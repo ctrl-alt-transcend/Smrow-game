@@ -21,13 +21,15 @@ services:
 
   nestjs:
     build:
-      context: ./app/backend
+      context: ./backend
     container_name: nestjs
     ports:
       - 3000:3000
     restart: unless-stopped
     networks:
       - ft-network
+    depends_on:
+      - postgres
 
   postgres:
     image: postgres:18
