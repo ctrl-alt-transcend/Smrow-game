@@ -6,7 +6,7 @@
 #   container_name:
 #   ports:
 #     - xxxx:xxxx
-#   volumes: 
+#   volumes:
 #     - ./path/machine/folder:/path/docker/folder
 #   restart: unless-stopped
 #   env_file: ".env_filename"
@@ -23,14 +23,27 @@ services:
     build:
       context: ./app/backend
     container_name: nestjs
-    ports: 
+    ports:
       - 3000:3000
     restart: unless-stopped
     networks:
       - ft-network
 
-# --- Volumes --- #
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    env_file:
+      - .env
+    #using the .env file directly in the compose to set user
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    networks:
+      - ft-network
+    restart: unless-stopped
 
+# --- Volumes --- #
+volumes:
+  postgres-data:
 
 # --- Networks --- #
 
