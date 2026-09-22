@@ -1,11 +1,13 @@
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
-import MainShell from './components/MainShell';
+import { RouterProvider } from 'react-router/dom';
+import { router } from './routes';
+
 
 export default function App() {
   return (
   <MantineProvider defaultColorScheme="dark">
-    <MainShell/>
+    <RouterProvider router={router}/>
   </MantineProvider>
   );
 }
