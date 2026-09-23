@@ -27,6 +27,18 @@ services:
     ports:
       - 3000:3000
     restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+            - .git/
+            - "*.log"
+        - action: rebuild
+          path: ./backend/package.json
     networks:
       - ft-network
 
