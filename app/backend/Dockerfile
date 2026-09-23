@@ -26,4 +26,4 @@ COPY --from=pruner /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 USER nestjs
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]

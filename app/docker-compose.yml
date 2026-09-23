@@ -21,10 +21,10 @@ services:
 
   nestjs:
     build:
-      context: ./app/backend
+      context: ./backend
     container_name: nestjs
     ports: 
-      - 3000:3000
+      - 3000:3000 #WARN: Dev Only
     restart: unless-stopped
     networks:
       - ft-network
