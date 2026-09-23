@@ -45,7 +45,9 @@ export default function MainShell()
       </AppShell.Header>
 
       <AppShell.Main>
-        <Title order={1}>Amazing Catan</Title>
+        <Title order={1} c={ 'Red' }>
+          Amazing Catan
+        </Title>
         <CardImage></CardImage>
         <Text>
           Cras maximus mauris a nisl maximus porta efficitur ac lacus. Donec eget sapien magna. Suspendisse a orci tempus, viverra lacus a, tempus felis. In hac habitasse platea dictumst. Etiam et sodales sapien. Integer non eleifend odio. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum aliquam justo ac suscipit consequat. Vivamus porta ac dolor eget tincidunt. Vestibulum mollis eros lorem, a sodales arcu dapibus id. Duis imperdiet enim vitae augue venenatis, a rhoncus magna egestas. Nam id eleifend ligula, in iaculis velit.

@@ -8,7 +8,7 @@ export default function CardImage () {
         orientation="horizontal" >
 
             <Card.Section inheritPadding px='xs' withBorder>
-                <Text c={ 'LightGreen' }>
+                <Text c={ 'Grey' }>
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Magnam voluptatum corporis minus sequi soluta est, odio delectus
                     voluptatibus? Praesentium eveniet doloremque est doloribus non consequuntur

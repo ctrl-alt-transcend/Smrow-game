@@ -73,11 +73,18 @@ export const theme = createTheme({
         ],
     },
 
+    primaryShade: {
+        light: 4,
+        dark: 7,
+    },
+
     primaryColor: 'LightGreen',
+
+    white: '#f9f8f0',
+    black: '#121007',
 
     fontFamily: 'Times',
     
-
     fontSizes: {
         xs: '0.75rem',
         sm: '0.875rem',
@@ -90,6 +97,7 @@ export const theme = createTheme({
     headings: {
         fontFamily: 'Basteleur-Bold',
         fontWeight: '700',
+        textWrap: 'pretty',
         sizes: {
             h1 : { fontSize: '2.5rem', lineHeight: '1.2' },
             h2 : { fontSize: '2rem', lineHeight: '1.3' },
