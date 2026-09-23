@@ -6,6 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+RUN npx prisma generate
 RUN npm run build
 
 #INFO: Remove dev dependencies to reduce image size
@@ -13,7 +14,9 @@ RUN npm run build
 FROM node:26-alpine AS pruner
 WORKDIR /app
 COPY package*.json ./
+COPY prisma ./prisma
 RUN npm ci --omit=dev && npm cache clean --force
+RUN npx prisma generate
 
 #INFO: the image gonne be used to run the application
 #
@@ -23,6 +26,7 @@ ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nestjs && \
     adduser -S nestjs -u 1001
 COPY --from=pruner /app/node_modules ./node_modules
+COPY --from=pruner /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/dist ./dist
 USER nestjs
 EXPOSE 3000

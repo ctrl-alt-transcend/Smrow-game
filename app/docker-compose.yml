@@ -28,6 +28,8 @@ services:
     restart: unless-stopped
     networks:
       - ft-network
+    env_file:
+      - backend/.env
     depends_on:
       - postgres
 
@@ -38,7 +40,7 @@ services:
       - .env
     #using the .env file directly in the compose to set user
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/
     ports:
       - "5432:5432"
     networks:
