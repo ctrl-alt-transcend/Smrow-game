@@ -37,8 +37,9 @@ export default function MainShell()
             inset: 0
           }}>
           <Group h="100%" px="md" justify='center'>
-            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-            Header
+            <Title c={ 'Cream' }>
+              This is Da Game
+            </Title>
           </Group>
         </BackgroundImage>
       </AppShell.Header>
