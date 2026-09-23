@@ -8,7 +8,6 @@ export default function App() {
   return (
 
   <MantineProvider theme={theme} defaultColorScheme='light'>
-    <MainShell/>
     <RouterProvider router={router}/>
   </MantineProvider>
   );
