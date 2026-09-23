@@ -1,8 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
 import { MantineProvider, createTheme } from '@mantine/core';
 import '@mantine/core/styles.css';
-import App from '../App';
 
 export const theme = createTheme({
     colors: {
@@ -78,7 +75,7 @@ export const theme = createTheme({
         dark: 7,
     },
 
-    primaryColor: 'LightGreen',
+    primaryColor: 'Red',
 
     white: '#f9f8f0',
     black: '#121007',
@@ -128,5 +125,5 @@ export const theme = createTheme({
     shadows: {
         inner: '0 1px 3px rgba(0, 0, 0, 0.1)',
         outer: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    },
+    }, 
 });

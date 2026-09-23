@@ -54,9 +54,9 @@ export default function MainShell()
         </Text>
 
         <GenericButton label='PLAY DA GAME' h={150} mt={30} mb={30}/>
-        
-      </AppShell.Main>
 
+      </AppShell.Main>
+      
       <AppShell.Aside
         h="100%"
         p="xs"

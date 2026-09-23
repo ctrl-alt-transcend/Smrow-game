@@ -1,8 +1,9 @@
+import { Title } from '@mantine/core';
 
 function HomePage(){
 	return (
 		<>
-			<h1>Home page</h1>
+			<Title c={'Red'}>home page</Title>
 		</>
 	)
 }
