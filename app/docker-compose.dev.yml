@@ -1,0 +1,41 @@
+## Container delcaration exemple ##
+#
+# container-id
+#   build:
+#     context: path/to/dockerfile/folder
+#   container_name:
+#   ports:
+#     - xxxx:xxxx
+#   volumes:
+#     - ./path/machine/folder:/path/docker/folder
+#   restart: unless-stopped
+#   env_file: ".env_filename"
+#   networks:
+#     - networks-name
+#   secrets:
+#     - sercrets_service_name
+#
+
+name: ft-catan #temporary
+services:
+
+  nestjs:
+    build:
+      context: ./backend
+      target: dev
+    container_name: nestjs
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    networks:
+      - ft-network
+
+# --- Volumes --- #
+
+
+# --- Networks --- #
+
+networks:
+  ft-network:
+
+# --- Secrets --- #

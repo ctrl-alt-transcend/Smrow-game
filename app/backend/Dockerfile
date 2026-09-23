@@ -1,11 +1,18 @@
 #INFO: Use multi-stage builds to reduce image size and better optimize caching
 # Using npm-ci instead of 'npm install' is better practice for production
 # more explaination here: https://stackoverflow.com/questions/52499617/what-is-the-difference-between-npm-install-and-npm-ci
-FROM node:22-alpine AS builder
+
+FROM node:22-alpine AS dev
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+ENTRYPOINT ["npm"]
+CMD ["run", "start:dev"]
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY --from=dev /app ./
 RUN npm run build
 
 #INFO: Remove dev dependencies to reduce image size
