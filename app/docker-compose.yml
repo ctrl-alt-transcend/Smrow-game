@@ -38,7 +38,9 @@ services:
       - .env
     #using the .env file directly in the compose to set user
     volumes:
-      - postgres-data:/var/lib/postgresql
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
       - ft-network
     restart: unless-stopped
