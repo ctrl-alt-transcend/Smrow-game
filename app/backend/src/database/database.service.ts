@@ -5,7 +5,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 @Injectable()
 export class DatabaseService extends PrismaClient implements OnModuleInit {
   constructor() {
-  const connectionString = process.env.DATABASE_URL;
+  	const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
     throw new Error('DATABASE_URL environment variable is not set');
