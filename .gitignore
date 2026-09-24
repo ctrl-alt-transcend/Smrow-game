@@ -459,3 +459,10 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
 
+### Agents ###
+.claude
+.agents
+.windsurf
+*skills*
+*.md
+!README.md
