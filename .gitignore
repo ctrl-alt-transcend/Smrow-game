@@ -463,3 +463,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .claude
 .agents
 .windsurf
+*skills*
+*.md
+!README.md
