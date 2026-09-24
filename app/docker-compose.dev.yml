@@ -39,11 +39,31 @@ services:
             - "*.log"
         - action: rebuild
           path: ./backend/package.json
+    env_file:
+      .env
     networks:
       - ft-network
 
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    env_file:
+      - .env
+    #using the .env file directly in the compose to set user
+    volumes:
+      - postgres-data:/var/lib/postgresql/
+    ports:
+      - "5432:5432"
+    networks:
+      - ft-network
+    restart: unless-stopped
+
+
+
 # --- Volumes --- #
 
+volumes:
+  postgres-data:
 
 # --- Networks --- #
 
