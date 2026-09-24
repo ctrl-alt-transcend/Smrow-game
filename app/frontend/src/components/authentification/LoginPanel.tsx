@@ -31,7 +31,8 @@ export function LoginPanel(props: PaperProps) {
     });
 
     return (
-        <Paper p="md" {...props}>
+        <Paper p="xs" withBorder
+        {...props}>
             <Text p="xs" size="lg" fw="500" c="Red">
                 Login to play !
             </Text>

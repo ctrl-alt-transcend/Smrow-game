@@ -3,11 +3,12 @@ import { Box, Card, Text, Image } from '@mantine/core';
 export default function CardImage () {
     return (
         <Card
-        padding="sm"
+        p="sm"
+        m={"sm"}
         withBorder
-        orientation="horizontal" >
-
-            <Card.Section inheritPadding px='xs' withBorder>
+        orientation="horizontal"
+        >
+            <Card.Section p={'lg'} px='xs'>
                 <Text c={ 'Grey' }>
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Magnam voluptatum corporis minus sequi soluta est, odio delectus
@@ -18,7 +19,10 @@ export default function CardImage () {
 
             <Card.Section inheritPadding px="md">
                 <Image
-                    src="https://plus.unsplash.com/premium_photo-1789200609644-cbcd8711dae2?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"/>
+                    src="https://plus.unsplash.com/premium_photo-1789200609644-cbcd8711dae2?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    w={'100%'}
+                    h={'100%'}
+                    />
             </Card.Section>
 
         </Card>

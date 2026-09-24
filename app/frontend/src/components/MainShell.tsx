@@ -5,27 +5,31 @@ import { LoginPanel } from './authentification/LoginPanel';
 import {
   AppShell,
   BackgroundImage,
-  Burger,
   Group,
   Text,
   Title
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 
 export default function MainShell()
 {
-  const [opened, { toggle }] = useDisclosure();
   return (
     <AppShell
-
       mode="static"
       header={{ height: 200 }}
       aside={{ width: 300, breakpoint: 'sm'}}
       padding="xs"
-      style={{
-      '--app-shell-border-color': 'var(--mantine-color-dark-4)',
-      '--app-shell-border-width': '2px' }}
     >
+      <BackgroundImage
+        src="https://github.com/makccr/wallpapers/blob/master/wallpapers/psychedelic/Alex%20Grey%20-%20Net%20of%20Being.jpg"
+        h={"100%"}
+        w={"100%"}
+        style={{
+          objectFit: "cover",
+          position: "absolute",
+          inset: 0
+        }}
+      />
+
       <AppShell.Header>
 
         <BackgroundImage
@@ -45,7 +49,9 @@ export default function MainShell()
         </BackgroundImage>
       </AppShell.Header>
 
-      <AppShell.Main>
+      <AppShell.Main
+        // m={"xl"}
+      >
         <Title order={1} c={ 'Red' }>
           Amazing Catan
         </Title>
@@ -60,7 +66,8 @@ export default function MainShell()
       
       <AppShell.Aside
         h="100%"
-        // p="xs"
+        // m="xl"
+        p="xs"
         zIndex={20}>
           <LoginPanel/>          
       </AppShell.Aside>
