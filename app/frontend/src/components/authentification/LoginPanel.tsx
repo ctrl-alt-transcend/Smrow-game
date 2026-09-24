@@ -31,8 +31,8 @@ export function LoginPanel(props: PaperProps) {
     });
 
     return (
-        <Paper radius="md" p="lg" {...props}>
-            <Text size="lg" fw="500" c="Red">
+        <Paper p="md" {...props}>
+            <Text p="xs" size="lg" fw="500" c="Red">
                 Login to play !
             </Text>
 
@@ -40,32 +40,26 @@ export function LoginPanel(props: PaperProps) {
                 <Stack>
                     {type === 'register' && (
                         <TextInput
-                        label="Name"
                         placeholder="Your name"
                         value={form.values.name}
                         onChange={(event) => form.setFieldValue('name', event.currentTarget.value)}
-                        radius="md"
                         />
                     )}
                     
                     <TextInput
                         required
-                        label="Email"
-                        placeholder="hello@mantine.dev"
+                        placeholder="Your email"
                         value={form.values.email}
                         onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
                         error={form.errors.email && 'Invalid email'}
-                        radius="md"
                     />
 
                     <PasswordInput
                         required
-                        label="Password"
                         placeholder="Your password"
                         value={form.values.password}
                         onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
                         error={form.errors.password && 'Password should include at least 6 characters'}
-                        radius="md"
                     />
 
                     {type === 'register' && (
@@ -90,7 +84,7 @@ export function LoginPanel(props: PaperProps) {
                             ? 'Already have an account? Login'
                             : "Don't have an account? Register"}
                     </Anchor>
-                        <Button type="submit" radius="xl">
+                        <Button type="submit">
                             {upperFirst(type)}
                         </Button>
                 </Group>

@@ -60,7 +60,7 @@ export default function MainShell()
       
       <AppShell.Aside
         h="100%"
-        p="xs"
+        // p="xs"
         zIndex={20}>
           <LoginPanel/>          
       </AppShell.Aside>
