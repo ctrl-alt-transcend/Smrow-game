@@ -1,5 +1,6 @@
 import GenericButton from './buttons/GenericButton';
 import CardImage from './Card';
+import { LoginPanel } from './authentification/LoginPanel';
 
 import {
   AppShell,
@@ -61,9 +62,7 @@ export default function MainShell()
         h="100%"
         p="xs"
         zIndex={20}>
-        <Group px="md">
-          <AppShell.Section p="xs">Login Panel</AppShell.Section>
-        </Group>
+          <LoginPanel/>          
       </AppShell.Aside>
       
       <AppShell.Footer>
