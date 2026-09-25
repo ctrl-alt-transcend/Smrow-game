@@ -120,10 +120,24 @@ export const theme = createTheme({
         md: '20px',
         lg: '24px',
         xl: '32px',
+        xxl: '128px',
     },
 
     shadows: {
         inner: '0 1px 3px rgba(0, 0, 0, 0.1)',
         outer: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    }, 
+    },
+
+    components: {
+        Paper: {
+            styles: {
+                root: {
+                    borderWidth: '2px',
+                    borderColor: 'var(--mantine-color-brand-7)',
+                },
+            },
+        },
+
+
+    },
 });
