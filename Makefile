@@ -1,4 +1,4 @@
-ENV := prod
+ENV := dev
 DOCKER_COMPOSE_FILE := ./app/docker-compose.yml
 
 ifeq ($(ENV), dev)
