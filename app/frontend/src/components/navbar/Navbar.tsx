@@ -1,7 +1,6 @@
 import { Group, Text } from "@mantine/core";
 import { Link } from "react-router"
-
-
+import { navLinks } from "./navLinks";
 
 export default function Navbar(){
 
@@ -9,9 +8,11 @@ export default function Navbar(){
 		<Group h="100%" px="md" justify="space-between">
 			<Text>Transcendance</Text>
 			<Group>
-				<Link to="/home">Home</Link>
-				<Link to="/profile">Profile</Link>
-				<Link to="/stats">Stats</Link>
+				{navLinks.map((link) => (
+					<Link key={link.to} to={link.to}>
+						{link.label}
+					</Link>
+				))}
 			</Group>
 
 			<Text>Nom_profile</Text>
