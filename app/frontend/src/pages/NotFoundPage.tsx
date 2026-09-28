@@ -1,8 +1,9 @@
+import { Title } from '@mantine/core';
 
 function NotFoundPage(){
 	return (
 		<>
-			<h1>404 | Page not found</h1>
+			<Title c={'Red'}>404 | Page not found</Title>
 		</>
 	)
 }

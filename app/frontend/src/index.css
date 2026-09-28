@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Basteleur-Bold';
+  src: url('fonts/Basteleur/Basteleur-Bold.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --text: #ffffff;
   --text-h: #000000;

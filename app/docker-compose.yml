@@ -1,36 +1,35 @@
-## Container delcaration exemple ##
-#
-# container-id
-#   build:
-#     context: path/to/dockerfile/folder
-#   container_name:
-#   ports:
-#     - xxxx:xxxx
-#   volumes: 
-#     - ./path/machine/folder:/path/docker/folder
-#   restart: unless-stopped
-#   env_file: ".env_filename"
-#   networks:
-#     - networks-name
-#   secrets:
-#     - sercrets_service_name
-#
-
-name: ft-catan #temporary
+name: ft-catan
 services:
 
   nestjs:
     build:
       context: ./backend
     container_name: nestjs
-    ports: 
-      - 3000:3000 #WARN: Dev Only
     restart: unless-stopped
     networks:
       - ft-network
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    env_file:
+      - .env
+    #using the .env file directly in the compose to set user
+    volumes:
+      - postgres-data:/var/lib/postgresql/
+    ports:
+      - "5432:5432"
+    networks:
+      - ft-network
+    restart: unless-stopped
 
 # --- Volumes --- #
-
+volumes:
+  postgres-data:
 
 # --- Networks --- #
 
