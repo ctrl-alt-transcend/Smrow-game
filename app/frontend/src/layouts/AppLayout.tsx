@@ -7,7 +7,7 @@ import { HeaderTabs } from '../components/navbar/HeaderTabs';
 export default function AppLayout () {
 
 	return (
-		<AppShell header={{ height: 100 }}>
+		<AppShell header={{ height: 60 }}>
 			<AppShell.Header>
 				<HeaderTabs/>
 			</AppShell.Header>

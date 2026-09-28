@@ -4,11 +4,9 @@ import {
   IconHeart,
   IconLogout,
   IconMessage,
-  IconPlayerPause,
   IconSettings,
   IconStar,
   IconSwitchHorizontal,
-  IconTrash,
 } from '@tabler/icons-react';
 import cx from 'clsx';
 import {
@@ -20,42 +18,46 @@ import {
   Group,
   Menu,
   ScrollArea,
-  Tabs,
+  Button,
   Text,
   UnstyledButton,
   useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './HeaderTabs.module.css';
+import { Link, useLocation } from 'react-router';
+import { navLinks } from './navLinks';
 
 const user = {
-  name: 'Jane Spoonfighter',
-  email: 'janspoon@fighter.dev',
+  name: 'Mr. Goblin',
+  email: 'goblins@fighter.dev',
   image: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-5.png',
 };
 
-const tabs = [
-  'Home',
-  'Stats',
-  'Profile',
-];
-
 export function HeaderTabs() {
   const theme = useMantineTheme();
+  const location = useLocation();
   const [opened, { toggle, close }] = useDisclosure(false);
   const [userMenuOpened, setUserMenuOpened] = useState(false);
-
-  const items = tabs.map((tab) => (
-    <Tabs.Tab value={tab} key={tab}>
-      {tab}
-    </Tabs.Tab>
-  ));
 
   return (
     <div className={classes.header}>
       <Container className={classes.mainSection} size="md">
         <Group justify="space-between">
           <Text>Build by Goblins</Text>
+
+          <Group gap="xs" visibleFrom="sm" component="nav">
+            {navLinks.map((link) => (
+              <Button
+                key={link.to}
+                component={Link}
+                to={link.to}
+                variant={location.pathname === link.to ? 'light' : 'subtle'}
+              >
+                {link.label}
+              </Button>
+            ))}
+          </Group>
 
           <Burger
             opened={opened}
@@ -111,38 +113,9 @@ export function HeaderTabs() {
                 Change account
               </Menu.Item>
               <Menu.Item leftSection={<IconLogout size={16} stroke={1.5} />}>Logout</Menu.Item>
-
-              <Menu.Divider />
-
-              <Menu.Label>Danger zone</Menu.Label>
-              <Menu.Item leftSection={<IconPlayerPause size={16} stroke={1.5} />}>
-                Pause subscription
-              </Menu.Item>
-              <Menu.Item color="red" leftSection={<IconTrash size={16} stroke={1.5} />}>
-                Delete account
-              </Menu.Item>
             </Menu.Dropdown>
           </Menu>
         </Group>
-      </Container>
-      <Container size="md">
-        <Tabs
-          defaultValue="Home"
-          variant="outline"
-          visibleFrom="sm"
-          classNames={{
-            root: classes.tabs,
-            list: classes.tabsList,
-            tab: classes.tab,
-          }}
-        >
-          <Tabs.List>{items}</Tabs.List>
-          {items.map((item) => (
-            <Tabs.Panel value={item.key!} key={item.key}>
-              {' '}
-            </Tabs.Panel>
-          ))}
-        </Tabs>
       </Container>
 
       <Drawer
@@ -156,15 +129,15 @@ export function HeaderTabs() {
       >
         <ScrollArea h="calc(100vh - 80px" mx="-md">
           <Divider my="sm" />
-          {tabs.map((tab) => (
-            <a
-              href="#"
-              key={tab}
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
               className={classes.drawerLink}
-              onClick={(event) => event.preventDefault()}
+              onClick={close}
             >
-              {tab}
-            </a>
+              {link.label}
+            </Link>
           ))}
         </ScrollArea>
       </Drawer>
