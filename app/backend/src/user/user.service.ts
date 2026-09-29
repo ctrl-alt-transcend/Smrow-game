@@ -16,6 +16,14 @@ export class UserService {
     return this.databaseService.user.findMany( {} )
   }
 
+  async findbyUsername(username: string) {
+    return this.databaseService.user.findUnique({
+      where: {
+        username,
+      }
+    });
+  }
+
   async findOne(id: string) {
     return this.databaseService.user.findUnique( {
       where: {
@@ -33,7 +41,15 @@ export class UserService {
     } );
   }
 
-  remove(id: string) {
+  async removeUser(username: string) {
+    return this.databaseService.user.delete( {
+      where: {
+        username,
+      },
+    });
+  }
+
+  async remove(id: string) {
     return this.databaseService.user.delete( {
       where: {
         id,
