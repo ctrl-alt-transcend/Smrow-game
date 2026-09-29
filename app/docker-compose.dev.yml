@@ -19,6 +19,8 @@
 name: ft-catan #temporary
 services:
 
+  # -- Backend -- #
+
   nestjs:
     build:
       context: ./backend
@@ -58,6 +60,31 @@ services:
       - ft-network
     restart: unless-stopped
 
+
+  # -- Frontend -- #
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    container_name: frontend
+    ports:
+      - 5173:5173
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+            - .git/
+            - "*.log"
+        - action: rebuild
+          path: ./backend/package.json
+    networks:
+      - ft-network
 
 
 # --- Volumes --- #
