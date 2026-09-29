@@ -15,6 +15,7 @@ import { useForm } from '@mantine/form';
 import { upperFirst, useToggle } from '@mantine/hooks';
 
 export function LoginPanel(props: PaperProps) {
+
     const [type, toggle] = useToggle(['login', 'register']);
     const form = useForm({
         initialValues: {
@@ -27,8 +28,13 @@ export function LoginPanel(props: PaperProps) {
         validate: {
             email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email'),
             password: (val) => (val.length <= 6 ? 'Password should include at least 6 characters' : null),
+            terms: (val) => (val === true ? null : 'You need to accept the terms and conditions'),
         },
     });
+
+    const handleSubmit = (values: typeof form.values) => {
+        console.log(values);
+    };
 
     return (
         <Paper p="xs" withBorder
@@ -37,7 +43,7 @@ export function LoginPanel(props: PaperProps) {
                 Login to play !
             </Text>
 
-            <form onSubmit={form.onSubmit(() => {})}>
+            <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack>
                     {type === 'register' && (
                         <TextInput
@@ -90,6 +96,27 @@ export function LoginPanel(props: PaperProps) {
                         </Button>
                 </Group>
             </form>
+
+            { /* Error handleing */ }
+            <form
+                onSubmit={form.onSubmit(
+                    (values, event) => {
+                        console.log(
+                            values,
+                            event
+                        );
+                    },
+                    (validationErros, values, event) => {
+                        console.log(
+                            validationErros,
+                            values,
+                            event
+                        );
+                    }
+                )}
+            />
+
+            <form onReset={form.onReset}></form>
         </Paper>
     )
 }
