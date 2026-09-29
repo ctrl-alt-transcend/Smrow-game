@@ -37,12 +37,14 @@ export class UserController {
   }
 
   // we could save the user using the findbyUsername and then execute the remove(id) istead. this needs to have an exception filter to avoid errors
-  //@Delete('deluser/:username')
-  //async removeUserid(@Param('username') username: string) {
-  //  const user = await this.userService.findbyUsername(username);
+  @Delete('deluserid/:username')
+  async removeUserid(@Param('username') username: string) {
+    const user = await this.userService.findbyUsername(username);
 
-  //  return this.userService.remove(user.id)
-  //}
+    if (user) {
+      return this.userService.remove(user.id);
+    }
+  }
 
 
   @Delete(':id')
