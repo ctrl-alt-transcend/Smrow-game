@@ -11,8 +11,11 @@ import {
     TextInput,
     type PaperProps,
 } from '@mantine/core';
+
 import { useForm } from '@mantine/form';
 import { upperFirst, useToggle } from '@mantine/hooks';
+
+import axios from 'axios';
 
 export function LoginPanel(props: PaperProps) {
 
@@ -32,8 +35,17 @@ export function LoginPanel(props: PaperProps) {
         },
     });
 
-    const handleSubmit = (values: typeof form.values) => {
-        console.log(values);
+
+    { /* Server will need cors moduls (npm i cors */}
+    const postData = async (values: typeof form.values) => {
+        try {
+            const response = await axios.post('https://jsonplaceholder.typicode.com/posts', {data: values});
+            console.log("Correct response: \n");
+            console.log(response.data.data);
+            form.reset();
+        } catch (error) {
+            console.error("Error response: \n" + error);
+        }
     };
 
     return (
@@ -43,7 +55,7 @@ export function LoginPanel(props: PaperProps) {
                 Login to play !
             </Text>
 
-            <form onSubmit={form.onSubmit(handleSubmit)}>
+            <form onSubmit={form.onSubmit(postData)}>
                 <Stack>
                     {type === 'register' && (
                         <TextInput
