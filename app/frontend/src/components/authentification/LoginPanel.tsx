@@ -15,7 +15,7 @@ import {
 import { useForm } from '@mantine/form';
 import { upperFirst, useToggle } from '@mantine/hooks';
 
-import axios from 'axios';
+import { postData } from './handlePost'
 
 export function LoginPanel(props: PaperProps) {
 
@@ -34,20 +34,6 @@ export function LoginPanel(props: PaperProps) {
             terms: (val) => (val === true ? null : 'You need to accept the terms and conditions'),
         },
     });
-
-
-    { /* Server will need cors modules (npm i cors */}
-    const postData = async (values: typeof form.values) => {
-        try {
-			/* 1. check if user exist */
-            const response = await axios.post('https://jsonplaceholder.typicode.com/posts', {data: values});	
-            console.log("Correct response: \n");
-            console.log(response.data.data);
-            form.reset();
-        } catch (error) {
-            console.error("Error response: \n" + error);
-        }
-    };
 
     return (
         <Paper p="xs" withBorder
