@@ -36,10 +36,11 @@ export function LoginPanel(props: PaperProps) {
     });
 
 
-    { /* Server will need cors moduls (npm i cors */}
+    { /* Server will need cors modules (npm i cors */}
     const postData = async (values: typeof form.values) => {
         try {
-            const response = await axios.post('https://jsonplaceholder.typicode.com/posts', {data: values});
+			/* 1. check if user exist */
+            const response = await axios.post('https://jsonplaceholder.typicode.com/posts', {data: values});	
             console.log("Correct response: \n");
             console.log(response.data.data);
             form.reset();
@@ -68,7 +69,7 @@ export function LoginPanel(props: PaperProps) {
                     <TextInput
                         required
                         placeholder="Your email"
-                        value={form.values.email}
+                        value={form.values.email.toLowerCase()}
                         onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
                         error={form.errors.email && 'Invalid email'}
                     />
