@@ -10,6 +10,7 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
+    createUserDto.password = await this.AuthService.hashPassword(createUserDto.password);
     return this.UserService.create(createUserDto);
   }
 

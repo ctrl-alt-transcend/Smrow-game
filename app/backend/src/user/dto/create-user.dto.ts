@@ -18,5 +18,5 @@ export class CreateUserDto {
 
   @IsString()
   @MinLength(8)
-  readonly password: string;
+  password: string;
 }
