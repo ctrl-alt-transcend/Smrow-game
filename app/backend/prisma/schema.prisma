@@ -13,11 +13,57 @@ datasource db {
 }
 
 model User {
-  id String @default(uuid()) @id
-  username String @unique
-  name String
-  email String @unique
-  password String
+  id        String @default(uuid()) @id
+  username  String @unique
+  name      String
+  email     String @unique
+  password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+    // relations
+  profile   Profile?
+  localAuth UserAuth?
+  accounts  Account[]
+
+}
+
+model Profile {
+  id        String @default(uuid()) @id
+  bio       String?
+  avatarURL String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserAuth {
+  id String @default(uuid()) @id
+  passwordHash String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String @unique
+}
+
+// OAuth models needed Account & Sessions
+model Account {
+  userId              String
+  provider            String
+  providerAccountId   String
+
+    // optional fields
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
 }
