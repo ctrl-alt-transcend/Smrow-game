@@ -19,19 +19,20 @@ import { postData } from './handlePost'
 
 export function LoginPanel(props: PaperProps) {
 
-    const [type, toggle] = useToggle(['login', 'register']);
+    const [type, toggle] = useToggle(['register', 'login']);
     const form = useForm({
         initialValues: {
             email: '',
             name: '',
+            username: '',
             password: '',
-            terms: true,
+            // terms: false,
         },
 
         validate: {
             email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email'),
             password: (val) => (val.length <= 6 ? 'Password should include at least 6 characters' : null),
-            terms: (val) => (val === true ? null : 'You need to accept the terms and conditions'),
+            // terms: (val) => (val === true ? null : 'You need to accept the terms and conditions'),
         },
     });
 
@@ -51,6 +52,14 @@ export function LoginPanel(props: PaperProps) {
                         onChange={(event) => form.setFieldValue('name', event.currentTarget.value)}
                         />
                     )}
+
+                    {type === 'register' && (
+                        <TextInput
+                        placeholder='Your username'
+                        value={form.values.username}
+                        onChange={(event) => form.setFieldValue('username', event.currentTarget.value)}
+                        />
+                    )}
                     
                     <TextInput
                         required
@@ -68,13 +77,13 @@ export function LoginPanel(props: PaperProps) {
                         error={form.errors.password && 'Password should include at least 6 characters'}
                     />
 
-                    {type === 'register' && (
+                    {/* {type === 'register' && (
                         <Checkbox
                             label="I accept terms and conditions"
                             checked={form.values.terms}
                             onChange={(event) => form.setFieldValue('terms', event.currentTarget.checked)}
                         />
-                    )}
+                    )} */}
                 </Stack>
 
                 <Group justify="space-between" mt="xl">
