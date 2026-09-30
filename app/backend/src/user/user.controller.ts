@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client'
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(readonly userService: UserService) {}
 
   @Get()
   findAll() {
@@ -14,6 +14,11 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
+  }
+
+  @Get('email/:email')
+  findByMail(@Param('email') email: string) {
+    return this.userService.findByMail(email);
   }
 
   @Patch(':id')
