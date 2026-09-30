@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host '0.0.0.0' ",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -25,10 +25,12 @@
     "@mantine/spotlight": "^9.6.1",
     "@mantine/tiptap": "^9.6.1",
     "@mantinex/dev-icons": "^2.0.0",
+    "@tabler/icons-react": "^3.48.0",
     "@tiptap/extension-link": "^3.31.3",
     "@tiptap/pm": "^3.31.3",
     "@tiptap/react": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
+    "clsx": "^2.1.1",
     "axios": "^1.20.0",
     "dayjs": "^1.11.23",
     "embla-carousel": "^8.6.0",
