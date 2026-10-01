@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render } from '@testing-library/react'
 import { MantineProvider } from '@mantine/core'
-import { createMemoryRouter, RouterProvider } from 'react-router'
+import { RouterProvider } from 'react-router'
 import { describe, it, expect } from 'vitest'
 import { router } from '../src/routes'
 
