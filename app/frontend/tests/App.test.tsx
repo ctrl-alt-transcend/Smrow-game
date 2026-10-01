@@ -1,13 +1,18 @@
-import { MantineProvider } from '@mantine/core';
-import { RouterProvider } from 'react-router/dom';
-import { router } from '../src/routes';
-import { theme } from '../src/style/goblinTheme'
+// @vitest-environment jsdom
+import { render } from '@testing-library/react'
+import { MantineProvider } from '@mantine/core'
+import { createMemoryRouter, RouterProvider } from 'react-router'
+import { describe, it, expect } from 'vitest'
+import { router } from '../src/routes'
 
-export default function App() {
-  return (
+describe('App', () => {
+  it('se rend sans planter', () => {
+    const { container } = render(
+      <MantineProvider>
+        <RouterProvider router={router} />
+      </MantineProvider>
+    )
 
-  <MantineProvider theme={theme} defaultColorScheme='light'>
-    <RouterProvider router={router}/>
-  </MantineProvider>
-  );
-}
+    expect(container).toBeTruthy()
+  })
+})
