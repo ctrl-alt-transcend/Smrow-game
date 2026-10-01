@@ -1,4 +1,4 @@
-import { Box, Card, Text, Image } from '@mantine/core';
+import { Card, Text, Image } from '@mantine/core';
 
 export default function CardImage () {
     return (
