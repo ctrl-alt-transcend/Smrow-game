@@ -9,6 +9,7 @@
     "clean": "rm -rf dist node_modules/.tmp",
     "lint": "oxlint",
     "type-check": "tsc -b config/tsconfig.json",
+    "test": "vitest run --config config/vite.config.ts",
     "test:watch": "vitetest",
     "preview": "vite preview"
   },

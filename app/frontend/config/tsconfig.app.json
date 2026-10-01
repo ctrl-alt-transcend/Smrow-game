@@ -22,5 +22,6 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
+  "types": ["vite/client", "vitest/globals"],
   "include": ["../src"]
 }
