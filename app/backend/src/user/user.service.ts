@@ -16,10 +16,26 @@ export class UserService {
     return this.databaseService.user.findMany( {} )
   }
 
-  async findOne(id: number) {
+  async findbyUsername(username: string) {
+    return this.databaseService.user.findUnique({
+      where: {
+        username,
+      }
+    });
+  }
+
+  async findOne(id: string) {
     return this.databaseService.user.findUnique( {
       where: {
         id,
+      }
+    });
+  }
+
+  async findByMail(email: string) {
+    return this.databaseService.user.findUnique( {
+      where: {
+        email,
       }
     });
   }
@@ -33,7 +49,15 @@ export class UserService {
     } );
   }
 
-  remove(id: number) {
+  async removeUser(username: string) {
+    return this.databaseService.user.delete( {
+      where: {
+        username,
+      },
+    });
+  }
+
+  async remove(id: string) {
     return this.databaseService.user.delete( {
       where: {
         id,
