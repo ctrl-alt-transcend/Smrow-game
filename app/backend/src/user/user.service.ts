@@ -1,15 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async create(createUserDto: Prisma.UserCreateInput) {
-    const username = Prisma
+  async create(createUserDto: CreateUserDto) {
+    const prismaDtoUser : Prisma.UserCreateInput = {
+      username: createUserDto.username,
+      name: createUserDto.name,
+      email: createUserDto.email,
+      localAuth: {
+        create: {
+          passwordHash: createUserDto.password,
+        }
+      },
+    }
+
     return this.databaseService.user.create( {
-      data: createUserDto
+      data: prismaDtoUser,
     })
   }
 
@@ -37,6 +48,9 @@ export class UserService {
     return this.databaseService.user.findUnique( {
       where: {
         email,
+      },
+      include: {
+        localAuth: true,
       }
     });
   }
@@ -55,6 +69,7 @@ export class UserService {
       where: {
         username,
       },
+
     });
   }
 

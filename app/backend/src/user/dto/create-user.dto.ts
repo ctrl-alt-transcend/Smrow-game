@@ -16,8 +16,7 @@ export class CreateUserDto {
   @Transform(({ value }) => value.toLowerCase())
   readonly email: string;
 
-  //@IsString()
-  //@MinLength(8)
-  @ApiProperty({ required: false, nullable: true })
-  password: string | null;
+  @IsString()
+  @MinLength(8)
+  password: string;
 }
