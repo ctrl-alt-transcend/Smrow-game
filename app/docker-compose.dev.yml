@@ -29,6 +29,9 @@ services:
     ports:
       - 3000:3000
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     develop:
       watch:
         - action: sync
@@ -39,8 +42,13 @@ services:
             - dist/
             - .git/
             - "*.log"
+            - prisma/migrations
         - action: rebuild
           path: ./backend/package.json
+        - action: rebuild
+          path: ./backend/prisma/schema.prisma
+        - action: rebuild
+          path: ./backend/prisma/migrations
     env_file:
       .env
     networks:
@@ -59,6 +67,11 @@ services:
     networks:
       - ft-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 
   # -- Frontend -- #
@@ -82,7 +95,7 @@ services:
             - .git/
             - "*.log"
         - action: rebuild
-          path: ./backend/package.json
+          path: ./frontend/package.json
     networks:
       - ft-network
 
