@@ -13,7 +13,7 @@ export class UserService {
   }
 
   async findAll() {
-    return this.databaseService.user.findMany( {} )
+    return this.databaseService.user.findMany( {include: {profile: true, localAuth:true}} )
   }
 
   async findbyUsername(username: string) {
