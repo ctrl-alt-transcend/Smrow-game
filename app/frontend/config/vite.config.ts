@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   test: {
+    pool: 'threads',
+    maxWorkers: 1,
     environment: 'jsdom',
     globals: true,
     setupFiles: './tests/setup.ts',

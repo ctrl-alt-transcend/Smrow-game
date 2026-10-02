@@ -51,7 +51,7 @@ jobs:
         run: npm run type-check
 
       - name: Run tests
-        run: npm test
+        run: npm test  -- --pool=threads --maxWorkers=1
 
       - name: Build
         run: npm run build

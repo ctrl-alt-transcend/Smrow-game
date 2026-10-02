@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest'
 import { router } from '../src/routes'
 
 describe('App', () => {
-  it('se rend sans planter', () => {
+  it('no crash', () => {
     const { container } = render(
       <MantineProvider>
         <RouterProvider router={router} />
