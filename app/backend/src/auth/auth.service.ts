@@ -15,7 +15,6 @@ export class AuthService {
   async signUp(createUserDto: CreateUserDto): Promise<any> {
     createUserDto.password = await this.hashPassword(createUserDto.password);
     const user = await this.userService.create(createUserDto);
-
     return await this.createJWTToken(user);
   }
 
@@ -38,7 +37,7 @@ export class AuthService {
   * @brief:   Create a JWT token for the given user
   * @details: the payload is the visible part of the token, it contains the userId and username
   */
-  private async createJWTToken(user: User): Promise<{access_token: string}> {
+  private async createJWTToken(user: {id: string, username: string}): Promise<{access_token: string}> {
     const payload = { sub: user.id, username: user.username };
     return {
       access_token: await this.JwtService.signAsync(payload),
