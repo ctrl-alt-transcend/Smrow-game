@@ -12,8 +12,8 @@ export class AuthController {
     return this.AuthService.signUp(createUserDto);
   }
 
-  @Post('login')
-  async login(@Body() authUserDto: AuthUserDto) {
-    return this.AuthService.signIn(authUserDto.email, authUserDto.password);
-  }
+  //@Post('login')
+  //async login(@Body() authUserDto: AuthUserDto) {
+  //  return this.AuthService.signIn(authUserDto.email, authUserDto.password);
+  //}
 }

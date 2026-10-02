@@ -7,6 +7,7 @@ export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async create(createUserDto: Prisma.UserCreateInput) {
+    const username = Prisma
     return this.databaseService.user.create( {
       data: createUserDto
     })
