@@ -21,7 +21,7 @@ export class UserService {
       },
     }
     try {
-    return await this.databaseService.user.create( {
+      return await this.databaseService.user.create( {
       data: prismaDtoUser,
     });
     } catch (error) {
