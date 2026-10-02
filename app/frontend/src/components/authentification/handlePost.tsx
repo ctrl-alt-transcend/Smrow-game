@@ -14,11 +14,8 @@ import { PostBody, UserPublic, CreatePostResponse } from '../../../../../shared/
 // }
 
 export const postData = async (data: PostBody): Promise<CreatePostResponse> => {
-    const response = await axios.post<CreatePostResponse>("https://jsonplaceholder.typicode.com/posts", data);
-    if (response.status == 400)
-        console.log("error");
-    const { token, user } = response.data;
-    localStorage.setItem('auth_token', token);
-    // console.log("Created user with ID: ", user.id);
+    console.log("Sending: \n", data);
+    const response = await axios.post<CreatePostResponse>('http://localhost:3000/auth/register', data);
+    console.log("Token: ", response.data.access_token);
     return response.data;
 };

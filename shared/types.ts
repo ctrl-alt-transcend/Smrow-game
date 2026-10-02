@@ -14,5 +14,5 @@ export type UserPublic = {
 export type CreatePostResponse = {
     message: string;
     user: UserPublic;
-    token: string;
+    access_token: string;
 };
