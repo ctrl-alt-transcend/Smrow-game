@@ -1,4 +1,4 @@
-export const HEX_SIZE = 30;
+export const HEX_SIZE = 50;
 
 export interface HexCoord {
   q: number;
@@ -28,7 +28,25 @@ export interface RoadData {
   id: string;
   edge: Edge;
 }
+export interface RoadHover {
+  type: 'road';
+  id: string;
+}
 
+export interface TileHover {
+  type: 'tile';
+  q: number;
+  r: number;
+}
+
+export interface SettlementHover {
+  type: 'settlement';
+  id: string;
+}
+
+export type HoverEntity = TileHover | RoadHover | SettlementHover | null;
+
+// classic Catan gameboard layout
 export const tilesLayout: TileData[] = [
     { q: 0, r: -2 }, { q: 1, r: -2 }, { q: 2, r: -2 },                                // ROW 1
     { q: -1, r: -1 }, { q: 0, r: -1 }, { q: 1, r: -1 }, { q: 2, r: -1 },              // ROW 2

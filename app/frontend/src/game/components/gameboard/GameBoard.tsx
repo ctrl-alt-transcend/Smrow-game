@@ -3,7 +3,6 @@ import { HexTile } from './HexTile'
 import { Road } from './RoadProps'
 import { Settlement } from './SettlementProps'
 
-
 import {
     Edge,
     Vertex,
@@ -11,6 +10,7 @@ import {
     RoadData,
     SettlementData,
     tilesLayout,
+    HoverEntity,
     HEX_SIZE } from '../../types/gameboard.types';
 
 import {
@@ -25,6 +25,26 @@ interface GameBoardState {
 }
 
 function GameBoard() {
+  const [hovered, setHovered] = useState<HoverEntity>(null);
+
+  const handleTileHover = (isHovered: boolean, tile: TileData) => {
+    setHovered(isHovered ? { type: 'tile', q: tile.q, r: tile.r } : null);
+  };
+  const handleRoadHover = (isHovered: boolean, road: RoadData) => {
+    setHovered(isHovered ? { type: 'road', id: road.id } : null);
+  };
+  const handleSettlementHover = (isHovered: boolean, settlement: SettlementData) => {
+    setHovered(isHovered ? { type: 'settlement', id: settlement.id } : null);
+  };
+
+  // Helper pour vérifier
+  const isTileHovered = (hovered: HoverEntity, tile: TileData) =>
+    hovered?.type === 'tile' && hovered.q === tile.q && hovered.r === tile.r;
+  const isRoadHovered = (hovered: HoverEntity, road: RoadData) =>
+    hovered?.type === 'road' && hovered.id === road.id;
+  const isSettlementHovered = (hovered: HoverEntity, settlement: SettlementData) =>
+    hovered?.type === 'settlement' && hovered.id === settlement.id;
+
   const [selected, setSelected] = useState<GameBoardState>({
     selectedTile: null,
     selectedSettlement: null,
@@ -40,7 +60,7 @@ function GameBoard() {
   });
 
   // Filtrer les sommets valides pour Catan (ceux partagés par au moins 1 tuile)
-  // Dans un vrai jeu, on limiterait aux sommets à la périphérie
+  // Dans un vrai jeu, on limiterait aux sommets à la périphéSrie
   const settlements: SettlementData[] = Array.from(allVertices.values())
     .map(v => ({ id: v.id, vertex: v }))
     .filter(s => {
@@ -115,6 +135,8 @@ function GameBoard() {
   const offsetX = bounds.minX - margin;
   const offsetY = bounds.minY - margin;
 
+
+
   return (
     <div style={{ width: '100%', maxWidth: svgWidth, margin: '0 auto' }}>
       <svg
@@ -131,6 +153,8 @@ function GameBoard() {
             key={`tile-${tile.q}-${tile.r}`}
             data={tile}
             isSelected={selected.selectedTile?.q === tile.q && selected.selectedTile?.r === tile.r}
+            isHovered={isTileHovered(hovered, tile)}  // ✅ Typed
+            onHoverChange={(isHovered) => handleTileHover(isHovered, tile)}
             onClick={handleTileClick}
           />
         ))}
@@ -141,6 +165,8 @@ function GameBoard() {
             key={`road-${road.id}`}
             data={road}
             isSelected={selected.selectedRoad?.id === road.id}
+            isHovered={isRoadHovered(hovered, road)}  // ✅ Typed
+            onHoverChange={(isHovered) => handleRoadHover(isHovered, road)}
             onClick={handleRoadClick}
           />
         ))}
@@ -151,6 +177,8 @@ function GameBoard() {
             key={`settlement-${settlement.id}`}
             data={settlement}
             isSelected={selected.selectedSettlement?.id === settlement.id}
+            isHovered={isSettlementHovered(hovered, settlement)}  // ✅ Typed
+            onHoverChange={(isHovered) => handleSettlementHover(isHovered, settlement)}
             onClick={handleSettlementClick}
           />
         ))}
