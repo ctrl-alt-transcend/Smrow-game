@@ -1,6 +1,6 @@
 import { AppShell, Burger, Group, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import GameBoard from './components/GameBoard';
+import GameBoard from './components/gameboard/GameBoard.tsx';
 
 export default function FullLayout() {
   const [opened, { toggle }] = useDisclosure();
