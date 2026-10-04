@@ -1,21 +1,21 @@
-export interface HexCoord {
-  q: number;
-  r: number;
-}
-
+/** @prop x, y → corner's axial coordinates */
 export interface Vertex {
   id: string;       // "{q}:{r}:{cornerIndex}"
   x: number;
   y: number;
 }
 
+/** @prop Vertex, Vertex → segment between two vertices(corner to corner) */
 export interface Edge {
   id: string;       // "{vertexId1}-{vertexId2}"
   p1: Vertex;
   p2: Vertex;
 }
 
-export interface TileData extends HexCoord {
+/** @prop q, r → center coordinates(column & row) of a tile */
+export interface TileData {
+  q: number;
+  r: number;
 }
 
 export interface RoadData {
@@ -28,7 +28,7 @@ export interface SettlementData {
   vertex: Vertex;
 }
 
-// Hover effect
+// Hover effects
 export interface TileHover {
   type: 'tile';
   q: number;
@@ -47,9 +47,7 @@ export interface SettlementHover {
 
 export type HoverEntity = TileHover | RoadHover | SettlementHover | null;
 
-/**
- * classic Catan gameboard layout ( 19 tiles )
- */
+/** @description classic Catan gameboard layout (19 tiles) */
 export const classicLayout: TileData[] = [
     { q: 0, r: -2 }, { q: 1, r: -2 }, { q: 2, r: -2 },                                // ROW 1
     { q: -1, r: -1 }, { q: 0, r: -1 }, { q: 1, r: -1 }, { q: 2, r: -1 },              // ROW 2

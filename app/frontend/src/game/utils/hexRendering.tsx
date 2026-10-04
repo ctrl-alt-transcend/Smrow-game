@@ -2,17 +2,13 @@ import type { Edge, Vertex } from "../types/gameboard.types";
 
 export const HEX_SIZE = 50;
 
-/**
- * Axial coordinates → pixels (pointy-topped)
- */
+/** @description axial coordinates → pixels (pointy-topped) */
 export const axialToPixel = (q: number, r: number, size: number) => ({
   x: size * (Math.sqrt(3) * q + Math.sqrt(3) / 2 * r),
   y: size * (3 / 2 * r)
 });
 
-/**
- * Axial coordinates → vertices ( 6 corners per hex )
- */
+/** @description axial coordinates → vertices (6 corners per hex) */
 export const getHexCorners = (q: number, r: number, size: number): Vertex[] => {
   const center = axialToPixel(q, r, size);
   const corners: Vertex[] = [];
@@ -29,9 +25,7 @@ export const getHexCorners = (q: number, r: number, size: number): Vertex[] => {
   return corners;
 };
 
-/**
- * Generates all the edges of a hexagon ( between consecutive vertices )
- */
+/** @description generates all the edges of a hexagon (between consecutive vertices) */
 export const getHexEdges = (q: number, r: number, size: number): Edge[] => {
   const corners = getHexCorners(q, r, size);
   const edges: Edge[] = [];
