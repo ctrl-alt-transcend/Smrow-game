@@ -47,8 +47,10 @@ export interface SettlementHover {
 
 export type HoverEntity = TileHover | RoadHover | SettlementHover | null;
 
-// classic Catan gameboard layout
-export const tilesLayout: TileData[] = [
+/**
+ * classic Catan gameboard layout ( 19 tiles )
+ */
+export const classicLayout: TileData[] = [
     { q: 0, r: -2 }, { q: 1, r: -2 }, { q: 2, r: -2 },                                // ROW 1
     { q: -1, r: -1 }, { q: 0, r: -1 }, { q: 1, r: -1 }, { q: 2, r: -1 },              // ROW 2
     { q: -2, r: 0 }, { q: -1, r: 0 }, { q: 0, r: 0 }, { q: 1, r: 0 }, { q: 2, r: 0 }, // ROW 3

@@ -1,16 +1,18 @@
 import { useState, useCallback } from 'react';
 
 /**
- * Hook générique pour gérer le survol
- * Supporte deux modes : controlled (parent) ou uncontrolled (local)
+ * Generic hook to handle hover
+ *
+ * Supports two modes: controlled ( parent in 'GameBoard )
+ * or uncontrolled (local in '*Tile')
+ *
+ * Priority: controlled > local
  */
 export const useHover = (
   controlledHover?: boolean,
   onControlledHoverChange?: (isHovered: boolean) => void
 ): { isHovered: boolean; onMouseEnter: () => void; onMouseLeave: () => void } => {
   const [localHovered, setLocalHovered] = useState(false);
-
-  // Priorité : controlled > local
   const isHovered = controlledHover !== undefined ? controlledHover : localHovered;
 
   const onMouseEnter = useCallback(() => {

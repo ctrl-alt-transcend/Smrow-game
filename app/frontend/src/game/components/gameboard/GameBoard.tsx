@@ -9,7 +9,7 @@ import {
     TileData,
     RoadData,
     SettlementData,
-    tilesLayout,
+    classicLayout,
     HoverEntity } from '../../types/gameboard.types';
 
 import {
@@ -53,7 +53,7 @@ function GameBoard() {
 
   // Générer tous les sommets uniques (pour les settlements)
   const allVertices = new Map<string, Vertex>();
-  tilesLayout.forEach(tile => {
+  classicLayout.forEach(tile => {
     getHexCorners(tile.q, tile.r, HEX_SIZE).forEach(v => {
       allVertices.set(v.id, v);
     });
@@ -70,7 +70,7 @@ function GameBoard() {
 
   // Générer toutes les arêtes uniques (pour les routes)
   const allEdges = new Map<string, Edge>();
-  tilesLayout.forEach(tile => {
+  classicLayout.forEach(tile => {
     getHexEdges(tile.q, tile.r, HEX_SIZE).forEach(e => {
       allEdges.set(e.id, e);
     });
@@ -148,7 +148,7 @@ function GameBoard() {
         {/* Ordre important: tuiles en fond, puis routes, puis settlements */}
 
         {/* TUILES */}
-        {tilesLayout.map(tile => (
+        {classicLayout.map(tile => (
           <HexTile
             key={`tile-${tile.q}-${tile.r}`}
             data={tile}

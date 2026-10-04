@@ -17,7 +17,6 @@ export const Settlement: React.FC<SettlementProps> = ({
       cy={data.vertex.y}
       r={effectiveIsHovered ? 12 : 10}
       fill={isSelected ? '#ff6b6b' : effectiveIsHovered ? '#ffa500' : (hasOwner ? '#77c41e' : '#c0a030')}
-      //fill={isSelected ? '#ff6b6b' : effectiveIsHovered ? '#ffa500' : '#c0a030'}
       strokeWidth={2}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

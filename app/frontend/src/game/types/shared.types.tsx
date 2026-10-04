@@ -1,6 +1,8 @@
 import { TileData, RoadData, SettlementData } from "./gameboard.types";
 
-// Définition commune pour toutes les entités interactives
+/**
+ * Common definition for all interactive game features
+ */
 export interface InteractiveProps<T> {
   data: T;
   isSelected: boolean;
@@ -14,9 +16,10 @@ export interface TileProps extends InteractiveProps<TileData> {
 
 export interface RoadProps extends InteractiveProps<RoadData> {
   hasOwner?: boolean;
+  //owner?: PlayerId;
 }
 
 export interface SettlementProps extends InteractiveProps<SettlementData> {
-  //owner?: PlayerId;
   hasOwner?: boolean;
+  //owner?: PlayerId;
 }
