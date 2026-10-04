@@ -1,5 +1,3 @@
-export const HEX_SIZE = 50;
-
 export interface HexCoord {
   q: number;
   r: number;
@@ -17,26 +15,29 @@ export interface Edge {
   p2: Vertex;
 }
 
-export interface TileData extends HexCoord {}
-
-export interface SettlementData {
-  id: string;
-  vertex: Vertex;
+export interface TileData extends HexCoord {
 }
 
 export interface RoadData {
   id: string;
   edge: Edge;
 }
-export interface RoadHover {
-  type: 'road';
+
+export interface SettlementData {
   id: string;
+  vertex: Vertex;
 }
 
+// Hover effect
 export interface TileHover {
   type: 'tile';
   q: number;
   r: number;
+}
+
+export interface RoadHover {
+  type: 'road';
+  id: string;
 }
 
 export interface SettlementHover {

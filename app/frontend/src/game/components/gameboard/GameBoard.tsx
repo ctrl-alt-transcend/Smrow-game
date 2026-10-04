@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { HexTile } from './HexTile'
-import { Road } from './RoadProps'
-import { Settlement } from './SettlementProps'
+import { Road } from './RoadTile'
+import { Settlement } from './SettlementTile'
 
 import {
     Edge,
@@ -10,12 +10,12 @@ import {
     RoadData,
     SettlementData,
     tilesLayout,
-    HoverEntity,
-    HEX_SIZE } from '../../types/gameboard.types';
+    HoverEntity } from '../../types/gameboard.types';
 
 import {
     getHexCorners,
-    getHexEdges } from '../../utils/hexRendering'
+    getHexEdges,
+    HEX_SIZE } from '../../utils/hexRendering'
 
 
 interface GameBoardState {
