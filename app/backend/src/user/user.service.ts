@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { ConflictException, HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -39,10 +39,10 @@ export class UserService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(username: string) {
     return this.databaseService.user.findUniqueOrThrow( {
       where: {
-        id,
+        username,
       }
     });
   }
@@ -58,10 +58,10 @@ export class UserService {
     });
   }
 
-  async update(id: string, updateUserDto: Prisma.UserUpdateInput) {
+  async update(username: string, updateUserDto: Prisma.UserUpdateInput) {
     return this.databaseService.user.update({
       where: {
-        id,
+        username,
       },
       data: updateUserDto,
     } );
