@@ -20,24 +20,23 @@ export class UserService {
         }
       },
     }
-    try {
+    //try {
       return await this.databaseService.user.create( {
       data: prismaDtoUser,
     });
-    } catch (error) {
+  //  } catch (error) {
 
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if ( error.code === 'P2002') {
-          const field = error.meta?.target;
-          this.logger.error(
-            `User creation failed: ${JSON.stringify(error.meta)}`,
-          );
-
-          throw new ConflictException( 'Username or email already exists');
-        }
-      }
-      throw error;
-    }
+  //    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+  //      if ( error.code === 'P2002') {
+  //        const field = error.meta?.target;
+  //        this.logger.error(
+  //          `User creation failed: ${JSON.stringify(error.meta)}`,
+  //        );
+  //        throw new ConflictException( 'Username or email already exists ');
+  //      }
+  //    }
+  //    throw error;
+  //  }
   }
 
   // include returns the relations data, if set to true

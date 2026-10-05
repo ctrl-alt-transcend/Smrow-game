@@ -5,7 +5,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  //output   = "../generated/prisma" // MUST comment or delete this line so we use the default @prisma/client folder instead of the separeate one
 }
 
 datasource db {
