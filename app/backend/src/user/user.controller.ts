@@ -16,7 +16,7 @@ export class UserController {
     return this.userService.findbyUsername(username);
   }
 
-  @Get(':id')
+  @Get('id:id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
@@ -26,7 +26,7 @@ export class UserController {
     return this.userService.findByMail(email);
   }
 
-  @Patch(':id')
+  @Patch('update:id')
   update(@Param('id') id: string, @Body() updateUserDto: Prisma.UserUpdateInput) {
     return this.userService.update(id, updateUserDto);
   }
@@ -47,8 +47,9 @@ export class UserController {
   }
 
 
-  @Delete(':id')
+  @Delete('id:id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
+
 }

@@ -1,7 +1,7 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
+import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-client-exception.filter'
 
 
 /** @brief: Defines the application gateway. This is where the Nest instance starts up

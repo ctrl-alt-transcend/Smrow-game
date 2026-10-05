@@ -20,23 +20,10 @@ export class UserService {
         }
       },
     }
-    //try {
-      return await this.databaseService.user.create( {
-      data: prismaDtoUser,
-    });
-  //  } catch (error) {
 
-  //    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-  //      if ( error.code === 'P2002') {
-  //        const field = error.meta?.target;
-  //        this.logger.error(
-  //          `User creation failed: ${JSON.stringify(error.meta)}`,
-  //        );
-  //        throw new ConflictException( 'Username or email already exists ');
-  //      }
-  //    }
-  //    throw error;
-  //  }
+    return await this.databaseService.user.create( {
+    data: prismaDtoUser,
+    });
   }
 
   // include returns the relations data, if set to true
@@ -45,7 +32,7 @@ export class UserService {
   }
 
   async findbyUsername(username: string) {
-    return this.databaseService.user.findUnique({
+    return this.databaseService.user.findUniqueOrThrow({
       where: {
         username,
       }
@@ -53,7 +40,7 @@ export class UserService {
   }
 
   async findOne(id: string) {
-    return this.databaseService.user.findUnique( {
+    return this.databaseService.user.findUniqueOrThrow( {
       where: {
         id,
       }
@@ -61,7 +48,7 @@ export class UserService {
   }
 
   async findByMail(email: string) {
-    return this.databaseService.user.findUnique( {
+    return this.databaseService.user.findUniqueOrThrow( {
       where: {
         email,
       },

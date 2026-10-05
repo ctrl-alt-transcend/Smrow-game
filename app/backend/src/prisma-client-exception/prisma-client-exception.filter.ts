@@ -14,11 +14,26 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     switch (exception.code) {
 		// error unique restriction, duplicated field, already in use
       case 'P2002': {
+
         const status = HttpStatus.CONFLICT; // 409
+        const target = exception.meta?.target as string || exception.message || '';
+        let afield = 'Unique field';
+        const match = target.match(/constraint:\s*`([^`]+)`/i);
+        const restrictionName = match ? match[1] : target;
+        if (restrictionName) {
+          const parts = restrictionName.split('_');
+          if (parts.length >= 3 ) {
+            afield = parts[1];
+          }
+          else {
+            afield = restrictionName.replace('key', '').replace(/[^a-zA-Z0-9]/g, '');
+          }
+        }
+
         response.status(status).json({
           statusCode: status,
-          message: `${(exception.meta?.target as string[]).join(', ')} is already in use`,
-		  error: 'Conflict'
+          message: `${afield} is already in use`,
+		      error: 'Conflict'
         });
         break;
       }
