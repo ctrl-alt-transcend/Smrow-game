@@ -12,7 +12,7 @@ export class AuthService {
     private readonly JwtService: JwtService
   ) {}
 
-  async signUp(createUserDto: CreateUserDto): Promise<any> {
+  async signUp(createUserDto: CreateUserDto): Promise<{access_token: string}> {
     createUserDto.password = await this.hashPassword(createUserDto.password);
     const user = await this.userService.create(createUserDto);
     return await this.createJWTToken(user);
