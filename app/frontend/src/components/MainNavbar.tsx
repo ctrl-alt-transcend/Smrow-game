@@ -1,5 +1,5 @@
 import { Box, Image, Skeleton, Stack } from "@mantine/core";
-import RegisterDrawer from "./buttons/RegisterDrawer";
+// import RegisterDrawer from "./buttons/RegisterDrawer";
 
 export default function MainNavbar() {
   return (
@@ -11,7 +11,7 @@ export default function MainNavbar() {
       gap="md"
       align="center"
       justify="center" >
-      <RegisterDrawer/>
+      {/* <RegisterDrawer/> */}
       <Box>
         <Image
           src="https://pleated-jeans.com/wp-content/uploads/2025/02/funniest-dungeons-and-dragons-memes-1-1.webp"

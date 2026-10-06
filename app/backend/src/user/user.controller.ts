@@ -16,7 +16,7 @@ export class UserController {
     return this.userService.findbyUsername(username);
   }
 
-  @Get(':id')
+  @Get('id/:id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
@@ -26,14 +26,28 @@ export class UserController {
     return this.userService.findByMail(email);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: Prisma.UserUpdateInput) {
-    return this.userService.update(id, updateUserDto);
+  @Patch('update/:id')
+  async update(@Param('id') username: string, @Body() updateUserDto: Prisma.UserUpdateInput) {
+     const updatedUser = await this.userService.update(username, updateUserDto);
+
+    return {
+      message: `User updated correctly`,
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        updatedAt:  updatedUser.updatedAt,
+      }
+    };
   }
 
   @Delete('deluser/:username')
-  removeUser(@Param('username') username: string) {
-    return this.userService.removeUser(username);
+  async removeUser(@Param('username') username: string) {
+    await this.userService.removeUser(username);
+
+    return {
+      status: 204,
+      message: `User: '${username}' has been correctly deleted.`
+    };
   }
 
   // we could save the user using the findbyUsername and then execute the remove(id) istead. this needs to have an exception filter to avoid errors
@@ -42,13 +56,18 @@ export class UserController {
     const user = await this.userService.findbyUsername(username);
 
     if (user) {
-      return this.userService.remove(user.id);
+      await this.userService.remove(user.id);
     }
+    return {
+      status: 200,
+      message: `User: '${username}' has been correctly deleted.`
+    };
   }
 
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete('id/:id')
+  async remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
+
 }
