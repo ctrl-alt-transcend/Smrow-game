@@ -26,14 +26,14 @@ export class UserController {
     return this.userService.findByMail(email);
   }
 
-  @Patch('update/:username')
-  async update(@Param('username') username: string, @Body() updateUserDto: Prisma.UserUpdateInput) {
+  @Patch('update/:id')
+  async update(@Param('id') username: string, @Body() updateUserDto: Prisma.UserUpdateInput) {
      const updatedUser = await this.userService.update(username, updateUserDto);
 
     return {
       message: `User updated correctly`,
       user: {
-        username: updatedUser.username,
+        id: updatedUser.id,
         email: updatedUser.email,
         updatedAt:  updatedUser.updatedAt,
       }

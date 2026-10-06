@@ -58,10 +58,10 @@ export class UserService {
     });
   }
 
-  async update(username: string, updateUserDto: Prisma.UserUpdateInput) {
+  async update(id: string, updateUserDto: Prisma.UserUpdateInput) {
     return this.databaseService.user.update({
       where: {
-        username,
+        id,
       },
       data: updateUserDto,
     } );
