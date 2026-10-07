@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PostBody, UserPublic, CreatePostResponse } from '../../../../../shared/types'
+import type { PostBody, CreatePostResponse } from '../../../../shared/types'
 
 // Response Example
 // {
