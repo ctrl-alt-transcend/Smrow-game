@@ -19,3 +19,11 @@ export const postData = async (data: PostBody): Promise<CreatePostResponse> => {
     console.log("Token: ", response.data.access_token);
     return response.data;
 };
+
+// IN back end
+//   async signUp(createUserDto: CreateUserDto): Promise< CreatePostResponse > {
+//     createUserDto.password = await this.hashPassword(createUserDto.password);
+//     const result: CreatePostResponse = await this.userService.create(createUserDto);
+//     result.access_token = await this.createJWTToken(result.user)
+//     return result;
+//   }
