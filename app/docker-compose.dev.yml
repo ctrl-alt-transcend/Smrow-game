@@ -25,6 +25,8 @@ services:
     build:
       context: ./backend
       target: dev
+      additional_contexts:
+        shared: ./shared
     container_name: nestjs
     ports:
       - 3000:3000
@@ -43,12 +45,21 @@ services:
             - .git/
             - "*.log"
             - prisma/migrations
+
+          ## shared types sync
+        - action: sync
+          path: ./shared
+          target: /app/shared
+
         - action: rebuild
           path: ./backend/package.json
         - action: rebuild
           path: ./backend/prisma/schema.prisma
         - action: rebuild
           path: ./backend/prisma/migrations
+
+
+
     env_file:
       .env
     networks:
@@ -80,6 +91,8 @@ services:
     build:
       context: ./frontend
       target: dev
+      additional_contexts:
+        shared: ./shared
     container_name: frontend
     ports:
       - 5173:5173
@@ -94,8 +107,14 @@ services:
             - dist/
             - .git/
             - "*.log"
+
+        - action: sync
+          path: ./shared
+          target: /app/shared
+
         - action: rebuild
           path: ./frontend/package.json
+
     networks:
       - ft-network
 
