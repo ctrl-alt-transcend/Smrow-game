@@ -22,10 +22,9 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-<<<<<<< HEAD
-  "include": ["src", "app/**/*", "shared/**/*"]
-=======
-  "types": ["vite/client", "vitest/globals"],
-  "include": ["../src"]
->>>>>>> develop
+  "include": [
+    "../../frontend/**/*",
+    "../../shared/**/*"
+  ],
+  "types": ["vite/client", "vitest/globals"]
 }
