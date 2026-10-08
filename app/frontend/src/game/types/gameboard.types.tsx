@@ -26,6 +26,7 @@ export interface TileData {
   q: number;
   r: number;
 }
+export interface TileProps extends InteractiveProps<TileData> { }
 
 export interface RoadData {
   id: string;
@@ -33,6 +34,7 @@ export interface RoadData {
   hasOwner?: boolean;
   //owner?: PlayerId;
 }
+export interface RoadProps extends InteractiveProps<RoadData> { }
 
 export interface SettlementData {
   id: string;
@@ -40,9 +42,6 @@ export interface SettlementData {
   hasOwner?: boolean;
   //owner?: PlayerId;
 }
-
-export interface TileProps extends InteractiveProps<TileData> { }
-export interface RoadProps extends InteractiveProps<RoadData> { }
 export interface SettlementProps extends InteractiveProps<SettlementData> { }
 
 /** @description set selected interactive element */

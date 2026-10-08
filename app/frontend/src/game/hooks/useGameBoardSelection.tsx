@@ -1,5 +1,9 @@
 import { useState, useCallback } from 'react';
-import { GameBoardState, TileData, SettlementData, RoadData } from '../types/gameboard.types';
+import {
+  TileData,
+  RoadData,
+  SettlementData,
+  GameBoardState } from '../types/gameboard.types';
 
 export const useGameBoardSelection = () => {
   const [selected, setSelected] = useState<GameBoardState>({

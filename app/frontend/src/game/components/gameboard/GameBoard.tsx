@@ -1,43 +1,24 @@
-import { useState } from 'react';
 import { HexTile } from './HexTile'
 import { Road } from './RoadTile'
 import { Settlement } from './SettlementTile'
 import { useGameBoardSelection } from '../../hooks/useGameBoardSelection';
+import { useGameBoardHover } from '../../hooks/useGameBoardHover';
 import {
     Edge,
     Vertex,
-    TileData,
     RoadData,
     SettlementData,
-    classicLayout,
-    HoverEntity } from '../../types/gameboard.types';
+    classicLayout } from '../../types/gameboard.types';
 import {
     getHexCorners,
     getHexEdges,
     HEX_SIZE } from '../../utils/hexRendering'
 
 function GameBoard() {
-  const { selected, handleTileClick, handleSettlementClick, handleRoadClick } = useGameBoardSelection();
-  const [hovered, setHovered] = useState<HoverEntity>(null);
-
-  const handleTileHover = (isHovered: boolean, tile: TileData) => {
-    setHovered(isHovered ? { type: 'tile', q: tile.q, r: tile.r } : null);
-  };
-  const handleRoadHover = (isHovered: boolean, road: RoadData) => {
-    setHovered(isHovered ? { type: 'road', id: road.id } : null);
-  };
-  const handleSettlementHover = (isHovered: boolean, settlement: SettlementData) => {
-    setHovered(isHovered ? { type: 'settlement', id: settlement.id } : null);
-  };
-
-  // Helper pour vérifier
-  const isTileHovered = (hovered: HoverEntity, tile: TileData) =>
-    hovered?.type === 'tile' && hovered.q === tile.q && hovered.r === tile.r;
-  const isRoadHovered = (hovered: HoverEntity, road: RoadData) =>
-    hovered?.type === 'road' && hovered.id === road.id;
-  const isSettlementHovered = (hovered: HoverEntity, settlement: SettlementData) =>
-    hovered?.type === 'settlement' && hovered.id === settlement.id;
-
+  const {selected,
+    handleTileClick, handleSettlementClick, handleRoadClick } = useGameBoardSelection();
+  const { isTileHovered, isRoadHovered, isSettlementHovered,
+    handleTileHover, handleRoadHover, handleSettlementHover } = useGameBoardHover();
 
   // Générer tous les sommets uniques (pour les settlements)
   const allVertices = new Map<string, Vertex>();
@@ -107,7 +88,7 @@ function GameBoard() {
             key={`tile-${tile.q}-${tile.r}`}
             data={tile}
             isSelected={selected.selectedTile?.q === tile.q && selected.selectedTile?.r === tile.r}
-            isHovered={isTileHovered(hovered, tile)}  // ✅ Typed
+            isHovered={isTileHovered(tile)}
             onHoverChange={(isHovered) => handleTileHover(isHovered, tile)}
             onClick={handleTileClick}
           />
@@ -119,7 +100,7 @@ function GameBoard() {
             key={`road-${road.id}`}
             data={road}
             isSelected={selected.selectedRoad?.id === road.id}
-            isHovered={isRoadHovered(hovered, road)}  // ✅ Typed
+            isHovered={isRoadHovered(road)}
             onHoverChange={(isHovered) => handleRoadHover(isHovered, road)}
             onClick={handleRoadClick}
           />
@@ -131,7 +112,7 @@ function GameBoard() {
             key={`settlement-${settlement.id}`}
             data={settlement}
             isSelected={selected.selectedSettlement?.id === settlement.id}
-            isHovered={isSettlementHovered(hovered, settlement)}  // ✅ Typed
+            isHovered={isSettlementHovered(settlement)}
             onHoverChange={(isHovered) => handleSettlementHover(isHovered, settlement)}
             onClick={handleSettlementClick}
           />
