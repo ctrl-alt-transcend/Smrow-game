@@ -11,11 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Inyectar carpeta Shared
-        run: |
-          mkdir -p shared
-          cp -r ./shared/. ./shared/
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -35,10 +30,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Inyectar carpeta Shared
-        run: |
-          mkdir -p shared
-          cp -r ./shared/. ./shared/
+      - name: Enlazar carpeta Shared para Linter
+        run: cp -r ./app/shared ./app/backend/shared
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -76,11 +69,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-     
-      - name: Inyectar carpeta Shared para compilación
-        run: |
-          mkdir -p shared
-          cp -r ./shared/. ./shared/
+      - name: Preparar contexto Shared
+        run: cp -r ./app/shared ./app/backend/shared
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
