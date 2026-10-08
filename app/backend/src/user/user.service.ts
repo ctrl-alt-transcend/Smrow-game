@@ -10,51 +10,53 @@ export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async create(createUserDto: CreateUserDto) {
-    const prismaDtoUser : Prisma.UserCreateInput = {
+    const prismaDtoUser: Prisma.UserCreateInput = {
       username: createUserDto.username,
       name: createUserDto.name,
       email: createUserDto.email,
       localAuth: {
         create: {
           passwordHash: createUserDto.password,
-        }
+        },
       },
-    }
+    };
 
-    return await this.databaseService.user.create( {
-    data: prismaDtoUser,
+    return await this.databaseService.user.create({
+      data: prismaDtoUser,
     });
   }
 
   // include returns the relations data, if set to true
   async findAll() {
-    return this.databaseService.user.findMany( {include: {profile: true, localAuth:false}} )
+    return this.databaseService.user.findMany({
+      include: { profile: true, localAuth: false },
+    });
   }
 
   async findbyUsername(username: string) {
     return this.databaseService.user.findUniqueOrThrow({
       where: {
         username,
-      }
+      },
     });
   }
 
   async findOne(username: string) {
-    return this.databaseService.user.findUniqueOrThrow( {
+    return this.databaseService.user.findUniqueOrThrow({
       where: {
         username,
-      }
+      },
     });
   }
 
   async findByMail(email: string) {
-    return this.databaseService.user.findUniqueOrThrow( {
+    return this.databaseService.user.findUniqueOrThrow({
       where: {
         email,
       },
       include: {
         localAuth: true,
-      }
+      },
     });
   }
 
@@ -64,23 +66,22 @@ export class UserService {
         id,
       },
       data: updateUserDto,
-    } );
+    });
   }
 
   async removeUser(username: string) {
-    return this.databaseService.user.delete( {
+    return this.databaseService.user.delete({
       where: {
         username,
       },
-
     });
   }
 
   async remove(id: string) {
-    return this.databaseService.user.delete( {
+    return this.databaseService.user.delete({
       where: {
         id,
-      }
+      },
     });
   }
 }
