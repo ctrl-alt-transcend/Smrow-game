@@ -16,7 +16,7 @@ export class AuthService {
   async signUpRes(createUserDto: CreateUserDto): Promise<{message: string, user: UserPublic, access_token: String}> {
     createUserDto.password = await this.hashPassword(createUserDto.password);
     const user = await this.userService.create(createUserDto);
-    const token: { access_token: string } = await this.createJWTToken({
+    const  { access_token } = await this.createJWTToken({
       id: user.id,
       username: String(user.username)
     });
@@ -30,7 +30,7 @@ export class AuthService {
     return {
       message: 'User created successfully',
       user: UserPublic,
-      access_token: token.access_token
+      access_token: access_token
     };
   }
 
