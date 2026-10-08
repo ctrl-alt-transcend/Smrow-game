@@ -1,10 +1,10 @@
 import { IsString, IsEmail, IsNotEmpty, MinLength } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, TransformFnParams } from 'class-transformer';
 
 export class AuthUserDto {
   @IsEmail()
   @IsNotEmpty()
-  @Transform(({ value }) => value.toLowerCase())
+  @Transform(({ value }: TransformFnParams) => typeof value === 'string' ? value.toLowerCase(): value)
   readonly email: string;
 
   @IsString()

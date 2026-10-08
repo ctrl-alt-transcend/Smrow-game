@@ -18,7 +18,7 @@ export class AuthService {
     const user = await this.userService.create(createUserDto);
     const { access_token } = await this.createJWTToken({
       id: user.id,
-      username: user.username
+      username: String(user.username)
     });
 
     const UserPublic: UserPublic = {
