@@ -42,7 +42,7 @@ jobs:
         run: npx prisma generate
       - name: Lint Code
         working-directory: app/backend
-        run: npm eslint "src/**/*.ts" --ext .ts
+        run: npx eslint "src/**/*.ts" --ext .ts
 
   build:
     needs: [format, lint]
