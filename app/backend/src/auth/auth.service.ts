@@ -30,7 +30,7 @@ export class AuthService {
     return {
       message: 'User created successfully',
       user: UserPublic,
-      access_token: access_token
+      access_token: String(access_token)
     };
   }
 
