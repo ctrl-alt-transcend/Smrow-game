@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import type { PostBody, CreatePostResponse } from '../../../../shared/types'
 
 // Response Example
@@ -14,10 +14,15 @@ import type { PostBody, CreatePostResponse } from '../../../../shared/types'
 // }
 
 export const postData = async (data: PostBody): Promise<CreatePostResponse> => {
-    console.log("Sending: \n", data);
-    const response = await axios.post<CreatePostResponse>('http://localhost:3000/auth/register', data);
-    console.log("Token: ", response.data.access_token);
-    return response.data;
+    try {
+        console.log("sending:\n", data);
+        const response: AxiosResponse = await axios.post<CreatePostResponse>('http://localhost:3000/auth/register', data);
+
+        return response.data;
+    } catch (error: any) {
+        console.error("Couldn't create user:", error.message);
+        throw error;
+    }
 };
 
 // IN back end
