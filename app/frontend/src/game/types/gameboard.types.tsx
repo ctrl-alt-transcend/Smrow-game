@@ -85,6 +85,26 @@ export interface SettlementHover {
 
 export type HoverEntity = TileHover | RoadHover | SettlementHover | null;
 
+export interface GameBoardProps {
+  boardData: GameBoardData;
+
+  //useGameBoardSelection
+  selected: GameBoardState;
+  handleTileClick: (tile: TileData | null) => void;
+  handleSettlementClick: (settlement: SettlementData | null) => void;
+  handleRoadClick: (road: RoadData | null) => void;
+  clearAll: () => void;
+
+  //useGameBoardHover
+  hovered: HoverEntity;
+  handleTileHover: (isHovered: boolean, tile: TileData) => void;
+  handleRoadHover: (isHovered: boolean, road: RoadData) => void;
+  handleSettlementHover: (isHovered: boolean, settlement: SettlementData) => void;
+  isTileHovered: (tile: TileData) => boolean;
+  isRoadHovered: (road: RoadData) => boolean;
+  isSettlementHovered: (settlement: SettlementData) => boolean;
+}
+
 /** @description classic Catan gameboard layout (19 tiles) */
 export const classicLayout: TileData[] = [
     { q: 0, r: -2 }, { q: 1, r: -2 }, { q: 2, r: -2 },

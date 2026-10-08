@@ -1,9 +1,13 @@
 import { AppShell, Burger, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import GameBoard from './components/gameboard/GameBoard.tsx';
+import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
+import { classicLayout } from './types/gameboard.types.tsx';
+import { SelectionInfo } from './components/ui/SelectionInfo.tsx';
 
 export default function FullLayout() {
   const [opened, { toggle }] = useDisclosure();
+  const GameBoardProps = useGameBoardFactory(classicLayout);
 
   return (
     <AppShell
@@ -19,16 +23,23 @@ export default function FullLayout() {
           Header
         </Group>
       </AppShell.Header>
-      <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
+      <AppShell.Navbar p="md">
+        Navbar
+        <SelectionInfo selected={GameBoardProps.selected} />
+      </AppShell.Navbar>
       <AppShell.Main>
         <Group>
           <AppShell.Section>
-            <GameBoard/>
+            <GameBoard {...GameBoardProps} />
           </AppShell.Section>
         </Group>
       </AppShell.Main>
-      <AppShell.Aside p="md">Aside</AppShell.Aside>
-      <AppShell.Footer p="md">Footer</AppShell.Footer>
+      <AppShell.Aside p="md">
+        Aside
+      </AppShell.Aside>
+      <AppShell.Footer p="md">
+        Footer
+      </AppShell.Footer>
     </AppShell>
   );
 }

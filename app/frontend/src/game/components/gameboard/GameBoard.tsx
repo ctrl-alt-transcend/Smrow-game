@@ -1,32 +1,22 @@
 import { HexTile } from './HexTile'
 import { Road } from './RoadTile'
 import { Settlement } from './SettlementTile'
-import { classicLayout } from '../../types/gameboard.types';
-import { useGameBoardData } from '../../hooks/useGameBoardData';
-import { useGameBoardHover } from '../../hooks/useGameBoardHover';
-import { useGameBoardSelection } from '../../hooks/useGameBoardSelection';
-import { SelectionInfo } from '../ui/SelectionInfo';
+import { classicLayout, GameBoardProps } from '../../types/gameboard.types';
 
-function GameBoard() {
+export const GameBoard: React.FC<GameBoardProps> = (props) => {
   const {
-    settlements,
-    roads,
-    svgBounds } =
-    useGameBoardData(classicLayout)
-  const {
+    boardData: { settlements, roads, svgBounds },
     selected,
     handleTileClick,
+    handleRoadClick,
     handleSettlementClick,
-    handleRoadClick } =
-    useGameBoardSelection();
-  const {
     isTileHovered,
     isRoadHovered,
     isSettlementHovered,
     handleTileHover,
     handleRoadHover,
-    handleSettlementHover } =
-    useGameBoardHover();
+    handleSettlementHover
+  } = props;
 
   return (
     <div style={{ width: '100%', maxWidth: svgBounds.svgWidth, margin: '0 auto' }}>
@@ -67,7 +57,6 @@ function GameBoard() {
           />
         ))}
       </svg>
-      <SelectionInfo selected={selected} />
     </div>
   );
 }
