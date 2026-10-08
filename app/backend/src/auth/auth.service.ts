@@ -2,8 +2,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
-import { User } from '@prisma/client';
 import * as bycrypt from 'bcrypt';
+import { UserPublic, CreatePostResponse } from '../../shared/types';
+
 
 @Injectable()
 export class AuthService {
@@ -11,6 +12,24 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly JwtService: JwtService
   ) {}
+
+  async signUpRes(createUserDto: CreateUserDto): Promise<CreatePostResponse> {
+    createUserDto.password = await this.hashPassword(createUserDto.password);
+    const user = await this.userService.create(createUserDto);
+    const { access_token } = await this.createJWTToken(user);
+
+    const UserPublic: UserPublic = {
+      id: Number(user.id),
+      name: user.name,
+      email: user.email
+    };
+
+    return {
+      message: 'User created successfully',
+      user: UserPublic,
+      access_token: access_token
+    };
+  }
 
   async signUp(createUserDto: CreateUserDto): Promise<{access_token: string}> {
     createUserDto.password = await this.hashPassword(createUserDto.password);
@@ -44,4 +63,3 @@ export class AuthService {
     };
   }
 }
-

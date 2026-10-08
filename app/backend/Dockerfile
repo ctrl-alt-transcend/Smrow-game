@@ -7,6 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+COPY --from=shared . /app/shared
 RUN npx prisma generate
 EXPOSE 3000
 ENTRYPOINT ["npm"]
