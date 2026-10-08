@@ -1,15 +1,22 @@
-/** @prop x, y → corner's axial coordinates */
+/** @description x, y → corner's axial coordinates */
 export interface Vertex {
   id: string;       // "{q}:{r}:{cornerIndex}"
   x: number;
   y: number;
 }
 
-/** @prop p1, p2 → segment between two vertices (corner to corner) */
+/** @description p1, p2 → segment between two vertices (corner to corner) */
 export interface Edge {
   id: string;       // "{vertexId1}-{vertexId2}"
   p1: Vertex;
   p2: Vertex;
+}
+
+export interface SvgBounds {
+  svgWidth: number;
+  svgHeight: number;
+  offsetX: number;
+  offsetY: number;
 }
 
 /** @description common definition for all interactive game features */
@@ -21,7 +28,7 @@ export interface InteractiveProps<T> {
   onClick: (data: T) => void;
 }
 
-/** @prop q = column, r = row → center coordinates of a tile */
+/** @description q = column, r = row → center coordinates of a tile */
 export interface TileData {
   q: number;
   r: number;
@@ -43,6 +50,14 @@ export interface SettlementData {
   //owner?: PlayerId;
 }
 export interface SettlementProps extends InteractiveProps<SettlementData> { }
+
+export interface GameBoardData {
+  vertices: Vertex[];
+  edges: Edge[];
+  settlements: SettlementData[];
+  roads: RoadData[];
+  svgBounds: SvgBounds;
+}
 
 /** @description set selected interactive element */
 export interface GameBoardState {

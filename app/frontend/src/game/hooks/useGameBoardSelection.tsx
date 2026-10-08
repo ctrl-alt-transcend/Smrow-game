@@ -46,5 +46,11 @@ export const useGameBoardSelection = () => {
     });
   }, []);
 
-  return { selected, handleTileClick, handleSettlementClick, handleRoadClick, clearAll };
+  return {
+    selected,
+    handleTileClick,
+    handleSettlementClick,
+    handleRoadClick,
+    clearAll
+  };
 };

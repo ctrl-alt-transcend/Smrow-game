@@ -5,7 +5,7 @@ import {
   SettlementData,
   HoverEntity } from '../types/gameboard.types';
 
-/** @description generic hook to handle hover */
+/** @description generic hook for gameboard interactive elements */
 export const useHover = (
   controlledHover?: boolean,
   onControlledHoverChange?: (isHovered: boolean) => void
