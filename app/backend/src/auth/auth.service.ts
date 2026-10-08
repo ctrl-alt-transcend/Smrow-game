@@ -16,7 +16,10 @@ export class AuthService {
   async signUpRes(createUserDto: CreateUserDto): Promise<CreatePostResponse> {
     createUserDto.password = await this.hashPassword(createUserDto.password);
     const user = await this.userService.create(createUserDto);
-    const { access_token } = await this.createJWTToken(user);
+    const { access_token } = await this.createJWTToken({
+      id: user.id,
+      username: user.username
+    });
 
     const UserPublic: UserPublic = {
       id: Number(user.id),
