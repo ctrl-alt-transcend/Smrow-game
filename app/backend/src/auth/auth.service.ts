@@ -27,7 +27,7 @@ export class AuthService {
       name: user.name,
       email: user.email,
     };
-
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return {
       message: 'User created successfully',
       user: UserPublic,
