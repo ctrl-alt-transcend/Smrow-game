@@ -1,5 +1,5 @@
-import { TileProps } from '../../types/shared.types';
-import { useHover } from '../../hooks/useHover';
+import { TileProps } from '../../types/gameboard.types';
+import { useHover } from '../../hooks/useGameBoardHover';
 import { axialToPixel, HEX_SIZE } from '../../utils/hexRendering';
 
 export const HexTile: React.FC<TileProps> = ({

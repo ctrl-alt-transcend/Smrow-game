@@ -1,14 +1,15 @@
 import type { Edge, Vertex } from "../types/gameboard.types";
 
+/** @description hextile pixel height */
 export const HEX_SIZE = 50;
 
-/** @description axial coordinates → pixels (pointy-topped) */
+/** @description axial coordinates (col & row) to pixels (pointy-topped) */
 export const axialToPixel = (q: number, r: number, size: number) => ({
   x: size * (Math.sqrt(3) * q + Math.sqrt(3) / 2 * r),
   y: size * (3 / 2 * r)
 });
 
-/** @description axial coordinates → vertices (6 corners per hex) */
+/** @description generates hextile's vertices (6 corners per hex) */
 export const getHexCorners = (q: number, r: number, size: number): Vertex[] => {
   const center = axialToPixel(q, r, size);
   const corners: Vertex[] = [];

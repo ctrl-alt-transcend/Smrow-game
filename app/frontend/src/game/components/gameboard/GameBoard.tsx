@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { HexTile } from './HexTile'
 import { Road } from './RoadTile'
 import { Settlement } from './SettlementTile'
-
+import { useGameBoardSelection } from '../../hooks/useGameBoardSelection';
 import {
     Edge,
     Vertex,
@@ -11,20 +11,13 @@ import {
     SettlementData,
     classicLayout,
     HoverEntity } from '../../types/gameboard.types';
-
 import {
     getHexCorners,
     getHexEdges,
     HEX_SIZE } from '../../utils/hexRendering'
 
-
-interface GameBoardState {
-  selectedTile: TileData | null;
-  selectedSettlement: SettlementData | null;
-  selectedRoad: RoadData | null;
-}
-
 function GameBoard() {
+  const { selected, handleTileClick, handleSettlementClick, handleRoadClick } = useGameBoardSelection();
   const [hovered, setHovered] = useState<HoverEntity>(null);
 
   const handleTileHover = (isHovered: boolean, tile: TileData) => {
@@ -45,11 +38,6 @@ function GameBoard() {
   const isSettlementHovered = (hovered: HoverEntity, settlement: SettlementData) =>
     hovered?.type === 'settlement' && hovered.id === settlement.id;
 
-  const [selected, setSelected] = useState<GameBoardState>({
-    selectedTile: null,
-    selectedSettlement: null,
-    selectedRoad: null
-  });
 
   // Générer tous les sommets uniques (pour les settlements)
   const allVertices = new Map<string, Vertex>();
@@ -79,40 +67,6 @@ function GameBoard() {
     id: e.id,
     edge: e
   }));
-
-  // Handlers de sélection
-  const handleTileClick = (data: TileData) => {
-    setSelected(prev => ({
-      ...prev,
-      selectedTile: prev.selectedTile?.q === data.q && prev.selectedTile?.r === data.r
-        ? null
-        : data,
-      selectedSettlement: null,
-      selectedRoad: null
-    }));
-  };
-
-  const handleSettlementClick = (data: SettlementData) => {
-    setSelected(prev => ({
-      ...prev,
-      selectedSettlement: prev.selectedSettlement?.id === data.id
-        ? null
-        : data,
-      selectedTile: null,
-      selectedRoad: null
-    }));
-  };
-
-  const handleRoadClick = (data: RoadData) => {
-    setSelected(prev => ({
-      ...prev,
-      selectedRoad: prev.selectedRoad?.id === data.id
-        ? null
-        : data,
-      selectedTile: null,
-      selectedSettlement: null
-    }));
-  };
 
   // Debug console
   console.log('Selection:', {
