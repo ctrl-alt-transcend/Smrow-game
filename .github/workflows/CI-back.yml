@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [main, develop, fix/data-types]
+    branches: [main, develop]
   pull_request:
-    branches: [main, develop, fix/data-types]
+    branches: [main, develop]
 
 jobs:
   format:
@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Enlazar carpeta Shared para Linter
+      - name: Link Shared folder for linter
         run: cp -r ./app/shared ./app/backend/shared
 
       - name: Setup Node.js
@@ -69,7 +69,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Preparar contexto Shared
+      - name: Prepare shared context
         run: cp -r ./app/shared ./app/backend/shared
       
       - name: Setup Node.js
