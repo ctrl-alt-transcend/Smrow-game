@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client';
 
 @Controller('user')
 export class UserController {
@@ -27,16 +27,19 @@ export class UserController {
   }
 
   @Patch('update/:id')
-  async update(@Param('id') username: string, @Body() updateUserDto: Prisma.UserUpdateInput) {
-     const updatedUser = await this.userService.update(username, updateUserDto);
+  async update(
+    @Param('id') username: string,
+    @Body() updateUserDto: Prisma.UserUpdateInput,
+  ) {
+    const updatedUser = await this.userService.update(username, updateUserDto);
 
     return {
       message: `User updated correctly`,
       user: {
         id: updatedUser.id,
         email: updatedUser.email,
-        updatedAt:  updatedUser.updatedAt,
-      }
+        updatedAt: updatedUser.updatedAt,
+      },
     };
   }
 
@@ -46,7 +49,7 @@ export class UserController {
 
     return {
       status: 204,
-      message: `User: '${username}' has been correctly deleted.`
+      message: `User: '${username}' has been correctly deleted.`,
     };
   }
 
@@ -60,14 +63,12 @@ export class UserController {
     }
     return {
       status: 200,
-      message: `User: '${username}' has been correctly deleted.`
+      message: `User: '${username}' has been correctly deleted.`,
     };
   }
-
 
   @Delete('id/:id')
   async remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
-
 }
