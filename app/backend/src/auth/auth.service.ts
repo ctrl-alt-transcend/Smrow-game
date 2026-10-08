@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import * as bycrypt from 'bcrypt';
-import { UserPublic, CreatePostResponse } from '../../shared/types';
+import { UserPublic } from '../../shared/types';
 
 
 @Injectable()
