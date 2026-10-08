@@ -37,6 +37,9 @@ jobs:
       - name: Install dependencies
         working-directory: app/backend
         run: npm ci
+      - name: Prisma generate (for linter)
+        working-directory: app/backend
+        run: npx prisma generate
       - name: Lint Code
         working-directory: app/backend
         run: npm run lint
