@@ -34,11 +34,11 @@ export class AuthService {
     };
   }
 
-  async signUp(createUserDto: CreateUserDto): Promise<{access_token: string}> {
-    createUserDto.password = await this.hashPassword(createUserDto.password);
-    const user = await this.userService.create(createUserDto);
-    return await this.createJWTToken(user);
-  }
+  //async signUp(createUserDto: CreateUserDto): Promise<{access_token: string}> {
+  //  createUserDto.password = await this.hashPassword(createUserDto.password);
+  //  const user = await this.userService.create(createUserDto);
+  //  return await this.createJWTToken(user);
+  //}
 
   async signIn(email: string, password: string): Promise<{access_token: string}> {
     const user = await this.userService.findByMail(email);

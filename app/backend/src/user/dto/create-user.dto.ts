@@ -13,7 +13,7 @@ export class CreateUserDto {
 
   @IsEmail()
   @IsNotEmpty()
-  @Transform(({ value }: TransformFnParams) => typeof value === 'string' ? value.toLowerCase(): value)
+  @Transform(({ value }: TransformFnParams) => (typeof value === 'string' ? value.toLowerCase(): value) as string)
   readonly email: string;
 
   @IsString()

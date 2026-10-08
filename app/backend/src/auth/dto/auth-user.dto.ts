@@ -4,7 +4,7 @@ import { Transform, TransformFnParams } from 'class-transformer';
 export class AuthUserDto {
   @IsEmail()
   @IsNotEmpty()
-  @Transform(({ value }: TransformFnParams) => typeof value === 'string' ? value.toLowerCase(): value)
+  @Transform(({ value }: TransformFnParams) => (typeof value === 'string' ? value.toLowerCase(): value) as string)
   readonly email: string;
 
   @IsString()
