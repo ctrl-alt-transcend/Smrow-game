@@ -19,8 +19,8 @@ async function bootstrap() {
     }),
   );
 
-  app.enableCors();
   const { httpAdapter } = app.get(HttpAdapterHost);
+  app.enableCors();
 
   /** @brief: includes the global exception filter for the Prisma Exception events.
    */
@@ -28,4 +28,4 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+bootstrap().catch((err) => console.error(err));

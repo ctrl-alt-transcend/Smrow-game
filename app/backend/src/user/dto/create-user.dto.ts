@@ -1,5 +1,5 @@
 import { IsString, IsEmail, IsNotEmpty, MinLength } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, TransformFnParams } from 'class-transformer';
 
 export class CreateUserDto {
   @IsString()
@@ -12,7 +12,10 @@ export class CreateUserDto {
 
   @IsEmail()
   @IsNotEmpty()
-  @Transform(({ value }) => value.toLowerCase())
+  @Transform(
+    ({ value }: TransformFnParams) =>
+      (typeof value === 'string' ? value.toLowerCase() : value) as string,
+  )
   readonly email: string;
 
   @IsString()

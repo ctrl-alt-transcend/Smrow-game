@@ -1,10 +1,4 @@
-import {
-  ConflictException,
-  HttpException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -26,7 +20,7 @@ export class UserService {
         },
       },
     };
-    console.error('Data:', prismaDtoUser);
+
     return await this.databaseService.user.create({
       data: prismaDtoUser,
     });

@@ -1,13 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { CreateUserDto } from '../user/dto/create-user.dto';
 import * as bycrypt from 'bcrypt';
-import type {
-  UserPublic,
-  PostBody,
-  CreatePostResponse,
-} from '../../shared/types';
+import type { UserPublic, CreatePostResponse } from '../../shared/types';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,13 +12,16 @@ export class AuthService {
     private readonly JwtService: JwtService,
   ) {}
 
-  async signUpRes(createUserDto: PostBody): Promise<CreatePostResponse> {
-    console.log('test');
-    createUserDto.password = await this.hashPassword(createUserDto.password);
-    const user = await this.userService.create(createUserDto);
-    const { access_token } = await this.createJWTToken(user);
+  async signUpRes(recvData: CreateUserDto): Promise<CreatePostResponse> {
+    recvData.password = await this.hashPassword(recvData.password);
+    const user = await this.userService.create(recvData);
 
-    console.log('Data reveiced: ', createUserDto);
+    const { access_token } = await this.createJWTToken({
+      id: user.id,
+      username: String(user.username),
+    });
+
+    console.log('Data reveiced: ', recvData);
     const userPublic: UserPublic = {
       id: Number(user.id),
       name: user.name,
@@ -31,19 +30,18 @@ export class AuthService {
 
     const result: CreatePostResponse = {
       message: 'User created successfully',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       user: userPublic,
       access_token: access_token,
     };
     return result;
   }
 
-  async signUp(
-    createUserDto: CreateUserDto,
-  ): Promise<{ access_token: string }> {
-    createUserDto.password = await this.hashPassword(createUserDto.password);
-    const user = await this.userService.create(createUserDto);
-    return await this.createJWTToken(user);
-  }
+  //async signUp(createUserDto: CreateUserDto): Promise<{access_token: string}> {
+  //  createUserDto.password = await this.hashPassword(createUserDto.password);
+  //  const user = await this.userService.create(createUserDto);
+  //  return await this.createJWTToken(user);
+  //}
 
   async signIn(
     email: string,
