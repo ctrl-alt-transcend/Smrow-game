@@ -15,7 +15,7 @@ export const useGameBoardSelection = () => {
   const handleTileClick = useCallback((tile: TileData | null) => {
     setSelected(prev => ({
       ...prev,
-      selectedTile: tile,
+      selectedTile: prev.selectedTile ? null : tile,
       selectedSettlement: null,
       selectedRoad: null
     }));
@@ -24,7 +24,7 @@ export const useGameBoardSelection = () => {
   const handleSettlementClick = useCallback((settlement: SettlementData | null) => {
     setSelected(prev => ({
       ...prev,
-      selectedSettlement: settlement,
+      selectedSettlement: prev.selectedSettlement ? null : settlement,
       selectedTile: null,
       selectedRoad: null
     }));
@@ -32,7 +32,7 @@ export const useGameBoardSelection = () => {
 
   const handleRoadClick = useCallback((road: RoadData | null) => {
     setSelected(prev => ({
-      ...prev, selectedRoad: road,
+      ...prev, selectedRoad: prev.selectedRoad ? null : road,
       selectedTile: null,
       selectedSettlement: null
     }));
