@@ -13,5 +13,5 @@ import { calculateGameBoardData } from '../utils/gameBoardCalculation';
 export const useGameBoardData = (tiles: TileData[]): GameBoardData => {
   return useMemo(() => {
     return calculateGameBoardData(tiles);
-  }, [tiles]); // Recalcul seulement si les tuiles changent
+  }, [tiles]);
 };

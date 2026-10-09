@@ -3,8 +3,7 @@ import { Road } from './RoadTile'
 import { Settlement } from './SettlementTile'
 import { classicLayout, GameBoardProps } from '../../types/gameboard.types';
 
-export const GameBoard: React.FC<GameBoardProps> = (props) => {
-  const {
+export const GameBoard: React.FC<GameBoardProps> = ({
     boardData: { settlements, roads, svgBounds },
     selected,
     handleTileClick,
@@ -15,9 +14,7 @@ export const GameBoard: React.FC<GameBoardProps> = (props) => {
     isSettlementHovered,
     handleTileHover,
     handleRoadHover,
-    handleSettlementHover
-  } = props;
-
+    handleSettlementHover}) => {
   return (
     <div style={{ width: '100%', maxWidth: svgBounds.svgWidth, margin: '0 auto' }}>
       <svg

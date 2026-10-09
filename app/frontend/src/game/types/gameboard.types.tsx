@@ -113,3 +113,4 @@ export const classicLayout: TileData[] = [
     { q: -2, r: 1 },{ q: -1, r: 1 }, { q: 0, r: 1 }, { q: 1, r: 1 },
     { q: -2, r: 2 },{ q: -1, r: 2 }, { q: 0, r: 2 }
 ];
+
