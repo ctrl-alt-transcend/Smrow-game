@@ -31,7 +31,7 @@ fclean: down
 re: fclean
 	docker compose -f $(DOCKER_COMPOSE_FILE) build --no-cache
 	$(MAKE) up
-	docker exec nestjs npx prisma migrate dev --name init  // to remigrate the deleted DB that will be empty of table
+	docker exec nestjs npx prisma migrate dev --name init
 
 .PHONY: all refresh build up down fclean re
 
