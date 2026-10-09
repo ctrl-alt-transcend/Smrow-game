@@ -58,7 +58,7 @@ export function LoginPanel(props: PaperProps) {
                         onChange={(event) => form.setFieldValue('username', event.currentTarget.value)}
                         />
                     )}
-                    
+
                     <TextInput
                         required
                         placeholder="Your email"

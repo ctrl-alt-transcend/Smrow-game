@@ -18,6 +18,7 @@ export const postData = async (data: PostBody): Promise<CreatePostResponse> => {
         console.log("sending:\n", data);
         const response: AxiosResponse = await axios.post<CreatePostResponse>('http://localhost:3000/auth/register', data);
 
+        console.log("recieved: ", response.data);
         return response.data;
     } catch (error: any) {
         console.error("Couldn't create user:", error.message);

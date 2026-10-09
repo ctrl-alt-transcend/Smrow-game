@@ -1,7 +1,7 @@
 export type PostBody = {
-    email: string;
-    name: string;
     username: string;
+    name: string;
+    email: string;
     password: string;
 };
 
