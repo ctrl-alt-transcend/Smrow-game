@@ -1,5 +1,5 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import type { PostBody, CreatePostResponse } from '../../../../shared/types'
+import axios, { AxiosResponse } from 'axios';
+import type { RegisterPost, LoginPost, RegisterResponse, LoginResponse } from '../../../../shared/types'
 
 // Response Example
 // {
@@ -13,18 +13,32 @@ import type { PostBody, CreatePostResponse } from '../../../../shared/types'
 //   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwNX0..."
 // }
 
-export const postData = async (data: PostBody): Promise<CreatePostResponse> => {
+export const createUser = async (data: RegisterPost): Promise<RegisterResponse> => {
     try {
         console.log("sending:\n", data);
-        const response: AxiosResponse = await axios.post<CreatePostResponse>('http://localhost:3000/auth/register', data);
+        const response: AxiosResponse = await axios.post<RegisterResponse>('http://localhost:3000/auth/register', data);
 
         console.log("recieved: ", response.data);
+        localStorage.setItem("access_token", response.data.access_token);
         return response.data;
     } catch (error: any) {
         console.error("Couldn't create user:", error.message);
         throw error;
     }
 };
+
+export const loginPost = async (data: LoginPost): Promise<LoginResponse> => {
+    try {
+        console.log("Sending: ", data);
+        const response: AxiosResponse = await axios.post<LoginResponse>('http://localhost:3000/auth/login', data);
+        console.log("access_token", response.data.access_token);
+        return response.data;
+
+    } catch (error: any) {
+        console.error("You are dumb", error.message);
+        throw error;
+    }
+}
 
 // IN back end
 //   async signUp(createUserDto: CreateUserDto): Promise< CreatePostResponse > {

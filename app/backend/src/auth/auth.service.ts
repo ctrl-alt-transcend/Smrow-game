@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bycrypt from 'bcrypt';
-import type { UserPublic, CreatePostResponse } from '../../shared/types';
+import type { UserPublic, RegisterResponse } from '../../shared/types';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class AuthService {
     private readonly JwtService: JwtService,
   ) {}
 
-  async signUpRes(recvData: CreateUserDto): Promise<CreatePostResponse> {
+  async signUpRes(recvData: CreateUserDto): Promise<RegisterResponse> {
     recvData.password = await this.hashPassword(recvData.password);
     const user = await this.userService.create(recvData);
 
@@ -21,14 +21,13 @@ export class AuthService {
       username: String(user.username),
     });
 
-    console.log('Data reveiced: ', recvData);
     const userPublic: UserPublic = {
-      id: Number(user.id),
+      id: user.id,
       name: user.name,
       email: user.email,
     };
 
-    const result: CreatePostResponse = {
+    const result: RegisterResponse = {
       message: 'User created successfully',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       user: userPublic,
