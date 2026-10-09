@@ -19,14 +19,21 @@
 name: ft-catan #temporary
 services:
 
+  # -- Backend -- #
+
   nestjs:
     build:
       context: ./backend
       target: dev
+      additional_contexts:
+        shared: ./shared
     container_name: nestjs
     ports:
       - 3000:3000
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     develop:
       watch:
         - action: sync
@@ -37,8 +44,22 @@ services:
             - dist/
             - .git/
             - "*.log"
+            - prisma/migrations
+
+          ## shared types sync
+        - action: sync
+          path: ./shared
+          target: /app/shared
+
         - action: rebuild
           path: ./backend/package.json
+        - action: rebuild
+          path: ./backend/prisma/schema.prisma
+        - action: rebuild
+          path: ./backend/prisma/migrations
+
+
+
     env_file:
       .env
     networks:
@@ -57,7 +78,45 @@ services:
     networks:
       - ft-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+
+  # -- Frontend -- #
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+      additional_contexts:
+        shared: ./shared
+    container_name: frontend
+    ports:
+      - 5173:5173
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+            - .git/
+            - "*.log"
+
+        - action: sync
+          path: ./shared
+          target: /app/shared
+
+        - action: rebuild
+          path: ./frontend/package.json
+
+    networks:
+      - ft-network
 
 
 # --- Volumes --- #
