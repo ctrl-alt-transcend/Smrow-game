@@ -12,7 +12,7 @@ export class AuthService {
     private readonly JwtService: JwtService,
   ) {}
 
-  async signUpRes(recvData: CreateUserDto): Promise<RegisterResponse> {
+  async signUp(recvData: CreateUserDto): Promise<RegisterResponse> {
     recvData.password = await this.hashPassword(recvData.password);
     const user = await this.userService.create(recvData);
 
@@ -35,12 +35,6 @@ export class AuthService {
     };
     return result;
   }
-
-  //async signUp(createUserDto: CreateUserDto): Promise<{access_token: string}> {
-  //  createUserDto.password = await this.hashPassword(createUserDto.password);
-  //  const user = await this.userService.create(createUserDto);
-  //  return await this.createJWTToken(user);
-  //}
 
   async signIn(
     email: string,
