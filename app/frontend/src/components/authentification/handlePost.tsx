@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { type AxiosResponse } from 'axios';
 import type { RegisterPost, LoginPost, RegisterResponse, LoginResponse } from '../../../../shared/types'
 
 // Response Example
