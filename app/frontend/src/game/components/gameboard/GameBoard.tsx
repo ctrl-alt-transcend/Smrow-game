@@ -1,7 +1,7 @@
 import { HexTile } from './HexTile'
 import { Road } from './RoadTile'
 import { Settlement } from './SettlementTile'
-import { classicLayout, GameBoardProps } from '../../types/gameboard.types';
+import { classicLayout, type GameBoardProps } from '../../types/gameboard.types';
 
 export const GameBoard: React.FC<GameBoardProps> = ({
     boardData: { settlements, roads, svgBounds },

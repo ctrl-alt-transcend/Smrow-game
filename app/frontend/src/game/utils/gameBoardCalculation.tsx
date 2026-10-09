@@ -1,11 +1,10 @@
-import {
+import type {
   Vertex,
   Edge,
   TileData,
   RoadData,
   SettlementData,
-  GameBoardData,
-  Faction
+  GameBoardData
 } from '../types/gameboard.types';
 import { getHexCorners, getHexEdges, HEX_SIZE } from './hexCalculation';
 
@@ -19,10 +18,7 @@ export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
   });
 
   const settlements: SettlementData[] = Array.from(allVertices.values())
-    .map(v => ({ id: v.id, vertex: v, faction: null }))
-    .filter(s => {
-      return true;
-    });
+    .map(v => ({ id: v.id, vertex: v, faction: null }));
 
   const allEdges = new Map<string, Edge>();
   tiles.forEach(tile => {

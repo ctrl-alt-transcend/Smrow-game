@@ -1,4 +1,4 @@
-import { GameBoardState } from '../types/gameboard.types';
+import type { GameBoardState } from '../types/gameboard.types';
 
 export interface SelectionItem {
   type: 'tile' | 'settlement' | 'road';

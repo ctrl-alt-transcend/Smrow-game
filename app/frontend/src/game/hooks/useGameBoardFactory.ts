@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { calculateGameBoardData } from '../utils/gameBoardCalculation';
 import { useGameBoardSelection } from './useGameBoardSelection';
 import { useGameBoardHover } from './useGameBoardHover';
-import { TileData } from '../types/gameboard.types';
+import type { TileData } from '../types/gameboard.types';
 
 /** @description "factory" hook combining: calculated board game, selected state, hover state and handlers */
 export const useGameBoardFactory = (tiles: TileData[]) => {

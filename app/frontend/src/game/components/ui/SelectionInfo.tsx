@@ -1,5 +1,5 @@
 import { useSelectionDisplay } from '../../hooks/useSelectionDisplay';
-import { GameBoardState } from '../../types/gameboard.types';
+import type { GameBoardState } from '../../types/gameboard.types';
 
 interface SelectionInfoProps {
   selected: GameBoardState;

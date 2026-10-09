@@ -1,4 +1,4 @@
-import { SettlementProps, Faction } from '../../types/gameboard.types';
+import type { SettlementProps } from '../../types/gameboard.types';
 import { useHover } from '../../hooks/useGameBoardHover';
 import { getTileFillColor } from '../../utils/tileRendering';
 

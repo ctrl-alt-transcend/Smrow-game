@@ -1,4 +1,4 @@
-import { TileProps } from '../../types/gameboard.types';
+import type { TileProps } from '../../types/gameboard.types';
 import { useHover } from '../../hooks/useGameBoardHover';
 import { axialToPixel, HEX_SIZE } from '../../utils/hexCalculation';
 import {

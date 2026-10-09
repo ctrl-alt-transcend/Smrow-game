@@ -2,14 +2,16 @@ export const SELECTED_COLOR = '#e30000';
 export const HOVER_COLOR = '#fe5b5b';
 export const DEFAULT_COLOR = '#e4e4e4';
 
-export enum LandType {
-  FOREST = 'forest',
-  PASTURE = 'pasture',
-  HILL = 'hill',
-  MOUNTAIN = 'mountain',
-  FIELD = 'field',
-  DESERT = 'desert'
-}
+export const LandType = {
+  FOREST: 'forest',
+  PASTURE: 'pasture',
+  HILL: 'hill',
+  MOUNTAIN: 'mountain',
+  FIELD: 'field',
+  DESERT: 'desert'
+} as const;
+
+export type LandType = (typeof LandType)[keyof typeof LandType];
 
 export const LAND_COLORS: Record<LandType, string> = {
   [LandType.FOREST]: '#4a7c2e',
@@ -20,12 +22,14 @@ export const LAND_COLORS: Record<LandType, string> = {
   [LandType.DESERT]: '#e8cfa0'
 };
 
-export enum Faction {
-  POURPRE_CHYBRE = 'pourpre',
-  BOURSE_BLEUE = 'bleu',
-  ROUGE_FIAC = 'vert',
-  UREE_JAUNE = 'jaune',
-}
+export const Faction = {
+  POURPRE_CHYBRE: 'pourpre',
+  BOURSE_BLEUE: 'bleu',
+  ROUGE_FIAC: 'vert',
+  UREE_JAUNE: 'jaune',
+} as const;
+
+export type Faction = (typeof Faction)[keyof typeof Faction];
 
 export const FACTION_COLORS: Record<Faction, string> = {
   [Faction.POURPRE_CHYBRE]: '#6b0b91',
