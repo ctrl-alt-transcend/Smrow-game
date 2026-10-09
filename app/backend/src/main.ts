@@ -20,6 +20,7 @@ async function bootstrap() {
   );
 
   const { httpAdapter } = app.get(HttpAdapterHost);
+  app.enableCors();
 
   /** @brief: includes the global exception filter for the Prisma Exception events.
    */
