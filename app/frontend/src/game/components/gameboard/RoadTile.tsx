@@ -1,5 +1,6 @@
-import { RoadProps } from '../../types/gameboard.types';
+import { RoadProps, Faction } from '../../types/gameboard.types';
 import { useHover } from '../../hooks/useGameBoardHover';
+import { getTileFillColor } from '../../utils/tileRendering';
 
 export const Road: React.FC<RoadProps> = ({
   data,
@@ -9,6 +10,7 @@ export const Road: React.FC<RoadProps> = ({
   onClick
 }) => {
   const { isHovered: effectiveIsHovered, onMouseEnter, onMouseLeave } = useHover(isHovered, onHoverChange);
+  const fillColor = getTileFillColor(null, data.faction, isSelected, effectiveIsHovered);
 
   return (
     <line
@@ -16,7 +18,7 @@ export const Road: React.FC<RoadProps> = ({
       y1={data.edge.p1.y}
       x2={data.edge.p2.x}
       y2={data.edge.p2.y}
-      stroke={isSelected ? '#ff0000' : effectiveIsHovered ? '#cc0000' : (data.hasOwner ? '#77c41e' : '#6be4ff')}
+      stroke={fillColor}
       strokeWidth={isSelected ? 8 : 6}
       strokeLinecap="round"
       onMouseEnter={onMouseEnter}

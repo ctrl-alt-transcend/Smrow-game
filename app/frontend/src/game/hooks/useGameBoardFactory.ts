@@ -4,13 +4,7 @@ import { useGameBoardSelection } from './useGameBoardSelection';
 import { useGameBoardHover } from './useGameBoardHover';
 import { TileData } from '../types/gameboard.types';
 
-/**
- * Hook "usine" qui combine :
- * - Données calculées (vertices, edges, etc.)
- * - État de sélection
- * - État de hover
- * - Handlers prêts à l'emploi
- */
+/** @description "factory" hook combining: calculated board game, selected state, hover state and handlers */
 export const useGameBoardFactory = (tiles: TileData[]) => {
   const boardData = useMemo(() => calculateGameBoardData(tiles), [tiles]);
   const selectionState = useGameBoardSelection();

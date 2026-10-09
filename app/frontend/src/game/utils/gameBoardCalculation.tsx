@@ -4,22 +4,13 @@ import {
   TileData,
   RoadData,
   SettlementData,
-  GameBoardData
+  GameBoardData,
+  Faction
 } from '../types/gameboard.types';
 import { getHexCorners, getHexEdges, HEX_SIZE } from './hexCalculation';
 
-/**
- * Fonction pure — zéro dépendance React
- * Input: liste de tuiles
- * Output: toutes les entités géométriques pré-calculées
- *
- * Avantages:
- * - Testable sans React
- * - Applicable dans Node.js, workers, tests unitaires
- * - Pas de recalculs accidentels
- */
+/** @description calculate and render an SVG board game based on the given layout */
 export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
-  // --- 1. Générer tous les sommets uniques (pour les settlements) ---
   const allVertices = new Map<string, Vertex>();
   tiles.forEach(tile => {
     getHexCorners(tile.q, tile.r, HEX_SIZE).forEach(v => {
@@ -27,15 +18,12 @@ export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
     });
   });
 
-  // Filtrer les sommets valides pour Catan (ceux partagés par au moins 1 tuile)
   const settlements: SettlementData[] = Array.from(allVertices.values())
-    .map(v => ({ id: v.id, vertex: v }))
+    .map(v => ({ id: v.id, vertex: v, faction: null }))
     .filter(s => {
-      // Tu peux ajouter tes propres règles ici (ex: périphérie uniquement)
       return true;
     });
 
-  // --- 2. Générer toutes les arêtes uniques (pour les routes) ---
   const allEdges = new Map<string, Edge>();
   tiles.forEach(tile => {
     getHexEdges(tile.q, tile.r, HEX_SIZE).forEach(e => {
@@ -45,10 +33,11 @@ export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
 
   const roads: RoadData[] = Array.from(allEdges.values()).map(e => ({
     id: e.id,
-    edge: e
+    edge: e,
+    faction: null
   }));
 
-  // --- 3. Calculer les dimensions SVG nécessaires ---
+  // SVG calculation
   const margin = 100;
   const bounds = Array.from(allVertices.values()).reduce((acc, v) => ({
     minX: Math.min(acc.minX, v.x),
