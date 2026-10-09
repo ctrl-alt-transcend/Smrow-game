@@ -2,6 +2,7 @@
 import { createBrowserRouter } from "react-router";
 
 import MainShell from './components/MainShell';
+import GameShell from './game/GameShell';
 import AppLayout from "./layouts/AppLayout"
 
 import  HomePage  from "./pages/HomePage"
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
 		],
 	},
 
+	{ path: "/game", Component: GameShell },
 	{ path: "/", Component: MainShell },
 	{ path: "*", Component: NotFoundPage },
 ]);
