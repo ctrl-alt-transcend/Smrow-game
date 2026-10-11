@@ -21,7 +21,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         width={svgBounds.svgWidth}
         height={svgBounds.svgHeight}
         viewBox={`${svgBounds.offsetX} ${svgBounds.offsetY} ${svgBounds.svgWidth} ${svgBounds.svgHeight}`}
-        style={{ border: '1px solid #ccc', backgroundColor: '#f5f5f5' }}
       >
         {classicLayout.map(tile => (
           <HexTile

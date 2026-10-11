@@ -1,7 +1,7 @@
 import { useSelectionDisplay } from '../../hooks/useSelectionDisplay';
 import type { GameBoardState } from '../../types/gameboard.types';
 
-interface SelectionInfoProps {
+export interface SelectionInfoProps {
   selected: GameBoardState;
 }
 

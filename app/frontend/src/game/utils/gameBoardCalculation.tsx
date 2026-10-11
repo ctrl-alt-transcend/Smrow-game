@@ -34,7 +34,7 @@ export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
   }));
 
   // SVG calculation
-  const margin = 100;
+  const margin = 50;
   const bounds = Array.from(allVertices.values()).reduce((acc, v) => ({
     minX: Math.min(acc.minX, v.x),
     maxX: Math.max(acc.maxX, v.x),
