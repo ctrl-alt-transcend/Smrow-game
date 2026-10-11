@@ -14,7 +14,7 @@ export default function FullLayout() {
     <AppShell
       header={{ height: 60 }}
       footer={{ height: 60 }}
-      navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+      navbar={{ width: 300, breakpoint: 'xs', collapsed: { mobile: !opened } }}
       aside={{ width: 300, breakpoint: 'xl', collapsed: { desktop: false, mobile: true } }}
       padding="xs"
     >

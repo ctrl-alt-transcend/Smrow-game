@@ -17,9 +17,6 @@ export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
     });
   });
 
-  const settlements: SettlementData[] = Array.from(allVertices.values())
-    .map(v => ({ id: v.id, vertex: v, faction: null }));
-
   const allEdges = new Map<string, Edge>();
   tiles.forEach(tile => {
     getHexEdges(tile.q, tile.r, HEX_SIZE).forEach(e => {
@@ -27,10 +24,18 @@ export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
     });
   });
 
+ const settlements: SettlementData[] = Array.from(allVertices.values()) .map(v => ({
+    id: v.id,
+    vertex: v,
+    faction: null,
+    hasOwner: false
+  }));
+
   const roads: RoadData[] = Array.from(allEdges.values()).map(e => ({
     id: e.id,
     edge: e,
-    faction: null
+    faction: null,
+    hasOwner: false
   }));
 
   // SVG calculation

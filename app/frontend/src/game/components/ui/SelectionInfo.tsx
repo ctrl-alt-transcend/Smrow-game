@@ -1,8 +1,9 @@
 import { useSelectionDisplay } from '../../hooks/useSelectionDisplay';
-import type { GameBoardState } from '../../types/gameboard.types';
+import type { GameBoardSelection } from '../../types/gameboard.types';
+import { BuildSelectionButton } from './BuildSelectionButton';
 
-export interface SelectionInfoProps {
-  selected: GameBoardState;
+interface SelectionInfoProps {
+  selected: GameBoardSelection;
 }
 
 export const SelectionInfo: React.FC<SelectionInfoProps> = ({ selected }) => {
@@ -16,6 +17,7 @@ export const SelectionInfo: React.FC<SelectionInfoProps> = ({ selected }) => {
       ) : (
         <div>No selection</div>
       )}
+      <BuildSelectionButton selected={selected} faction={null}/>
     </div>
   );
 };

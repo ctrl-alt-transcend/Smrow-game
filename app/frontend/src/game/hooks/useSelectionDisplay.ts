@@ -1,11 +1,11 @@
-import type { GameBoardState } from '../types/gameboard.types';
+import type { GameBoardSelection } from '../types/gameboard.types';
 
 export interface SelectionItem {
   type: 'tile' | 'settlement' | 'road';
   label: string;
 }
 
-export const useSelectionDisplay = (selected: GameBoardState): SelectionItem[] => {
+export const useSelectionDisplay = (selected: GameBoardSelection): SelectionItem[] => {
   const items: SelectionItem[] = [];
 
   if (selected.selectedTile) {
