@@ -68,13 +68,15 @@ export const TileSelection: React.FC<TileSelectionProps> = ({ selected }) => {
       <Card withBorder radius="md" shadow="sm" h={200}>
         <Stack gap="xs" justify='center' align='center'>
           <Title order={4}>Selection</Title>
-          {items.length > 0 ? (
-            items.map((item, idx) => (
-              <Text key={idx} ml="xs">• {item.label}</Text>
-            ))
-          ) : (
-            <Text c="dimmed">No selection</Text>
-          )}
+            <Group justify='left' gap={'xs'}>
+              {items.length > 0 ? (
+                items.map((item, idx) => (
+                  <Text key={idx} ml="xs">• {item.label}</Text>
+                ))
+              ) : (
+                <Text c="dimmed">No selection</Text>
+              )}
+            </Group>
           <BuildSelectionButton selected={selected} faction={null} />
         </Stack>
       </Card>

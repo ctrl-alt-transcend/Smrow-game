@@ -31,10 +31,8 @@ export default function FullLayout() {
       </Group>
     </AppShell.Navbar>
       <AppShell.Main>
-        <Group>
-          <AppShell.Section>
-            <GameBoard {...GameBoardProps} />
-          </AppShell.Section>
+        <Group justify='center' align='center'>
+          <GameBoard {...GameBoardProps} />
         </Group>
       </AppShell.Main>
       <AppShell.Aside p="md">
