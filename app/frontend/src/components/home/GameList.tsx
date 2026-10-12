@@ -7,15 +7,16 @@ export default function GameList(){
 
 	return (
 
-		<Paper withBorder p="md">
-			<Title order={3}>Parties en cours</Title>
+		<Paper withBorder p="md" mih ={600}>
+			<Title order={3} mb="md">Game in progress</Title>
 
 		<Table striped highlightOnHover>
 			<Table.Thead>
 				<Table.Tr>
-					<Table.Th ta="center">ID</Table.Th>
-					<Table.Th ta="center">Joueurs</Table.Th>
-					<Table.Th ta="center">Statut</Table.Th>
+					<Table.Th ta="left">ID</Table.Th>
+					<Table.Th ta="left">Players</Table.Th>
+					<Table.Th ta="left">Status</Table.Th>
+
 					<Table.Th ></Table.Th>
 				</Table.Tr>
 			</Table.Thead>

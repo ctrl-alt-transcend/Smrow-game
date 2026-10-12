@@ -5,8 +5,8 @@ export default function GameActions() {
 
 	return (
 		<Group>
-			<Button>Rejoindre une partie</Button>
-			<Button variant="default">Crée une partie</Button>
+			<Button>Join da game</Button>
+			<Button variant="default">Create a game</Button>
 		</Group>
 	)
 }
