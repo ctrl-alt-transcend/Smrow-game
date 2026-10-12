@@ -6,7 +6,6 @@
 
 # temporary files which can be created if a process still has a handle open of a deleted file
 .fuse_hidden*
-
 # KDE directory preferences
 .directory
 
@@ -156,6 +155,10 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+
+# secrets folders for docker use
+
+*/secrets
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -458,6 +461,8 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
+
+
 
 ### Agents ###
 .claude

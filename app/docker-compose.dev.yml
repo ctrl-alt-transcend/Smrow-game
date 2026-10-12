@@ -71,6 +71,9 @@ services:
     env_file:
       - .env
     #using the .env file directly in the compose to set user
+    environment:
+      - POSTGRES_PASSWORD=/run/secrets/db_password.txt
+      - POSTGRES_USER=/run/secrets/db_user.txt
     volumes:
       - postgres-data:/var/lib/postgresql/
     ports:
@@ -83,6 +86,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    secrets:
+      - db_password
+      - db_user
 
 
   # -- Frontend -- #
@@ -97,6 +103,9 @@ services:
     ports:
       - 5173:5173
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     develop:
       watch:
         - action: sync
@@ -130,3 +139,9 @@ networks:
   ft-network:
 
 # --- Secrets --- #
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  db_user:
+    file: ./secrets/db_user.txt
