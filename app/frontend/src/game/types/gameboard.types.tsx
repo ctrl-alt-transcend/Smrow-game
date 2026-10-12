@@ -25,19 +25,19 @@ export const LAND_COLORS: Record<LandType, string> = {
 };
 
 export const Faction = {
-  POURPRE_CHYBRE: 'pourpre',
-  BOURSE_BLEUE: 'bleu',
-  ROUGE_FIAC: 'vert',
-  UREE_JAUNE: 'jaune',
-  DEFAULT: 'pink',
+  POURPRES_CHYBRES: 'Pourpres Chybres',
+  BOURSES_BLEUES: 'Bourses Bleues',
+  ROUGES_FIACS: 'Rouges Fiacs',
+  UREE_JAUNE: 'Uree Jaune',
+  DEFAULT: 'Kikouneurs (default)',
 } as const;
 
 export type Faction = (typeof Faction)[keyof typeof Faction];
 
 export const FACTION_COLORS: Record<Faction, string> = {
-  [Faction.POURPRE_CHYBRE]: '#6b0b91',
-  [Faction.BOURSE_BLEUE]: '#19aad5',
-  [Faction.ROUGE_FIAC]: '#da1111',
+  [Faction.POURPRES_CHYBRES]: '#6b0b91',
+  [Faction.BOURSES_BLEUES]: '#19aad5',
+  [Faction.ROUGES_FIACS]: '#da1111',
   [Faction.UREE_JAUNE]: '#ffdd00',
   [Faction.DEFAULT]: '#fd92e4'
 };
@@ -86,7 +86,7 @@ export interface TileProps extends InteractiveProps<TileData> { }
 export interface RoadData {
   id: string;
   edge: Edge;
-  faction: Faction | null;
+  faction: Faction | 'unoccupied road';
   hasOwner?: boolean;
 }
 export interface RoadProps extends InteractiveProps<RoadData> { }
@@ -94,7 +94,7 @@ export interface RoadProps extends InteractiveProps<RoadData> { }
 export interface SettlementData {
   id: string;
   vertex: Vertex;
-  faction: Faction | null;
+  faction: Faction | 'unoccupied settlement';
   hasOwner?: boolean;
 }
 export interface SettlementProps extends InteractiveProps<SettlementData> { }
