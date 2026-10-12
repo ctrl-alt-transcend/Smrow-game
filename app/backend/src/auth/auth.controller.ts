@@ -1,6 +1,6 @@
-import { Controller, Body, Post } from '@nestjs/common';
+import { Controller, Body, Post, Request, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { AuthService} from './auth.service';
-import { AuthUserDto } from './dto/auth-user.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 
 @Controller('auth')
@@ -12,8 +12,10 @@ export class AuthController {
     return this.AuthService.signUpRes(createUserDto);
   }
 
+  //WARN: no validation pipe
+  @UseGuards(AuthGuard('local'))
   @Post('login')
-  async login(@Body() authUserDto: AuthUserDto) {
-    return this.AuthService.signIn(authUserDto.email, authUserDto.password);
+  async login(@Request() req) : Promise<{access_token: string}> {
+    return this.AuthService.signIn(req.user);
   }
 }

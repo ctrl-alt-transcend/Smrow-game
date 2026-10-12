@@ -31,19 +31,25 @@ export class AuthService {
     };
   }
 
-  async signUp(createUserDto: CreateUserDto): Promise<{access_token: string}> {
-    createUserDto.password = await this.hashPassword(createUserDto.password);
-    const user = await this.userService.create(createUserDto);
+  // async signUp(createUserDto: CreateUserDto): Promise<{access_token: string}> {
+  //   createUserDto.password = await this.hashPassword(createUserDto.password);
+  //   const user = await this.userService.create(createUserDto);
+  //   return await this.createJWTToken(user);
+  // }
+
+  async signIn(user: any): Promise<{access_token: string}> {
+
     return await this.createJWTToken(user);
   }
-
-  async signIn(email: string, password: string): Promise<{access_token: string}> {
+  
+async validateUser(email: string, password: string) {
     const user = await this.userService.findByMail(email);
-    if (user == null || user.localAuth == null || !(await bycrypt.compare(password, user.localAuth.passwordHash)))
-      throw new UnauthorizedException('Invalid credentials');
 
-    return await this.createJWTToken(user);
+    if (user == null || user.localAuth == null || !(await bycrypt.compare(password, user.localAuth.passwordHash)))
+      return (null);
+    return user;
   }
+
 
   private async hashPassword(password: string): Promise<string> {
     const salt = await bycrypt.genSalt(10);
