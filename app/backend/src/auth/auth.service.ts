@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { CreateUserDto } from '../user/dto/create-user.dto';
 import * as bycrypt from 'bcrypt';
-import { UserPublic, CreatePostResponse } from '../../shared/types';
+import type { UserPublic, RegisterResponse } from '../../shared/types';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -12,34 +12,29 @@ export class AuthService {
     private readonly JwtService: JwtService,
   ) {}
 
-  async signUpRes(createUserDto: CreateUserDto): Promise<CreatePostResponse> {
-    createUserDto.password = await this.hashPassword(createUserDto.password);
-    const user = await this.userService.create(createUserDto);
+  async signUp(recvData: CreateUserDto): Promise<RegisterResponse> {
+    recvData.password = await this.hashPassword(recvData.password);
+    const user = await this.userService.create(recvData);
 
-    const token: { access_token: string } = await this.createJWTToken({
+    const { access_token } = await this.createJWTToken({
       id: user.id,
       username: String(user.username),
     });
 
-    const UserPublic: UserPublic = {
-      id: Number(user.id),
+    const userPublic: UserPublic = {
+      id: user.id,
       name: user.name,
       email: user.email,
     };
 
-    return {
+    const result: RegisterResponse = {
       message: 'User created successfully',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      user: UserPublic,
-      access_token: token.access_token,
+      user: userPublic,
+      access_token: access_token,
     };
+    return result;
   }
-
-  //async signUp(createUserDto: CreateUserDto): Promise<{access_token: string}> {
-  //  createUserDto.password = await this.hashPassword(createUserDto.password);
-  //  const user = await this.userService.create(createUserDto);
-  //  return await this.createJWTToken(user);
-  //}
 
   async signIn(
     email: string,
