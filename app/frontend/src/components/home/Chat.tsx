@@ -26,7 +26,7 @@ export default function Chat(){
 
 	return (
 
-		<Paper withBorder p="md">
+		<Paper  withBorder p="md" h="100%" >
 			<Title order={3} ta="center" mb="md">Toxic chat</Title>
 			<ScrollArea h={480}>
 				<Stack gap="xs" align="flex-start">

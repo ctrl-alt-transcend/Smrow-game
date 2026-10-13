@@ -9,7 +9,7 @@ export default function GameList(){
 
 	return (
 
-		<Paper withBorder p="md" mih ={600}>
+		<Paper withBorder p="md" mih ={600} h="100%">
 			<Title order={3} mb="md">Game in progress</Title>
 
 		{noGame ? ( <Text c="dimmed" ta="center" py="xl">No game in progress ..</Text>)
