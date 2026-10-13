@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bycrypt from 'bcrypt';
-import type { UserPublic, RegisterResponse } from '../../shared/types';
+import type { UserPublic, RegisterResponse } from '../../../shared/types';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Injectable()
@@ -29,11 +29,17 @@ export class AuthService {
 
     const result: RegisterResponse = {
       message: 'User created successfully',
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       user: userPublic,
       access_token: access_token,
     };
     return result;
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.userService.findById(userId);
+    if (!user) throw new UnauthorizedException('User not found');
+    return user;
   }
 
   async signIn(
