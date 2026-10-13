@@ -13,7 +13,7 @@ import {
 import { useForm } from '@mantine/form';
 import { upperFirst, useToggle } from '@mantine/hooks';
 
-import { createUser, loginPost } from './handlePost'
+import { registerUser, loginUser } from '../../services/auth.service'
 
 export function LoginPanel(props: PaperProps) {
 
@@ -49,7 +49,7 @@ export function LoginPanel(props: PaperProps) {
                 Login to play !
             </Text>
 
-            <form onSubmit={registerForm.onSubmit(createUser)}>
+            <form onSubmit={registerForm.onSubmit(registerUser)}>
                 <Stack>
                     {type === 'register' && (
                         <TextInput
@@ -106,7 +106,7 @@ export function LoginPanel(props: PaperProps) {
 
             </form>
 
-            <form onSubmit={loginForm.onSubmit(loginPost)}>
+            <form onSubmit={loginForm.onSubmit(loginUser)}>
                 {type === 'login' && (
                     <TextInput
                         required
