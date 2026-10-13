@@ -18,7 +18,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:ws": "node websocket-client/socket.io.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -35,7 +36,8 @@
     "class-validator": "^0.15.1",
     "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io-client": "^4.8.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

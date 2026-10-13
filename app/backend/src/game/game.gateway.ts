@@ -1,5 +1,5 @@
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway(3001)
 export class GameGateway {
@@ -8,6 +8,11 @@ export class GameGateway {
 
   @SubscribeMessage('message')
   handleMessage(client: any, payload: any): string {
+    console.log('Received message:', payload);
     return 'Hello world!';
+  }
+
+  handleConnection(client: Socket) {
+    console.log('Client connected:', client.id);
   }
 }
