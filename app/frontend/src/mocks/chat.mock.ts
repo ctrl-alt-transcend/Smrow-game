@@ -18,18 +18,13 @@ export const messages: ChatMessage[] = [
 	{id: 'h1118', author: 'Enrike', content: 'je ne lirais jamais cette merde!'},
 	{id: 'i1119', author: 'Enrikeaulongpseudointermiinabledsfdsfsdfdsfdsfsdfsdfsfdsfdsfsdfpourtestercecasla', content: 'je ne lirais jamais cette merde!'},
 	{id: 'c1113', author: 'Matthieu', content: ':O'},
-	{id: 'c1113', author: 'Matthieu', content: ':O'},
+	{id: 'c1123', author: 'Matthieu', content: ':O'},
 	{id: 'c1114', author: 'Matthieu', content: ':O'},
 	{id: 'c1115', author: 'Matthieu', content: ':O'},
 	{id: 'c1116', author: 'Matthieu', content: ':O'},
 	{id: 'c1117', author: 'Matthieu', content: ':O'},
 	{id: 'c1118', author: 'Matthieu', content: ':O'},
 	{id: 'c1119', author: 'Matthieu', content: ':O'},
-	{id: 'c1123', author: 'Matthieu', content: ':O'},
-
-
-
-
-
+	{id: 'c1323', author: 'Matthieu', content: ':O'},
 
 ]

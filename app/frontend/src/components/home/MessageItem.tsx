@@ -10,7 +10,7 @@ type MessageItemProps = {
 export default function MessageItem({message} : MessageItemProps) {
 
 	return (
-		<Paper bg="red.1" p="xs" maw="95%"  style={{ overflowWrap: 'anywhere' }}>
+		<Paper bg="Red.1" p="xs" maw="95%"  style={{ overflowWrap: 'anywhere' }}>
 			<Text fw={700}>@{message.author}</Text>
 			<Text>{message.content}</Text>
 		</Paper>
