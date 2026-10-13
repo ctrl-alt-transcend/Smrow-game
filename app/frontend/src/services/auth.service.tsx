@@ -1,8 +1,9 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { RegisterPost, LoginPost, RegisterResponse, LoginResponse } from '../../../shared/types'
+import type { RegisterPost, LoginPost, RegisterResponse, LoginResponse } from '../../shared/types'
 
 export const registerUser = async (data: RegisterPost): Promise<RegisterResponse> => {
     try {
+        console.log("sending: ", data);
         const response: AxiosResponse = await axios.post<RegisterResponse>('http://localhost:3000/auth/register', data);
         localStorage.setItem("access_token", response.data.access_token);
         console.log("token: ", response.data.access_token);

@@ -1,7 +1,7 @@
 // src/context/AuthProvider.tsx
 import { useState, useEffect, useCallback } from "react";
 import { AuthContext } from "./AuthContext";
-import { LoginPost, RegisterPost, UserPublic } from "../../../shared/types";
+import { LoginPost, RegisterPost, UserPublic } from "../../shared/types";
 import { getCurrentUser } from "../services/user.service";
 import { registerUser, loginUser } from '../services/auth.service'
 
