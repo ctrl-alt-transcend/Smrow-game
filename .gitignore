@@ -25,6 +25,8 @@
 # Icon must end with two \r
 Icon
 
+# DB
+app/backend/prisma/migrations/
 
 # Thumbnails
 ._*
