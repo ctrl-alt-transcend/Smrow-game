@@ -30,13 +30,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const login = useCallback(async (data: LoginPost) => {
-        await loginUser(data);          // stocke le token (issue 1)
+        await loginUser(data);
         const profile = await getCurrentUser();
         setUser(profile);
     }, []);
 
     const register = useCallback(async (data: RegisterPost) => {
-        await registerUser(data);          // stocke déjà le token
+        await registerUser(data);
         const profile = await getCurrentUser();
         setUser(profile);
     }, []);

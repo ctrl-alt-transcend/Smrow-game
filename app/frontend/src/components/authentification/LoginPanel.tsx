@@ -12,12 +12,15 @@ import {
 
 import { useForm } from '@mantine/form';
 import { upperFirst, useToggle } from '@mantine/hooks';
+import { useState } from 'react';
 
-import { registerUser, loginUser } from '../../services/auth.service'
+import { useAuth } from '../../hooks/useAuth';
 
 export function LoginPanel(props: PaperProps) {
 
+    const { register, login } = useAuth();
     const [type, toggle] = useToggle(['register', 'login']);
+    const [error, setError] = useState<string | null>(null);
 
     const registerForm = useForm({
         initialValues: {
@@ -25,13 +28,10 @@ export function LoginPanel(props: PaperProps) {
             name: '',
             username: '',
             password: '',
-            // terms: false,
         },
-
         validate: {
             email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email'),
             password: (val) => (val.length <= 6 ? 'Password should include at least 6 characters' : null),
-            // terms: (val) => (val === true ? null : 'You need to accept the terms and conditions'),
         },
     });
 
@@ -39,117 +39,110 @@ export function LoginPanel(props: PaperProps) {
         initialValues: {
             email: '',
             password: '',
+        },
+    });
+
+    const handleRegister = registerForm.onSubmit(async (data) => {
+        setError(null);
+        try {
+            await register({ data, email: data.email.toLocaleLowerCase() });
+        } catch {
+            setError("Couldn't create user");
         }
-    })
+    });
+
+    const handleLogin = loginForm.onSubmit(async (data) => {
+        setError(null);
+        try {
+            await login(data);
+        } catch {
+            setError("Invalid credentials");
+        }
+    });
 
     return (
-        <Paper p="xs" withBorder
-        {...props}>
+        <Paper p="xs" withBorder {...props}>
             <Text p="xs" size="lg" fw="500" c="Red">
                 Login to play !
             </Text>
 
-            <form onSubmit={registerForm.onSubmit(registerUser)}>
-                <Stack>
-                    {type === 'register' && (
+            {type === 'register' && (
+                <form onSubmit={handleRegister}>
+                    <Stack>
                         <TextInput
-                        placeholder="Your name"
-                        value={registerForm.values.name}
-                        onChange={(event) => registerForm.setFieldValue('name', event.currentTarget.value)}
-                    />
-                    )}
-
-                    {type === 'register' && (
-                        <TextInput
-                        placeholder='Your username'
-                        value={registerForm.values.username}
-                        onChange={(event) => registerForm.setFieldValue('username', event.currentTarget.value)}
-                    />
-                    )}
-
-                    {type === 'register' && (
-                        <TextInput
-                        required
-                        placeholder="Your email"
-                        value={registerForm.values.email.toLowerCase()}
-                        onChange={(event) => registerForm.setFieldValue('email', event.currentTarget.value)}
-                        error={registerForm.errors.email && 'Invalid email'}
-                    />
-                    )}
-
-                    {type === 'register' && (
-                        <PasswordInput
-                        required
-                        placeholder="Your password"
-                        value={registerForm.values.password}
-                        onChange={(event) => registerForm.setFieldValue('password', event.currentTarget.value)}
-                        error={registerForm.errors.password && 'Password should include at least 6 characters'}
-                    />
-                    )}
-
-                    {/* {type === 'register' && (
-                        <Checkbox
-                            label="I accept terms and conditions"
-                            checked={registerForm.values.terms}
-                            onChange={(event) => form.setFieldValue('terms', event.currentTarget.checked)}
+                            placeholder="Your name"
+                            value={registerForm.values.name}
+                            onChange={(event) => registerForm.setFieldValue('name', event.currentTarget.value)}
                         />
-                    )} */}
-                </Stack>
+                        <TextInput
+                            placeholder='Your username'
+                            value={registerForm.values.username}
+                            onChange={(event) => registerForm.setFieldValue('username', event.currentTarget.value)}
+                        />
+                        <TextInput
+                            required
+                            placeholder="Your email"
+                            value={registerForm.values.email}
+                            onChange={(event) => registerForm.setFieldValue('email', event.currentTarget.value)}
+                            error={registerForm.errors.email && 'Invalid email'}
+                        />
+                        <PasswordInput
+                            required
+                            placeholder="Your password"
+                            value={registerForm.values.password}
+                            onChange={(event) => registerForm.setFieldValue('password', event.currentTarget.value)}
+                            error={registerForm.errors.password && 'Password should include at least 6 characters'}
+                        />
+                    </Stack>
 
-                {type === 'register' && (
                     <Group justify="space-between" mt="xl">
-                    <Button type="submit">
-                        {upperFirst(type)}
-                    </Button>
-                </Group>
-                )}
+                        <Button type="submit">{upperFirst(type)}</Button>
+                    </Group>
+                </form>
+            )}
 
-            </form>
+            {type === 'login' && (
+                <form onSubmit={handleLogin}>
+                    <Stack>
+                        <TextInput
+                            required
+                            placeholder="Your email"
+                            value={loginForm.values.email}
+                            onChange={(event) => loginForm.setFieldValue('email', event.currentTarget.value)}
+                            error={loginForm.errors.email && 'Invalid email'}
+                        />
+                        <PasswordInput
+                            required
+                            placeholder="Your password"
+                            value={loginForm.values.password}
+                            onChange={(event) => loginForm.setFieldValue('password', event.currentTarget.value)}
+                        />
+                    </Stack>
 
-            <form onSubmit={loginForm.onSubmit(loginUser)}>
-                {type === 'login' && (
-                    <TextInput
-                        required
-                        placeholder="Your email"
-                        value={loginForm.values.email.toLowerCase()}
-                        onChange={(event) => loginForm.setFieldValue('email', event.currentTarget.value)}
-                        error={loginForm.errors.email && 'Invalid email'}
-                    />
-                )}
-
-                {type === 'login' && (
-                    <PasswordInput
-                        required
-                        placeholder="Your password"
-                        value={loginForm.values.password}
-                        onChange={(event) => loginForm.setFieldValue('password', event.currentTarget.value)}
-                        error={loginForm.errors.password && 'Password should include at least 6 characters'}
-                    />
-                )}
-
-                { type === 'login' && (
                     <Group justify="space-between" mt="xl">
-                    <Button type="submit">
-                        {upperFirst(type)}
-                    </Button>
-                </Group>
-                )}
-            </form>
+                        <Button type="submit">{upperFirst(type)}</Button>
+                    </Group>
+                </form>
+            )}
 
-<Anchor
-                    component="button"
-                    type="button"
-                    c="bright"
-                    opacity={0.85}
-                    onClick={() => toggle()}
-                    size="xs"
-                    >
+            {error && (
+                <Text c="red" size="sm" mt="xs">
+                    {error}
+                </Text>
+            )}
+
+            <Anchor
+                component="button"
+                type="button"
+                c="bright"
+                opacity={0.85}
+                onClick={() => toggle()}
+                size="xs"
+            >
                 {type === 'register'
                     ? 'Already have an account? Login'
                     : "Don't have an account? Register"}
-                </Anchor>
-
-            <form onReset={registerForm.onReset}></form>
+            </Anchor>
         </Paper>
-    )
+    );
 }
