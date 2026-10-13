@@ -1,8 +1,8 @@
 import { createContext } from "react";
-import type { LoginResponse, LoginPost, RegisterPost } from "../../../shared/types";
+import type { LoginPost, RegisterPost, UserPublic } from "../../../shared/types";
 
 export interface AuthContextValue {
-    user: LoginResponse | null;
+    user: UserPublic | null;
     loading: boolean;
     login: (data: LoginPost) => Promise<void>;
     register: (data: RegisterPost) => Promise<void>;
