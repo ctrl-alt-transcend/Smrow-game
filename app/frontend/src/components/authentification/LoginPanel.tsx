@@ -45,7 +45,7 @@ export function LoginPanel(props: PaperProps) {
     const handleRegister = registerForm.onSubmit(async (data) => {
         setError(null);
         try {
-            await register({ data, email: data.email.toLocaleLowerCase() });
+            await register(data);
         } catch {
             setError("Couldn't create user");
         }
