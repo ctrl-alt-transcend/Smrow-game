@@ -46,8 +46,8 @@ export function LoginPanel(props: PaperProps) {
         setError(null);
         try {
             await register(data);
-        } catch {
-            setError("Couldn't create user");
+        } catch (errorMessage: any) {
+            setError(errorMessage);
         }
     });
 

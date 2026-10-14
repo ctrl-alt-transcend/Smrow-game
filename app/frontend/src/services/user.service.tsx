@@ -1,4 +1,4 @@
-import axios, { type AxiosResponse } from 'axios';
+import axios from 'axios';
 import type { UserPublic } from "../../shared/types";
 
 export const getCurrentUser = async (): Promise<UserPublic> => {
