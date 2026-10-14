@@ -1,5 +1,4 @@
-import { Card, Image, Text, Badge, Stack, Box, Divider } from '@mantine/core'
-
+import { Card, Image, Text, Badge, Box  } from '@mantine/core'
 
 interface cardProps {
 	name: string;

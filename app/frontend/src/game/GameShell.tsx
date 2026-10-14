@@ -1,4 +1,4 @@
-import { AppShell, Burger, CardSection, Container, Group, SimpleGrid } from '@mantine/core';
+import { AppShell, Burger, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import GameBoard from './components/gameboard/GameBoard.tsx';
 import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
