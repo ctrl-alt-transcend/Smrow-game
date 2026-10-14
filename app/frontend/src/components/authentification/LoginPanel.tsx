@@ -18,7 +18,7 @@ import { useAuth } from '../../hooks/useAuth';
 
 export function LoginPanel(props: PaperProps) {
 
-    const { register, login } = useAuth();
+    const { register, login, user, logout, loading } = useAuth();
     const [type, toggle] = useToggle(['register', 'login']);
     const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +60,44 @@ export function LoginPanel(props: PaperProps) {
         }
     });
 
+    // Logged state
+    if (loading) {
+        return (
+            <Paper p="xs" withBorder {...props}>
+                <Text p="xs" c="dimmed">Loading...</Text>
+            </Paper>
+        )
+    }
+
+    if (user) {
+        return (
+            <Paper p="xs" withBorder {...props}>
+                <Text p="xs" size="lg" fw="500" c="Red">
+                    Welcome, {user.name} !
+                </Text>
+
+                <Stack gap="xs" p="xs">
+                    <Text size="sm">
+                        <b>Name:</b> {user.name}
+                    </Text>
+                    <Text size="sm">
+                        <b>Email:</b> {user.email}
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                        <b>ID:</b> {user.id}
+                    </Text>
+                </Stack>
+
+                <Group justify="space-between" mt="xl" p="xs">
+                    <Button variant="light" color="red" onClick={logout}>
+                        Logout
+                    </Button>
+                </Group>
+            </Paper>
+        );
+    }
+
+    
     return (
         <Paper p="xs" withBorder {...props}>
             <Text p="xs" size="lg" fw="500" c="Red">
