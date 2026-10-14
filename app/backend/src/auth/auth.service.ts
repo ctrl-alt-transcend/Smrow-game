@@ -13,6 +13,7 @@ export class AuthService {
   ) {}
 
   async signUp(recvData: CreateUserDto): Promise<RegisterResponse> {
+    console.log("signUp: ", recvData);
     recvData.password = await this.hashPassword(recvData.password);
     const user = await this.userService.create(recvData);
 
