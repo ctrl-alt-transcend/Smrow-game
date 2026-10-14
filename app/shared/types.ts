@@ -26,10 +26,9 @@ export type LoginResponse = {
     access_token: string;
 }
 
-
 // Payload
 
 export interface JwtPayload {
-    sub: number;
+    sub: string;
     username: string;
 }

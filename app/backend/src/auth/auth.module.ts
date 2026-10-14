@@ -13,10 +13,12 @@ import { jwtConstants } from './auth.constants';
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '1h' },
     }),
+    
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
 })
+
 export class AuthModule {}
