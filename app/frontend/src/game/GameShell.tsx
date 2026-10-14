@@ -1,9 +1,11 @@
-import { AppShell, Burger, Group } from '@mantine/core';
+import { AppShell, Burger, CardSection, Container, Group, SimpleGrid } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import GameBoard from './components/gameboard/GameBoard.tsx';
 import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
 import { classicLayout } from './types/gameboard.types.tsx';
 import { SelectionInfo } from './components/ui/SelectionInfo.tsx';
+import { CardModel } from './components/cards/catan-card.tsx';
+import { playerResources } from './components/cards/mock-vals.tsx';
 
 export default function FullLayout() {
   const [opened, { toggle }] = useDisclosure();
@@ -32,6 +34,17 @@ export default function FullLayout() {
           <AppShell.Section>
             <GameBoard {...GameBoardProps} />
           </AppShell.Section>
+        </Group>
+        <Group gap="sm" wrap="nowrap" justify="flex-start" style={{ overflowX: 'auto', paddingBottom: '16px', minWidth: 'max-content'}}>
+                {playerResources.map((resource) => (
+                  < CardModel
+                  key={resource.id}
+                  name={resource.name}
+                  imageUrl={resource.imageUrl}
+                  count={resource.count}
+                  color={resource.color}
+                  />
+                ))}
         </Group>
       </AppShell.Main>
       <AppShell.Aside p="md">

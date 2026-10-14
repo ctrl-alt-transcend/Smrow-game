@@ -22,7 +22,8 @@ export const createUser = async (data: RegisterPost): Promise<RegisterResponse> 
         localStorage.setItem("access_token", response.data.access_token);
         return response.data;
     } catch (error: any) {
-        console.error("Couldn't create user:", error.message);
+        console.error(error.response.data);
+        console.error("Couldn't create user:", error.response.data.message, error.response.data);
         throw error;
     }
 };
@@ -35,6 +36,7 @@ export const loginPost = async (data: LoginPost): Promise<LoginResponse> => {
         return response.data;
 
     } catch (error: any) {
+        console.error(error.response.data);
         console.error("You are dumb", error.message);
         throw error;
     }
