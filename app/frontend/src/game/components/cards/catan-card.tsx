@@ -1,4 +1,5 @@
 import { Card, Image, Text, Badge, Box  } from '@mantine/core'
+import { useState } from 'react';
 
 interface cardProps {
 	name: string;
@@ -8,8 +9,17 @@ interface cardProps {
 }
 
 export function CardModel({name, imageUrl, count, color }: cardProps) {
-
+	//const [flipped, setFlipped] = useState(false);
 	return (
+		//<Box
+		//	onClick={() ==> setFlipped(!flipped)}
+		//	style={{
+		//		width: 180,
+		//		height: 240,
+		//		perspective: '1000px',
+		//		cursor: 'pointer',
+		//	}}
+		//>
 		<Card shadow="md" padding="md" radius="lg" withBorder w={180} h={240}
 				style={{width: '100%', margin: '0 auto ', position:'relative', overflow: 'hidden', display: 'flex-start', flexDirection: 'column', flexShrink: 0}}
 		>
@@ -50,5 +60,6 @@ export function CardModel({name, imageUrl, count, color }: cardProps) {
 				</Badge>
 				</Box>
 		</Card>
+		//</Box>
 	);
 }
