@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host '0.0.0.0' ",
+    "dev": "vite --host '0.0.0.0' --config config/vite.config.ts",
     "build": "tsc -b config/tsconfig.json && vite build",
     "clean": "rm -rf dist node_modules/.tmp",
     "lint": "oxlint",
