@@ -40,9 +40,7 @@ export class AuthService {
 
       return result;
     } catch (error: any) {
-      if (error.code === 'P2002')
         throw new ConflictException('Email already used');
-      throw error;
     }
   }
 
