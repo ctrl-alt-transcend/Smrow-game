@@ -1,10 +1,11 @@
-import type {
-  Vertex,
-  Edge,
-  TileData,
-  RoadData,
-  SettlementData,
-  GameBoardData
+import {
+  type Vertex,
+  type Edge,
+  type TileData,
+  type RoadData,
+  type SettlementData,
+  type GameBoardData,
+  Faction
 } from '../types/gameboard.types';
 import { getHexCorners, getHexEdges, HEX_SIZE } from './hexCalculation';
 
@@ -17,9 +18,6 @@ export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
     });
   });
 
-  const settlements: SettlementData[] = Array.from(allVertices.values())
-    .map(v => ({ id: v.id, vertex: v, faction: null }));
-
   const allEdges = new Map<string, Edge>();
   tiles.forEach(tile => {
     getHexEdges(tile.q, tile.r, HEX_SIZE).forEach(e => {
@@ -27,14 +25,22 @@ export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
     });
   });
 
+ const settlements: SettlementData[] = Array.from(allVertices.values()) .map(v => ({
+    id: v.id,
+    vertex: v,
+    faction: Faction.UNOCCUPIED,
+    hasOwner: false
+  }));
+
   const roads: RoadData[] = Array.from(allEdges.values()).map(e => ({
     id: e.id,
     edge: e,
-    faction: null
+    faction: Faction.UNOCCUPIED,
+    hasOwner: false
   }));
 
   // SVG calculation
-  const margin = 100;
+  const margin = 50;
   const bounds = Array.from(allVertices.values()).reduce((acc, v) => ({
     minX: Math.min(acc.minX, v.x),
     maxX: Math.max(acc.maxX, v.x),
@@ -48,6 +54,7 @@ export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
   const offsetY = bounds.minY - margin;
 
   return {
+    layout: tiles,
     vertices: Array.from(allVertices.values()),
     edges: Array.from(allEdges.values()),
     settlements,
