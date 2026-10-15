@@ -10,8 +10,8 @@ export function DiceRoller() {
   };
 
   return (
-    <Box style={{ flex: 1, minWidth: 200, alignContent: "center" }}>
-      <Card withBorder radius="md" shadow="sm" h={200}>
+    <Box style={{ flex: 1, minWidth: 220, alignContent: "center" }}>
+      <Card withBorder radius="md" shadow="sm" h={220}>
         <Stack gap="xs" align="center" justify='center'>
           <Title order={4}>Dice box</Title>
             <Dice onRoll={handleRoll} size={80}/>

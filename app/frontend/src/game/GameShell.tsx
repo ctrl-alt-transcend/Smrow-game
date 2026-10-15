@@ -5,6 +5,7 @@ import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
 import { classicLayout } from './types/gameboard.types.tsx';
 import { TileSelection } from './components/ui/TileSelection.tsx';
 import { DiceRoller } from './components/ui/DiceRoller.tsx';
+import GameMasterLogs from './components/ui/GameMasterLogs.tsx';
 import GameBoardProvider from './contexts/GameBoardContext.tsx';
 
 export default function FullLayout() {
@@ -15,7 +16,7 @@ export default function FullLayout() {
     <GameBoardProvider layout={classicLayout} >
       <AppShell
         header={{ height: 60 }}
-        footer={{ height: 60 }}
+        footer={{ height: 100 }}
         navbar={{ width: 300, breakpoint: 'xs', collapsed: { desktop: !opened, mobile: !opened } }}
         aside={{ width: 300, breakpoint: 'xl', collapsed: { desktop: false, mobile: true } }}
         padding="xs"
@@ -40,8 +41,8 @@ export default function FullLayout() {
         <AppShell.Aside p="md">
           Aside
         </AppShell.Aside>
-        <AppShell.Footer p="md">
-          Footer
+        <AppShell.Footer p="xs">
+          <GameMasterLogs/>
         </AppShell.Footer>
       </AppShell>
     </GameBoardProvider>

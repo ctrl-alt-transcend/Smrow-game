@@ -68,8 +68,8 @@ export const TileSelection: React.FC<TileSelectionProps> = ({ selected }) => {
   const items = useSelectionDisplay(selected);
 
   return (
-    <Box style={{ flex: 1, minWidth: 200, alignContent: "center" }}>
-      <Card withBorder radius="md" shadow="sm" h={200}>
+    <Box style={{ flex: 1, minWidth: 220, alignContent: "center" }}>
+      <Card withBorder radius="md" shadow="sm" h={220}>
         <Stack gap="xs" justify='center' align='center'>
           <Title order={4}>Selection</Title>
             <Group justify='left' gap={'xs'}>
