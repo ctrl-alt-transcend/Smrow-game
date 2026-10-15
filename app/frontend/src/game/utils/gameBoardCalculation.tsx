@@ -54,6 +54,7 @@ export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
   const offsetY = bounds.minY - margin;
 
   return {
+    layout: tiles,
     vertices: Array.from(allVertices.values()),
     edges: Array.from(allEdges.values()),
     settlements,

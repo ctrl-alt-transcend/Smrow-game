@@ -28,6 +28,11 @@ down:
 lint:
 	cd ./app/frontend && npm run lint && cd ../..
 
+type:
+	cd ./app/frontend && npm run type-check && cd ../..
+
+prepush: lint type
+
 fclean: down
 	docker compose -f $(DOCKER_COMPOSE_FILE) down --rmi all --volumes --remove-orphans
 

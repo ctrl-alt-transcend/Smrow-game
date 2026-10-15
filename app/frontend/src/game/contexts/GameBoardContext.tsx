@@ -6,7 +6,7 @@ import {
   useCallback,
   useMemo,
 } from 'react';
-import {
+import type {
   GameBoardData,
   RoadData,
   SettlementData,
