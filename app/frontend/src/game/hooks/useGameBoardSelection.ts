@@ -1,14 +1,14 @@
 import { useState, useCallback } from 'react';
-import type { TileData, SettlementData, RoadData, GameBoardState } from '../types/gameboard.types';
+import type { TileData, SettlementData, RoadData, GameBoardSelection } from '../types/gameboard.types';
 
-const resetSelection = (): GameBoardState => ({
+const resetSelection = (): GameBoardSelection => ({
   selectedTile: null,
   selectedSettlement: null,
   selectedRoad: null
 });
 
 export const useGameBoardSelection = () => {
-  const [selected, setSelected] = useState<GameBoardState>(resetSelection());
+  const [selected, setSelected] = useState<GameBoardSelection>(resetSelection());
 
   const handleTileClick = useCallback((tile: TileData | null) => {
     setSelected(prev => {
