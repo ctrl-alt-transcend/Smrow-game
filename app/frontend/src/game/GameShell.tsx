@@ -5,11 +5,11 @@ import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
 import { classicLayout } from './types/gameboard.types.tsx';
 import { TileSelection } from './components/ui/TileSelection.tsx';
 import { DiceRoller } from './components/ui/DiceRoller.tsx';
-import GameBoardProvider, { useGameBoard } from './contexts/GameBoardContext.tsx';
+import GameBoardProvider from './contexts/GameBoardContext.tsx';
 
 export default function FullLayout() {
   const [opened, { toggle }] = useDisclosure();
-  const GameBoardProps = useGameBoardFactory();
+  const GameBoardProps = useGameBoardFactory(classicLayout);
 
   return (
     <GameBoardProvider layout={classicLayout} >

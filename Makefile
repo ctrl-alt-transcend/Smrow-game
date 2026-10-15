@@ -25,6 +25,9 @@ watch: up
 down:
 	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
+lint:
+	cd ./app/frontend && npm run lint && cd ../..
+
 fclean: down
 	docker compose -f $(DOCKER_COMPOSE_FILE) down --rmi all --volumes --remove-orphans
 

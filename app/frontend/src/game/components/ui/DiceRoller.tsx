@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Text, Group, Stack, Title, Box, Center } from '@mantine/core';
+import { Card, Text, Stack, Title, Box } from '@mantine/core';
 import Dice from 'modern-react-dice-roll';
 
 export function DiceRoller() {

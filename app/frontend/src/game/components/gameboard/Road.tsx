@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Faction, RoadProps } from '../../types/gameboard.types';
+import { RoadProps } from '../../types/gameboard.types';
 import { useHover } from '../../hooks/useGameBoardHover';
 import { getTileFillColor } from '../../utils/tileRendering';
 

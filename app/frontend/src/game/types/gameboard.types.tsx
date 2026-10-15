@@ -137,6 +137,8 @@ export interface SettlementHover {
 export type HoverEntity = TileHover | RoadHover | SettlementHover | null;
 
 export interface GameBoardProps {
+  layout: TileData[];
+
   //useGameBoardSelection
   selected: GameBoardSelection;
   handleTileClick: (tile: TileData | null) => void;

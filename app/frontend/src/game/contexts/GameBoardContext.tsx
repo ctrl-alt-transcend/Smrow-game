@@ -5,7 +5,6 @@ import {
   useContext,
   useCallback,
   useMemo,
-  useEffect
 } from 'react';
 import {
   GameBoardData,
@@ -17,7 +16,6 @@ import {
 
 type GameBoardContextType = {
   gameboard: GameBoardData;
-  layout: TileData[];
   updateGameboard: (newGameboard: GameBoardData) => void;
   updateRoadFaction: (road: RoadData, faction: Faction) => void;
   updateSettlementFaction: (settlement: SettlementData, faction: Faction) => void;
@@ -29,21 +27,10 @@ const GameBoardProvider: React.FC<{ children: React.ReactNode; layout: TileData[
   children,
   layout
 }) => {
-  const [currentLayout, setCurrentLayout] = useState(layout);
   const [gameboard, setGameboard] = useState<GameBoardData>(() => calculateGameBoardData(layout));
-
-  useEffect(() => {
-    setCurrentLayout(layout);
-    setGameboard(calculateGameBoardData(layout));
-  }, [layout]);
 
   const updateGameboard = useCallback((newGameboard: GameBoardData) => {
     setGameboard(newGameboard);
-  }, []);
-
-  const updateLayout = useCallback((newLayout: TileData[]) => {
-    setCurrentLayout(newLayout);
-    setGameboard(calculateGameBoardData(newLayout));
   }, []);
 
   const updateRoadFaction = useCallback((newRoad: RoadData, faction: Faction) => {
@@ -66,12 +53,15 @@ const GameBoardProvider: React.FC<{ children: React.ReactNode; layout: TileData[
 
   const value = useMemo(() => ({
     gameboard,
-    layout,
     updateGameboard,
-    updateLayout,
     updateRoadFaction,
     updateSettlementFaction
-  }), [gameboard, updateGameboard, updateRoadFaction, updateSettlementFaction]);
+  }), [
+    gameboard,
+    updateGameboard,
+    updateRoadFaction,
+    updateSettlementFaction
+  ]);
 
   return (
     <GameBoardContext.Provider value={value}>
