@@ -3,22 +3,26 @@ import { modals } from '@mantine/modals';
 import { useSelectionDisplay } from '../../hooks/useSelectionDisplay';
 import type { GameBoardSelection } from '../../types/gameboard.types';
 import { Faction } from '../../types/gameboard.types';
+import { useGameBoard } from '../../contexts/GameBoardContext';
 
 interface BuildSelectionButtonProps {
   selected: GameBoardSelection;
-  faction: Faction | null;
+  faction: Faction;
 }
 
 const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   selected,
   faction
 }) => {
+  const { updateRoadFaction, updateSettlementFaction } = useGameBoard();
+
   const handleConfirm = () => {
+    const newFaction = faction ?? Faction.DEFAULT;
     if (selected.selectedRoad) {
-      selected.selectedRoad.faction = faction ?? Faction.DEFAULT;
+      updateRoadFaction(selected.selectedRoad, newFaction);
     }
     if (selected.selectedSettlement) {
-      selected.selectedSettlement.faction = faction ?? Faction.DEFAULT;
+      updateSettlementFaction(selected.selectedSettlement, newFaction);
     }
   };
 
@@ -77,7 +81,7 @@ export const TileSelection: React.FC<TileSelectionProps> = ({ selected }) => {
                 <Text c="dimmed">No selection</Text>
               )}
             </Group>
-          <BuildSelectionButton selected={selected} faction={null} />
+          <BuildSelectionButton selected={selected} faction={Faction.DEFAULT} />
         </Stack>
       </Card>
     </Box>

@@ -30,6 +30,7 @@ export const Faction = {
   ROUGES_FIACS: 'Rouges Fiacs',
   UREE_JAUNE: 'Uree Jaune',
   DEFAULT: 'Kikouneurs (default)',
+  UNOCCUPIED: 'unoccupied ...'
 } as const;
 
 export type Faction = (typeof Faction)[keyof typeof Faction];
@@ -39,7 +40,8 @@ export const FACTION_COLORS: Record<Faction, string> = {
   [Faction.BOURSES_BLEUES]: '#19aad5',
   [Faction.ROUGES_FIACS]: '#da1111',
   [Faction.UREE_JAUNE]: '#ffdd00',
-  [Faction.DEFAULT]: '#fd92e4'
+  [Faction.DEFAULT]: '#fd92e4',
+  [Faction.UNOCCUPIED]: '#e4e4e4'
 };
 
 /** @description x, y → corner's axial coordinates */
@@ -86,7 +88,7 @@ export interface TileProps extends InteractiveProps<TileData> { }
 export interface RoadData {
   id: string;
   edge: Edge;
-  faction: Faction | 'unoccupied road';
+  faction: Faction;
   hasOwner?: boolean;
 }
 export interface RoadProps extends InteractiveProps<RoadData> { }
@@ -94,12 +96,13 @@ export interface RoadProps extends InteractiveProps<RoadData> { }
 export interface SettlementData {
   id: string;
   vertex: Vertex;
-  faction: Faction | 'unoccupied settlement';
+  faction: Faction;
   hasOwner?: boolean;
 }
 export interface SettlementProps extends InteractiveProps<SettlementData> { }
 
 export interface GameBoardData {
+  layout: TileData[];
   vertices: Vertex[];
   edges: Edge[];
   settlements: SettlementData[];
@@ -134,8 +137,6 @@ export interface SettlementHover {
 export type HoverEntity = TileHover | RoadHover | SettlementHover | null;
 
 export interface GameBoardProps {
-  boardData: GameBoardData;
-
   //useGameBoardSelection
   selected: GameBoardSelection;
   handleTileClick: (tile: TileData | null) => void;

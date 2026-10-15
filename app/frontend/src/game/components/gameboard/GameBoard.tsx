@@ -1,20 +1,24 @@
-import { HexTile } from './HexTile'
-import { Road } from './RoadTile'
-import { Settlement } from './SettlementTile'
-import { classicLayout, type GameBoardProps } from '../../types/gameboard.types';
+import { HexTile } from './HexTile';
+import { Road } from './RoadTile';
+import { Settlement } from './SettlementTile';
+import { useGameBoard } from '../../contexts/GameBoardContext';
+import type { GameBoardProps } from '../../types/gameboard.types';
 
 export const GameBoard: React.FC<GameBoardProps> = ({
-    boardData: { settlements, roads, svgBounds },
-    selected,
-    handleTileClick,
-    handleRoadClick,
-    handleSettlementClick,
-    isTileHovered,
-    isRoadHovered,
-    isSettlementHovered,
-    handleTileHover,
-    handleRoadHover,
-    handleSettlementHover}) => {
+  selected,
+  handleTileClick,
+  handleRoadClick,
+  handleSettlementClick,
+  isTileHovered,
+  isRoadHovered,
+  isSettlementHovered,
+  handleTileHover,
+  handleRoadHover,
+  handleSettlementHover
+}) => {
+  const { gameboard, layout } = useGameBoard();
+  const { roads, settlements, svgBounds } = gameboard;
+
   return (
     <div style={{ width: '100%', maxWidth: svgBounds.svgWidth, margin: '0 auto' }}>
       <svg
@@ -22,7 +26,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         height={svgBounds.svgHeight}
         viewBox={`${svgBounds.offsetX} ${svgBounds.offsetY} ${svgBounds.svgWidth} ${svgBounds.svgHeight}`}
       >
-        {classicLayout.map(tile => (
+        {layout.map(tile => (
           <HexTile
             key={`tile-${tile.q}-${tile.r}`}
             data={tile}
@@ -55,6 +59,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       </svg>
     </div>
   );
-}
+};
 
 export default GameBoard;
