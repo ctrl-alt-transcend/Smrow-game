@@ -40,7 +40,8 @@ export class AuthService {
 
       return result;
     } catch (error: any) {
-        throw new ConflictException('Email already used');
+      console.log(error);
+      throw new ConflictException('Email already used');
     }
   }
 
