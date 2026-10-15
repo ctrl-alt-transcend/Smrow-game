@@ -26,6 +26,18 @@ export class UserService {
     });
   }
 
+  async findById(id: string) {
+    return this.databaseService.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+      },
+    });
+  }
+
   // include returns the relations data, if set to true
   async findAll() {
     return this.databaseService.user.findMany({

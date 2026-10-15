@@ -25,3 +25,10 @@ export type RegisterResponse = {
 export type LoginResponse = {
     access_token: string;
 }
+
+// Payload
+
+export interface JwtPayload {
+    sub: string;
+    username: string;
+}
