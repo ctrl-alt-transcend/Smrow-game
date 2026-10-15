@@ -14,11 +14,8 @@ import { JwtStrategy } from '../strategies/jwt.strategy';
       secret: process.env.JWT_SECRET!,
       signOptions: { expiresIn: '1h' },
     }),
-    
-    
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
 })
-
 export class AuthModule {}

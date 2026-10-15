@@ -4,8 +4,7 @@ import { AuthUserDto } from './dto/auth-user.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Req } from '@nestjs/common';
-import type { UserPublic } from '../../shared/types'
-
+import type { UserPublic } from '../../shared/types';
 
 @Controller('auth')
 export class AuthController {

@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bycrypt from 'bcrypt';
@@ -35,13 +39,13 @@ export class AuthService {
       };
 
       return result;
-
     } catch (error: any) {
-      if (error.code === 'P2002')  throw new ConflictException('Email already used');
-        throw error;
-    };
+      if (error.code === 'P2002')
+        throw new ConflictException('Email already used');
+      throw error;
+    }
   }
-  
+
   async getProfile(userId: string) {
     const user = await this.userService.findById(userId);
     if (!user) throw new UnauthorizedException('User not found');
