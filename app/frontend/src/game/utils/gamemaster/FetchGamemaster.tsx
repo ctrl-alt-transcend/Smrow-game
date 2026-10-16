@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from "react"
 
-function fetchGamemaster() {
-  const [data, setData] = useState(null)
+function FetchGamemaster() {
+    const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
@@ -26,6 +26,7 @@ function fetchGamemaster() {
     if (error) {
       return <p>Error fetching data: {error}</p>
     }
+    return <p> {data} </p>
 };
 
-export default fetchGamemaster;
+export default FetchGamemaster;

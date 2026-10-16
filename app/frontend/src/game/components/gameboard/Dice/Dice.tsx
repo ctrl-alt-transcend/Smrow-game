@@ -224,11 +224,11 @@ const FACE_CLASSNAMES: readonly string[] = [
 
 const GRID_CELLS: readonly number[] = Array.from({ length: 25 }, (_, i) => i);
 
-const DICE_VALUES: readonly DiceValue[] = [1, 2, 3, 4, 5, 6];
-
-function isDiceValue(input: number): input is DiceValue {
-  return (DICE_VALUES as readonly number[]).includes(input);
-}
+// useless??
+//const DICE_VALUES: readonly DiceValue[] = [1, 2, 3, 4, 5, 6];
+//function isDiceValue(input: number): input is DiceValue {
+//  return (DICE_VALUES as readonly number[]).includes(input);
+//}
 
 /* ================================================================
  * Face par défaut (les points). Mémoïsée.
