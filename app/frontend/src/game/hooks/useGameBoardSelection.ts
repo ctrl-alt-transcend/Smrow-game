@@ -1,39 +1,52 @@
-import { useState, useCallback } from 'react';
-import type { TileData, SettlementData, RoadData, GameBoardSelection } from '../types/gameboard.types';
+import { useState, useCallback } from "react";
+import type {
+  TileData,
+  SettlementData,
+  RoadData,
+  GameBoardSelection,
+} from "../types/gameboard.types";
 
 const resetSelection = (): GameBoardSelection => ({
   selectedTile: null,
   selectedSettlement: null,
-  selectedRoad: null
+  selectedRoad: null,
 });
 
 export const useGameBoardSelection = () => {
-  const [selected, setSelected] = useState<GameBoardSelection>(resetSelection());
+  const [selected, setSelected] =
+    useState<GameBoardSelection>(resetSelection());
 
   const handleTileClick = useCallback((tile: TileData | null) => {
-    setSelected(prev => {
+    setSelected((prev) => {
       if (!tile) return resetSelection();
-      const isSameTile = prev.selectedTile?.q === tile.q && prev.selectedTile?.r === tile.r;
-      return isSameTile ?
-        resetSelection() : { ...resetSelection(), selectedTile: tile };
+      const isSameTile =
+        prev.selectedTile?.q === tile.q && prev.selectedTile?.r === tile.r;
+      return isSameTile
+        ? resetSelection()
+        : { ...resetSelection(), selectedTile: tile };
     });
   }, []);
 
-  const handleSettlementClick = useCallback((settlement: SettlementData | null) => {
-    setSelected(prev => {
-      if (!settlement) return resetSelection();
-      const isSameSettlement = prev.selectedSettlement?.id === settlement.id;
-      return isSameSettlement ?
-        resetSelection() : { ...resetSelection(), selectedSettlement: settlement };
-    });
-  }, []);
+  const handleSettlementClick = useCallback(
+    (settlement: SettlementData | null) => {
+      setSelected((prev) => {
+        if (!settlement) return resetSelection();
+        const isSameSettlement = prev.selectedSettlement?.id === settlement.id;
+        return isSameSettlement
+          ? resetSelection()
+          : { ...resetSelection(), selectedSettlement: settlement };
+      });
+    },
+    [],
+  );
 
   const handleRoadClick = useCallback((road: RoadData | null) => {
-    setSelected(prev => {
+    setSelected((prev) => {
       if (!road) return resetSelection();
       const isSameRoad = prev.selectedRoad?.id === road.id;
-      return isSameRoad ?
-        resetSelection() : { ...resetSelection(), selectedRoad: road };
+      return isSameRoad
+        ? resetSelection()
+        : { ...resetSelection(), selectedRoad: road };
     });
   }, []);
 
@@ -41,5 +54,11 @@ export const useGameBoardSelection = () => {
     return resetSelection();
   }, []);
 
-  return { selected, handleTileClick, handleRoadClick, handleSettlementClick, clearSelection };
+  return {
+    selected,
+    handleTileClick,
+    handleRoadClick,
+    handleSettlementClick,
+    clearSelection,
+  };
 };
