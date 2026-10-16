@@ -3,18 +3,8 @@ name: CI-front
 on:
   push:
     branches: ["main", "develop"]
-    paths:
-      - "app/frontend/**"
-      - ".github/workflows/ci-front.yml"
   pull_request:
     branches: ["main", "develop"]
-    paths:
-      - "app/frontend/**"
-      - ".github/workflows/ci-front.yml"
-
-concurrency:
-  group: ci-front-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read
