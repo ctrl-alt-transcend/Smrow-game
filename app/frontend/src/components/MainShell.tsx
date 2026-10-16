@@ -1,6 +1,7 @@
 import GenericButton from './buttons/GenericButton';
 import CardImage from './Card';
 import { LoginPanel } from './authentification/LoginPanel';
+import MainTitle from './Titles/MainTitle'
 
 import {
   AppShell,
@@ -17,18 +18,9 @@ export default function MainShell()
       mode="static"
       header={{ height: 200 }}
       aside={{ width: 300, breakpoint: 'sm'}}
-      padding="xs"
+      m={'lg'}
+      // padding="xs"
     >
-      <BackgroundImage
-        src="https://github.com/makccr/wallpapers/blob/master/wallpapers/psychedelic/Alex%20Grey%20-%20Net%20of%20Being.jpg"
-        h={"100%"}
-        w={"100%"}
-        style={{
-          objectFit: "cover",
-          position: "absolute",
-          inset: 0
-        }}
-      />
 
       <AppShell.Header>
 
@@ -43,18 +35,15 @@ export default function MainShell()
           }}>
           <Group h="100%" px="md" justify='center'>
             <Title c={ 'Cream' }>
-              This is Da Game
+              Welcome to KATAN
             </Title>
           </Group>
         </BackgroundImage>
       </AppShell.Header>
 
       <AppShell.Main
-        // m={"xl"}
       >
-        <Title order={1} c={ 'Red' }>
-          Amazing Catan
-        </Title>
+        <MainTitle content="Welcome to Catan"/>
         <CardImage></CardImage>
         <Text>
           Cras maximus mauris a nisl maximus porta efficitur ac lacus. Donec eget sapien magna. Suspendisse a orci tempus, viverra lacus a, tempus felis. In hac habitasse platea dictumst. Etiam et sodales sapien. Integer non eleifend odio. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum aliquam justo ac suscipit consequat. Vivamus porta ac dolor eget tincidunt. Vestibulum mollis eros lorem, a sodales arcu dapibus id. Duis imperdiet enim vitae augue venenatis, a rhoncus magna egestas. Nam id eleifend ligula, in iaculis velit.

@@ -80,7 +80,7 @@ export const theme = createTheme({
     white: '#f9f8f0',
     black: '#121007',
 
-    fontFamily: 'Times',
+    fontFamily: 'Times New Roman',
     
     fontSizes: {
         xs: '0.75rem',
@@ -129,6 +129,16 @@ export const theme = createTheme({
     },
 
     components: {
+        AppShell: {
+            styles: {
+                root: {
+                    // border: 'solid 3px red',
+                },
+                border: 'solid 3px red',
+                main: {
+                }
+            }
+        },
         Paper: {
             styles: {
                 root: {

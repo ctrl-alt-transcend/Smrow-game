@@ -8,7 +8,8 @@ export default function CardImage () {
         withBorder
         orientation="horizontal"
         >
-            <Card.Section p={'lg'} px='xs'>
+            <Card.Section
+                    p='lg'px='xs'>
                 <Text c={ 'Grey' }>
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Magnam voluptatum corporis minus sequi soluta est, odio delectus
