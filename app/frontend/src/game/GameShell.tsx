@@ -5,7 +5,7 @@ import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
 import { classicLayout } from './types/gameboard.types.tsx';
 import { TileSelection } from './components/ui/TileSelection.tsx';
 import { DiceRoller } from './components/ui/DiceRoller.tsx';
-import GameMasterLogs from './components/ui/GameMasterLogs.tsx';
+import GameMasterLogs from './components/ui/GameMasterLogs';
 import GameBoardProvider from './contexts/GameBoardContext.tsx';
 
 export default function FullLayout() {

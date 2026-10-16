@@ -9,7 +9,7 @@ function GameMasterLogs() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:5173/gamemaster')
+        const response = await fetch('/api/gamemaster/gamemasterGreetings')
         const result = await response.json()
         setData(result)
       } catch (error) {
@@ -20,26 +20,20 @@ function GameMasterLogs() {
     }
     fetchData()
   }, [])
-
   if (loading) {
     return <p>Loading data...</p>
   }
-
   if (error) {
-    return <p>Error fetching data: {error.message}</p>
+    return <p>Error fetching data: {error}</p>
   }
 
   return (
-
     <Box style={{ flex: 1, minWidth: 80, alignContent: "center" }}>
       <Card withBorder radius="md" shadow="sm" h={80}>
         <Stack gap="xs" align="center" justify='center'>
           <Title order={6}>Game Master Logs</Title>
           <Text>
-            {data.map(item => (
-              <li key={item.id}>{item.name}</li>
-             ))}
-            {/*{'Hello'}*/}
+            { data.message }
           </Text>
         </Stack>
       </Card>
