@@ -24,9 +24,9 @@ export class GamemasterService {
     return `This action returns a #${id} gamemaster`;
   }
 
-  update(id: number, updateGamemasterDto: UpdateGamemasterDto) {
-    return `This action updates a #${id} gamemaster`;
-  }
+  //update(id: number, updateGamemasterDto: UpdateGamemasterDto) {
+  //  return `This action updates a #${id} gamemaster`;
+  //}
 
   remove(id: number) {
     return `This action removes a #${id} gamemaster`;

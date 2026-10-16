@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { GamemasterService } from './gamemaster.service';
 import { CreateGamemasterDto } from './dto/create-gamemaster.dto';
 import { UpdateGamemasterDto } from './dto/update-gamemaster.dto';
@@ -15,8 +23,7 @@ export class GamemasterController {
   @Get('gamemasterGreetings')
   getMessage() {
     //return this.gamemasterService.greetingsFromGM()
-    return { message: this.gamemasterService.greetingsFromGM()
-    };
+    return { message: this.gamemasterService.greetingsFromGM() };
   }
 
   @Get()
@@ -30,7 +37,10 @@ export class GamemasterController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGamemasterDto: UpdateGamemasterDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateGamemasterDto: UpdateGamemasterDto,
+  ) {
     return this.gamemasterService.update(+id, updateGamemasterDto);
   }
 

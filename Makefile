@@ -25,13 +25,21 @@ watch: up
 down:
 	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
-lint:
+lint-front:
 	cd ./app/frontend && npm run lint && cd ../..
 
-type:
+type-front:
 	cd ./app/frontend && npm run type-check && cd ../..
 
-prepush: lint type
+prepush-front: lint-front type-front
+
+lint-back:
+	cd ./app/backend && npm run lint && cd ../..
+
+type-back:
+	cd ./app/backend && npm run type-check && cd ../..
+
+prepush-back: lint-back type-back
 
 fclean: down
 	docker compose -f $(DOCKER_COMPOSE_FILE) down --rmi all --volumes --remove-orphans
