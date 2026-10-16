@@ -68,8 +68,8 @@ services:
       - .env
     #using the .env file directly in the compose to set user
     environment:
-      - POSTGRES_PASSWORD=/run/secrets/db_password.txt
-      - POSTGRES_USER=/run/secrets/db_user.txt
+      - POSTGRES_PASSWORD=/run/secrets/db_password
+      - POSTGRES_USER=/run/secrets/db_user
     volumes:
       - postgres-data:/var/lib/postgresql/
     ports:
@@ -78,7 +78,7 @@ services:
       - ft-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -U $$(cat run/secrets/db_user) -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -135,6 +135,6 @@ networks:
 
 secrets:
   db_password:
-    file: ./secrets/db_password.txt
+    file: secrets/db_password.txt
   db_user:
-    file: ./secrets/db_user.txt
+    file: secrets/db_user.txt
