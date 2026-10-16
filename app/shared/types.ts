@@ -25,3 +25,6 @@ export type RegisterResponse = {
 export type LoginResponse = {
     access_token: string;
 }
+
+// Test de sincronización shared
+// COMPOSE_WATCH_TESTs
