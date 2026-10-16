@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host '0.0.0.0' ",
+    "format": "prettier --write \"src/**/*.ts\"",
     "build": "tsc -b config/tsconfig.json && vite build",
     "clean": "rm -rf dist node_modules/.tmp",
     "lint": "oxlint",
@@ -40,6 +41,7 @@
     "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "modern-react-dice-roll": "^1.0.0",
+    "prettier": "^3.9.10",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hexgrid": "^2.0.1",
