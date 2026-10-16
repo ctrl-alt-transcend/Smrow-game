@@ -26,3 +26,5 @@ export default defineConfig({
     setupFiles: './tests/setup.ts',
   },
 })
+
+console.log('Vite config loaded successfully.')
