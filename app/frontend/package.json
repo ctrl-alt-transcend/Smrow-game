@@ -8,7 +8,7 @@
     "build": "tsc -b config/tsconfig.json && vite build",
     "clean": "rm -rf dist node_modules/.tmp",
     "lint": "oxlint",
-    "type-check": "tsc -b config/tsconfig.json",
+    "type-check": "tsc -b config/tsconfig.json --noEmit",
     "test": "vitest run --config config/vite.config.ts",
     "test:watch": "vitetest",
     "preview": "vite preview"

@@ -23,8 +23,10 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "../../frontend/**/*",
-    "../../shared/**/*"
+    "../src/**/*",
+    "../public/**/*",
+    "../*",
+    "../../../shared/types"
   ],
   "types": ["vite/client", "vitest/globals"]
 }
