@@ -22,3 +22,4 @@ export default defineConfig({
   },
 })
 
+console.log('Vite config loaded successfully.')
