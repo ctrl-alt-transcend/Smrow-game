@@ -26,5 +26,9 @@ export type LoginResponse = {
     access_token: string;
 }
 
-// Test de sincronización shared
-// COMPOSE_WATCH_TESTs
+// Payload
+
+export interface JwtPayload {
+    sub: string;
+    username: string;
+}

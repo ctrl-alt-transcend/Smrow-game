@@ -1,4 +1,4 @@
-import { type RoadProps } from '../../types/gameboard.types';
+import type { RoadProps } from '../../types/gameboard.types';
 import { useHover } from '../../hooks/useGameBoardHover';
 import { getTileFillColor } from '../../utils/tileRendering';
 

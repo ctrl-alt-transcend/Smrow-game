@@ -8,10 +8,14 @@ const sharedPath = fileURLToPath(
 )
 
 export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@shared': sharedPath,
+  plugins: [react()]
+  ,server: {
+    proxy: {
+      '/api': {
+        target: 'http://nestjs:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
     },
   },
   test: {
