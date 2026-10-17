@@ -7,6 +7,7 @@ import { TileSelection } from './components/ui/TileSelection.tsx';
 import { DiceRoller } from './components/ui/DiceRoller.tsx';
 import GameMasterLogs from './components/ui/GameMasterLogs';
 import GameBoardProvider from './contexts/GameBoardContext.tsx';
+import { PlayerCard } from './components/ui/PlayerCard.tsx';
 
 export default function FullLayout() {
   const [opened, { toggle }] = useDisclosure();
@@ -40,6 +41,7 @@ export default function FullLayout() {
         </AppShell.Main>
         <AppShell.Aside p="md">
           Aside
+          <PlayerCard />
         </AppShell.Aside>
         <AppShell.Footer p="xs">
           <GameMasterLogs/>
