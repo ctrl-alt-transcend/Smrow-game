@@ -1,4 +1,3 @@
-
 import { Grid, Title } from '@mantine/core';
 import GameActions from '../components/home/GameActions';
 import GameList from '../components/home/GameList';
@@ -19,7 +18,6 @@ export default function HomePage(){
      		<GameList/>
   		</Grid.Col>
 	<Grid.Col span={{ base: 12, md: 7 }}>
-
 	<Chat/>
   		</Grid.Col>
 	</Grid>
