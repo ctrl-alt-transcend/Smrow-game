@@ -42,7 +42,7 @@ export default function FullLayout() {
           Aside
         </AppShell.Aside>
         <AppShell.Footer p="xs">
-          <GameMasterLogs/>
+          <GameMasterLogs controller='api/gamemaster/gamemasterGreetings' />
         </AppShell.Footer>
       </AppShell>
     </GameBoardProvider>
