@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { CreateGamemasterDto } from './dto/create-gamemaster.dto';
-import { UpdateGamemasterDto } from './dto/update-gamemaster.dto';
+//import { CreateGamemasterDto } from './dto/create-gamemaster.dto';
+//import { UpdateGamemasterDto } from './dto/update-gamemaster.dto';
 
 @Injectable()
 export class GamemasterService {
-  create(createGamemasterDto: CreateGamemasterDto) {
-    return 'This action adds a new gamemaster';
-  }
+  //create(createGamemasterDto: CreateGamemasterDto) {
+  //  return 'This action adds a new gamemaster';
+  //}
 
   greetingsFromGM(): string {
     return 'Hello, I am the Game Master';
   }
 
-  itsYourTurn() {
+  itsYourTurn(): string {
     return 'Now it is your turn';
   }
 
