@@ -20,9 +20,34 @@ export class GamemasterController {
   //  return this.gamemasterService.create(createGamemasterDto);
   //}
 
-  @Get('gamemasterGreetings')
+  @Get('greetings')
   getMessage() {
     return { message: this.gamemasterService.greetingsFromGM() };
+  }
+
+  @Get('road')
+  getRoad() {
+    return { message: this.gamemasterService.builtRoad() };
+  }
+
+  @Get('settlement')
+  getSettlement() {
+    return { message: this.gamemasterService.builtSettlement() };
+  }
+
+  @Get('turn')
+  getTurn() {
+    return { message: this.gamemasterService.yourTurn() };
+  }
+
+  @Get('dice')
+  getDice() {
+    return { message: this.gamemasterService.rolledDice() };
+  }
+
+  @Get('something')
+  getSomething() {
+    return { message: this.gamemasterService.builtSomething() };
   }
 
   @Get()

@@ -4,6 +4,7 @@ import { useSelectionDisplay } from '../../hooks/useSelectionDisplay';
 import type { GameBoardSelection } from '../../types/gameboard.types';
 import { Faction } from '../../types/gameboard.types';
 import { useGameBoard } from '../../contexts/GameBoardContext';
+import { useGamemasterLog } from '../../hooks/useGamemasterLog';
 
 interface BuildSelectionButtonProps {
   selected: GameBoardSelection;
@@ -14,17 +15,21 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   selected,
   faction
 }) => {
-  const { updateRoadFaction, updateSettlementFaction } = useGameBoard();
+  const { updateRoadFaction, updateSettlementFaction, updateGamemasterLog } = useGameBoard();
+  const { refetch } = useGamemasterLog('/api/gamemaster/something');
 
-  const handleConfirm = () => {
-    const newFaction = faction ?? Faction.DEFAULT;
-    if (selected.selectedRoad) {
-      updateRoadFaction(selected.selectedRoad, newFaction);
-    }
-    if (selected.selectedSettlement) {
-      updateSettlementFaction(selected.selectedSettlement, newFaction);
-    }
-  };
+const handleConfirm = async () => {
+  const newFaction = faction ?? Faction.DEFAULT;
+  if (selected.selectedRoad) {
+    updateRoadFaction(selected.selectedRoad, newFaction);
+  }
+  if (selected.selectedSettlement) {
+    updateSettlementFaction(selected.selectedSettlement, newFaction);
+  }
+
+  const log = await refetch();
+  updateGamemasterLog(log ?? '...');
+};
 
   const openModal = () => {
     if (!selected.selectedRoad && !selected.selectedSettlement) {

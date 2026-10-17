@@ -9,11 +9,27 @@ export class GamemasterService {
   //}
 
   greetingsFromGM(): string {
-    return 'Hello, I am the Game Master';
+    return 'Hello, I am the Game Master ...';
   }
 
-  itsYourTurn(): string {
-    return 'Now it is your turn';
+  yourTurn(): string {
+    return 'Now it is your turn !';
+  }
+
+  rolledDice(): string {
+    return 'You rolled a dice !';
+  }
+
+  builtRoad(): string {
+    return 'You built a road !';
+  }
+
+  builtSettlement(): string {
+    return 'You built a settlement !';
+  }
+
+  builtSomething(): string {
+    return 'You built a something !';
   }
 
   findAll() {

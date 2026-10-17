@@ -1,18 +1,16 @@
 import { Box, Card, Text, Title, Stack } from '@mantine/core';
-import useGamemasterLogs from '../../hooks/useGamemasterLogs';
+import { useGameBoard } from '../../contexts/GameBoardContext';
 
-function GameMasterLogs({ controller }: { controller: string }) {
-  const { data, error, loading } = useGamemasterLogs(controller);
+function GameMasterLogs() {
+  const { gamemasterlog } = useGameBoard();
 
-  if (loading) return <p>Loading data...</p>;
-  if (error) return <p>Error fetching data: {error}</p>;
   return (
     <Box style={{ flex: 1, minWidth: 80, alignContent: "center" }}>
       <Card withBorder radius="md" shadow="sm" h={80}>
         <Stack gap="xs" align="center" justify='center'>
           <Title order={6}>Game Master Logs</Title>
           <Text>
-            { data }
+            { gamemasterlog }
           </Text>
         </Stack>
       </Card>
