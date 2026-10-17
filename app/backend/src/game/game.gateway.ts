@@ -17,9 +17,7 @@ import { instrument } from '@socket.io/admin-ui';
     credentials: true,
   }, //WARN: dev only
 })
-
 export class GameGateway implements OnGatewayInit {
-
   constructor(private readonly gameService: GameService) {}
 
   @WebSocketServer() server: Server;
@@ -46,10 +44,12 @@ export class GameGateway implements OnGatewayInit {
       false
     ) {
       console.log(`Game with id ${roomData.room} not found`);
-      return ;
+      return;
       //TODO: send an error and disconnect the client
     }
-    client.broadcast.to(roomData.room).emit('message', `new client joined the room ${roomData.room}`);
+    client.broadcast
+      .to(roomData.room)
+      .emit('message', `new client joined the room ${roomData.room}`);
     return { ok: true, room: roomData.room };
   }
 

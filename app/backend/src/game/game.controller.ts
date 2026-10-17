@@ -6,8 +6,7 @@ export class GameController {
   constructor(private readonly GameService: GameService) {}
 
   @Post('/create_game')
-  createGame() : string {
+  createGame(): string {
     return this.GameService.createGame();
   }
-
 }

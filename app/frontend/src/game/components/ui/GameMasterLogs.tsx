@@ -4,7 +4,6 @@ import useGamemasterLogs from '../../hooks/useGamemasterLogs';
 function GameMasterLogs({ controller }: { controller: string }) {
   const { data, error, loading } = useGamemasterLogs(controller);
 
-
   if (loading) return <p>Loading data...</p>;
   if (error) return <p>Error fetching data: {error}</p>;
   return (

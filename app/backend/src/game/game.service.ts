@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { GameState, Player, Ressources } from '../../shared/game/game.types';
+import type {
+  GameState,
+  Player,
+  Ressources,
+} from '../../shared/game/game.types';
 
 @Injectable()
 export class GameService {
@@ -13,7 +17,7 @@ export class GameService {
     return gameId;
   }
 
-  findGame(gameId: string): GameState  {
+  findGame(gameId: string): GameState {
     const game = this.games.get(gameId);
     if (!game) {
       throw new Error(`Game with id ${gameId} not found`);
@@ -25,11 +29,11 @@ export class GameService {
   addPlayerToGame(gameId: string, playerId: string): boolean {
     const game = this.findGame(gameId);
     game.players.push(this.createPlayer(playerId));
-    return (true);
+    return true;
   }
 
-  private createPlayer(playerId: string) : Player {
-    return ({
+  private createPlayer(playerId: string): Player {
+    return {
       playerId: playerId,
       ressources: {
         wood: 0,
@@ -40,7 +44,7 @@ export class GameService {
       },
       score: 0,
       //color TODO: add color to player
-    })
+    };
   }
 
   // private initGameState(gameId: string): GameState {
