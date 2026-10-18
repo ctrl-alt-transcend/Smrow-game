@@ -18,18 +18,19 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   const { updateRoadFaction, updateSettlementFaction, updateGamemasterLog } = useGameBoard();
   const { refetch } = useGamemasterLog('/api/gamemaster/something');
 
-const handleConfirm = async () => {
-  const newFaction = faction ?? Faction.DEFAULT;
-  if (selected.selectedRoad) {
-    updateRoadFaction(selected.selectedRoad, newFaction);
-  }
-  if (selected.selectedSettlement) {
-    updateSettlementFaction(selected.selectedSettlement, newFaction);
-  }
-
-  const log = await refetch();
-  updateGamemasterLog(log ?? '...');
-};
+  const handleConfirm = async () => {
+    let log: string | null = "";
+    const newFaction = faction ?? Faction.DEFAULT;
+    if (selected.selectedRoad) {
+      updateRoadFaction(selected.selectedRoad, newFaction);
+      log = await refetch('/api/gamemaster/road');
+    }
+    if (selected.selectedSettlement) {
+      updateSettlementFaction(selected.selectedSettlement, newFaction);
+      log = await refetch('/api/gamemaster/settlement');
+    }
+    updateGamemasterLog(log ?? '...');
+  };
 
   const openModal = () => {
     if (!selected.selectedRoad && !selected.selectedSettlement) {
@@ -61,7 +62,6 @@ const handleConfirm = async () => {
       });
     }
   };
-
   return <Button onClick={openModal}>Build selection</Button>;
 };
 
@@ -69,7 +69,9 @@ interface TileSelectionProps {
   selected: GameBoardSelection;
 }
 
-export const TileSelection: React.FC<TileSelectionProps> = ({ selected }) => {
+export const TileSelection: React.FC<TileSelectionProps> = ({
+  selected
+}) => {
   const items = useSelectionDisplay(selected);
 
   return (

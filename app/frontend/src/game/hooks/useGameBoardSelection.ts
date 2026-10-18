@@ -40,7 +40,8 @@ export const useGameBoardSelection = () => {
     [],
   );
 
-  const handleRoadClick = useCallback((road: RoadData | null) => {
+  const handleRoadClick = useCallback(
+    (road: RoadData | null) => {
     setSelected((prev) => {
       if (!road) return resetSelection();
       const isSameRoad = prev.selectedRoad?.id === road.id;

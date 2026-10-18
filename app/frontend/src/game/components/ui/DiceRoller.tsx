@@ -9,12 +9,13 @@ import { useGameBoard } from '../../contexts/GameBoardContext';
 export function DiceRoller() {
   const [rolledValue, setRolledValue] = useState<number | null>(null);
   const { updateGamemasterLog } = useGameBoard();
-  const { refetch } = useGamemasterLog('/api/gamemaster/dice');
+  const { refetch } = useGamemasterLog(null);
 
-  const handleRoll = async (value: number) => {
+  const handleRoll = async (
+    value: number
+  ) => {
     setRolledValue(value);
-
-    const log = await refetch();
+    const log = await refetch('/api/gamemaster/dice');
     updateGamemasterLog(log ?? '...');
   };
 

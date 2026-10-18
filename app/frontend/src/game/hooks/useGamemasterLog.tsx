@@ -5,14 +5,17 @@ interface GreetingResponse {
   message: string;
 }
 
-export function useGamemasterLog(controller: string) {
+export function useGamemasterLog(initialUrl: string | null) {
   const [data, setData] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const abortRef = useRef<AbortController | null>(null);
 
+  const refetch = useCallback(
+    async (url?: string): Promise<string | null> => {
+    const targetUrl = url ?? initialUrl;
+    if (!targetUrl) return null;
 
-  const refetch = useCallback(async (): Promise<string | null> => {
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
@@ -21,7 +24,7 @@ export function useGamemasterLog(controller: string) {
     setError(null);
 
     try {
-      const response = await axios.get<GreetingResponse>(controller, {
+      const response = await axios.get<GreetingResponse>(targetUrl, {
         signal: ac.signal,
       });
       const message =
@@ -35,12 +38,12 @@ export function useGamemasterLog(controller: string) {
     } finally {
       if (!ac.signal.aborted) setLoading(false);
     }
-  }, [controller]);
+  }, [initialUrl]);
 
   useEffect(() => {
-    void refetch();
+    if (initialUrl) void refetch(initialUrl);
     return () => abortRef.current?.abort();
-  }, [refetch]);
+  }, [refetch, initialUrl]);
 
   return { data, error, loading, refetch };
 }
