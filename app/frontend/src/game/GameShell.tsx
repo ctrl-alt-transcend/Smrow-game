@@ -5,7 +5,7 @@ import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
 import { classicLayout } from './types/gameboard.types.tsx';
 import { TileSelection } from './components/ui/TileSelection.tsx';
 import { DiceRoller } from './components/ui/DiceRoller.tsx';
-import GameMasterLogs from './components/ui/GameMasterLogs';
+import GameMasterLog from './components/ui/GameMasterLog.tsx';
 import GameBoardProvider from './contexts/GameBoardContext.tsx';
 
 export default function FullLayout() {
@@ -42,9 +42,10 @@ export default function FullLayout() {
           Aside
         </AppShell.Aside>
         <AppShell.Footer p="xs">
-          <GameMasterLogs/>
+          <GameMasterLog />
         </AppShell.Footer>
       </AppShell>
     </GameBoardProvider>
   );
 }
+

@@ -19,6 +19,8 @@ type GameBoardContextType = {
   updateGameboard: (newGameboard: GameBoardData) => void;
   updateRoadFaction: (road: RoadData, faction: Faction) => void;
   updateSettlementFaction: (settlement: SettlementData, faction: Faction) => void;
+  updateGamemasterLog: (newLog: string) => void;
+  gamemasterlog: string | null;
 }
 
 export const GameBoardContext = createContext<GameBoardContextType | null>(null);
@@ -31,6 +33,12 @@ const GameBoardProvider: React.FC<{ children: React.ReactNode; layout: TileData[
 
   const updateGameboard = useCallback((newGameboard: GameBoardData) => {
     setGameboard(newGameboard);
+  }, []);
+
+  const [gamemasterlog, setGamemasterLog] = useState<string>('...')
+
+  const updateGamemasterLog = useCallback((newLog: string) => {
+    setGamemasterLog(newLog);
   }, []);
 
   const updateRoadFaction = useCallback((newRoad: RoadData, faction: Faction) => {
@@ -55,12 +63,16 @@ const GameBoardProvider: React.FC<{ children: React.ReactNode; layout: TileData[
     gameboard,
     updateGameboard,
     updateRoadFaction,
-    updateSettlementFaction
+    updateSettlementFaction,
+    gamemasterlog,
+    updateGamemasterLog
   }), [
     gameboard,
     updateGameboard,
     updateRoadFaction,
-    updateSettlementFaction
+    updateSettlementFaction,
+    gamemasterlog,
+    updateGamemasterLog
   ]);
 
   return (
