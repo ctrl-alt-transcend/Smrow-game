@@ -16,18 +16,18 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   faction
 }) => {
   const { updateRoadFaction, updateSettlementFaction, updateGamemasterLog } = useGameBoard();
-  const { refetch } = useGamemasterLog('/api/gamemaster/something');
+  const { refetch } = useGamemasterLog(null);
 
   const handleConfirm = async () => {
     let log: string | null = "";
     const newFaction = faction ?? Faction.DEFAULT;
     if (selected.selectedRoad) {
       updateRoadFaction(selected.selectedRoad, newFaction);
-      log = await refetch('/api/gamemaster/road');
+      log = await refetch('/api/game/road');
     }
     if (selected.selectedSettlement) {
       updateSettlementFaction(selected.selectedSettlement, newFaction);
-      log = await refetch('/api/gamemaster/settlement');
+      log = await refetch('/api/game/settlement');
     }
     updateGamemasterLog(log ?? '...');
   };

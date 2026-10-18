@@ -9,4 +9,19 @@ export class GameController {
   createGame(): string {
     return this.GameService.createGame();
   }
+
+  @Get('dice')
+  getDice() {
+    return { message: this.GameService.rolledDice() };
+  }
+
+  @Get('road')
+  getRoad() {
+    return { message: this.GameService.buildRoad() };
+  }
+
+  @Get('settlement')
+  getSettlement() {
+    return { message: this.GameService.buildSettlement() };
+  }
 }

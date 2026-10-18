@@ -6,6 +6,13 @@ export type Ressources = {
   rock: number;
 }
 
+export type GameLoopData = {
+  firstRoll: number;
+  secondRoll: number;
+  roadsBuilt: number;
+  settlementsBuilt: number;
+}
+
 export type Player = {
   playerId: string;
   score: number;

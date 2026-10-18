@@ -15,7 +15,8 @@ export function DiceRoller() {
     value: number
   ) => {
     setRolledValue(value);
-    const log = await refetch('/api/gamemaster/dice');
+    //const log = await refetch('/api/gamemaster/dice');
+    const log = await refetch('/api/game/dice');
     updateGamemasterLog(log ?? '...');
   };
 

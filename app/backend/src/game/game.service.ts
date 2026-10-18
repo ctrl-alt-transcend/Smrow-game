@@ -4,6 +4,8 @@ import type {
   GameState,
   Player,
   Ressources,
+  GameLoopData
+
 } from '../../shared/game/game.types';
 
 @Injectable()
@@ -55,4 +57,31 @@ export class GameService {
   //     playerTurn: "",
   //   });
   // }
+
+  private loopData: GameLoopData = {
+    firstRoll: 0,
+    secondRoll: 0,
+    roadsBuilt: 0,
+    settlementsBuilt: 0
+  }
+
+  rolledDice(): string {
+    if(this.loopData.firstRoll == 0) {
+      this.loopData.firstRoll = 1;
+      return `First roll with a ${this.loopData.firstRoll}`;
+    }
+    if(this.loopData.secondRoll == 0) {
+      this.loopData.secondRoll = 1;
+      return `Second roll with a ${this.loopData.secondRoll}`;
+    }
+    return `You already rolled your dices, first [${this.loopData.firstRoll}], second [${this.loopData.secondRoll}]`;
+  }
+
+  buildRoad(): string {
+    return 'You built a road !';
+  }
+
+  buildSettlement(): string {
+    return 'You built a settlement !';
+  }
 }
