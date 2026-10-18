@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+//import type { GameLoopData } from '../../../shared/game/game.types.ts'
 //import { CreateGamemasterDto } from './dto/create-gamemaster.dto';
 //import { UpdateGamemasterDto } from './dto/update-gamemaster.dto';
 
