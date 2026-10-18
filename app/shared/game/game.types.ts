@@ -7,10 +7,10 @@ export type Ressources = {
 }
 
 export type GameLoopData = {
-  firstRoll: 0;
-  secondRoll: 0;
-  roadsBuilt: 0;
-  settlementsBuilt: 0;
+  firstRoll: number;
+  secondRoll: number;
+  roadsBuilt: number;
+  settlementsBuilt: number;
 }
 
 export type Player = {

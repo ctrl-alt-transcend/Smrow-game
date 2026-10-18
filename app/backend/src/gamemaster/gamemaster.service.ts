@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-//import type { GameLoopData } from '../../../shared/game/game.types.ts'
+import type { GameLoopData } from '../game.types'
 //import { CreateGamemasterDto } from './dto/create-gamemaster.dto';
 //import { UpdateGamemasterDto } from './dto/update-gamemaster.dto';
 
@@ -8,6 +8,13 @@ export class GamemasterService {
   //create(createGamemasterDto: CreateGamemasterDto) {
   //  return 'This action adds a new gamemaster';
   //}
+
+  private loopData: GameLoopData = {
+    firstRoll: 0,
+    secondRoll: 0,
+    roadsBuilt: 0,
+    settlementsBuilt: 0
+  }
 
   greetingsFromGM(): string {
     return 'Hello, I am the Game Master ...';
@@ -18,6 +25,14 @@ export class GamemasterService {
   }
 
   rolledDice(): string {
+    if(this.loopData.firstRoll == 0) {
+      this.loopData.firstRoll = 1;
+      return `You rolled a dice a ${this.loopData.firstRoll}`;
+    }
+    if(this.loopData.secondRoll == 0) {
+      this.loopData.secondRoll = 1;
+      return `You rolled a dice a ${this.loopData.secondRoll}`;
+    }
     return 'You rolled a dice !';
   }
 
