@@ -3,7 +3,6 @@ import { AppShell } from '@mantine/core';
 import { Outlet } from 'react-router';
 import { HeaderTabs } from '../components/navbar/HeaderTabs';
 
-
 export default function AppLayout () {
 
 	return (

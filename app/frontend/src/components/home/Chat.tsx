@@ -1,12 +1,12 @@
 import { useState } from "react";
+import { useAuth } from '../../hooks/useAuth'
 import { Title, Paper, ScrollArea, Stack, Group, TextInput, Button } from "@mantine/core";
 import { messages as initialMessages } from "../../mocks/chat.mock";
 import MessageItem from "./MessageItem";
 
-const currentUser = 'Mr. Goblin';
-
 export default function Chat(){
 
+    const { register, login, user, logout, loading } = useAuth();
 	const [draft, setDraft] = useState('');
 	const [messages, setMessages] = useState(initialMessages);
 
@@ -16,7 +16,7 @@ export default function Chat(){
 
 		const newMessage = {
 			id: Date.now().toString(),
-			author: currentUser,
+			author: user?.name,
 			content: draft,
 		};
 

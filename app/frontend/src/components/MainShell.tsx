@@ -1,17 +1,22 @@
 import GenericButton from './buttons/GenericButton';
 import CardImage from './Card';
 import { LoginPanel } from './authentification/LoginPanel';
-
 import {
   AppShell,
   BackgroundImage,
   Group,
   Text,
-  Title
+  Title,
+  useTableContext
 } from '@mantine/core';
+
+import { Navigate } from 'react-router';
+import { useAuth } from '../hooks/useAuth';
 
 export default function MainShell()
 {
+  const { user } = useAuth();
+  if (user) return <Navigate to="/home" replace />;
   return (
     <AppShell
       mode="static"

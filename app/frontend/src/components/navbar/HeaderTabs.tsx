@@ -27,6 +27,7 @@ import { useDisclosure } from '@mantine/hooks';
 import classes from './HeaderTabs.module.css';
 import { Link, useLocation } from 'react-router';
 import { navLinks } from './navLinks';
+import { useAuth } from '../../hooks/useAuth'
 
 const user = {
   name: 'Mr. Goblin',
@@ -39,6 +40,8 @@ export function HeaderTabs() {
   const location = useLocation();
   const [opened, { toggle, close }] = useDisclosure(false);
   const [userMenuOpened, setUserMenuOpened] = useState(false);
+
+  const { register, login, user, logout, loading } = useAuth();
 
   return (
     <div className={classes.header}>
@@ -80,9 +83,9 @@ export function HeaderTabs() {
                 className={cx(classes.user, { [classes.userActive]: userMenuOpened })}
               >
                 <Group gap={7}>
-                  <Avatar src={user.image} alt="" radius="xl" size={20} />
+                  {/* <Avatar src={user.image} alt="" radius="xl" size={20} /> */}
                   <Text fw={500} size="sm" lh={1} mr={3}>
-                    {user.name}
+                    {user?.name}
                   </Text>
                   <IconChevronDown size={12} stroke={1.5} />
                 </Group>

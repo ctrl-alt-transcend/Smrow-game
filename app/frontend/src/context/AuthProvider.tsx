@@ -28,19 +28,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const login = useCallback(async (data: LoginPost) => {
-        await loginUser(data);
+        const response = await loginUser(data);
+        localStorage.setItem('access_token', response.access_token);
         const profile = await getCurrentUser();
         setUser(profile);
     }, []);
 
     const register = useCallback(async (data: RegisterPost) => {
-        await registerUser(data);
+        const response = await registerUser(data);
+        localStorage.setItem('access_token', response.access_token);
         const profile = await getCurrentUser();
         setUser(profile);
     }, []);
 
     const logout = useCallback(() => {
-        localStorage.removeItem("access_token");
         setUser(null);
     }, []);
 
@@ -50,3 +51,5 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         </AuthContext.Provider>
     );
 };
+
+// https://dev.to/miracool/how-to-manage-user-authentication-with-react-js-3ic5
