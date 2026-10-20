@@ -1,5 +1,6 @@
-import { Controller, Post, Get } from '@nestjs/common';
+import { Controller, Post, Get, Body } from '@nestjs/common';
 import { GameService } from './game.service';
+import { RollDiceDto } from './dto/roll-dice.dto';
 
 @Controller('game')
 export class GameController {
@@ -10,11 +11,6 @@ export class GameController {
     return this.GameService.createGame();
   }
 
-  @Get('dice')
-  getDice() {
-    return { message: this.GameService.rolledDice() };
-  }
-
   @Get('road')
   getRoad() {
     return { message: this.GameService.buildRoad() };
@@ -23,5 +19,16 @@ export class GameController {
   @Get('settlement')
   getSettlement() {
     return { message: this.GameService.buildSettlement() };
+  }
+
+   @Post('dice/roll')
+  async rollDice(@Body() dto: RollDiceDto) {
+    const result = this.GameService.rollDice();
+    return { ...result };
+  }
+
+  @Get('dice/stats')
+  getStats() {
+    return this.GameService.getLoopData();
   }
 }

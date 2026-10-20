@@ -15,7 +15,7 @@ import type { ButtonHTMLAttributes, CSSProperties } from 'react';
  * ================================================================ */
 
 /** Les six faces possibles du dé. */
-export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6;
+type DiceValue = 1 | 2 | 3 | 4 | 5 | 6;
 
 /**
  * Positionnement du dé par rapport à son conteneur.
@@ -35,7 +35,7 @@ export type DicePlacement =
   | (string & {});
 
 /** Ce que le parent peut piloter via une ref. */
-export interface Dice3DHandle {
+interface Dice3DHandle {
   /** Lance le dé. `forcedValue` court-circuite l'aléatoire. */
   rollDice: (forcedValue?: DiceValue) => void;
 }
@@ -47,11 +47,8 @@ export interface Dice3DHandle {
  * valide sur le `<button>` (id, aria-*, data-*, title…), en retirant
  * ceux qu'on redéfinit avec un sens différent.
  */
-export interface Dice3DProps
-  extends Omit<
-    ButtonHTMLAttributes<HTMLButtonElement>,
-    'defaultValue' | 'value' | 'children'
-  > {
+interface Dice3DProps
+  extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Durée de l'animation de lancer, en ms. @default 1000 */
   rollingTime?: number;
   /** Appelé quand le dé se stabilise, avec la face obtenue. */
@@ -64,14 +61,17 @@ export interface Dice3DProps
   faceBg?: string;
   /** Images des faces, dans l'ordre 1→6. Une entrée vide = face par défaut. */
   faces?: string[];
+  disabled?: boolean;
   /** Force la face obtenue au prochain lancer (triche / tests). */
-  cheatValue?: DiceValue;
+  cheatValue?: DiceValue;  // Valeur fournie par le parent pour forcer l'animation
   /** Ancrage du dé, ex. `"top-left"`. */
   placement?: DicePlacement;
   /** URL d'un son joué pendant le lancer. */
   sound?: string;
   /** Touches déclenchant le lancer, plus `"click"`. @default ['click'] */
   triggers?: string[];
+  className?: string;
+  style?: CSSProperties;
   /**
    * Face affichée en mode contrôlé. Fournir cette prop bascule le
    * composant en contrôlé : il n'avancera plus tout seul.
@@ -80,6 +80,24 @@ export interface Dice3DProps
   /** Appelé à chaque stabilisation — sert à synchroniser `value`. */
   onValueChange?: (value: DiceValue) => void;
 }
+
+//export interface Dice3DProps
+//  extends Omit<
+//    ButtonHTMLAttributes<HTMLButtonElement>,
+//    'defaultValue' | 'value' | 'children'
+//  > {
+//  rollingTime?: number;
+//  onRoll?: (value: DiceValue) => void;
+
+//  size?: number;
+//  faceBg?: string;
+//  faces?: string[];
+//  cheatValue?: DiceValue;
+//  placement?: DicePlacement;
+//  sound?: string;
+//  triggers?: string[];
+
+//}
 
 /* ================================================================
  * CSS — injecté une seule fois pour toute l'application.
@@ -254,105 +272,103 @@ const DefaultFace = memo(function DefaultFace({ faceNumber }: DefaultFaceProps) 
  * Composant principal
  * ================================================================ */
 
-const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>(
-  function Dice3D(props, ref) {
-    const {
-      rollingTime = 1000,
-      onRoll,
-      defaultValue = 6,
-      size = 250,
-      faceBg,
-      faces,
-      disabled = false,
-      cheatValue,
-      placement,
-      sound,
-      triggers = ['click'],
-      value,
-      onValueChange,
-      className,
-      style,
-      onClick,
-      ...rest
-    } = props;
 
-    /* --- Mode contrôlé / non contrôlé --- */
-    const isControlled = value !== undefined;
-    const [internalValue, setInternalValue] = useState<DiceValue>(defaultValue);
-    const displayedValue: DiceValue = isControlled ? value : internalValue;
 
-    const [rolling, setRolling] = useState(false);
+const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
+  const {
+    rollingTime = 1000,
+    onRoll,
+    onClick,
+    defaultValue = 6,
+    size = 250,
+    faceBg,
+    faces = [],
+    disabled = false,
+    cheatValue,
+    placement,
+    sound,
+    triggers = ['click'],
+    className,
+    style,
+    ...rest
+  } = props;
 
-    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [value, setValue] = useState<DiceValue>(defaultValue);
+  const [rolling, setRolling] = useState(false);
+  const isControlled = value !== undefined;
+const [internalValue, setInternalValue] = useState<DiceValue>(defaultValue);
+const displayedValue: DiceValue = isControlled && value !== undefined ? value : internalValue;
 
-    /* --- Refs « dernière valeur connue » : gardent rollDice stable
-           sans le recréer quand le parent passe une nouvelle closure. --- */
-    const onRollRef = useRef<Dice3DProps['onRoll']>(onRoll);
-    const onValueChangeRef = useRef<Dice3DProps['onValueChange']>(onValueChange);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    useEffect(() => {
-      onRollRef.current = onRoll;
-    }, [onRoll]);
+  const onRollRef = useRef(onRoll);
+  onRollRef.current = onRoll;
 
-    useEffect(() => {
-      onValueChangeRef.current = onValueChange;
-    }, [onValueChange]);
+  const triggersRef = useRef(triggers);
+  triggersRef.current = triggers;
 
-    /* --- Injection CSS, une fois pour toute l'app --- */
-    useEffect(() => {
-      injectDiceCSS();
-    }, []);
+  useEffect(() => {
+    injectDiceCSS();
+  }, []);
 
-    /* --- Nettoyage au démontage --- */
-    useEffect(
-      () => () => {
-        if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current = null;
-        }
-      },
-      []
-    );
+  useEffect(
+    () => () => {
+      if (timeoutRef.current !== null)
+        clearTimeout(timeoutRef.current);
+      audioRef.current?.pause();
+      audioRef.current = null;
+    },
+    []
+  );
 
-    /* --- Lancer le dé --- */
-    const rollDice = useCallback(
-      (forcedValue?: DiceValue) => {
-        if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
+  // Si cheatValue change, on déclenche automatiquement l'animation
+  useEffect(() => {
+    if (cheatValue !== undefined && !rolling && !disabled) {
+      animateCheat(cheatValue);
+    }
+  }, [cheatValue]);
 
-        if (sound) {
-          const audio = new Audio(sound);
-          audioRef.current = audio;
-          // play() renvoie une promesse : on ignore un éventuel blocage autoplay.
-          void audio.play().catch(() => undefined);
-        }
+const animateCheat = useCallback(
+  (forcedValue: DiceValue) => {
+    if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
 
-        setRolling(true);
+    if (sound) {
+      audioRef.current = new Audio(sound);
+      void audioRef.current.play().catch(() => undefined);
+    }
 
-        timeoutRef.current = setTimeout(() => {
-          let next: DiceValue = (Math.floor(Math.random() * 6) + 1) as DiceValue;
-          if (forcedValue !== undefined) next = forcedValue;
-          if (cheatValue !== undefined) next = cheatValue;
+    setRolling(true);
 
-          setRolling(false);
-          // En mode contrôlé, cet état interne est ignoré à l'affichage :
-          // c'est le parent qui décide via `value`.
-          setInternalValue(next);
+    timeoutRef.current = setTimeout(() => {
+      setRolling(false);
+      setValue(forcedValue);
 
-          if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current = null;
-          }
+      if (onRollRef.current) {
+        onRollRef.current(forcedValue);
+      }
 
-          onValueChangeRef.current?.(next);
-          onRollRef.current?.(next);
-        }, rollingTime);
-      },
-      [rollingTime, sound, cheatValue]
-    );
+      audioRef.current?.pause();
+      audioRef.current = null;
+    }, rollingTime);
+  },
+  [rollingTime, sound]
+);
 
-    useImperativeHandle(ref, () => ({ rollDice }), [rollDice]);
+  const rollDice = useCallback(
+    (forcedValue?: DiceValue) => {
+      if (forcedValue !== undefined) {
+        animateCheat(forcedValue);
+      } else {
+        // Lancer aléatoire local (fallback)
+        const random = (Math.floor(Math.random() * 6) + 1) as DiceValue;
+        animateCheat(random);
+      }
+    },
+    [animateCheat]
+  );
+
+  useImperativeHandle(ref, () => ({ rollDice }), [rollDice]);
 
     /* --- Triggers : clé primitive pour éviter les réabonnements --- */
     const triggersKey = Array.isArray(triggers) ? triggers.join('|') : '';
@@ -437,7 +453,7 @@ const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>(
 
     const rootClassName = [
       '_space3d',
-      VALUE_TO_CLASS[displayedValue],
+       VALUE_TO_CLASS[displayedValue] ?? VALUE_TO_CLASS[6],
       rolling ? 'rolling' : '',
       className ?? '',
     ]
@@ -462,5 +478,4 @@ const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>(
   }
 );
 
-export default Dice3D;
-export { Dice3D };
+export { Dice3D, Dice3DHandle, DiceValue };

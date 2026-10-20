@@ -1,33 +1,49 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Card, Text, Stack, Title, Box } from '@mantine/core';
-import Dice3D from '../gameboard/Dice/Dice';
-import { useGamemasterLog } from '../../hooks/useGamemasterLog';
+import { Dice3D, type Dice3DHandle, type DiceValue } from '../gameboard/Dice/Dice';
 import { useGameBoard } from '../../contexts/GameBoardContext';
-
-
+import { useRollDice } from '../../hooks/useRollDice';
 
 export function DiceRoller() {
-  const [rolledValue, setRolledValue] = useState<number | null>(null);
+  const [rolledValue, setRolledValue] = useState<DiceValue | null>(null);
+  const [pendingCheatValue, setPendingCheatValue] = useState<DiceValue | null>(null);
   const { updateGamemasterLog } = useGameBoard();
-  const { refetch } = useGamemasterLog(null);
+  const { roll } = useRollDice();
+  const diceRef = useRef<Dice3DHandle>(null);
 
-  const handleRoll = async (
-    value: number
-  ) => {
-    setRolledValue(value);
-    //const log = await refetch('/api/gamemaster/dice');
-    const log = await refetch('/api/game/dice');
-    updateGamemasterLog(log ?? '...');
-  };
+  const handleRoll = useCallback(async () => {
+    try {
+      const result = await roll();
+      if (!result) return;
+      setPendingCheatValue(result.value);
+    } catch (err) {
+      console.error('Failed to roll dice:', err);
+      updateGamemasterLog('Error rolling dice');
+    }
+  }, [roll, updateGamemasterLog]);
+
+  const handleAnimationComplete = useCallback((finalValue: DiceValue) => {
+    setRolledValue(finalValue);
+    updateGamemasterLog('You rolled a ' + finalValue);
+    setPendingCheatValue(null)
+  }, [updateGamemasterLog]);
 
   return (
     <Box style={{ flex: 1, minWidth: 220, alignContent: 'center' }}>
       <Card withBorder radius="md" shadow="sm" h={220}>
         <Stack gap="xs" align="center" justify="center">
           <Title order={4}>Dice box</Title>
-          <Dice3D onRoll={handleRoll} size={80} />
+
+          <Dice3D
+            ref={diceRef}
+            size={80}
+            cheatValue={pendingCheatValue ?? undefined}
+            onClick={handleRoll}
+            onRoll={handleAnimationComplete}
+            triggers={['click']}
+          />
           <Text>
-            {rolledValue !== null ? `You rolled a ${rolledValue}!` : 'Roll the dice!'}
+            {rolledValue !== null ? `You rolled a ${rolledValue}!` : 'Click the dice!'}
           </Text>
         </Stack>
       </Card>

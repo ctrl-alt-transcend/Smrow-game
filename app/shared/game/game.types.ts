@@ -13,10 +13,13 @@ export type GameLoopData = {
   settlementsBuilt: number;
 }
 
+
 export type Player = {
   playerId: string;
   score: number;
   ressources: Ressources;
+  firstDice: number,
+  secondDice: number
   //color: ""
 }
 
