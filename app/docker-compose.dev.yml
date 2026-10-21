@@ -63,8 +63,6 @@ services:
           path: ./backend/prisma/schema.prisma
         - action: rebuild
           path: ./backend/prisma/migrations
-    env_file:
-      .env
     networks:
       - ft-network
     secrets:
@@ -129,7 +127,6 @@ services:
 
         - action: rebuild
           path: ./frontend/package.json
-
     networks:
       - ft-network
 
