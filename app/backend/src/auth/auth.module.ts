@@ -12,7 +12,7 @@ import { readSecret } from 'src/strategies/readSecret';
     UserModule,
     PassportModule,
     JwtModule.register({
-      secret: readSecret('JWT_SECRET_FILE')!,
+      secret: readSecret('JWT_SECRET_FILE'),
       signOptions: { expiresIn: '1h' },
     }),
   ],

@@ -6,7 +6,6 @@ import { readSecret } from 'src/strategies/readSecret';
 @Injectable()
 export class DatabaseService extends PrismaClient implements OnModuleInit {
   constructor() {
-
     const dbHost = process.env.DB_HOST;
     const dbUser = process.env.DB_USER;
     const dbPassword: string = readSecret('DB_PASSWORD_FILE'); // readSecret('DB_PASSWORD_FILE');  'run/secrets/db_password'
@@ -17,10 +16,9 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
       throw new Error('Incorrect variables "dbHost", "dbUSer", "dbName"');
     }
 
-    const connectionString = `postgres://${encodeURIComponent(dbUser)}:${encodeURIComponent(dbPassword)}@${dbHost}:${dbPort}/${dbName}?schema=public`
+    const connectionString = `postgres://${encodeURIComponent(dbUser)}:${encodeURIComponent(dbPassword)}@${dbHost}:${dbPort}/${dbName}?schema=public`;
 
-
-    const adapter = new PrismaPg({connectionString});
+    const adapter = new PrismaPg({ connectionString });
     super({ adapter });
   }
   async onModuleInit() {
