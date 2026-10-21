@@ -25,7 +25,6 @@
 Icon
 
 # DB
-app/backend/prisma/migrations/
 
 # Thumbnails
 ._*
