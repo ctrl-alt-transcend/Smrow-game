@@ -41,7 +41,8 @@ export function HeaderTabs() {
   const [opened, { toggle, close }] = useDisclosure(false);
   const [userMenuOpened, setUserMenuOpened] = useState(false);
 
-  const { register, login, user, logout, loading } = useAuth();
+  const { user, logout } = useAuth();
+
   const handleLogout = (async () => {
     try {
       logout();

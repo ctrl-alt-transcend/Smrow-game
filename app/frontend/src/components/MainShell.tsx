@@ -15,8 +15,10 @@ import { useAuth } from '../hooks/useAuth';
 
 export default function MainShell()
 {
+  
   const { user } = useAuth();
   if (user) return <Navigate to="/home" replace />;
+
   return (
     <AppShell
       mode="static"
