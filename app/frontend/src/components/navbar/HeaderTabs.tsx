@@ -29,11 +29,11 @@ import { Link, useLocation } from 'react-router';
 import { navLinks } from './navLinks';
 import { useAuth } from '../../hooks/useAuth'
 
-const user = {
-  name: 'Mr. Goblin',
-  email: 'goblins@fighter.dev',
-  image: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-5.png',
-};
+// const user = {
+//   name: 'Mr. Goblin',
+//   email: 'goblins@fighter.dev',
+//   image: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-5.png',
+// };
 
 export function HeaderTabs() {
   const theme = useMantineTheme();
@@ -42,6 +42,15 @@ export function HeaderTabs() {
   const [userMenuOpened, setUserMenuOpened] = useState(false);
 
   const { register, login, user, logout, loading } = useAuth();
+  const handleLogout = (async () => {
+    try {
+      logout();
+      localStorage.clear();
+    } catch (errorMessage: any) {
+      console.error(errorMessage);
+    }
+  });
+
 
   return (
     <div className={classes.header}>
@@ -115,7 +124,7 @@ export function HeaderTabs() {
               <Menu.Item leftSection={<IconSwitchHorizontal size={16} stroke={1.5} />}>
                 Change account
               </Menu.Item>
-              <Menu.Item leftSection={<IconLogout size={16} stroke={1.5} />}>Logout</Menu.Item>
+              <Menu.Item onClick={handleLogout} leftSection={<IconLogout size={16} stroke={1.5} />}>Logout</Menu.Item>
             </Menu.Dropdown>
           </Menu>
         </Group>

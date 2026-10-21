@@ -46,7 +46,6 @@ export function LoginPanel(props: PaperProps) {
     const handleRegister = registerForm.onSubmit(async (data) => {
         setError(null);
         try {
-            console.log('test');
             await register(data);
         } catch (errorMessage: any) {
             setError(errorMessage);
@@ -57,9 +56,8 @@ export function LoginPanel(props: PaperProps) {
         setError(null);
         try {
             await login(data);
-            console.log('logged');
-        } catch {
-            setError("Invalid credentials");
+        } catch(errorMessage: any) {
+            setError(errorMessage);
         }
     });
     
