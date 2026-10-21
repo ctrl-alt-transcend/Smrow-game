@@ -2,7 +2,7 @@ import axios from "axios";
 import { authEvents } from "../context/AuthEvents";
 
 export const http = axios.create({
-    baseURL: "http://localhost:5432/api",
+    baseURL: "/api",
 });
 
 http.interceptors.request.use((config) => {
@@ -17,7 +17,7 @@ http.interceptors.response.use(
         if (error.response?.status === 401) {
             localStorage.removeItem("access_token");
             authEvents.dispatchEvent(new CustomEvent("logout", {
-                detail: "Votre session a expiré, veuillez vous reconnecter",
+                detail: "You session has expired.",
             }));
         }
         return Promise.reject(error);
