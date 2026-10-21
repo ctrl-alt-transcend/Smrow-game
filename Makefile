@@ -7,6 +7,7 @@ endif
 
 SECRETS_DIR=app/secrets
 ENV_DIR=app
+MIGRATION_NAME ?= init
 
 all: up
 
@@ -38,11 +39,11 @@ secrets:
 	@mkdir -p $(SECRETS_DIR)
 
 	@if [ ! -s $(SECRETS_DIR)/db_password.txt ]; then \
-		openssl rand -hex 32 > "$(SECRETS_DIR)/db_password.txt"; \
+		openssl rand -hex 32 | tr -dc 'A-Za-z0-9@%^*_+=-' | head -c 16 > "$(SECRETS_DIR)/db_password.txt"; \
 	fi;
 
 	@if [ ! -s $(SECRETS_DIR)/jwt_secret.txt ]; then \
-		openssl rand -hex 32 > "$(SECRETS_DIR)/jwt_secret.txt"; \
+		openssl rand -hex 32 | tr -dc 'A-Za-z0-9@%^*_+=-' | head -c 16 > "$(SECRETS_DIR)/jwt_secret.txt"; \
 	fi
 
 prepush: lint type
@@ -53,9 +54,10 @@ fclean: down
 re: fclean
 	docker compose -f $(DOCKER_COMPOSE_FILE) build --no-cache
 	$(MAKE) up
-	docker exec backend npx prisma migrate dev --name init
+	$(MAKE) initdb
 
-MIGRATION_NAME ?= init
+initdb:
+	docker compose -f $(DOCKER_COMPOSE_FILE) exec backend npx prisma migrate deploy
 
 migrate:
 	@cd app/backend && \
@@ -66,5 +68,5 @@ migrate:
 	DB_PASSWORD_FILE=../secrets/db_password.txt \
 	npx prisma migrate dev --name $(MIGRATION_NAME)
 
-.PHONY: all refresh build up down fclean re secrets migrate
+.PHONY: all refresh build up down fclean re secrets migrate initdb
 
