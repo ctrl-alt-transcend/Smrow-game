@@ -7,16 +7,29 @@ import {
   Group,
   Text,
   Title,
-  useTableContext
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 
+import { useEffect } from 'react';
 import { Navigate } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
 
 export default function MainShell()
 {
   
-  const { user } = useAuth();
+  const { user, authMessage, clearAuthMessage } = useAuth();
+
+  useEffect(() => {
+    if (authMessage) {
+      notifications.show({
+        title: 'Disconnected',
+        message: authMessage,
+        color: 'Red',
+      });
+      clearAuthMessage();
+    }
+  }, [authMessage]);
+
   if (user) return <Navigate to="/home" replace />;
 
   return (
