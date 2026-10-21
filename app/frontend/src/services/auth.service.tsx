@@ -1,10 +1,11 @@
-import axios, { type AxiosResponse } from 'axios';
+import  { http } from './http'
+import type {AxiosResponse } from 'axios'
 import type { RegisterPost, LoginPost, RegisterResponse, LoginResponse } from '../../../shared/types'
 
 export const registerUser = async (data: RegisterPost): Promise<RegisterResponse> => {
     try {
-        const response: AxiosResponse = await axios.post<RegisterResponse>('/api/auth/register', data);
-        return response.data;
+        const res: AxiosResponse = await http.post<RegisterResponse>('/auth/register', data);
+        return res.data;
     } catch (error: any) {
         const err_msg = error.response?.data?.message;
         throw err_msg;
@@ -13,8 +14,8 @@ export const registerUser = async (data: RegisterPost): Promise<RegisterResponse
 
 export const loginUser = async (data: LoginPost): Promise<LoginResponse> => {
     try {
-        const response: AxiosResponse = await axios.post<LoginResponse>('/api/auth/login', data);
-        return response.data;
+        const res: AxiosResponse = await http.post<LoginResponse>('/auth/login', data);
+        return res.data;
 
     } catch (error: any) {
         const err_msg = error.response?.data?.message;

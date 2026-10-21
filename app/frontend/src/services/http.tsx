@@ -2,7 +2,7 @@ import axios from "axios";
 import { authEvents } from "../context/AuthEvents";
 
 export const http = axios.create({
-    baseURL: "http://localhost:8000",
+    baseURL: "http://localhost:5432/api",
 });
 
 http.interceptors.request.use((config) => {
