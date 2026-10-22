@@ -3,11 +3,11 @@
 # more explaination here: https://stackoverflow.com/questions/52499617/what-is-the-difference-between-npm-install-and-npm-ci
 
 FROM node:26-alpine AS dev
-WORKDIR /app
-COPY package*.json ./
+WORKDIR /app/backend
+COPY /backend/package*.json ./
 RUN npm ci
-COPY . .
-COPY --from=shared . /app/shared
+COPY --exclude=.env backend ./
+COPY shared /app/shared
 RUN npx prisma generate
 EXPOSE 3000
 ENTRYPOINT ["npm"]

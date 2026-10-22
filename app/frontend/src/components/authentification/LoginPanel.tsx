@@ -16,12 +16,13 @@ import { useState } from 'react';
 import { router } from '../../routes/routes';
 
 import { useAuth } from '../../hooks/useAuth';
+import ErrorMessages from '../utils/ErrorMessages'
 
 export function LoginPanel(props: PaperProps) {
 
     const { register, login } = useAuth();
     const [type, toggle] = useToggle(['register', 'login']);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | string[] | null>(null);
 
     const registerForm = useForm({
         initialValues: {
@@ -47,8 +48,8 @@ export function LoginPanel(props: PaperProps) {
         setError(null);
         try {
             await register(data);
-        } catch (errorMessage: any) {
-            setError(errorMessage);
+        } catch (error: any) {
+            setError(error);
         }
     });
 
@@ -126,11 +127,13 @@ export function LoginPanel(props: PaperProps) {
                 </form>
             )}
 
-            {error && (
+            {/* {error && (
                 <Text c="red" size="sm" mt="xs">
                     {error}
                 </Text>
-            )}
+            )} */}
+
+            <ErrorMessages error={error}/>
 
             <Anchor
                 component="button"
