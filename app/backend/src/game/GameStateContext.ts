@@ -2,7 +2,7 @@ import {
   GameData,
   Player,
   RollResponse
-} from '../../shared/game/game.types';
+} from '@shared/game/game.types';
 //import { createPlayer } from './game.utils';
 
 /**

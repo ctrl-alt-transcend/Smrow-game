@@ -2,8 +2,8 @@ import { Controller, Post, Get, UseGuards, Req, Body } from '@nestjs/common';
 import { GameService } from './game.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
-import type { GameState, PlayerProfile } from '../../shared/game/game.types';
-import type { UserPublic } from '../../shared/types';
+import type { GameState, PlayerProfile } from '@shared/game/game.types';
+import type { UserPublic } from '@shared/types';
 import type { RollDiceDto } from './dto/roll-dice.dto';
 
 @Controller('game')

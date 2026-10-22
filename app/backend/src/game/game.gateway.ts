@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { GameService } from './game.service';
 import { Server, Socket } from 'socket.io';
 import { instrument } from '@socket.io/admin-ui';
-import type {GameState} from '../../shared/game/game.types';
+import type {GameState} from '@shared/game/game.types';
 
 @WebSocketGateway(3001, {
   cors: {

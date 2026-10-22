@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 import axios from 'axios';
-import { DiceValue } from '../components/gameboard/Dice/Dice';
-import { RollResponse } from '../../../../shared/game/game.types';
+import type { DiceValue } from '../components/gameboard/Dice/Dice';
+import type { RollResponse } from '@shared/game/game.types';
 
 
 export function useRollDice() {

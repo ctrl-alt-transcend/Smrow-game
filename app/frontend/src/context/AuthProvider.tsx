@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { AuthContext } from "./AuthContext";
 import { getCurrentUser } from "../services/user.service";
 import { registerUser, loginUser } from '../services/auth.service'
-import type { LoginPost, RegisterPost, UserPublic } from "../../../shared/types";
+import type { LoginPost, RegisterPost, UserPublic } from "@shared/types";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<UserPublic | null>(null);

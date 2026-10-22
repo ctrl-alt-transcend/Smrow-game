@@ -1,5 +1,5 @@
 import { Card, Stack, Text, Avatar } from '@mantine/core';
-import { PlayerCardProps } from '../../../../../shared/game/ui.types'
+import type { PlayerCardProps } from '@shared/game/ui.types'
 import defaultAvatar from "../../../../public/default-pp.png"
 
 const AVATAR_SIZE = 50;

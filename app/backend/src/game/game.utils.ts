@@ -1,6 +1,6 @@
 import type {
   Player
-} from '../../shared/game/game.types';
+} from '@shared/game/game.types';
 
 //TODO: use PlayerProfile instead of playerId
 export function createPlayer( playerId: string ): Player {

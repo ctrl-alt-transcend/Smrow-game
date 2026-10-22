@@ -5,7 +5,7 @@ import type {
   Player,
   RollResponse,
   PlayerProfile,
-} from '../../shared/game/game.types';
+} from '@shared/game/game.types';
 import {
   GameStateContext,
   RessourcePhase

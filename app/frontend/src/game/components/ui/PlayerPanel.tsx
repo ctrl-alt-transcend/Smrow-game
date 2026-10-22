@@ -1,6 +1,6 @@
 import { Stack } from '@mantine/core';
 import { PlayerCard } from './PlayerCard.tsx';
-import type { Player } from  "../../../../../shared/game/game.types.ts"
+import type { Player } from  "@shared/game/game.types.ts"
 
 export function PlayerPanel({ players }: { players: Player[] }) {
 
