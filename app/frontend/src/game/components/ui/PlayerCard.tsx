@@ -4,9 +4,9 @@ import defaultAvatar from "../../../../public/default-pp.png"
 
 const AVATAR_SIZE = 50;
 
-export function PlayerCard({name, level, score, avatarUrl}: PlayerCardProps) {
+export function PlayerCard({name, level, score, avatarURL}: PlayerCardProps) {
 
-  const avatarSrc = avatarUrl || defaultAvatar;
+  const avatarSrc = avatarURL || defaultAvatar;
 
   return (
     <Card padding={0} withBorder orientation="horizontal">

@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { GameState, Player, Ressources } from '../../shared/game/game.types';
+import type { GameState, Player, Ressources, PlayerProfile } from '../../shared/game/game.types';
 
 @Injectable()
 export class GameService {
@@ -11,22 +11,22 @@ export class GameService {
    * @brief Create a new game and add the player to it
    * @param playerId - The user ID of the player to be added to the game
    */
-  createGame(playerId: string) {
-    if (this.playersMap.has(playerId)) {
-      throw new ConflictException(`Player with id ${playerId} is already in a game`);
+  createGame(playerProfile: PlayerProfile) {
+    if (this.playersMap.has(playerProfile.id)) {
+      throw new ConflictException(`Player with id ${playerProfile.username} is already in a game`);
     }
     const gameId = randomUUID();
 
     this.gamesMap.set(gameId, { gameId: gameId, players: [], playerTurn: '' });
-    this.addPlayerToGame(gameId, playerId);
+    this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
   }
 
-  joinGame(playerId: string, gameId: string) {
-    if (this.playersMap.has(playerId)) {
-      throw new ConflictException(`Player with id ${playerId} is already in a game`);
+  joinGame(playerProfile: PlayerProfile, gameId: string) {
+    if (this.playersMap.has(playerProfile.id)) {
+      throw new ConflictException(`Player with id ${playerProfile.username} is already in a game`);
     }
-    this.addPlayerToGame(gameId, playerId);
+    this.addPlayerToGame(gameId, playerProfile);
   }
 
 
@@ -60,17 +60,17 @@ export class GameService {
    * @param playerId - The user ID of the player to be added to the game
    * @warning You need to check if the palyer is already in a game before calling this function
    */
-  private addPlayerToGame(gameId: string, playerId: string) {
+  private addPlayerToGame(gameId: string, playerProfile: PlayerProfile) {
     const game = this.getGameState(gameId);
 
-    this.playersMap.set(playerId, gameId);
-    game.players.push(this.createPlayer(playerId));
+    this.playersMap.set(playerProfile.id, gameId);
+    game.players.push(this.createPlayer(playerProfile));
   }
 
 
-  private createPlayer(playerId: string) : Player {
+  private createPlayer(playerProfile: PlayerProfile) : Player {
     return ({
-      playerId: playerId,
+      playerId: playerProfile.id,
       ressources: {
         wood: 0,
         brick: 0,
@@ -78,7 +78,11 @@ export class GameService {
         sheep: 0,
         rock: 0,
       },
+      level: 1, //TODO: add a level system to the game
       score: 0,
+      username: playerProfile.username,
+      avatarURL: playerProfile.avatarURL
+      //avatar: playerProfile.avatarPath
       //color TODO: add color to player
     })
   }

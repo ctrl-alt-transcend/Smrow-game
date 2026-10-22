@@ -31,7 +31,6 @@ export class GameGateway implements OnGatewayInit {
     instrument(server, { auth: false, mode: 'development' });
   }
 
-
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(@ConnectedSocket() client: Socket) {
     const userId = client.data.user.id;
@@ -53,8 +52,8 @@ export class GameGateway implements OnGatewayInit {
       const payload = this.jwtService.verify(token);
       client.data.user = {id: payload.sub};
     }
-    catch {
-      console.log('Client connection rejected:', client.id);
+    catch (error) {
+      console.log('Client connection rejected:', client.id, " - ", (error as Error).message);
       client.disconnect(true); //WARN: what happens in the frontend ?
       //TODO: remove player of the GameStat
       return ; //TEST: remove this line

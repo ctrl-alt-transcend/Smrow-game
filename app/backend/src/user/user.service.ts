@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { PlayerProfile } from '../../shared/game/game.types'
 
 @Injectable()
 export class UserService {
@@ -37,6 +38,27 @@ export class UserService {
       },
     });
   }
+
+async findPlayerProfile(id: string): Promise<PlayerProfile> {
+  const user = await this.databaseService.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      username: true,
+      profile: { select: { avatarURL: true } },
+    },
+  });
+
+  if (!user) {
+    throw new NotFoundException(`User not found with id: ${id}`);
+  }
+
+  return {
+    id: user.id,
+    username: user.username,
+    avatarURL: user.profile?.avatarURL ?? null,
+  };
+}
 
   // include returns the relations data, if set to true
   async findAll() {
