@@ -24,7 +24,10 @@ import { readSecret } from "./src/strategies/readSecret";
    dbName: process.env.DB_NAME || "",
 }
 
-const DATABASE_URL = `postgres://${config.dbUser}:${config.dbPassword}@${config.dbHost}:${config.dbPort}/${config.dbName}?schema=public`
+const DATABASE_URL =
+    `postgres://${encodeURIComponent(config.dbUser)}:` +
+    `${encodeURIComponent(config.dbPassword)}@${(config.dbHost)}:${config.dbPort}/` +
+    `${config.dbName}?schema=public`
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
