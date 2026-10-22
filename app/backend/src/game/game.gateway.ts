@@ -17,7 +17,6 @@ import type {GameState} from '../../shared/game/game.types';
     credentials: true,
   }, //WARN: dev only
 })
-
 export class GameGateway implements OnGatewayInit {
 
   constructor(
