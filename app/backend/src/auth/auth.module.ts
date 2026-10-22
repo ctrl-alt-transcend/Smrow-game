@@ -5,13 +5,14 @@ import { AuthService } from './auth.service';
 import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from '../strategies/jwt.strategy';
+import { readSecret } from 'src/strategies/readSecret';
 
 @Module({
   imports: [
     UserModule,
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET!,
+      secret: readSecret('JWT_SECRET_FILE'),
       signOptions: { expiresIn: '1h' },
     }),
   ],

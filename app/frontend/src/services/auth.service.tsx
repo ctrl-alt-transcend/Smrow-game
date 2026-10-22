@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { RegisterPost, LoginPost, RegisterResponse, LoginResponse } from '../../../shared/types'
+import type { RegisterPost, LoginPost, RegisterResponse, LoginResponse } from '@shared/types';
 
 export const registerUser = async (data: RegisterPost): Promise<RegisterResponse> => {
     try {
