@@ -2,9 +2,9 @@ import { useCallback, useRef } from 'react';
 import axios from 'axios';
 import { DiceValue } from '../components/gameboard/Dice/Dice';
 
-interface RollResponse {
-  value: DiceValue;
-  message: string;
+export interface RollResponse {
+  value: DiceValue | null;
+  message: string | null;
 }
 
 export function useRollDice() {

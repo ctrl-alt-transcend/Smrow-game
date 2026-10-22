@@ -25,11 +25,11 @@ class GamePhaseContext {
   }
 
   /** The Context delegates part of its behavior to the current State object. */
-  public request1(any: any): void {
-      this.state.handle1(any);
+  public request1(any: any): boolean {
+      return this.state.play(any);
   }
-  public request2(): void {
-      this.state.handle2();
+  public request2(any: any): void {
+      this.state.handle2(any);
   }
 }
 
@@ -46,8 +46,8 @@ abstract class  BasePhase {
   public  setGamePhase( newGamephase: GamePhaseContext ) {
     this.gamephase = newGamephase;
   }
-  public abstract handle1(any: any): void;
-  public abstract handle2(): void;
+  public abstract play(any: any): boolean;
+  public abstract handle2(any: any): void;
 }
 
 // Concrete game loop phases
@@ -58,8 +58,9 @@ abstract class  BasePhase {
 class StartingPhase extends BasePhase {
   //private diceRolls: Map<Player.id, Player.firstDice>
 
-  public handle1(p: Player): void {
+  public play(p: Player): boolean {
       console.log('StartingPhase handles request1.');
+      return true;
 
   }
 
@@ -75,20 +76,30 @@ class StartingPhase extends BasePhase {
 }
 
 class RessourcePhase extends BasePhase {
-  public handle1(): void {
-      console.log('RessourcePhase handles request1.');
+  public play(p: Player): boolean {
+      if(p.firstDice && p.secondDice) {
+        console.log('RessourcePhase: player rolled both dices and is now ready.');
+        return true;
+      }
+      console.log('RessourcePhase: player is not ready');
+      return false;
   }
 
-  public handle2(): void {
+  public handle2(p: Player): void {
+      if(!p.firstDice || !p.secondDice) return;
+      p.firstDice = 0;
+      p.secondDice = 0;
       console.log('RessourcePhase handles request2.');
       console.log('RessourcePhase wants to change the state of the context.');
       this.gamephase.transitionTo(new TradeAndBuildPhase());
+
   }
 }
 
 class TradeAndBuildPhase extends BasePhase {
-  public handle1(): void {
+  public play(p: any): boolean {
       console.log('TradeAndBuildPhase handles request1.');
+      return true;
   }
 
   public handle2(): void {

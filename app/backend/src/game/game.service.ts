@@ -83,63 +83,54 @@ export class GameService {
   }
 
   private loopData: GameLoopData = {
-    firstRoll: 0,
-    secondRoll: 0,
+    firstDice: 0,
+    secondDice: 0,
     roadsBuilt: 0,
     settlementsBuilt: 0
   }
 
-  phase = new GamePhaseContext(new StartingPhase());
+  phase = new GamePhaseContext(new RessourcePhase());
   // --------------------------------
 
-  rollDice(): { value: number } {
-    const value = Math.floor(Math.random() * 6) + 1;
+  resetDices( player: Player ) {
+    player.firstDice = 0;
+    player.secondDice = 0;
+  }
 
-    if (this.loopData.firstRoll === 0) this.loopData.firstRoll = value;
-    else if (this.loopData.secondRoll === 0) this.loopData.secondRoll = value;
+  rollDice(): { value: number | null, message: string | null } {
+    let value: number | null = Math.floor(Math.random() * 6) + 1;
+    let message: string | null = null;
 
-    const count = this.loopData.firstRoll + this.loopData.secondRoll;
-
-    return { value };
+    if (this.tst_plyr.firstDice === 0) this.tst_plyr.firstDice = value;
+    else if (this.tst_plyr.secondDice === 0) this.tst_plyr.secondDice = value;
+    else {
+      value = null;
+      message = 'You already rolled both dices.';
+    }
+    return { value, message };
   }
 
   getLoopData(): GameLoopData {
     return { ...this.loopData };
   }
 
-  rolledDice(): string {
-    if(!this.loopData.firstRoll) {
-      this.loopData.firstRoll = -1;
-      return `First roll with a [${this.loopData.firstRoll}]`;
-    }
-    if(!this.loopData.secondRoll) {
-      this.loopData.secondRoll = -6;
-      return `Second roll with a [${this.loopData.secondRoll}]`;
-    }
-    return `You already rolled your dices, first [${this.loopData.firstRoll}], second [${this.loopData.secondRoll}]`;
-  }
-
   buildRoad(): string {
     //if(this.phase.)
-    if(this.loopData.firstRoll && this.loopData.firstRoll) {
-      this.loopData.firstRoll = 0;
-      this.loopData.secondRoll = 0;
+    if(this.tst_plyr.firstDice && this.tst_plyr.firstDice) {
+      this.tst_plyr.firstDice = 0;
+      this.tst_plyr.secondDice = 0;
     }
     this.loopData.roadsBuilt++;
     return `You built your #${this.loopData.roadsBuilt}th road !`;
   }
 
   buildSettlement(): string {
-    //const game = new GamePhaseContext(new StartingPhase());
-    //game.request1();
-    //game.request2();
-    //game.request2();
-    this.phase.request1(this.tst_plyr);
-    this.phase.request2();
-    this.phase.request2();
-    if(this.loopData.firstRoll && this.loopData.firstRoll) {
-      this.loopData.firstRoll = 0;
-      this.loopData.secondRoll = 0;
+    //this.phase.request1(this.tst_plyr);
+    //this.phase.request2();
+    //this.phase.request2();
+    if(this.tst_plyr.firstDice && this.tst_plyr.firstDice) {
+      this.tst_plyr.firstDice = 0;
+      this.tst_plyr.secondDice = 0;
     }
     this.loopData.settlementsBuilt++;
     return `You built your #${this.loopData.settlementsBuilt}th settlement !`;

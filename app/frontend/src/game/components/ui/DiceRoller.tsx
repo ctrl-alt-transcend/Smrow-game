@@ -2,11 +2,12 @@ import { useState, useCallback, useRef } from 'react';
 import { Card, Text, Stack, Title, Box } from '@mantine/core';
 import { Dice3D, type Dice3DHandle, type DiceValue } from '../gameboard/Dice/Dice';
 import { useGameBoard } from '../../contexts/GameBoardContext';
-import { useRollDice } from '../../hooks/useRollDice';
+import { useRollDice, RollResponse } from '../../hooks/useRollDice';
 
 export function DiceRoller() {
   const [rolledValue, setRolledValue] = useState<DiceValue | null>(null);
   const [pendingCheatValue, setPendingCheatValue] = useState<DiceValue | null>(null);
+  const pendingResultRef = useRef<{ value: DiceValue | null; message: string | null } | null>(null);
   const { updateGamemasterLog } = useGameBoard();
   const { roll } = useRollDice();
   const diceRef = useRef<Dice3DHandle>(null);
@@ -15,6 +16,7 @@ export function DiceRoller() {
     try {
       const result = await roll();
       if (!result) return;
+      pendingResultRef.current = { value: result.value, message: result.message };
       setPendingCheatValue(result.value);
     } catch (err) {
       console.error('Failed to roll dice:', err);
@@ -24,7 +26,9 @@ export function DiceRoller() {
 
   const handleAnimationComplete = useCallback((finalValue: DiceValue) => {
     setRolledValue(finalValue);
-    updateGamemasterLog('You rolled a ' + finalValue);
+    const message =
+    pendingResultRef.current?.message ?? `You rolled a ${finalValue}`;
+    updateGamemasterLog(message);
     setPendingCheatValue(null)
   }, [updateGamemasterLog]);
 
@@ -33,7 +37,6 @@ export function DiceRoller() {
       <Card withBorder radius="md" shadow="sm" h={220}>
         <Stack gap="xs" align="center" justify="center">
           <Title order={4}>Dice box</Title>
-
           <Dice3D
             ref={diceRef}
             size={80}

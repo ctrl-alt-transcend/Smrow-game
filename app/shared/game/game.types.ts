@@ -7,8 +7,8 @@ export type Ressources = {
 }
 
 export type GameLoopData = {
-  firstRoll: number;
-  secondRoll: number;
+  firstDice: number;
+  secondDice: number;
   roadsBuilt: number;
   settlementsBuilt: number;
 }
@@ -19,8 +19,9 @@ export type Player = {
   score: number;
   ressources: Ressources;
   firstDice: number,
-  secondDice: number
+  secondDice: number,
   //color: ""
+  //resetDice(): Function
 }
 
 export type GameState = {
