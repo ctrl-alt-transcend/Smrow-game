@@ -1,9 +1,9 @@
 import {
   GameData,
   Player,
-  RollResponse
+  GameResponse
 } from '../../shared/game/game.types';
-//import { createPlayer } from './game.utils';
+import { initPlayer } from './game.utils';
 
 /**
  * STATE DESIGN PATTERN
@@ -22,7 +22,7 @@ class GameStateContext {
 
   constructor( state: State ) {
     this.game = {              // ✅ Création explicite
-    currentPlayer: 0,
+    whoPlays: 0,
     player: [],
     gameId: '0101010'
   };
@@ -35,30 +35,32 @@ class GameStateContext {
    * - init ressources
    */
   protected initGameData() {
-    this.game.currentPlayer = 0; // will be init in StartingPhase: starting player defined by highest dice roll
+    this.game.whoPlays = 0; // will be init in StartingPhase: starting player defined by highest dice roll
 
     if (!this.game.player[0]) {
-    this.game.player[0] = {
-      playerId: "enriquest",
-      firstDice: 0,
-      secondDice: 0,
-      score: 0,
-      ressources: null,
-      settlementsBuilt: 0,
-      roadsBuilt: 0
-    };
+      this.game.player[0] = initPlayer('enriquest');
+    //this.game.player[0] = {
+    //  playerId: "enriquest",
+    //  firstDice: 0,
+    //  secondDice: 0,
+    //  score: 0,
+    //  ressources: null,
+    //  settlementsBuilt: 0,
+    //  roadsBuilt: 0
+    //};
   }
-  if (!this.game.player[1]) {
-    this.game.player[1] = {
-      playerId: "spagg",
-      firstDice: 0,
-      secondDice: 0,
-      score: 0,
-      ressources: null,
-      settlementsBuilt: 0,
-      roadsBuilt: 0
-    };
-  }
+    if (!this.game.player[1]) {
+      this.game.player[1] = initPlayer('spagg');
+      //this.game.player[1] = {
+      //  playerId: "spagg",
+      //  firstDice: 0,
+      //  secondDice: 0,
+      //  score: 0,
+      //  ressources: null,
+      //  settlementsBuilt: 0,
+      //  roadsBuilt: 0
+      //};
+    }
   }
 
   /** The Context allows changing the State object at runtime. */
@@ -69,7 +71,7 @@ class GameStateContext {
   }
 
   /** The Context delegates part of its behavior to the current State object. */
-  public request1(): RollResponse | any {
+  public request1(): GameResponse | any {
       return this.state.play();
   }
   public request2(): void {
@@ -78,15 +80,15 @@ class GameStateContext {
 
   /** Getters */
   public  getGameData(): GameData { return this.game; }
-  //public  getPhase(): typeof GamePhase { return this.game.phase; }
-  public  getCurrentPlayer(): Player { return this.game.player[this.game.currentPlayer]; }
+  public  getWhoPlays(): Player { return this.game.player[this.game.whoPlays]; }
 
   /** Setters */
-  //public  setPhase( newPhase: typeof GamePhase ) { this.game.phase = newPhase; }
+  public  setWhoPlays( player: number | null ) { player ? this.game.whoPlays = player : this.game.whoPlays++; }
+
 
   /** Checkers */
   public  hasRolledDices(): boolean {
-    const p: Player = this.getCurrentPlayer();
+    const p: Player = this.getWhoPlays();
     if (p.firstDice && p.secondDice) {
       console.log(`hasRolledDices: ${p.playerId} already rolled both dices !`);
       return true;
@@ -108,7 +110,7 @@ abstract class  State {
   public  setGameState( newGameState: GameStateContext ) {
     this.state = newGameState;
   }
-  public abstract play(): RollResponse | any;
+  public abstract play(): GameResponse | any;
   public abstract handle2(): void;
 }
 
@@ -135,14 +137,14 @@ class StartingPhase extends State {
 
 class RessourcePhase extends State
 {
-  public play(): RollResponse {
+  public play(): GameResponse {
     if(this.state.hasRolledDices()) {
       console.log('RessourcePhase: player rolled both dices and is now ready.');
     }
     else {
-      console.log(`RessourcePhase: ${this.state.getCurrentPlayer().playerId} just rolled a dice`);
+      console.log(`RessourcePhase: ${this.state.getWhoPlays().playerId} just rolled a dice`);
     }
-    return this.rollDice(this.state.getCurrentPlayer())
+    return this.rollDice(this.state.getWhoPlays())
   }
 
   public handle2(): void {
@@ -157,7 +159,7 @@ class RessourcePhase extends State
   }
 
   private rollDice( player: Player ): { value: number | null, message: string | null } {
-  //private rollDice( player: Player ): RollResponse {
+  //private rollDice( player: Player ): GameResponse {
     let value: number | null = Math.floor(Math.random() * 6) + 1;
     let message: string | null = null;
 

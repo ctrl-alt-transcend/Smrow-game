@@ -44,12 +44,12 @@ export type GameState = {
 // test copy of GameState to implement in GameStateContext
 export type GameData = {
   //playerTurn: string;
-  currentPlayer: number;
+  whoPlays: number;
   gameId: string;
   player: Player[];
 }
 
-export interface RollResponse {
+export interface GameResponse {
   value: number | null;
   message: string | null;
 }

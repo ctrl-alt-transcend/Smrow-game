@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import type {
   GameState,
   Player,
-  RollResponse
+  GameResponse
 } from '../../shared/game/game.types';
 import {
   GameStateContext,
@@ -109,7 +109,7 @@ export class GameService {
   game = new GameStateContext(new RessourcePhase());
 
   rollDice(): { value: number | null, message: string | null } {
-    let response: RollResponse = this.game.request1();
+    let response: GameResponse = this.game.request1();
     //this.game.request2();
     return { value: response.value, message: response.message };
   }
