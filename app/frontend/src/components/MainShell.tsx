@@ -28,7 +28,7 @@ export default function MainShell()
       });
       clearAuthMessage();
     }
-  }, [authMessage]);
+  }, [authMessage, clearAuthMessage]);
 
   if (user) return <Navigate to="/home" replace />;
 
@@ -92,11 +92,11 @@ export default function MainShell()
           <LoginPanel/>          
       </AppShell.Aside>
       
-      <AppShell.Footer>
+      {/* <AppShell.Footer>
         <Text>
           Lorem ipsum dolor sit, amet consectetur adipisicing elit. Deserunt aliquam aut quis ad, fuga impedit eveniet obcaecati nesciunt atque accusantium voluptatum harum sit voluptates molestias tenetur molestiae assumenda itaque deleniti!
         </Text>
-      </AppShell.Footer>
+      </AppShell.Footer> */}
 
     </AppShell>
   );

@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from "react-router";
+import { createBrowserRouter } from "react-router";
 
 import GameShell from '../game/GameShell';
 import AppLayout from "../layouts/AppLayout";

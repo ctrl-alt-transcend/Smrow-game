@@ -7,7 +7,7 @@ import Chat from '../components/home/Chat';
 
 
 export default function HomePage(){
-		const { register, login, user, logout, loading } = useAuth();
+		const { user } = useAuth();
 
 	return (
 	<>

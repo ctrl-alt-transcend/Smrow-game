@@ -6,7 +6,7 @@ import MessageItem from "./MessageItem";
 
 export default function Chat(){
 
-    const { register, login, user, logout, loading } = useAuth();
+    const { user } = useAuth();
 	const [draft, setDraft] = useState('');
 	const [messages, setMessages] = useState(initialMessages);
 

@@ -10,7 +10,6 @@ import {
 } from '@tabler/icons-react';
 import cx from 'clsx';
 import {
-  Avatar,
   Burger,
   Container,
   Divider,
