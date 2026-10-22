@@ -14,6 +14,8 @@ import { useEffect } from 'react';
 import { Navigate } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
 
+import '@mantine/notifications/styles.css';
+
 export default function MainShell()
 {
   
