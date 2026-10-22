@@ -2,6 +2,7 @@ import type {
   Player
 } from '../../shared/game/game.types';
 
+//TODO: use PlayerProfile instead of playerId
 export function createPlayer( playerId: string ): Player {
     return {
       playerId: playerId,
@@ -10,6 +11,9 @@ export function createPlayer( playerId: string ): Player {
       secondDice: 0,
       settlementsBuilt: 0,
       roadsBuilt: 0,
+      level: 1,
+      username: "Username", // TODO: change this for username
+      avatarURL: null,
       ressources: {
         wood: 0,
         brick: 0,

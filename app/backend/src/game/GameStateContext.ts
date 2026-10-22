@@ -39,24 +39,30 @@ class GameStateContext {
 
     if (!this.game.player[0]) {
     this.game.player[0] = {
-      playerId: "enriquest",
+      playerId: "enriquest", //TODO: change this for id
+      username: "enriquest",
       firstDice: 0,
       secondDice: 0,
       score: 0,
       ressources: null,
       settlementsBuilt: 0,
-      roadsBuilt: 0
+      roadsBuilt: 0,
+      level: 1,
+      avatarURL: null
     };
   }
   if (!this.game.player[1]) {
     this.game.player[1] = {
-      playerId: "spagg",
+      username: "spagg",
+      playerId: "spagg", //TODO: change this for id
       firstDice: 0,
       secondDice: 0,
       score: 0,
       ressources: null,
       settlementsBuilt: 0,
-      roadsBuilt: 0
+      roadsBuilt: 0,
+      level: 1,
+      avatarURL: null
     };
   }
   }

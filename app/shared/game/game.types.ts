@@ -20,6 +20,7 @@ export type Player = {
   playerId: string;
   username: string;
   score: number;
+  level: number;
   ressources: Ressources | null;
   firstDice: number,
   secondDice: number,
@@ -49,6 +50,8 @@ export type PlayerProfile = {
   username: string;
   //level: number;
   avatarURL: string | null;
+}
+
 // test copy of GameState to implement in GameStateContext
 export type GameData = {
   //playerTurn: string;

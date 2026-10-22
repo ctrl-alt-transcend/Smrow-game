@@ -1,10 +1,10 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { GameState, Player, Ressources, PlayerProfile } from '../../shared/game/game.types';
 import type {
   GameState,
   Player,
-  RollResponse
+  RollResponse,
+  PlayerProfile,
 } from '../../shared/game/game.types';
 import {
   GameStateContext,
@@ -37,7 +37,6 @@ export class GameService {
     }
     this.addPlayerToGame(gameId, playerProfile);
   }
-
 
   private getGameState(gameId: string): GameState  {
     const game = this.gamesMap.get(gameId);
@@ -77,13 +76,9 @@ export class GameService {
   }
 
 
-  private createPlayer(playerProfile: PlayerProfile) : Player {
-    return ({
-      playerId: playerProfile.id,
-
-  private createPlayer(playerId: string): Player {
+  private createPlayer(playerProfile: PlayerProfile): Player {
     return {
-      playerId: playerId,
+      playerId: playerProfile.id,
       score: 0,
       firstDice: 0,
       secondDice: 0,
@@ -97,7 +92,6 @@ export class GameService {
         rock: 0,
       },
       level: 1, //TODO: add a level system to the game
-      score: 0,
       username: playerProfile.username,
       avatarURL: playerProfile.avatarURL
       //avatar: playerProfile.avatarPath
