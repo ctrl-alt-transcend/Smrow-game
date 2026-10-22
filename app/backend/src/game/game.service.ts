@@ -4,14 +4,14 @@ import type {
   GameState,
   Player,
   Ressources,
-  GameLoopData
+  RollResponse
 } from '../../shared/game/game.types';
 import {
-  GamePhaseContext,
+  GameStateContext,
   StartingPhase,
   RessourcePhase,
   TradeAndBuildPhase
-} from './game.context';
+} from './GameStateContext';
 
 @Injectable()
 export class GameService {
@@ -42,6 +42,11 @@ export class GameService {
   private createPlayer(playerId: string): Player {
     return {
       playerId: playerId,
+      score: 0,
+      firstDice: 0,
+      secondDice: 0,
+      settlementsBuilt: 0,
+      roadsBuilt: 0,
       ressources: {
         wood: 0,
         brick: 0,
@@ -49,9 +54,6 @@ export class GameService {
         sheep: 0,
         rock: 0,
       },
-      score: 0,
-      firstDice: 0,
-      secondDice: 0
       //color TODO: add color to player
     };
   }
@@ -74,66 +76,71 @@ export class GameService {
     rock: 0
   }
 
-  private tst_plyr: Player = {
-    playerId: 'test',
-    score: 0,
-    ressources: this.tst_inventory,
-    firstDice: 0,
-    secondDice: 0
-  }
+  //private tst_plyr: Player = {
+  //  playerId: 'test',
+  //  score: 0,
+  //  ressources: this.tst_inventory,
+  //  firstDice: 0,
+  //  secondDice: 0
+  //}
 
-  private loopData: GameLoopData = {
-    firstDice: 0,
-    secondDice: 0,
-    roadsBuilt: 0,
-    settlementsBuilt: 0
-  }
+  //private loopData: GameLoopData = {
+  //  firstDice: 0,
+  //  secondDice: 0,
+  //  roadsBuilt: 0,
+  //  settlementsBuilt: 0
+  //}
 
-  phase = new GamePhaseContext(new RessourcePhase());
+  game = new GameStateContext(new RessourcePhase());
   // --------------------------------
 
-  resetDices( player: Player ) {
-    player.firstDice = 0;
-    player.secondDice = 0;
-  }
-
   rollDice(): { value: number | null, message: string | null } {
-    let value: number | null = Math.floor(Math.random() * 6) + 1;
-    let message: string | null = null;
-
-    if (this.tst_plyr.firstDice === 0) this.tst_plyr.firstDice = value;
-    else if (this.tst_plyr.secondDice === 0) this.tst_plyr.secondDice = value;
-    else {
-      value = null;
-      message = 'You already rolled both dices.';
-    }
-    return { value, message };
+    let response: RollResponse = this.game.request1();
+    return { value: response.value, message: response.message };
   }
 
-  getLoopData(): GameLoopData {
-    return { ...this.loopData };
-  }
+  //resetDices( player: Player ) {
+  //  player.firstDice = 0;
+  //  player.secondDice = 0;
+  //}
 
-  buildRoad(): string {
-    //if(this.phase.)
-    if(this.tst_plyr.firstDice && this.tst_plyr.firstDice) {
-      this.tst_plyr.firstDice = 0;
-      this.tst_plyr.secondDice = 0;
-    }
-    this.loopData.roadsBuilt++;
-    return `You built your #${this.loopData.roadsBuilt}th road !`;
-  }
+  //rollDice(): { value: number | null, message: string | null } {
+  //  let value: number | null = Math.floor(Math.random() * 6) + 1;
+  //  let message: string | null = null;
 
-  buildSettlement(): string {
-    //this.phase.request1(this.tst_plyr);
-    //this.phase.request2();
-    //this.phase.request2();
-    if(this.tst_plyr.firstDice && this.tst_plyr.firstDice) {
-      this.tst_plyr.firstDice = 0;
-      this.tst_plyr.secondDice = 0;
-    }
-    this.loopData.settlementsBuilt++;
-    return `You built your #${this.loopData.settlementsBuilt}th settlement !`;
-  }
+  //  if (this.tst_plyr.firstDice === 0) this.tst_plyr.firstDice = value;
+  //  else if (this.tst_plyr.secondDice === 0) this.tst_plyr.secondDice = value;
+  //  else {
+  //    value = null;
+  //    message = 'You already rolled both dices.';
+  //  }
+  //  return { value, message };
+  //}
+
+  //getLoopData(): GameLoopData {
+  //  return { ...this.loopData };
+  //}
+
+  //buildRoad(): string {
+  //  //if(this.phase.)
+  //  if(this.tst_plyr.firstDice && this.tst_plyr.firstDice) {
+  //    this.tst_plyr.firstDice = 0;
+  //    this.tst_plyr.secondDice = 0;
+  //  }
+  //  this.loopData.roadsBuilt++;
+  //  return `You built your #${this.loopData.roadsBuilt}th road !`;
+  //}
+
+  //buildSettlement(): string {
+  //  //this.phase.request1(this.tst_plyr);
+  //  //this.phase.request2();
+  //  //this.phase.request2();
+  //  if(this.tst_plyr.firstDice && this.tst_plyr.firstDice) {
+  //    this.tst_plyr.firstDice = 0;
+  //    this.tst_plyr.secondDice = 0;
+  //  }
+  //  this.loopData.settlementsBuilt++;
+  //  return `You built your #${this.loopData.settlementsBuilt}th settlement !`;
+  //}
 
 }

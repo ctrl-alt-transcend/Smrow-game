@@ -15,7 +15,7 @@ import type { ButtonHTMLAttributes, CSSProperties } from 'react';
  * ================================================================ */
 
 /** Les six faces possibles du dé. */
-type DiceValue = 1 | 2 | 3 | 4 | 5 | 6;
+export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6;
 
 /**
  * Positionnement du dé par rapport à son conteneur.
@@ -478,4 +478,4 @@ const animateCheat = useCallback(
   }
 );
 
-export { Dice3D, Dice3DHandle, DiceValue };
+export { Dice3D, Dice3DHandle };

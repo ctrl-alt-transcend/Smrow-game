@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { Card, Text, Stack, Title, Box } from '@mantine/core';
 import { Dice3D, type Dice3DHandle, type DiceValue } from '../gameboard/Dice/Dice';
 import { useGameBoard } from '../../contexts/GameBoardContext';
-import { useRollDice, RollResponse } from '../../hooks/useRollDice';
+import { useRollDice } from '../../hooks/useRollDice';
 
 export function DiceRoller() {
   const [rolledValue, setRolledValue] = useState<DiceValue | null>(null);

@@ -11,15 +11,15 @@ export class GameController {
     return this.GameService.createGame();
   }
 
-  @Get('road')
-  getRoad() {
-    return { message: this.GameService.buildRoad() };
-  }
+  //@Get('road')
+  //getRoad() {
+  //  return { message: this.GameService.buildRoad() };
+  //}
 
-  @Get('settlement')
-  getSettlement() {
-    return { message: this.GameService.buildSettlement() };
-  }
+  //@Get('settlement')
+  //getSettlement() {
+  //  return { message: this.GameService.buildSettlement() };
+  //}
 
    @Post('dice/roll')
   async rollDice(@Body() dto: RollDiceDto) {
@@ -27,8 +27,8 @@ export class GameController {
     return { ...result };
   }
 
-  @Get('dice/stats')
-  getStats() {
-    return this.GameService.getLoopData();
-  }
+  //@Get('dice/stats')
+  //getStats() {
+  //  return this.GameService.getLoopData();
+  //}
 }

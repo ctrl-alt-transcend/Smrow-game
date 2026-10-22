@@ -1,11 +1,8 @@
 import { useCallback, useRef } from 'react';
 import axios from 'axios';
 import { DiceValue } from '../components/gameboard/Dice/Dice';
+import { RollResponse } from '../../../../shared/game/game.types';
 
-export interface RollResponse {
-  value: DiceValue | null;
-  message: string | null;
-}
 
 export function useRollDice() {
   const abortRef = useRef<AbortController | null>(null);
