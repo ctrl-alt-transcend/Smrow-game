@@ -1,15 +1,31 @@
-import { Controller, Post, Get, Body } from '@nestjs/common';
+import { Controller, Post, Get, UseGuards, Req, Body } from '@nestjs/common';
 import { GameService } from './game.service';
-import { RollDiceDto } from './dto/roll-dice.dto';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import type { GameState } from '../../shared/game/game.types';
+import type { UserPublic } from '../../shared/types';
+import type { RollDiceDto } from './dto/roll-dice.dto';
 
 @Controller('game')
 export class GameController {
-  constructor(private readonly GameService: GameService) {}
+  constructor(private readonly gameService: GameService) {}
 
-  @Post('/create_game')
-  createGame(): string {
-    return this.GameService.createGame();
+  @Post('/create')
+  @UseGuards(JwtAuthGuard)
+  async createGame(@Req() req: { user: UserPublic })  {
+    return this.gameService.createGame(req.user.id);
   }
+
+  @Post('/join')
+  @UseGuards(JwtAuthGuard)
+  async joingame(@Req() req: { user: UserPublic }, @Body('gameId') gameId: string) {
+    return this.gameService.joinGame(req.user.id, gameId);
+  }
+
+  @Get('/currentGame')
+  @UseGuards(JwtAuthGuard)
+  async findGameByJwt(@Req() req: { user: UserPublic }): Promise<GameState> {
+    return this.gameService.getGameStateByUserId(req.user.id);
+  };
 
   //@Get('road')
   //getRoad() {
@@ -23,7 +39,7 @@ export class GameController {
 
   @Post('dice/roll')
   async rollDice(@Body() dto: RollDiceDto) {
-    const result = this.GameService.rollDice();
+    const result = this.gameService.rollDice();
     return { ...result };
   }
 

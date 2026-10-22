@@ -3,13 +3,13 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  MessageBody,
   OnGatewayInit,
 } from '@nestjs/websockets';
+import { JwtService } from '@nestjs/jwt';
 import { GameService } from './game.service';
 import { Server, Socket } from 'socket.io';
-import type { RoomData } from '../../shared/game/websockets.types';
 import { instrument } from '@socket.io/admin-ui';
+import type {GameState} from '../../shared/game/game.types';
 
 @WebSocketGateway(3001, {
   cors: {
@@ -18,7 +18,11 @@ import { instrument } from '@socket.io/admin-ui';
   }, //WARN: dev only
 })
 export class GameGateway implements OnGatewayInit {
-  constructor(private readonly gameService: GameService) {}
+
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly gameService: GameService,
+  ) {}
 
   @WebSocketServer() server: Server;
 
@@ -26,38 +30,35 @@ export class GameGateway implements OnGatewayInit {
     instrument(server, { auth: false, mode: 'development' });
   }
 
-  // @SubscribeMessage('message')
-  // handleMessage(client: any, payload: any): string {
-  //   console.log('Received message:', payload);
-  //   return 'Hello world!';
-  // }
 
   @SubscribeMessage('joinRoom')
-  handleJoinRoom(
-    @MessageBody() roomData: RoomData,
-    @ConnectedSocket() client: Socket,
-  ) {
-    console.log('room info: ', roomData);
-
-    if (
-      this.gameService.addPlayerToGame(roomData.room, roomData.playerId) ==
-      false
-    ) {
-      console.log(`Game with id ${roomData.room} not found`);
-      return;
-      //TODO: send an error and disconnect the client
+  async handleJoinRoom(@ConnectedSocket() client: Socket) {
+    const userId = client.data.user.id;
+    try {
+      const gameState = this.gameService.getGameStateByUserId(userId)
+      await client.join(gameState.gameId);
+      return { ok: true, data: gameState };
     }
-    client.broadcast
-      .to(roomData.room)
-      .emit('message', `new client joined the room ${roomData.room}`);
-    return { ok: true, room: roomData.room };
+    catch {
+      return { ok: false, error: "not in game" };
+    }
   }
 
-  handleConnection(client: Socket) {
-    //TODO: check if the client exists in database
-    //TODO: check if the client already joined a room
 
-    console.log('Client connected with clienID: ', client.id);
-    client.emit('message', 'Welcome to the game server!');
+  handleConnection(client: Socket) { //TODO: Use middleware to check the token before the connection is established "next()"
+    try {
+      console.log('Client connected:', client.id);
+      const token = client.handshake.auth.token;
+      const payload = this.jwtService.verify(token);
+      client.data.user = {id: payload.sub};
+    }
+    catch {
+      console.log('Client connection rejected:', client.id);
+      client.disconnect(true); //WARN: what happens in the frontend ?
+      //TODO: remove player of the GameStat
+      return ; //TEST: remove this line
+    }
+
+    client.emit('message', 'Welcome to the game server!'); //TEST: remove this line
   }
 }
