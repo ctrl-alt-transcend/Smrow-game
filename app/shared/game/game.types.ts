@@ -27,13 +27,13 @@ export type Player = {
   //color: ""
 }
 
-export const GamePhase = {
-  INIT: 'init phase',
-  START: 'starting phase',
-  RESSOURCE: 'ressource phase',
-  TRADE_BUILD: 'trade and build phase',
-  END: 'end phase'
-} as const
+//export const GamePhase = {
+//  INIT: 'init phase',
+//  START: 'starting phase',
+//  RESSOURCE: 'ressource phase',
+//  TRADE_BUILD: 'trade and build phase',
+//  END: 'end phase'
+//} as const
 
 export type GameState = {
   gameId: string;

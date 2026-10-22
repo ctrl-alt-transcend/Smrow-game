@@ -21,14 +21,10 @@ export class GameController {
   //  return { message: this.GameService.buildSettlement() };
   //}
 
-   @Post('dice/roll')
+  @Post('dice/roll')
   async rollDice(@Body() dto: RollDiceDto) {
     const result = this.GameService.rollDice();
     return { ...result };
   }
 
-  //@Get('dice/stats')
-  //getStats() {
-  //  return this.GameService.getLoopData();
-  //}
 }

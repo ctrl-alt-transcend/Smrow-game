@@ -3,14 +3,11 @@ import { randomUUID } from 'crypto';
 import type {
   GameState,
   Player,
-  Ressources,
   RollResponse
 } from '../../shared/game/game.types';
 import {
   GameStateContext,
-  StartingPhase,
-  RessourcePhase,
-  TradeAndBuildPhase
+  RessourcePhase
 } from './GameStateContext';
 
 @Injectable()
@@ -67,55 +64,14 @@ export class GameService {
   //   });
   // }
 
-  // "hardcoded" for tetsing purpose
-  private tst_inventory: Ressources = {
-    wood: 0,
-    brick: 0,
-    hay: 0,
-    sheep: 0,
-    rock: 0
-  }
-
-  //private tst_plyr: Player = {
-  //  playerId: 'test',
-  //  score: 0,
-  //  ressources: this.tst_inventory,
-  //  firstDice: 0,
-  //  secondDice: 0
-  //}
-
-  //private loopData: GameLoopData = {
-  //  firstDice: 0,
-  //  secondDice: 0,
-  //  roadsBuilt: 0,
-  //  settlementsBuilt: 0
-  //}
-
-  game = new GameStateContext(new RessourcePhase());
   // --------------------------------
+  game = new GameStateContext(new RessourcePhase());
 
   rollDice(): { value: number | null, message: string | null } {
     let response: RollResponse = this.game.request1();
+    //this.game.request2();
     return { value: response.value, message: response.message };
   }
-
-  //resetDices( player: Player ) {
-  //  player.firstDice = 0;
-  //  player.secondDice = 0;
-  //}
-
-  //rollDice(): { value: number | null, message: string | null } {
-  //  let value: number | null = Math.floor(Math.random() * 6) + 1;
-  //  let message: string | null = null;
-
-  //  if (this.tst_plyr.firstDice === 0) this.tst_plyr.firstDice = value;
-  //  else if (this.tst_plyr.secondDice === 0) this.tst_plyr.secondDice = value;
-  //  else {
-  //    value = null;
-  //    message = 'You already rolled both dices.';
-  //  }
-  //  return { value, message };
-  //}
 
   //getLoopData(): GameLoopData {
   //  return { ...this.loopData };
