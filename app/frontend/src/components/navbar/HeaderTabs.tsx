@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   IconChevronDown,
   IconHeart,
@@ -7,8 +7,8 @@ import {
   IconSettings,
   IconStar,
   IconSwitchHorizontal,
-} from '@tabler/icons-react';
-import cx from 'clsx';
+} from "@tabler/icons-react";
+import cx from "clsx";
 import {
   Burger,
   Container,
@@ -21,12 +21,12 @@ import {
   Text,
   UnstyledButton,
   useMantineTheme,
-} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import classes from './HeaderTabs.module.css';
-import { Link, useLocation } from 'react-router';
-import { navLinks } from './navLinks';
-import { useAuth } from '../../hooks/useAuth'
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import classes from "./HeaderTabs.module.css";
+import { Link, useLocation } from "react-router";
+import { navLinks } from "./navLinks";
+import { useAuth } from "../../hooks/useAuth";
 
 // const user = {
 //   name: 'Mr. Goblin',
@@ -42,15 +42,14 @@ export function HeaderTabs() {
 
   const { user, logout } = useAuth();
 
-  const handleLogout = (async () => {
+  const handleLogout = async () => {
     try {
       logout();
       localStorage.clear();
     } catch (errorMessage: any) {
       console.error(errorMessage);
     }
-  });
-
+  };
 
   return (
     <div className={classes.header}>
@@ -64,7 +63,7 @@ export function HeaderTabs() {
                 key={link.to}
                 component={Link}
                 to={link.to}
-                variant={location.pathname === link.to ? 'light' : 'subtle'}
+                variant={location.pathname === link.to ? "light" : "subtle"}
               >
                 {link.label}
               </Button>
@@ -82,14 +81,16 @@ export function HeaderTabs() {
           <Menu
             width={260}
             position="bottom-end"
-            transitionProps={{ transition: 'pop-top-right' }}
+            transitionProps={{ transition: "pop-top-right" }}
             onClose={() => setUserMenuOpened(false)}
             onOpen={() => setUserMenuOpened(true)}
             withinPortal
           >
             <Menu.Target>
               <UnstyledButton
-                className={cx(classes.user, { [classes.userActive]: userMenuOpened })}
+                className={cx(classes.user, {
+                  [classes.userActive]: userMenuOpened,
+                })}
               >
                 <Group gap={7}>
                   {/* <Avatar src={user.image} alt="" radius="xl" size={20} /> */}
@@ -102,17 +103,35 @@ export function HeaderTabs() {
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Item
-                leftSection={<IconHeart size={16} color={theme.colors.red[6]} stroke={1.5} />}
+                leftSection={
+                  <IconHeart
+                    size={16}
+                    color={theme.colors.red[6]}
+                    stroke={1.5}
+                  />
+                }
               >
                 Liked posts
               </Menu.Item>
               <Menu.Item
-                leftSection={<IconStar size={16} color={theme.colors.yellow[6]} stroke={1.5} />}
+                leftSection={
+                  <IconStar
+                    size={16}
+                    color={theme.colors.yellow[6]}
+                    stroke={1.5}
+                  />
+                }
               >
                 Saved posts
               </Menu.Item>
               <Menu.Item
-                leftSection={<IconMessage size={16} color={theme.colors.blue[6]} stroke={1.5} />}
+                leftSection={
+                  <IconMessage
+                    size={16}
+                    color={theme.colors.blue[6]}
+                    stroke={1.5}
+                  />
+                }
               >
                 Your comments
               </Menu.Item>
@@ -121,10 +140,17 @@ export function HeaderTabs() {
               <Menu.Item leftSection={<IconSettings size={16} stroke={1.5} />}>
                 Account settings
               </Menu.Item>
-              <Menu.Item leftSection={<IconSwitchHorizontal size={16} stroke={1.5} />}>
+              <Menu.Item
+                leftSection={<IconSwitchHorizontal size={16} stroke={1.5} />}
+              >
                 Change account
               </Menu.Item>
-              <Menu.Item onClick={handleLogout} leftSection={<IconLogout size={16} stroke={1.5} />}>Logout</Menu.Item>
+              <Menu.Item
+                onClick={handleLogout}
+                leftSection={<IconLogout size={16} stroke={1.5} />}
+              >
+                Logout
+              </Menu.Item>
             </Menu.Dropdown>
           </Menu>
         </Group>
