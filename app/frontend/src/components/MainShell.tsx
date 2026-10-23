@@ -79,8 +79,6 @@ export default function MainShell() {
           Duis imperdiet enim vitae augue venenatis, a rhoncus magna egestas.
           Nam id eleifend ligula, in iaculis velit.
         </Text>
-
-        <GenericButton label="PLAY DA GAME" h={150} mt={30} mb={30} />
       </AppShell.Main>
 
       <AppShell.Aside
