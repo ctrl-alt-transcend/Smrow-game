@@ -18,10 +18,10 @@ http.interceptors.response.use(
     if (error.response?.status === 401 && token) {
       localStorage.removeItem("access_token");
       authEvents.dispatchEvent(
-      new CustomEvent("logout", {
-        detail: "You session has expired.",
-      }),
-    );
+        new CustomEvent("logout", {
+          detail: "You session has expired.",
+        }),
+      );
     }
     return Promise.reject(error);
   },

@@ -1,4 +1,3 @@
-import GenericButton from "./buttons/GenericButton";
 import CardImage from "./Card";
 import { LoginPanel } from "./authentification/LoginPanel";
 import { AppShell, BackgroundImage, Group, Text, Title } from "@mantine/core";
