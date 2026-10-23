@@ -4,7 +4,8 @@ import { Dice3D, type Dice3DHandle, type DiceValue } from '../gameboard/Dice/Dic
 import { useGameBoard } from '../../contexts/GameBoardContext';
 import { useRollDice } from '../../hooks/useRollDice';
 
-export function DiceRoller() {
+
+export function DiceRoller({diceValue, masterLog}: { diceValue: number | null ; masterLog: string | null }) {
   const [rolledValue, setRolledValue] = useState<DiceValue | null>(null);
   const [pendingCheatValue, setPendingCheatValue] = useState<DiceValue | null>(null);
   const pendingResultRef = useRef<{ value: DiceValue | null; message: string | null } | null>(null);
@@ -12,17 +13,19 @@ export function DiceRoller() {
   const { roll } = useRollDice();
   const diceRef = useRef<Dice3DHandle>(null);
 
+
   const handleRoll = useCallback(async () => {
     try {
-      const result = await roll();
-      if (!result) return;
-      pendingResultRef.current = { value: result.value, message: result.message };
-      setPendingCheatValue(result.value);
+      // const result = await roll();
+      // if (!result) return;
+      await roll();
+      pendingResultRef.current = { value: diceValue, message: masterLog };
+      setPendingCheatValue(diceValue);
     } catch (err) {
       console.error('Failed to roll dice:', err);
       updateGamemasterLog('Error rolling dice');
     }
-  }, [roll, updateGamemasterLog]);
+  }, [roll, updateGamemasterLog, diceValue, masterLog]);
 
   const handleAnimationComplete = useCallback((finalValue: DiceValue) => {
     setRolledValue(finalValue);

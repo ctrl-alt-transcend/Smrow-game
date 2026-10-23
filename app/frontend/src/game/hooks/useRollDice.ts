@@ -1,7 +1,5 @@
 import { useCallback, useRef } from 'react';
 import { socket } from '../../socket';
-import axios from 'axios';
-import type { DiceValue } from '../components/gameboard/Dice/Dice';
 import type { RollResponse } from '@shared/game/game.types';
 
 
@@ -11,14 +9,14 @@ export function useRollDice() {
   const roll = useCallback(async (): Promise<RollResponse | null> => {
     abortRef.current?.abort();
     const ac = new AbortController();
-    abortRef.current = ac;
+    abortRef.current = ac; //OPTIM: Do you still need the signals, given that they don’t seem to be used any more ?
+    socket.emit('rollDice');
 
-    const response: RollResponse = await socket.emitWithAck('rollDice');
-
-    return response;
+    // const response: RollResponse = await socket.emitWithAck('rollDice');
+    // return response; //TODO: remove the response and set the result in gameState
     }, []);
 
-    // try {
+  //   try {
   //     const response = await axios.post<RollResponse>(
   //       '/api/game/dice/roll',
   //       {},

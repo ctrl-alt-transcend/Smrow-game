@@ -42,6 +42,8 @@ export type GameState = {
   gameId: string;
   players: Player[];
   playerTurn: string;
+  diceRoll: number | null;
+  masterLog: string | null;
 }
 
 //INFO: data we need to colect from the database when a client join a game

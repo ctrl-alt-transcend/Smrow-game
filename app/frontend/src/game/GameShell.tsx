@@ -36,7 +36,7 @@ export default function FullLayout() {
       <AppShell.Navbar p="md">
         <Group grow gap="md" w="100%" align="center" justify="center">
           <TileSelection selected={GameBoardProps.selected} />
-          <DiceRoller />
+          <DiceRoller diceValue={game.diceRoll} masterLog={game.masterLog}/>
         </Group>
       </AppShell.Navbar>
         <AppShell.Main>

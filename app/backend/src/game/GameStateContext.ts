@@ -162,15 +162,15 @@ class RessourcePhase extends State
     player.secondDice = 0;
   }
 
-  private rollDice( player: Player ): { value: number | null, message: string | null } {
+  private rollDice( player: Player ): { value: number, message: string} {
   //private rollDice( player: Player ): RollResponse {
-    let value: number | null = Math.floor(Math.random() * 6) + 1;
-    let message: string | null = null;
+    let value: number = Math.floor(Math.random() * 6) + 1;
+    let message: string = "";
 
     if (player.firstDice === 0) player.firstDice = value;
     else if (player.secondDice === 0) player.secondDice = value;
     else {
-      value = null;
+      value = 0;
       message = `You(${player.playerId}) already rolled both dices.`;
     }
     return { value, message };

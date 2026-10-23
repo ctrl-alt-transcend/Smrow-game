@@ -26,7 +26,7 @@ export class GameService {
     }
     const gameId = randomUUID();
 
-    this.gamesMap.set(gameId, { gameId: gameId, players: [], playerTurn: '' });
+    this.gamesMap.set(gameId, { gameId: gameId, players: [], playerTurn: '', diceRoll: 0, masterLog: '' });
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
   }
@@ -60,7 +60,14 @@ export class GameService {
     return this.gamesMap.get(gameId) as GameState;
   }
 
+  getGameId(playerId: string): string {
+    const gameId = this.playersMap.get(playerId);
+    if (!gameId) {
+      throw new NotFoundException(`Player with id ${playerId} is not in a game`);
+    }
 
+    return gameId;
+  }
 
   /**
    * @brief Create a new instance of the Player class, initialise it and add it to both maps
@@ -94,7 +101,6 @@ export class GameService {
       level: 1, //TODO: add a level system to the game
       username: playerProfile.username,
       avatarURL: playerProfile.avatarURL
-      //avatar: playerProfile.avatarPath
       //color TODO: add color to player
     };
   }
@@ -111,7 +117,7 @@ export class GameService {
   // --------------------------------
   game = new GameStateContext(new RessourcePhase());
 
-  rollDice(): { value: number | null, message: string | null } {
+  rollDice(): { value: number | null , message: string | null } {
     let response: RollResponse = this.game.request1();
     //this.game.request2();
     return { value: response.value, message: response.message };

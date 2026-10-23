@@ -1,10 +1,9 @@
-import { Controller, Post, Get, UseGuards, Req, Body } from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Body } from '@nestjs/common';
 import { GameService } from './game.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
-import type { GameState, PlayerProfile } from '@shared/game/game.types';
+import type { PlayerProfile } from '@shared/game/game.types';
 import type { UserPublic } from '@shared/types';
-import type { RollDiceDto } from './dto/roll-dice.dto';
 
 @Controller('game')
 export class GameController {
@@ -27,26 +26,30 @@ export class GameController {
     return this.gameService.joinGame(playerProfile, gameId);
   }
 
-  @Get('/currentGame')
-  @UseGuards(JwtAuthGuard)
-  async findGameByJwt(@Req() req: { user: UserPublic }): Promise<GameState> {
-    return this.gameService.getGameStateByUserId(req.user.id);
-  };
+  //TODO: check id this endpoint is needed ?
+  // @Get('/currentGame')
+  // @UseGuards(JwtAuthGuard)
+  // async findGameByJwt(@Req() req: { user: UserPublic }): Promise<GameState> {
+  //   return this.gameService.getGameStateByUserId(req.user.id);
+  // };
 
+  //TODO: Implement this with websockets
   //@Get('road')
   //getRoad() {
   //  return { message: this.GameService.buildRoad() };
   //}
 
+  //TODO: Implement this with websockets
   //@Get('settlement')
   //getSettlement() {
   //  return { message: this.GameService.buildSettlement() };
   //}
 
-  @Post('dice/roll')
-  async rollDice(@Body() dto: RollDiceDto) {
-    const result = this.gameService.rollDice();
-    return { ...result };
-  }
-
+  //TODO: delete `roll-dice.dto` if this controller is not used
+  // @Post('dice/roll')
+  // async rollDice(@Body() dto: RollDiceDto) {
+  //   const result = this.gameService.rollDice();
+  //   return { ...result };
+  // }
+  //
 }

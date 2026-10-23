@@ -33,11 +33,22 @@ export class GameGateway implements OnGatewayInit {
   // @SubscribeMessage('gameMasterLog')
 
 
+/**
+ * @brief Handle the 'rollDice' event from the client.
+ * @details SubscribeMessage is used to listen for the 'rollDice' event.
+ *          ConnectedSocket decorator is used to get the socket of the client that sent the event.
+ *          client.to(gameId).emit('diceRolled', result) is used to send the result of the dice roll to all clients in the same game.
+ */
   @SubscribeMessage('rollDice')
     async rollDice(@ConnectedSocket() client: Socket) {
+    const gameState = this.gameService.getGameStateByUserId(client.data.user.id);
     const result = this.gameService.rollDice();
+
+    gameState.diceRoll = result.value;
+    gameState.masterLog = result.message;
+    client.to(gameState.gameId).emit('gameState'); //INFO: Always return the new gameState to all client in the room
+    //client.broadcast.to(gameState.gameId).emit('diceRolled', );
     return { ...result };
-    client.broadcast.to().emit('diceRolled', result); //INFO: broadcast the result to all players in the game room
   }
 
   @SubscribeMessage('joinRoom')
