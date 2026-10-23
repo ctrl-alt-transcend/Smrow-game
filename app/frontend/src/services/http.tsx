@@ -14,15 +14,14 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (error.response?.status === 401) {
-      if (localStorage.getItem("access_token")) {
-        localStorage.removeItem("access_token");
-        authEvents.dispatchEvent(
-        new CustomEvent("logout", {
-          detail: "You session has expired.",
-        }),
-      );
-      }
+    const token = localStorage.getItem("access_token");
+    if (error.response?.status === 401 && token) {
+      localStorage.removeItem("access_token");
+      authEvents.dispatchEvent(
+      new CustomEvent("logout", {
+        detail: "You session has expired.",
+      }),
+    );
     }
     return Promise.reject(error);
   },

@@ -15,9 +15,11 @@ export default function MainShell() {
 
   useEffect(() => {
     if (authMessage) {
+      const msg = authMessage;
+      clearAuthMessage();
       notifications.show({
         title: "Disconnected",
-        message: authMessage,
+        message: msg,
         color: "Red",
       });
       clearAuthMessage();
