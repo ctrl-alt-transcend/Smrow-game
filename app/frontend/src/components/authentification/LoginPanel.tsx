@@ -149,12 +149,6 @@ export function LoginPanel(props: PaperProps) {
         </form>
       )}
 
-      {/* {error && (
-                <Text c="red" size="sm" mt="xs">
-                    {error}
-                </Text>
-            )} */}
-
       <ErrorMessages error={error} />
 
       <Anchor

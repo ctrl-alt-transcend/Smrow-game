@@ -52,7 +52,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const clearAuthMessage = useCallback(() => setAuthMessage(null), []);
 
-  // Expired token case
   useEffect(() => {
     const handler = (e: Event) => {
       const reason = (e as CustomEvent).detail;

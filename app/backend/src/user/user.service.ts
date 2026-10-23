@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import type { UserProfile } from '../../shared/types';
+import type { UserProfile } from '@shared/types';
 
 @Injectable()
 export class UserService {
