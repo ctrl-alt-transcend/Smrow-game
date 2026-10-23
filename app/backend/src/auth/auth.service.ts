@@ -1,12 +1,8 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bycrypt from 'bcrypt';
-import type { UserPublic, RegisterResponse } from '../../shared/types';
+import type { UserPublic, RegisterResponse } from '@shared/types';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Injectable()
@@ -17,32 +13,27 @@ export class AuthService {
   ) {}
 
   async signUp(recvData: CreateUserDto): Promise<RegisterResponse> {
-    try {
-      recvData.password = await this.hashPassword(recvData.password);
-      const user = await this.userService.create(recvData);
+    recvData.password = await this.hashPassword(recvData.password);
+    const user = await this.userService.create(recvData);
 
-      const { access_token } = await this.createJWTToken({
-        id: user.id,
-        username: String(user.username),
-      });
+    const { access_token } = await this.createJWTToken({
+      id: user.id,
+      username: String(user.username),
+    });
 
-      const userPublic: UserPublic = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      };
+    const userPublic: UserPublic = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    };
 
-      const result: RegisterResponse = {
-        message: 'User created successfully',
-        user: userPublic,
-        access_token: access_token,
-      };
+    const result: RegisterResponse = {
+      message: 'User created successfully',
+      user: userPublic,
+      access_token: access_token,
+    };
 
-      return result;
-    } catch (error: any) {
-      console.log(error);
-      throw new ConflictException('Email already used');
-    }
+    return result;
   }
 
   async getProfile(userId: string) {

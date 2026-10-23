@@ -1,27 +1,27 @@
 FROM node:22-alpine AS dev
-WORKDIR /app
-COPY package*.json ./
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
 RUN npm ci
-COPY --exclude=nginx . .
+COPY --exclude=nginx frontend/ ./
+COPY shared/ /app/shared
 EXPOSE 5173
 ENTRYPOINT ["npm"]
-CMD ["run", "dev"]
+CMD ["run", "dev", "--", "--host", "0.0.0.0"]
 
 FROM node:22-alpine AS builder
-WORKDIR /app
+WORKDIR /app/backend
 COPY --exclude=config --from=dev /app ./
 COPY --from=dev /app/config/ ./
 RUN ls -la && pwd
 RUN npm run build
 
 
-#INFO: the image gonne be used to run the application
+#INFO: the image gonna be used to run the application
 #
 FROM nginx:1.31.6-alpine AS runner
-WORKDIR /etc/nginx
-COPY ./nginx/nginx.conf /etc/nginx/conf.d/nginx.conf
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY frontend/nginx/nginx.conf /etc/nginx/conf.d/nginx.conf
+COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 EXPOSE 5173
-ENTRYPOINT ["nginx", "-g", "daemon off;"] 
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
 
 
