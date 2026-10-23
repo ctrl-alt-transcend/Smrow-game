@@ -15,11 +15,10 @@ import { readSecret } from "./src/strategies/readSecret";
     dbPassword = 'dummy-pass-for-build';
   }
 
-
   const config = {
    dbHost: process.env.DB_HOST || "",
    dbUser: process.env.DB_USER || "",
-   dbPassword: dbPassword, // readSecret('DB_PASSWORD_FILE'),  'run/secrets/db_password'
+   dbPassword: dbPassword,
    dbPort: process.env.DB_PORT ?? '5432',
    dbName: process.env.DB_NAME || "",
 }

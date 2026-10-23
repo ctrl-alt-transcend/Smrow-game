@@ -34,7 +34,7 @@ export class UserController {
     const updatedUser = await this.userService.update(username, updateUserDto);
 
     return {
-      message: `User updated correctly`,
+      message: `User updated correctly`,  //TRANSLATE
       user: {
         id: updatedUser.id,
         email: updatedUser.email,
@@ -49,7 +49,7 @@ export class UserController {
 
     return {
       status: 204,
-      message: `User: '${username}' has been correctly deleted.`,
+      message: `User: '${username}' has been correctly deleted.`, //TRANSLATE
     };
   }
 

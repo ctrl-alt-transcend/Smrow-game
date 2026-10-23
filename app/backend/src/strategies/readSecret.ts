@@ -4,7 +4,7 @@ export function readSecret(fileVariable: string): string {
   const path = process.env[fileVariable];
 
   if (!path) {
-    throw new Error(`Missing environement variable: ${fileVariable}`);
+    throw new Error(`Missing environement variable: ${fileVariable}`); //TRANSLATE
   }
 
   return readFileSync(path, 'utf8').trim();

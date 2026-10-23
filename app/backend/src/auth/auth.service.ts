@@ -28,7 +28,7 @@ export class AuthService {
     };
 
     const result: RegisterResponse = {
-      message: 'User created successfully',
+      message: 'User created successfully', //TRANSLATE
       user: userPublic,
       access_token: access_token,
     };

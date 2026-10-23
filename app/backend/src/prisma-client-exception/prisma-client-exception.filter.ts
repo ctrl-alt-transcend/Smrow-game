@@ -9,7 +9,6 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     console.error(exception.message);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    //const message = exception.message.replace(/\n/g, ''); // clean newlines from Prisma log
     switch (exception.code) {
       // error unique restriction, duplicated field, already in use
       case 'P2002': {
@@ -32,7 +31,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
 
         response.status(status).json({
           statusCode: status,
-          message: `${afield} is already in use`,
+          message: `${afield} is already in use`,  //TRANSLATE
           error: 'Conflict',
         });
         break;
@@ -42,8 +41,8 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
         const status = HttpStatus.NOT_FOUND; // 404
         response.status(status).json({
           statusCode: status,
-          message: 'The register was not found, please try again.',
-          error: 'Not found',
+          message: 'The register was not found, please try again.', //TRANSLATE
+          error: 'Not found',                                       //TRANSLATE
         });
         break;
       }
@@ -52,8 +51,8 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
         const status = HttpStatus.BAD_REQUEST; // 400
         response.status(status).json({
           statusCode: status,
-          message: 'Error in relation reference used (foreign key invalid.)',
-          error: 'Bad request',
+          message: 'Error in relation reference used (foreign key invalid.)', //TRANSLATE
+          error: 'Bad request',                                               //TRANSLATE
         });
         break;
       }

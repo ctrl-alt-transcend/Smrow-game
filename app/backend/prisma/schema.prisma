@@ -4,22 +4,22 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client-js"
+	provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+	provider = "postgresql"
 }
 
 model User {
-  id        String @default(cuid()) @id
-  username  String @unique
-  name      String
-  email     String @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+	id				String @default(cuid()) @id
+	username	String @unique
+	name			String
+	email		 String @unique
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
 
-    // relations
+	  // relations
   profile   Profile?
   localAuth UserAuth?
   accounts  Account[]
@@ -65,3 +65,26 @@ model Account {
   @@id([provider, providerAccountId])
 }
 
+
+//model Stats {
+//	Id			String @default(cuid()) @id
+//	wins		Int?
+//	loses		Int?
+//	ranking		Int?
+//	user		User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//	userId		String @unique
+//}
+
+//model GameHistory {
+//	id			Int @default(autoincrement()) @id
+//	gameId		String?
+//	startTime	DateTime?
+//	endTime		DateTime?
+//	game		Game @relation()
+//	gameResult  Boolean
+//}
+
+
+//model Game {
+//	id Int  @id
+//}
