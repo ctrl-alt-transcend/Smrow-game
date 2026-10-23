@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { GameService } from './game.service';
 import { Server, Socket } from 'socket.io';
 import { instrument } from '@socket.io/admin-ui';
-import type {GameState} from '@shared/game/game.types';
+import { readSecret } from '../strategies/readSecret';
 
 @WebSocketGateway(3001, {
   cors: {
@@ -30,6 +30,16 @@ export class GameGateway implements OnGatewayInit {
     instrument(server, { auth: false, mode: 'development' });
   }
 
+  // @SubscribeMessage('gameMasterLog')
+
+
+  @SubscribeMessage('rollDice')
+    async rollDice(@ConnectedSocket() client: Socket) {
+    const result = this.gameService.rollDice();
+    return { ...result };
+    client.broadcast.to().emit('diceRolled', result); //INFO: broadcast the result to all players in the game room
+  }
+
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(@ConnectedSocket() client: Socket) {
     const userId = client.data.user.id;
@@ -48,7 +58,7 @@ export class GameGateway implements OnGatewayInit {
     try {
       console.log('Client connected:', client.id);
       const token = client.handshake.auth.token;
-      const payload = this.jwtService.verify(token);
+      const payload = this.jwtService.verify(token, {secret: readSecret('JWT_SECRET_FILE')});
       client.data.user = {id: payload.sub};
     }
     catch (error) {
