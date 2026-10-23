@@ -18,10 +18,11 @@ class GameStateContext {
    /** @type {State} A reference to the current state of the Context. */
   private   state: State;
   protected game!: GameData;
+  private nPlayers: number = 2; //⚠️ HARDCODED
 
 
   constructor( state: State ) {
-    this.game = {              // ✅ Création explicite
+    this.game = {
     whoPlays: 0,
     player: [],
     gameId: '0101010'
@@ -35,31 +36,12 @@ class GameStateContext {
    * - init ressources
    */
   protected initGameData() {
-    this.game.whoPlays = 0; // will be init in StartingPhase: starting player defined by highest dice roll
-
+    this.game.whoPlays = 0; //⚠️ HARDCODED: will be init in StartingPhase: starting player defined by highest dice roll
     if (!this.game.player[0]) {
       this.game.player[0] = initPlayer('enriquest');
-    //this.game.player[0] = {
-    //  playerId: "enriquest",
-    //  firstDice: 0,
-    //  secondDice: 0,
-    //  score: 0,
-    //  ressources: null,
-    //  settlementsBuilt: 0,
-    //  roadsBuilt: 0
-    //};
-  }
+    }
     if (!this.game.player[1]) {
       this.game.player[1] = initPlayer('spagg');
-      //this.game.player[1] = {
-      //  playerId: "spagg",
-      //  firstDice: 0,
-      //  secondDice: 0,
-      //  score: 0,
-      //  ressources: null,
-      //  settlementsBuilt: 0,
-      //  roadsBuilt: 0
-      //};
     }
   }
 
@@ -71,8 +53,8 @@ class GameStateContext {
   }
 
   /** The Context delegates part of its behavior to the current State object. */
-  public request1(): GameResponse | any {
-      return this.state.play();
+  public dice(): GameResponse {
+      return this.state.dice();
   }
   public request2(): void {
       this.state.handle2();
@@ -81,19 +63,28 @@ class GameStateContext {
   /** Getters */
   public  getGameData(): GameData { return this.game; }
   public  getWhoPlays(): Player { return this.game.player[this.game.whoPlays]; }
-
-  /** Setters */
-  public  setWhoPlays( player: number | null ) { player ? this.game.whoPlays = player : this.game.whoPlays++; }
-
-
-  /** Checkers */
   public  hasRolledDices(): boolean {
     const p: Player = this.getWhoPlays();
-    if (p.firstDice && p.secondDice) {
-      console.log(`hasRolledDices: ${p.playerId} already rolled both dices !`);
-      return true;
-    }
+    if (p.firstDice && p.secondDice) { return true; }
     return false;
+  }
+
+  /** Setters */
+  public  setWhoPlays( player: number | null ) {
+    if (player) {
+      this.game.whoPlays = player
+    }
+    else {
+      if (this.game.whoPlays + 1 <= this.nPlayers - 1) { this.game.whoPlays++; }
+      else { this.game.whoPlays = 0;}
+    }
+    console.log(`setWhoPlays: it's ${this.game.player[this.game.whoPlays].playerId} turn  now !`);
+  }
+
+  public  resetDices() {
+    const p: Player = this.getWhoPlays();
+    p.firstDice = 0
+    p.secondDice = 0;
   }
 }
 
@@ -103,14 +94,15 @@ class GameStateContext {
  * with the State. This backreference can be used by States to transition the
  * Context to another State.
  */
-abstract class  State {
+abstract class  State
+{
   protected state: GameStateContext;
   protected ready: boolean = false;
 
   public  setGameState( newGameState: GameStateContext ) {
     this.state = newGameState;
   }
-  public abstract play(): GameResponse | any;
+  public abstract dice(): GameResponse;
   public abstract handle2(): void;
 }
 
@@ -119,11 +111,16 @@ abstract class  State {
  * Concrete States implement various behaviors, associated with a state of the
  * Context.
  */
-class StartingPhase extends State {
-  public play(): boolean {
-    console.log('StartingPhase handles request1.');
-    return true;
+class StartingPhase extends State
+{
+
+  public dice(): { value: number | null, message: string | null } {
+    console.log('StartingPhase handles dice.');
+    let value: null = null;
+    let message: string = 'StartingPhase:dice: not handled for the moment...';
+    return { value, message };
   }
+
   public handle2(): void {
     console.log('StartingPhase handles request2.');
     if(this.ready){
@@ -133,16 +130,20 @@ class StartingPhase extends State {
     else
       console.log('StartingPhase not ready to change state');
   }
+
 }
 
 class RessourcePhase extends State
 {
-  public play(): GameResponse {
+  public dice(): GameResponse {
+    console.log('RessourcePhase handles dice.');
     if(this.state.hasRolledDices()) {
-      console.log('RessourcePhase: player rolled both dices and is now ready.');
+      console.log(`RessourcePhase:dice: player rolled both dices and is now ready, firstDice[${this.state.getWhoPlays().firstDice}], secondDice[${this.state.getWhoPlays().secondDice}]`);
+      this.state.resetDices(); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
+      this.state.setWhoPlays(null);
     }
     else {
-      console.log(`RessourcePhase: ${this.state.getWhoPlays().playerId} just rolled a dice`);
+      console.log(`RessourcePhase:dice: ${this.state.getWhoPlays().playerId} just rolled a dice`);
     }
     return this.rollDice(this.state.getWhoPlays())
   }
@@ -151,11 +152,6 @@ class RessourcePhase extends State
     console.log('RessourcePhase handles request2.');
     console.log('RessourcePhase wants to change the state of the context.');
     this.state.transitionTo(new TradeAndBuildPhase());
-  }
-
-  private resetDices( player: Player ) {
-    player.firstDice = 0;
-    player.secondDice = 0;
   }
 
   private rollDice( player: Player ): { value: number | null, message: string | null } {
@@ -173,10 +169,13 @@ class RessourcePhase extends State
   }
 }
 
-class TradeAndBuildPhase extends State {
-  public play(): boolean {
-    console.log('TradeAndBuildPhase handles request1.');
-    return true;
+class TradeAndBuildPhase extends State
+{
+  public dice(): { value: number | null, message: string | null } {
+    console.log('TradeAndBuildPhase handles dice.');
+    let value: null = null;
+    let message: string = 'TradeAndBuildPhase:dice: no dice roll allowed.';
+    return { value, message };
   }
 
   public handle2(): void {
