@@ -1,5 +1,3 @@
-//import { DiceValue } from "../../frontend/src/game/components/gameboard/Dice/Dice";
-
 export type Ressources = {
   wood: number;
   brick: number;

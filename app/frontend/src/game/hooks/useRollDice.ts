@@ -14,7 +14,7 @@ export function useRollDice() {
 
     try {
       const response = await axios.post<GameResponse>(
-        '/api/game/dice/roll',
+        '/api/game/dice',
         {},
         { signal: ac.signal }
       );

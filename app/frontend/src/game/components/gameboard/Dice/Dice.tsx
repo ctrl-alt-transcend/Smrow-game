@@ -15,7 +15,8 @@ import type { ButtonHTMLAttributes, CSSProperties } from 'react';
  * ================================================================ */
 
 /** Les six faces possibles du dé. */
-export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6;
+//export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6;
+export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6 | number;
 
 /**
  * Positionnement du dé par rapport à son conteneur.

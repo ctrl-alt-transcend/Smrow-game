@@ -53,11 +53,11 @@ class GameStateContext {
   }
 
   /** The Context delegates part of its behavior to the current State object. */
-  public dice(): GameResponse {
+  public diceRequest(): GameResponse {
       return this.state.dice();
   }
-  public request2(): void {
-      this.state.handle2();
+  public buildRequest(): GameResponse | void {
+      return this.state.build();
   }
 
   /** Getters */
@@ -65,7 +65,7 @@ class GameStateContext {
   public  getWhoPlays(): Player { return this.game.player[this.game.whoPlays]; }
   public  hasRolledDices(): boolean {
     const p: Player = this.getWhoPlays();
-    if (p.firstDice && p.secondDice) { return true; }
+    if (p.firstDice !== 0 && p.secondDice !== 0) { return true; }
     return false;
   }
 
@@ -83,7 +83,7 @@ class GameStateContext {
 
   public  resetDices() {
     const p: Player = this.getWhoPlays();
-    p.firstDice = 0
+    p.firstDice = 0;
     p.secondDice = 0;
   }
 }
@@ -103,7 +103,7 @@ abstract class  State
     this.state = newGameState;
   }
   public abstract dice(): GameResponse;
-  public abstract handle2(): void;
+  public abstract build(): GameResponse | void;
 }
 
 // Concrete game loop phases
@@ -115,14 +115,14 @@ class StartingPhase extends State
 {
 
   public dice(): { value: number | null, message: string | null } {
-    console.log('StartingPhase handles dice.');
+    console.log('StartingPhase handles diceRequest.');
     let value: null = null;
     let message: string = 'StartingPhase:dice: not handled for the moment...';
     return { value, message };
   }
 
-  public handle2(): void {
-    console.log('StartingPhase handles request2.');
+  public build(): void {
+    console.log('StartingPhase handles build.');
     if(this.ready){
       console.log('StartingPhase wants to change the state of the context.');
       this.state.transitionTo(new RessourcePhase());
@@ -136,34 +136,38 @@ class StartingPhase extends State
 class RessourcePhase extends State
 {
   public dice(): GameResponse {
-    console.log('RessourcePhase handles dice.');
+    console.log('RessourcePhase handles diceRequest.');
     if(this.state.hasRolledDices()) {
       console.log(`RessourcePhase:dice: player rolled both dices and is now ready, firstDice[${this.state.getWhoPlays().firstDice}], secondDice[${this.state.getWhoPlays().secondDice}]`);
       this.state.resetDices(); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
       this.state.setWhoPlays(null);
-    }
-    else {
-      console.log(`RessourcePhase:dice: ${this.state.getWhoPlays().playerId} just rolled a dice`);
+      return { value: null, message: `You already rolled both dices.`}
     }
     return this.rollDice(this.state.getWhoPlays())
   }
 
-  public handle2(): void {
-    console.log('RessourcePhase handles request2.');
+  public build(): void {
+    console.log('RessourcePhase handles buildRequest.');
     console.log('RessourcePhase wants to change the state of the context.');
     this.state.transitionTo(new TradeAndBuildPhase());
   }
 
   private rollDice( player: Player ): { value: number | null, message: string | null } {
-  //private rollDice( player: Player ): GameResponse {
     let value: number | null = Math.floor(Math.random() * 6) + 1;
     let message: string | null = null;
 
-    if (player.firstDice === 0) player.firstDice = value;
-    else if (player.secondDice === 0) player.secondDice = value;
+    if (player.firstDice === 0) {
+      player.firstDice = value;
+      console.log(`RessourcePhase:rollDice: FIRST dice:${player.playerId}'s rolled [${value}]`);
+    }
+    else if (player.secondDice === 0) {
+      player.secondDice = value;
+      console.log(`RessourcePhase:rollDice: SECOND dice:${player.playerId}'s rolled [${value}]`);
+
+    }
     else {
       value = null;
-      message = `You(${player.playerId}) already rolled both dices.`;
+      message = `RessourcePhase:rollDice: You (${player.playerId}) already rolled both dices.`;
     }
     return { value, message };
   }
@@ -172,14 +176,14 @@ class RessourcePhase extends State
 class TradeAndBuildPhase extends State
 {
   public dice(): { value: number | null, message: string | null } {
-    console.log('TradeAndBuildPhase handles dice.');
+    console.log('TradeAndBuildPhase handles diceRequest.');
     let value: null = null;
     let message: string = 'TradeAndBuildPhase:dice: no dice roll allowed.';
     return { value, message };
   }
 
-  public handle2(): void {
-    console.log('TradeAndBuildPhase handles request2.');
+  public build(): void {
+    console.log('TradeAndBuildPhase handles buildRequest.');
     console.log('TradeAndBuildPhase wants to change the state of the context.');
     this.state.transitionTo(new RessourcePhase());
   }

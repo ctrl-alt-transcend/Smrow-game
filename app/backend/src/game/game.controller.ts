@@ -37,9 +37,9 @@ export class GameController {
   //  return { message: this.GameService.buildSettlement() };
   //}
 
-  @Post('dice/roll')
-  async rollDice(@Body() dto: RollDiceDto) {
-    const result = this.gameService.rollDice();
+  @Post('dice')
+  async diceRequest(@Body() dto: RollDiceDto) {
+    const result = this.gameService.diceRequest();
     return { ...result };
   }
 

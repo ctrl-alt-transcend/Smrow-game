@@ -108,9 +108,8 @@ export class GameService {
   // --------------------------------
   game = new GameStateContext(new RessourcePhase());
 
-  rollDice(): { value: number | null, message: string | null } {
-    let response: GameResponse = this.game.dice();
-    //this.game.request2();
+  diceRequest(): { value: number | null, message: string | null } {
+    let response: GameResponse = this.game.diceRequest();
     return { value: response.value, message: response.message };
   }
 
