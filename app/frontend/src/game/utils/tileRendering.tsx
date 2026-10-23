@@ -5,15 +5,15 @@ import {
   FACTION_COLORS,
   SELECTED_COLOR,
   HOVER_COLOR,
-  DEFAULT_COLOR
-} from '../types/gameboard.types';
+  DEFAULT_COLOR,
+} from "../types/gameboard.types";
 
 /** @description render tile color based on state, land type or faction */
 export const getTileFillColor = (
   landType: LandType | null,
   faction: Faction | null,
   isSelected: boolean,
-  isHovered: boolean
+  isHovered: boolean,
 ): string => {
   if (isSelected) return SELECTED_COLOR;
   if (isHovered) return HOVER_COLOR;
@@ -23,7 +23,7 @@ export const getTileFillColor = (
 };
 
 export const getTileStrokeColor = (isHovered: boolean): string => {
-  return isHovered ? '#666' : '#444';
+  return isHovered ? "#666" : "#444";
 };
 
 export const getTileStrokeWidth = (isHovered: boolean): number => {
