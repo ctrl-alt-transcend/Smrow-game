@@ -36,8 +36,3 @@ export interface GameResponse {
   value: number | null;
   message: string | null;
 }
-
-export type Score = {
-  value: number | null;
-  id: string;
-}

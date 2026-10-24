@@ -2,8 +2,7 @@ import { Public } from 'generated/prisma/runtime/client';
 import {
   GameData,
   Player,
-  GameResponse,
-  Score
+  GameResponse
 } from '../../shared/game/game.types';
 import {
   initPlayer,
@@ -83,25 +82,23 @@ class GameStateContext {
   public  getStartingRolls(): Map<string, number | null> { return this.game.startingRolls; }
   public  getCurrentPlayer(): Player | undefined { return this.game.players.get(this.game.turnOrder[this.game.currentTurnIndex]); }
 
-  public  isPlayerInGame( playerId: string ): Player | undefined {
-    if (this.game.players.has(playerId)) {
-      return this.game.players.get(playerId);
-    }
-    return undefined;
+  public  getPlayerById(playerId: string): Player | undefined {
+    return this.game.players.get(playerId);
   }
-  public  isPlayersTurn( playerId: string ): Player | undefined {
-    const p1 = this.isPlayerInGame(playerId);
-    if (p1 === undefined) {
-      return undefined;
+
+ public isPlayersTurn(playerId: string): Player | null {
+    const player = this.getPlayerById(playerId);
+    if (!player) {
+      throw new Error(`Unknown playerId: ${playerId}`);
     }
-    const p2 = this.getCurrentPlayer();
-    if (p2 === undefined) {
-      return undefined;
+    const currentPlayer = this.getCurrentPlayer();
+    if (!currentPlayer) {
+      return null;
     }
-    if (p1.playerId != p2.playerId) {
-      return undefined;
+    if (player.playerId !== currentPlayer.playerId) {
+      return null;
     }
-    return p1;
+    return player;
   }
 
   public  hasRolledBothDices( p: Player ): boolean {
@@ -115,11 +112,16 @@ class GameStateContext {
   public  setTurnOrder( newTurnOrder: string[] ) { this.game.turnOrder = newTurnOrder; }
   public  resetDices( p: Player ) { p.firstDice = 0; p.secondDice = 0; }
   public  resetAllDices() {
-    this.game.players.forEach((p: Player ) => {
-      p.firstDice = 0;
-      p.secondDice = 0;
-    });
+
+    for (let [key, value] of this.game.players) {
+      this.resetDices(value);
+    }
+
+    //this.game.players.forEach((p: Player) => {
+    //  this.resetDices(p);
+    //});
   }
+
   public  setCurrentTurnIndex( index: number | null ) {
     if(index) {
       this.game.currentTurnIndex = index;
@@ -148,7 +150,7 @@ abstract class  State
     this.state = newGameState;
   }
   public abstract dice( playerId: string | null ): GameResponse;
-  public abstract build(  playerId: string | null ): GameResponse;
+  public abstract build( playerId: string | null ): GameResponse;
   public abstract phaseCheck(): void;
 }
 
@@ -161,7 +163,7 @@ class StartingPhase extends State
 {
   public dice( playerId: string ): GameResponse {
     console.log('StartingPhase:dice: handles diceRequest.');
-    const p = this.state.isPlayerInGame(playerId);
+    const p = this.state.getPlayerById(playerId);
     if(p === undefined) {
       throw new Error(`Unknown playerId: ${playerId}`);
     }
@@ -227,24 +229,38 @@ class StartingPhase extends State
 class RessourcePhase extends State
 {
   public dice( playerId: string ): GameResponse {
-    // Todo 🚩
-    // - is current player turn check?
+
     console.log('RessourcePhase:dice: handles diceRequest.');
-    const p = this.state.getCurrentPlayer();
-    if (p === undefined) {
-      return { value: null, message: 'Error: getCurrentPlayer() === undefined'}
+    const p = this.state.isPlayersTurn(playerId);
+    if(!p) {
+      return { value: null, message: "It's not your turn !" };
     }
-    if(this.state.hasRolledBothDices(p)) {
-      console.log(`RessourcePhase:dice: player rolled both dices and is now ready to collect ressources from terrains #${p.firstDice + p.secondDice}`);
-      // Todo 🚩
-      // - collect ressources
-      this.state.resetDices(p); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
-      // Todo 🚩
-      // - return current player dice rolls
+    const roll: GameResponse = rollDice(p);
+    if(this.state.hasRolledBothDices(p) && roll.value) {
+      console.log(`StartingPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
+      this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
       this.state.setCurrentTurnIndex(null);
-      return { value: null, message: `You already rolled both dices.`}
+       // Todo 🚩
+      // - collect ressources
+      //this.state.resetDices(p); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
+      this.state.setCurrentTurnIndex(null);
+      return { value: null,
+        message: funnyLogs(p.playerId, p.firstDice + p.secondDice) }
     }
-    return rollDice(p)
+    return { value: roll.value, message: roll.message }
+
+
+    //if(this.state.hasRolledBothDices(p)) {
+    //  console.log(`RessourcePhase:dice: player rolled both dices and is now ready to collect ressources from terrains #${p.firstDice + p.secondDice}`);
+    //  // Todo 🚩
+    //  // - collect ressources
+    //  this.state.resetDices(p); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
+    //  // Todo 🚩
+    //  // - return current player dice rolls
+    //  this.state.setCurrentTurnIndex(null);
+    //  return { value: null, message: `You already rolled both dices.`}
+    //}
+    //return rollDice(p)
   }
 
   public build(): GameResponse {
@@ -262,14 +278,16 @@ class RessourcePhase extends State
 
 class TradeAndBuildPhase extends State
 {
-  public build(): GameResponse {
-    // Todo 🚩
-    // - is current player turn check?
+  public build( playerId: string ): GameResponse {
+    const p = this.state.isPlayersTurn(playerId);
+    if(p === undefined) {
+      throw new Error(`Unknown playerId: ${playerId}`);
+    }
     console.log('TradeAndBuildPhase:build: handles buildRequest.');
     return { value: null, message: `TradeAndBuildPhase:build: not handled for the moment...`}
   }
 
-  public dice( playerId: string ): { value: number | null, message: string | null } {
+  public dice(): { value: number | null, message: string | null } {
     console.log('TradeAndBuildPhase:dice: handles diceRequest.');
     return { value: null, message: `TradeAndBuildPhase:dice: action forbidden during this phase.`}
   }
