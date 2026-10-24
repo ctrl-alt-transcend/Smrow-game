@@ -111,12 +111,14 @@ export class GameService {
 
   diceRequest(): { value: number | null, message: string | null } {
     let response: GameResponse = this.game.diceRequest('spagg');
+    response = this.game.diceRequest('enriquest');
     this.game.phaseCheckRequest();
     return { value: response.value, message: response.message };
   }
 
   buildRequest(): { value: number | null, message: string | null } {
     let response: GameResponse = this.game.buildRequest('spagg');
+    response = this.game.buildRequest('enriquest');
     this.game.phaseCheckRequest();
     return { value: response.value, message: response.message };
   }

@@ -26,19 +26,17 @@ export function initPlayer( playerId: string ): Player {
   };
 }
 
-
-
 export function rollDice( p: Player ): { value: number | null, message: string | null } {
   let value: number | null = Math.floor(Math.random() * 6) + 1;
   let message: string | null = null;
 
   if (p.firstDice === 0) {
     p.firstDice = value;
-    console.log(`utils:rollDice: FIRST dice:${p.playerId}'s rolled [${value}]`);
+    console.log(`utils:rollDice: FIRST dice: ${p.playerId} rolled [${value}]`);
   }
   else if (p.secondDice === 0) {
     p.secondDice = value;
-    console.log(`utils:rollDice: SECOND dice:${p.playerId}'s rolled [${value}]`);
+    console.log(`utils:rollDice: SECOND dice: ${p.playerId} rolled [${value}]`);
 
   }
   else {

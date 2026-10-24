@@ -37,7 +37,7 @@ class GameStateContext {
     this.initStartingRolls();
     this.transitionTo(state);
     this.game.players.forEach((value: Player, key: string) => {
-      console.log(`Key: ${key}, Value: ${value}`);
+      console.log(`GameStateContext:constructor: Key: ${key}, Value: ${value}`);
     });
     console.log('GameStateContext:constructor: first init done!');
   }
@@ -81,13 +81,27 @@ class GameStateContext {
   public  getGameData(): GameData { return this.game; }
   public  getPlayers(): Map<string, Player> { return this.game.players; }
   public  getStartingRolls(): Map<string, number | null> { return this.game.startingRolls; }
-  public  getCurrentPlayer(): Player { return this.game.players[this.game.turnOrder[this.game.currentTurnIndex]]; }
+  public  getCurrentPlayer(): Player | undefined { return this.game.players.get(this.game.turnOrder[this.game.currentTurnIndex]); }
 
-  public  isPlayerInGame(playerId: string ): Player | null {
+  public  isPlayerInGame( playerId: string ): Player | undefined {
     if (this.game.players.has(playerId)) {
-      return this.game.players[playerId];
+      return this.game.players.get(playerId);
     }
-    return null;
+    return undefined;
+  }
+  public  isPlayersTurn( playerId: string ): Player | undefined {
+    const p1 = this.isPlayerInGame(playerId);
+    if (p1 === undefined) {
+      return undefined;
+    }
+    const p2 = this.getCurrentPlayer();
+    if (p2 === undefined) {
+      return undefined;
+    }
+    if (p1.playerId != p2.playerId) {
+      return undefined;
+    }
+    return p1;
   }
 
   public  hasRolledBothDices( p: Player ): boolean {
@@ -100,6 +114,12 @@ class GameStateContext {
   /** Setters */
   public  setTurnOrder( newTurnOrder: string[] ) { this.game.turnOrder = newTurnOrder; }
   public  resetDices( p: Player ) { p.firstDice = 0; p.secondDice = 0; }
+  public  resetAllDices() {
+    this.game.players.forEach((p: Player ) => {
+      p.firstDice = 0;
+      p.secondDice = 0;
+    });
+  }
   public  setCurrentTurnIndex( index: number | null ) {
     if(index) {
       this.game.currentTurnIndex = index;
@@ -112,19 +132,6 @@ class GameStateContext {
       this.game.currentTurnIndex++;
     }
   }
-
-
-  /** Others */
-//  public  isPlayersTurn( requestingPlayerId: string ): Player | null {
-//    if (!this.game.players.has(requestingPlayerId)) {
-//      return null;;
-//    }
-//    let currentPlayer: Player = this.getCurrentPlayer();
-//    if(currentPlayer.playerId == requestingPlayerId) {
-//      return currentPlayer;
-//    }
-//    return null;;
-//  }
 }
 
 /**
@@ -152,30 +159,21 @@ abstract class  State
  */
 class StartingPhase extends State
 {
-
   public dice( playerId: string ): GameResponse {
     console.log('StartingPhase:dice: handles diceRequest.');
-    // Todo 🚩
-    // - is player part of this game?
-    //const p: Player | null = this.state.isPlayersTurn(playerId);
-    //if (!p) {
-    //  throw new Error(`Unknown playerId: ${playerId}`);
-    //}
-
-    const p: Player | null = this.state.isPlayerInGame(playerId); //⚠️ HOTFIX to bypass 'isPlayersTurn' CurrentPlayer check...
-    if (!p) {
+    const p = this.state.isPlayerInGame(playerId);
+    if(p === undefined) {
       throw new Error(`Unknown playerId: ${playerId}`);
     }
     const roll: GameResponse = rollDice(p);
     if(this.state.hasRolledBothDices(p) && roll.value) {
-      console.log(`StartingPhase:dice: player rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
+      console.log(`StartingPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
       this.state.setCurrentTurnIndex(null);
       return { value: null,
         message: funnyLogs(p.playerId, p.firstDice + p.secondDice) }
     }
-    return { value: null,
-      message: `You already rolled both dices (${p.firstDice} and ${p.secondDice})` }
+    return { value: roll.value, message: roll.message }
   }
 
   public build(): GameResponse {
@@ -217,7 +215,11 @@ class StartingPhase extends State
       return;
     }
     console.log('StartingPhase:phaseCheck: everybody is ready !');
-    console.log(`StartingPhase:phaseCheck: ${this.state.getCurrentPlayer().playerId} is starting !`);
+    this.state.resetAllDices();
+    const p = this.state.getCurrentPlayer();
+    if (p) {
+      console.log(`StartingPhase:phaseCheck: ${p.playerId} is starting !`);
+    }
     this.state.transitionTo(new RessourcePhase);
   }
 }
@@ -228,17 +230,21 @@ class RessourcePhase extends State
     // Todo 🚩
     // - is current player turn check?
     console.log('RessourcePhase:dice: handles diceRequest.');
-    if(this.state.hasRolledBothDices(this.state.getCurrentPlayer())) {
-      console.log(`RessourcePhase:dice: player rolled both dices and is now ready to collect ressources from terrains #${this.state.getCurrentPlayer().firstDice + this.state.getCurrentPlayer().secondDice}`);
+    const p = this.state.getCurrentPlayer();
+    if (p === undefined) {
+      return { value: null, message: 'Error: getCurrentPlayer() === undefined'}
+    }
+    if(this.state.hasRolledBothDices(p)) {
+      console.log(`RessourcePhase:dice: player rolled both dices and is now ready to collect ressources from terrains #${p.firstDice + p.secondDice}`);
       // Todo 🚩
       // - collect ressources
-      this.state.resetDices(this.state.getCurrentPlayer()); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
+      this.state.resetDices(p); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
       // Todo 🚩
       // - return current player dice rolls
       this.state.setCurrentTurnIndex(null);
       return { value: null, message: `You already rolled both dices.`}
     }
-    return rollDice(this.state.getCurrentPlayer())
+    return rollDice(p)
   }
 
   public build(): GameResponse {
