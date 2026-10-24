@@ -36,6 +36,10 @@ class GameStateContext {
     this.initGameData();
     this.initStartingRolls();
     this.transitionTo(state);
+    this.game.players.forEach((value: Player, key: string) => {
+      console.log(`Key: ${key}, Value: ${value}`);
+    });
+    console.log('GameStateContext:constructor: first init done!');
   }
 
   /** WORK IN PROGRESS: to do:
@@ -78,6 +82,14 @@ class GameStateContext {
   public  getPlayers(): Map<string, Player> { return this.game.players; }
   public  getStartingRolls(): Map<string, number | null> { return this.game.startingRolls; }
   public  getCurrentPlayer(): Player { return this.game.players[this.game.turnOrder[this.game.currentTurnIndex]]; }
+
+  public  isPlayerInGame(playerId: string ): Player | null {
+    if (this.game.players.has(playerId)) {
+      return this.game.players[playerId];
+    }
+    return null;
+  }
+
   public  hasRolledBothDices( p: Player ): boolean {
     if (p.firstDice !== 0 && p.secondDice !== 0) {
       return true;
@@ -103,16 +115,16 @@ class GameStateContext {
 
 
   /** Others */
-  public  isPlayersTurn( requestingPlayerId: string ): Player | null {
-    if (!this.game.players.has(requestingPlayerId)) {
-      return null;;
-    }
-    const currentPlayer: Player = this.getCurrentPlayer();
-    if(currentPlayer.playerId === requestingPlayerId) {
-      return currentPlayer;
-    }
-    return null;;
-  }
+//  public  isPlayersTurn( requestingPlayerId: string ): Player | null {
+//    if (!this.game.players.has(requestingPlayerId)) {
+//      return null;;
+//    }
+//    let currentPlayer: Player = this.getCurrentPlayer();
+//    if(currentPlayer.playerId == requestingPlayerId) {
+//      return currentPlayer;
+//    }
+//    return null;;
+//  }
 }
 
 /**
@@ -143,7 +155,14 @@ class StartingPhase extends State
 
   public dice( playerId: string ): GameResponse {
     console.log('StartingPhase:dice: handles diceRequest.');
-    const p: Player | null = this.state.isPlayersTurn(playerId);
+    // Todo 🚩
+    // - is player part of this game?
+    //const p: Player | null = this.state.isPlayersTurn(playerId);
+    //if (!p) {
+    //  throw new Error(`Unknown playerId: ${playerId}`);
+    //}
+
+    const p: Player | null = this.state.isPlayerInGame(playerId); //⚠️ HOTFIX to bypass 'isPlayersTurn' CurrentPlayer check...
     if (!p) {
       throw new Error(`Unknown playerId: ${playerId}`);
     }
