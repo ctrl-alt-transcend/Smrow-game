@@ -6,14 +6,6 @@ export type Ressources = {
   rock: number;
 }
 
-export type GameLoopData = {
-  firstDice: number;
-  secondDice: number;
-  roadsBuilt: number;
-  settlementsBuilt: number;
-}
-
-
 export type Player = {
   playerId: string;
   score: number;
@@ -25,14 +17,6 @@ export type Player = {
   //color: ""
 }
 
-//export const GamePhase = {
-//  INIT: 'init phase',
-//  START: 'starting phase',
-//  RESSOURCE: 'ressource phase',
-//  TRADE_BUILD: 'trade and build phase',
-//  END: 'end phase'
-//} as const
-
 export type GameState = {
   gameId: string;
   players: Player[];
@@ -41,13 +25,19 @@ export type GameState = {
 
 // test copy of GameState to implement in GameStateContext
 export type GameData = {
-  //playerTurn: string;
-  whoPlays: number;
+  players: Map<string, Player>;
+  startingRolls: Map<string, number | null>;
+  turnOrder: string[];
+  currentTurnIndex: number;
   gameId: string;
-  player: Player[];
 }
 
 export interface GameResponse {
   value: number | null;
   message: string | null;
+}
+
+export type Score = {
+  value: number | null;
+  id: string;
 }

@@ -5,7 +5,6 @@ import { useGameBoard } from '../../contexts/GameBoardContext';
 import { useRollDice } from '../../hooks/useRollDice';
 
 export function DiceRoller() {
-  const [pendingCheatValue, setPendingCheatValue] = useState<DiceValue | null>(null);
   const [rolledValue, setRolledValue] = useState<DiceValue | null>(null);
   const [busy, setBusy] = useState(false);
   const pendingResultRef = useRef<{ value: DiceValue | number | null; message: string | null} | null>(null);
@@ -29,8 +28,8 @@ export function DiceRoller() {
       }
 
       pendingResultRef.current = { value: result.value, message: result.message };
-      setPendingCheatValue(result.value);
-      console.log(`front:DiceRoller:server value: ${result.value}`);
+      setRolledValue(result.value);
+      //console.log(`front:DiceRoller:server result.value: ${result.value}`);
     } catch (err) {
       console.error('Failed to roll dice:', err);
       updateGamemasterLog('Error rolling dice');
@@ -40,18 +39,13 @@ export function DiceRoller() {
 
   const handleAnimationComplete = useCallback(
     (finalValue: DiceValue) => {
-      const server = pendingResultRef.current;
-
-      // La valeur serveur prime ; `finalValue` n'est qu'un filet de sécurité
-      const value = server?.value ?? finalValue;
-      const message = server?.message ?? `You rolled a ${value}`;
-
+      const value = pendingResultRef.current?.value ?? finalValue;
+      const message = pendingResultRef.current?.message ?? `You rolled a ${value}`;
       setRolledValue(value);
       updateGamemasterLog(message);
-      console.log(`front:DiceRoller:displayed value: ${value}`);
-
+      //console.log(`front:DiceRoller:displayed value: ${value}`);
       pendingResultRef.current = null;
-      setPendingCheatValue(null); // reset → autorise le prochain lancer
+      setRolledValue(null);
       setBusy(false);
     },
     [updateGamemasterLog]
@@ -60,26 +54,22 @@ export function DiceRoller() {
   return (
     <Box style={{ flex: 1, minWidth: 220, position: 'relative' }}>
       <Card withBorder radius="md" shadow="sm" h={220}>
-        <Stack gap="xs" align="center" justify="center">
+        <Stack gap="xl" align="center" justify="center">
           <Title order={4}>Dice box</Title>
           <Dice3D
             size={80}
-            cheatValue={pendingCheatValue ?? undefined}
+            cheatValue={rolledValue ?? undefined}
             onRoll={handleAnimationComplete}
             triggers={[]}
             style={{ pointerEvents: 'none' }}
           />
-
-          <Text>
-            {rolledValue !== null ? `You rolled a ${rolledValue}!` : 'Click the dice!'}
-          </Text>
         </Stack>
       </Card>
       <button
         type="button"
         onClick={handleRollRequest}
         disabled={busy}
-        aria-label="Lancer les dés"
+        aria-label="Roll the dice"
         style={{
           position: 'absolute',
           inset: 0,

@@ -7,7 +7,8 @@ import type {
 } from '../../shared/game/game.types';
 import {
   GameStateContext,
-  RessourcePhase
+  RessourcePhase,
+  StartingPhase
 } from './GameStateContext';
 
 @Injectable()
@@ -106,10 +107,17 @@ export class GameService {
   // }
 
   // --------------------------------
-  game = new GameStateContext(new RessourcePhase());
+  game = new GameStateContext(new StartingPhase());
 
   diceRequest(): { value: number | null, message: string | null } {
-    let response: GameResponse = this.game.diceRequest();
+    let response: GameResponse = this.game.diceRequest('spagg');
+    this.game.phaseCheckRequest();
+    return { value: response.value, message: response.message };
+  }
+
+  buildRequest(): { value: number | null, message: string | null } {
+    let response: GameResponse = this.game.buildRequest('spagg');
+    this.game.phaseCheckRequest();
     return { value: response.value, message: response.message };
   }
 
