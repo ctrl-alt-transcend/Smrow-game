@@ -44,6 +44,8 @@ export type GameData = {
   turnOrder: string[];
   currentTurnIndex: number;
   gameId: string;
+  diceRoll: number | null;
+  masterLog: string | null;
 }
 
 export interface GameResponse {

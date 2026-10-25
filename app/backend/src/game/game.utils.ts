@@ -22,9 +22,9 @@ export function initPlayer( playerId: string ): Player {
     secondDice: 0,
     settlementsBuilt: 0,
     roadsBuilt: 0,
-      level: 1,
-      username: "Username", // TODO: change this for username
-      avatarURL: null,
+    level: 1,
+    username: playerId,
+    avatarURL: null,
     ressources: initRessources()
     //color TODO: add color to player
   };

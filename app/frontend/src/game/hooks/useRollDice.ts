@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { useCallback, useRef } from 'react';
 import { socket } from '../../socket';
 import type { GameResponse } from '@shared/game/game.types.ts';
@@ -10,7 +9,7 @@ export function useRollDice() {
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac; //OPTIM: Do you still need the signals, given that they don’t seem to be used any more ?
-    socket.emit('rollDice');
+    socket.emit('dice');
     // const response: RollResponse = await socket.emitWithAck('rollDice');
     // return response; //TODO: remove the response and set the result in gameState
 

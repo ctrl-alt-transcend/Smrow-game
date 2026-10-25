@@ -21,23 +21,25 @@ import {
  */
 class GameStateContext {
    /** @type {State} A reference to the current state of the Context. */
-  private   state: State;
+  private   state!: State;
   protected game!: GameData;
 
-  constructor( state: State ) {
+  constructor( gameId: string, state: State ) {
     this.game = {
       players: new Map<string, Player>(),
       startingRolls: new Map<string, number | null>(),
       turnCount: 0,
       turnOrder: [],
       currentTurnIndex: 0,
-      gameId: '0101010'
+      gameId: gameId,
+      masterLog: '...',
+      diceRoll: 0
     };
     this.initGameData();
     this.initStartingRolls();
     this.transitionTo(state);
     this.game.players.forEach((value: Player, key: string) => {
-      console.log(`GameStateContext:constructor: plazerId: ${key}, value: ${value}`);
+      console.log(`GameStateContext:constructor: playerId: ${key}, value: ${value}`);
     });
   }
 
@@ -45,10 +47,9 @@ class GameStateContext {
    * - init every player with their current name
    * - init ressources
    */
-  protected initGameData() {
+  protected initGameData() {  //⚠️ FOR TESTING
     this.game.players.set('spagg', initPlayer('spagg'));
     this.game.players.set('enriquest', initPlayer('enriquest'));
-    //⚠️ ... init from playerId list?
   }
 
   private initStartingRolls(): void {
@@ -78,6 +79,7 @@ class GameStateContext {
 
   /** Getters */
   public  getGameData(): GameData { return this.game; }
+  public  getGameId(): string { return this.game.gameId; }
   public  getPlayers(): Map<string, Player> { return this.game.players; }
   public  getStartingRolls(): Map<string, number | null> { return this.game.startingRolls; }
   public  getTurnCount(): number { return this.game.turnCount; }
@@ -111,13 +113,16 @@ class GameStateContext {
   }
 
   /** Setters */
+  public setDiceRoll( roll: number | null ) { this.game.diceRoll = roll; }
+  public setMasterLog( log: string | null ) { this.game.masterLog = log; }
+  public  setTurnOrder( newTurnOrder: string[] ) { this.game.turnOrder = newTurnOrder; }
   public  resetDices( p: Player ) { p.firstDice = 0; p.secondDice = 0; }
   public  resetAllDices() {
     for (let [key, value] of this.game.players) {
       this.resetDices(value);
     }
   }
-  public  setTurnOrder( newTurnOrder: string[] ) { this.game.turnOrder = newTurnOrder; }
+
   private updateValue(
     currentValue: number,
     limit: number,
@@ -153,7 +158,7 @@ class GameStateContext {
  */
 abstract class  State
 {
-  protected state: GameStateContext;
+  protected state!: GameStateContext;
 
   public  setGameState( newGameState: GameStateContext ) {
     this.state = newGameState;

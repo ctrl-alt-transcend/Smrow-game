@@ -17,21 +17,22 @@ export function DiceRoller({diceValue, masterLog}: { diceValue: number | null ; 
     if (busy) return;
     setBusy(true);
     try {
-      // await roll(); // @Hayden: just that?
-      const result = await roll();
-      if (!result) {
-        setBusy(false);
-        return;
-      }
-      if(result.value === null) {
-        if(result.message)
-          updateGamemasterLog(result.message);
-        setBusy(false);
-        return;
-      }
+      await roll(); // @Hayden: just that?
+      setBusy(false);
+      //const result = await roll();
+      //if (!result) {
+      //  setBusy(false);
+      //  return;
+      //}
+      //if(result.value === null) {
+      //  if(result.message)
+      //    updateGamemasterLog(result.message);
+      //  setBusy(false);
+      //  return;
+      //}
 
-      pendingResultRef.current = { value: result.value, message: result.message };
-      setRolledValue(result.value);
+      //pendingResultRef.current = { value: result.value, message: result.message };
+      //setRolledValue(result.value);
     } catch (err) {
       console.error('Failed to roll dice:', err);
       updateGamemasterLog('Error rolling dice');
