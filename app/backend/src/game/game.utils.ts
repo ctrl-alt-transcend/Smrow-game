@@ -36,12 +36,11 @@ export function rollDice( p: Player ): { value: number | null, message: string |
 
   if (p.firstDice === 0) {
     p.firstDice = value;
-    console.log(`utils:rollDice: FIRST dice: ${p.playerId} rolled [${value}]`);
+    //console.log(`utils:rollDice: FIRST dice: ${p.playerId} rolled [${value}]`);
   }
   else if (p.secondDice === 0) {
     p.secondDice = value;
-    console.log(`utils:rollDice: SECOND dice: ${p.playerId} rolled [${value}]`);
-
+    //console.log(`utils:rollDice: SECOND dice: ${p.playerId} rolled [${value}]`);
   }
   else {
     value = null;

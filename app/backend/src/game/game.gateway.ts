@@ -51,6 +51,18 @@ export class GameGateway implements OnGatewayInit {
     return { ...result };
   }
 
+  @SubscribeMessage('build')
+    async buils(@ConnectedSocket() client: Socket) {
+    const gameState = this.gameService.getGameStateByUserId(client.data.user.id);
+    const result = this.gameService.buildRequest();
+
+    gameState.diceRoll = result.value;
+    gameState.masterLog = result.message;
+    client.to(gameState.gameId).emit('gameState'); //INFO: Always return the new gameState to all client in the room
+    //client.broadcast.to(gameState.gameId).emit('diceRolled', );
+    return { ...result };
+  }
+
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(@ConnectedSocket() client: Socket) {
     const userId = client.data.user.id;

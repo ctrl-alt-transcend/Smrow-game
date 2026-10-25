@@ -37,9 +37,8 @@ class GameStateContext {
     this.initStartingRolls();
     this.transitionTo(state);
     this.game.players.forEach((value: Player, key: string) => {
-      console.log(`GameStateContext:constructor: Key: ${key}, Value: ${value}`);
+      console.log(`GameStateContext:constructor: plazerId: ${key}, value: ${value}`);
     });
-    console.log('GameStateContext:constructor: first init done!');
   }
 
   /** WORK IN PROGRESS: to do:
@@ -61,7 +60,7 @@ class GameStateContext {
 
   /** The Context allows changing the State object at runtime. */
   public transitionTo( newState: State ): void {
-    console.log(`GamePhase: transition to ${(<any>newState).constructor.name}.`);
+    console.log(`➡️ GamePhase: transition to ${(<any>newState).constructor.name}.`);
     this.state = newState
     this.state.setGameState(this);
   }
@@ -267,6 +266,7 @@ class RessourcePhase extends State
       return;
     }
     this.state.setTurnCount(0);
+    this.state.setCurrentTurnIndex(0);
     console.log('🪵RessourcePhase:phaseCheck: everybody is ready!');
     this.state.transitionTo(new TradeAndBuildPhase);
   }
@@ -292,10 +292,11 @@ class TradeAndBuildPhase extends State
 
   public phaseCheck(): void {
     if(this.state.getTurnCount() !== this.state.getPlayers().size) {
-      console.log(`🪵🏗️TradeAndBuildPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
+      console.log(`🏗️TradeAndBuildPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
     this.state.setTurnCount(0);
+    this.state.setCurrentTurnIndex(0);
     console.log('🏗️TradeAndBuildPhase:phaseCheck: everybody is ready!');
     this.state.transitionTo(new RessourcePhase);
   }

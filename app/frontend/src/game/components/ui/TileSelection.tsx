@@ -1,10 +1,11 @@
 import { Card, Stack, Title, Text, Group, Button, Anchor, Box } from '@mantine/core';
 import { modals } from '@mantine/modals';
+import { socket } from '../../../socket';
 import { useSelectionDisplay } from '../../hooks/useSelectionDisplay';
 import type { GameBoardSelection } from '../../types/gameboard.types';
 import { Faction } from '../../types/gameboard.types';
 import { useGameBoard } from '../../contexts/GameBoardContext';
-import { useGamemasterLog } from '../../hooks/useGamemasterLog';
+//import { useGamemasterLog } from '../../hooks/useGamemasterLog';
 
 interface BuildSelectionButtonProps {
   selected: GameBoardSelection;
@@ -16,18 +17,20 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   faction
 }) => {
   const { updateRoadFaction, updateSettlementFaction, updateGamemasterLog } = useGameBoard();
-  const { refetch } = useGamemasterLog(null);
+  //const { refetch } = useGamemasterLog(null);
 
   const handleConfirm = async () => {
     let log: string | null = "";
     const newFaction = faction ?? Faction.DEFAULT;
     if (selected.selectedRoad) {
       updateRoadFaction(selected.selectedRoad, newFaction);
-      log = await refetch('/api/game/build');
+      socket.emit('build');
+      //log = await refetch('/api/game/build');
     }
     if (selected.selectedSettlement) {
       updateSettlementFaction(selected.selectedSettlement, newFaction);
-      log = await refetch('/api/game/build');
+      socket.emit('build');
+      //log = await refetch('/api/game/build');
     }
     updateGamemasterLog(log ?? '...');
   };
