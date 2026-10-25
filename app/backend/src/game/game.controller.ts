@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import type { GameState } from '../../shared/game/game.types';
 import type { UserPublic } from '../../shared/types';
 import type { RollDiceDto } from './dto/roll-dice.dto';
+import type { BuildDto } from './dto/build.dto';
 
 @Controller('game')
 export class GameController {
@@ -27,18 +28,8 @@ export class GameController {
     return this.gameService.getGameStateByUserId(req.user.id);
   };
 
-  //@Get('road')
-  //getRoad() {
-  //  return { message: this.GameService.buildRoad() };
-  //}
-
-  //@Get('settlement')
-  //getSettlement() {
-  //  return { message: this.GameService.buildSettlement() };
-  //}
-
   @Post('build')
-  async buildRequest(@Body() dto: RollDiceDto) {
+  async buildRequest(@Body() dto: BuildDto) {
     const result = this.gameService.buildRequest();
     return { ...result };
   }

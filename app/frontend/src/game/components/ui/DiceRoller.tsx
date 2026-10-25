@@ -29,7 +29,6 @@ export function DiceRoller() {
 
       pendingResultRef.current = { value: result.value, message: result.message };
       setRolledValue(result.value);
-      //console.log(`front:DiceRoller:server result.value: ${result.value}`);
     } catch (err) {
       console.error('Failed to roll dice:', err);
       updateGamemasterLog('Error rolling dice');
@@ -43,7 +42,6 @@ export function DiceRoller() {
       const message = pendingResultRef.current?.message ?? `You rolled a ${value}`;
       setRolledValue(value);
       updateGamemasterLog(message);
-      //console.log(`front:DiceRoller:displayed value: ${value}`);
       pendingResultRef.current = null;
       setRolledValue(null);
       setBusy(false);

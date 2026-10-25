@@ -7,7 +7,6 @@ import type {
 } from '../../shared/game/game.types';
 import {
   GameStateContext,
-  RessourcePhase,
   StartingPhase
 } from './GameStateContext';
 
@@ -76,8 +75,6 @@ export class GameService {
     game.players.push(this.createPlayer(playerId));
   }
 
-
-
   private createPlayer(playerId: string): Player {
     return {
       playerId: playerId,
@@ -97,56 +94,20 @@ export class GameService {
     };
   }
 
-  // private initGameState(gameId: string): GameState {
-  // return(
-  //   {
-  //     gameId: gameId,
-  //     players: [],
-  //     playerTurn: "",
-  //   });
-  // }
-
-  // --------------------------------
+  // ⚠️ FOR TESTING ONLY!
   game = new GameStateContext(new StartingPhase());
 
   diceRequest(): { value: number | null, message: string | null } {
-    let response: GameResponse = this.game.diceRequest('spagg');
-    response = this.game.diceRequest('enriquest');
+    let response: GameResponse = this.game.diceRequest('spagg');  // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
+    response = this.game.diceRequest('enriquest');                // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
     this.game.phaseCheckRequest();
     return { value: response.value, message: response.message };
   }
 
   buildRequest(): { value: number | null, message: string | null } {
-    let response: GameResponse = this.game.buildRequest('spagg');
-    response = this.game.buildRequest('enriquest');
+    let response: GameResponse = this.game.buildRequest('spagg'); // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
+    response = this.game.buildRequest('enriquest');               // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
     this.game.phaseCheckRequest();
     return { value: response.value, message: response.message };
   }
-
-  //getLoopData(): GameLoopData {
-  //  return { ...this.loopData };
-  //}
-
-  //buildRoad(): string {
-  //  //if(this.phase.)
-  //  if(this.tst_plyr.firstDice && this.tst_plyr.firstDice) {
-  //    this.tst_plyr.firstDice = 0;
-  //    this.tst_plyr.secondDice = 0;
-  //  }
-  //  this.loopData.roadsBuilt++;
-  //  return `You built your #${this.loopData.roadsBuilt}th road !`;
-  //}
-
-  //buildSettlement(): string {
-  //  //this.phase.dice(this.tst_plyr);
-  //  //this.phase.request2();
-  //  //this.phase.request2();
-  //  if(this.tst_plyr.firstDice && this.tst_plyr.firstDice) {
-  //    this.tst_plyr.firstDice = 0;
-  //    this.tst_plyr.secondDice = 0;
-  //  }
-  //  this.loopData.settlementsBuilt++;
-  //  return `You built your #${this.loopData.settlementsBuilt}th settlement !`;
-  //}
-
 }

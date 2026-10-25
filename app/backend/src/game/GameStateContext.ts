@@ -217,9 +217,6 @@ class StartingPhase extends State
   }
 
   public phaseCheck(): void {
-    // Todo 🚩
-    // - define starting player based on highest dice score
-    // - find an efficient way to keep same player order at each turn
     try {
       this.computeTurnOrder();
     } catch(error) {
@@ -265,11 +262,8 @@ class RessourcePhase extends State
   }
 
   public phaseCheck(): void {
-    // Todo 🚩
-    // - if everbody played transit to next phase
-    console.log(`🪵RessourcePhase:phaseCheck: turn count: ${this.state.getTurnCount()}`);
     if(this.state.getTurnCount() !== this.state.getPlayers().size) {
-      console.log("🪵RessourcePhase:phaseCheck: some player didn't't played yet.");
+      console.log(`🪵RessourcePhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
     this.state.setTurnCount(0);
@@ -297,11 +291,8 @@ class TradeAndBuildPhase extends State
   }
 
   public phaseCheck(): void {
-    // Todo 🚩
-    // - if everbody is ready (or played?) transit to next phase
-    console.log(`🏗️TradeAndBuildPhase:phaseCheck: turn count: ${this.state.getTurnCount()}`);
     if(this.state.getTurnCount() !== this.state.getPlayers().size) {
-      console.log("🏗️TradeAndBuildPhase:phaseCheck: some player didn't't played yet.");
+      console.log(`🪵🏗️TradeAndBuildPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
     this.state.setTurnCount(0);
