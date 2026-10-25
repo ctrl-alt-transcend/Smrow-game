@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import type { UserProfile } from '@shared/types';
 
 @Injectable()
 export class UserService {
@@ -26,16 +27,35 @@ export class UserService {
     });
   }
 
-  async findById(id: string) {
-    return await this.databaseService.user.findUniqueOrThrow({
+  async findById(id: string): Promise<UserProfile | null> {
+    const user = await this.databaseService.user.findUnique({
       where: { id },
       select: {
         id: true,
         email: true,
         name: true,
+        username: true,
         createdAt: true,
+        profile: {
+          select: {
+            bio: true,
+            avatarURL: true,
+          },
+        },
       },
     });
+
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      username: user.username,
+      createdAt: user.createdAt.toISOString(),
+      bio: user.profile?.bio ?? null,
+      avatarURL: user.profile?.avatarURL ?? null,
+    };
   }
 
   // include returns the relations data, if set to true

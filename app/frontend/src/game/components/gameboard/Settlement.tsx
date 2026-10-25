@@ -1,17 +1,25 @@
-import type { SettlementProps } from '../../types/gameboard.types';
-import { useHover } from '../../hooks/useGameBoardHover';
-import { getTileFillColor } from '../../utils/tileRendering';
-
+import type { SettlementProps } from "../../types/gameboard.types";
+import { useHover } from "../../hooks/useGameBoardHover";
+import { getTileFillColor } from "../../utils/tileRendering";
 
 export const Settlement: React.FC<SettlementProps> = ({
   data,
   isSelected,
   isHovered,
   onHoverChange,
-  onClick
+  onClick,
 }) => {
-  const { isHovered: effectiveIsHovered, onMouseEnter, onMouseLeave } = useHover(isHovered, onHoverChange);
-  const fillColor = getTileFillColor(null, data.faction, isSelected, effectiveIsHovered);
+  const {
+    isHovered: effectiveIsHovered,
+    onMouseEnter,
+    onMouseLeave,
+  } = useHover(isHovered, onHoverChange);
+  const fillColor = getTileFillColor(
+    null,
+    data.faction,
+    isSelected,
+    effectiveIsHovered,
+  );
 
   return (
     <circle
@@ -22,8 +30,11 @@ export const Settlement: React.FC<SettlementProps> = ({
       strokeWidth={2}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onClick={(e) => { e.stopPropagation(); onClick(data); }}
-      style={{ cursor: 'pointer' }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(data);
+      }}
+      style={{ cursor: "pointer" }}
     />
   );
 };
