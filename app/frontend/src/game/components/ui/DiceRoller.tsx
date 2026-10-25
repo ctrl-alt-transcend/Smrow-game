@@ -31,8 +31,8 @@ export function DiceRoller({diceValue, masterLog}: { diceValue: number | null ; 
       //  return;
       //}
 
-      //pendingResultRef.current = { value: result.value, message: result.message };
-      //setRolledValue(result.value);
+      pendingResultRef.current = { value: diceValue, message: masterLog };
+      setRolledValue(diceValue);
     } catch (err) {
       console.error('Failed to roll dice:', err);
       updateGamemasterLog('Error rolling dice');

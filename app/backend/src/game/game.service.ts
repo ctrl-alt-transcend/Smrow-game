@@ -1,15 +1,10 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type {
-  GameState,
-  Player,
-  GameResponse,
-  PlayerProfile,
-} from '@shared/game/game.types';
+import type { PlayerProfile } from '@shared/game/game.types';
 import {
   GameStateContext,
   StartingPhase
-} from '../../../shared/game/GameStateContext';
+} from './GameStateContext';
 import { initPlayer } from './game.utils';
 
 @Injectable()

@@ -13,7 +13,7 @@ import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
 export default function FullLayout() {
   const [opened, { toggle }] = useDisclosure();
   const GameBoardProps = useGameBoardFactory(classicLayout);
-  const { game } = useGameState();
+  const game  = useGameState();
 
   if (!game) return <div>Loading game...</div>;
 
@@ -46,7 +46,7 @@ export default function FullLayout() {
         </AppShell.Main>
         <AppShell.Aside p="md">
           Aside
-          <PlayerPanel players={game.players} />
+          {/* <PlayerPanel players={game.players} /> */}
         </AppShell.Aside>
         <AppShell.Footer p="xs">
           <GameMasterLog message={game.masterLog}/>

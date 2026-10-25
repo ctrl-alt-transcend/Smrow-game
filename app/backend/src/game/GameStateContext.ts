@@ -2,12 +2,12 @@ import type {
   GameData,
   Player,
   GameResponse
-} from './game.types';
+} from '../../../shared/game/game.types';
 import {
   initPlayer,
   rollDice,
   funnyLogs
-} from '../../backend/src/game/game.utils';
+} from './game.utils';
 
 /**
  * STATE DESIGN PATTERN
@@ -46,7 +46,7 @@ class GameStateContext {
    * - init every player with their current name
    * - init ressources
    */
-  protected initGameData() {  //⚠️ FOR TESTING
+  protected initGameData() {  //⚠️ FOR TESTING //TEST: REMOVE THIS IN PROD
     this.game.players.set('spagg', initPlayer('spagg'));
     this.game.players.set('enriquest', initPlayer('enriquest'));
   }

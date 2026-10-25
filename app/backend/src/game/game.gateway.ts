@@ -62,7 +62,7 @@ export class GameGateway implements OnGatewayInit {
     game.phaseCheckRequest();
     game.setDiceRoll(result.value); // v.2
     game.setMasterLog(result.message) // v.2
-    this.server.to(game.getGameId()).emit('gameState', game); //INFO: Always return the new gameState to all client in the room
+    this.server.to(game.getGameId()).emit('gameState', game.getGameData()); //INFO: Always return the new gameState to all client in the room
     //client.broadcast.to(gameState.gameId).emit('diceRolled', );
     return { ...result };
   }
@@ -79,11 +79,12 @@ export class GameGateway implements OnGatewayInit {
       //game.masterLog = `${client.data.user.username} joined the room`; // v.1
       game.setMasterLog(`${client.data.user.username} joined the room`); // v.2
       //this.server.to(game.gameId).emit('gameState', game); // v.1
-      this.server.to(game.getGameId()).emit('gameState', game); // v.2
-      return { ok: true, data: game };
+      console.log(game.getGameId());
+      this.server.to(game.getGameId()).emit('gameState', game.getGameData()); // v.2
+      return { ok: true, data: game.getGameData() };
     }
     catch (e) {
-      console.log('joinRoom failed');
+      console.log('joinRoom failed', e);
       //this.logger.error('joinRoom a échoué', e);
       return { ok: false, error: 'not in game' };
     }
@@ -96,7 +97,7 @@ export class GameGateway implements OnGatewayInit {
 
   handleConnection(client: Socket) { //TODO: Use middleware to check the token before the connection is established "next()"
     try {
-      console.log('Client connected:', client.id);
+      console.log('Client connected:', client.id); //TEST:
       const token = client.handshake.auth.token;
       const payload = this.jwtService.verify(token, {secret: readSecret('JWT_SECRET_FILE')});
       client.data.user = {id: payload.sub, username: payload.username};

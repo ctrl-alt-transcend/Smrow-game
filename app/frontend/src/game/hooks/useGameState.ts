@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { socket } from '../../socket.tsx';
 //import type { GameState } from  "@shared/game/game.types.ts";
-import type { GameStateContext } from "@shared/game/GameStateContext.ts";
+import type { GameData } from "@shared/game/game.types.ts";
 
-export function useGameState() {
+export function useGameState() : GameData | null {
 //  //const [game, setGame] = useState<GameState | null>(null); //INFO: game is the state variable that will hold the game state, and setGame is the function that will update it.
-  const [game, setGame] = useState<GameStateContext | null>(null); //INFO: game is the state variable that will hold the game state, and setGame is the function that will update it.
+  const [game, setGame] = useState< GameData | null>(null); //INFO: game is the state variable that will hold the game state, and setGame is the function that will update it.
 //  //const [error, setError] = useState<string | null>(null);
 
 //  useEffect(() => {
@@ -56,5 +56,6 @@ export function useGameState() {
       socket.disconnect();
     };
   }, []);
-  return { game };
+
+  return (game);
 }
