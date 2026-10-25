@@ -9,7 +9,7 @@ import type {
 import {
   GameStateContext,
   StartingPhase
-} from './GameStateContext';
+} from '../../../shared/game/GameStateContext';
 import { initPlayer } from './game.utils';
 
 @Injectable()
@@ -102,6 +102,10 @@ export class GameService {
     this.playersMap.set(playerProfile.id, gameId);
     //game.players.push(this.createPlayer(playerProfile)); // v.1
     game.getPlayers().set(playerProfile.username, initPlayer(playerProfile.username));  // v.2
+    // Debug
+    //game.getPlayers().forEach((value: Player, key: string) => {
+    //  console.log(`addPlayerToGame: gameId: ${gameId}, playerId: ${key}, value: ${value}`);
+    //});
   }
 
 

@@ -62,7 +62,7 @@ export class GameGateway implements OnGatewayInit {
     game.phaseCheckRequest();
     game.setDiceRoll(result.value); // v.2
     game.setMasterLog(result.message) // v.2
-    this.server.to(game.getGameId()).emit('gameState'); //INFO: Always return the new gameState to all client in the room
+    this.server.to(game.getGameId()).emit('gameState', game); //INFO: Always return the new gameState to all client in the room
     //client.broadcast.to(gameState.gameId).emit('diceRolled', );
     return { ...result };
   }
@@ -73,6 +73,7 @@ export class GameGateway implements OnGatewayInit {
     try {
       //const game = this.gameService.getGameStateByUserId(userId) // v.1
       const game = this.gameService.getGameInstanceByUserId(userId) // v.2
+      if (!game) throw new Error('Game not found');
       //await client.join(game.gameId); // v.1
       await client.join(game.getGameId()); // v.2
       //game.masterLog = `${client.data.user.username} joined the room`; // v.1
@@ -81,10 +82,16 @@ export class GameGateway implements OnGatewayInit {
       this.server.to(game.getGameId()).emit('gameState', game); // v.2
       return { ok: true, data: game };
     }
-    catch {
-      return { ok: false, error: "not in game" };
+    catch (e) {
+      console.log('joinRoom failed');
+      //this.logger.error('joinRoom a échoué', e);
+      return { ok: false, error: 'not in game' };
     }
+    //catch {
+    //  return { ok: false, error: "not in game" };
+    //}
   }
+
 
 
   handleConnection(client: Socket) { //TODO: Use middleware to check the token before the connection is established "next()"

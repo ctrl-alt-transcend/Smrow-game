@@ -1,14 +1,13 @@
-import { Public } from 'generated/prisma/runtime/client';
-import {
+import type {
   GameData,
   Player,
   GameResponse
-} from '@shared/game/game.types';
+} from './game.types';
 import {
   initPlayer,
   rollDice,
   funnyLogs
-} from './game.utils';
+} from '../../backend/src/game/game.utils';
 
 /**
  * STATE DESIGN PATTERN
