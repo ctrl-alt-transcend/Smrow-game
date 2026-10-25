@@ -24,3 +24,7 @@ export function createPlayer( playerId: string ): Player {
       //color TODO: add color to player
     };
   }
+
+export function changeGameMasterLog(message: string) {
+
+}

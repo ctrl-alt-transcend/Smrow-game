@@ -46,7 +46,7 @@ export class GameGateway implements OnGatewayInit {
 
     gameState.diceRoll = result.value;
     gameState.masterLog = result.message;
-    client.to(gameState.gameId).emit('gameState'); //INFO: Always return the new gameState to all client in the room
+    this.server.to(gameState.gameId).emit('gameState', gameState); //INFO: Always return the new gameState to all client in the room
     //client.broadcast.to(gameState.gameId).emit('diceRolled', );
     return { ...result };
   }
@@ -57,6 +57,8 @@ export class GameGateway implements OnGatewayInit {
     try {
       const gameState = this.gameService.getGameStateByUserId(userId)
       await client.join(gameState.gameId);
+      gameState.masterLog = `${client.data.user.username} joined the room`;
+      this.server.to(gameState.gameId).emit('gameState', gameState);
       return { ok: true, data: gameState };
     }
     catch {
@@ -70,15 +72,12 @@ export class GameGateway implements OnGatewayInit {
       console.log('Client connected:', client.id);
       const token = client.handshake.auth.token;
       const payload = this.jwtService.verify(token, {secret: readSecret('JWT_SECRET_FILE')});
-      client.data.user = {id: payload.sub};
+      client.data.user = {id: payload.sub, username: payload.username};
     }
     catch (error) {
       console.log('Client connection rejected:', client.id, " - ", (error as Error).message);
       client.disconnect(true); //WARN: what happens in the frontend ?
       //TODO: remove player of the GameStat
-      return ; //TEST: remove this line
     }
-
-    client.emit('message', 'Welcome to the game server!'); //TEST: remove this line
   }
 }
