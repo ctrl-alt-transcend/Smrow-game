@@ -68,7 +68,7 @@ model Account {
 
 
 model Games {
-	id			String @default(uuid()) @id
+	id			String @default(cuid()) @id
 	totalTurns	Int
 	duration	Int?
 	playedAt	DateTime @default(now())
