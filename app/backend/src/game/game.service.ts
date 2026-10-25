@@ -3,12 +3,12 @@ import { randomUUID } from 'crypto';
 import type {
   GameState,
   Player,
-  RollResponse,
+  GameResponse,
   PlayerProfile,
 } from '@shared/game/game.types';
 import {
   GameStateContext,
-  RessourcePhase
+  StartingPhase
 } from './GameStateContext';
 
 @Injectable()
@@ -105,48 +105,20 @@ export class GameService {
     };
   }
 
-  // private initGameState(gameId: string): GameState {
-  // return(
-  //   {
-  //     gameId: gameId,
-  //     players: [],
-  //     playerTurn: "",
-  //   });
-  // }
+  // ⚠️ FOR TESTING ONLY!
+  game = new GameStateContext(new StartingPhase());
 
-  // --------------------------------
-  game = new GameStateContext(new RessourcePhase());
-
-  rollDice(): { value: number | null , message: string | null } {
-    let response: RollResponse = this.game.request1();
-    //this.game.request2();
+  diceRequest(): { value: number | null, message: string | null } {
+    let response: GameResponse = this.game.diceRequest('spagg');  // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
+    response = this.game.diceRequest('enriquest');                // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
+    this.game.phaseCheckRequest();
     return { value: response.value, message: response.message };
   }
 
-  //getLoopData(): GameLoopData {
-  //  return { ...this.loopData };
-  //}
-
-  //buildRoad(): string {
-  //  //if(this.phase.)
-  //  if(this.tst_plyr.firstDice && this.tst_plyr.firstDice) {
-  //    this.tst_plyr.firstDice = 0;
-  //    this.tst_plyr.secondDice = 0;
-  //  }
-  //  this.loopData.roadsBuilt++;
-  //  return `You built your #${this.loopData.roadsBuilt}th road !`;
-  //}
-
-  //buildSettlement(): string {
-  //  //this.phase.request1(this.tst_plyr);
-  //  //this.phase.request2();
-  //  //this.phase.request2();
-  //  if(this.tst_plyr.firstDice && this.tst_plyr.firstDice) {
-  //    this.tst_plyr.firstDice = 0;
-  //    this.tst_plyr.secondDice = 0;
-  //  }
-  //  this.loopData.settlementsBuilt++;
-  //  return `You built your #${this.loopData.settlementsBuilt}th settlement !`;
-  //}
-
+  buildRequest(): { value: number | null, message: string | null } {
+    let response: GameResponse = this.game.buildRequest('spagg'); // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
+    response = this.game.buildRequest('enriquest');               // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
+    this.game.phaseCheckRequest();
+    return { value: response.value, message: response.message };
+  }
 }

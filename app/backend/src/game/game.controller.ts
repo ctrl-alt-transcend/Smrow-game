@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
 import type { PlayerProfile } from '@shared/game/game.types';
 import type { UserPublic } from '@shared/types';
+import type { BuildDto } from './dto/build.dto';
 
 @Controller('game')
 export class GameController {
@@ -34,22 +35,17 @@ export class GameController {
   // };
 
   //TODO: Implement this with websockets
-  //@Get('road')
-  //getRoad() {
-  //  return { message: this.GameService.buildRoad() };
+  //@Post('build')
+  //async buildRequest(@Body() dto: BuildDto) {
+  //  const result = this.gameService.buildRequest();
+  //  return { ...result };
   //}
 
   //TODO: Implement this with websockets
-  //@Get('settlement')
-  //getSettlement() {
-  //  return { message: this.GameService.buildSettlement() };
+  //@Post('dice')
+  //async diceRequest(@Body() dto: RollDiceDto) {
+  //  const result = this.gameService.diceRequest();
+  //  return { ...result };
   //}
 
-  //TODO: delete `roll-dice.dto` if this controller is not used
-  // @Post('dice/roll')
-  // async rollDice(@Body() dto: RollDiceDto) {
-  //   const result = this.gameService.rollDice();
-  //   return { ...result };
-  // }
-  //
 }

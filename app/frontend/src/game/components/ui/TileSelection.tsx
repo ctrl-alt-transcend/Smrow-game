@@ -23,11 +23,11 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     const newFaction = faction ?? Faction.DEFAULT;
     if (selected.selectedRoad) {
       updateRoadFaction(selected.selectedRoad, newFaction);
-      log = await refetch('/api/game/road');
+      log = await refetch('/api/game/build');
     }
     if (selected.selectedSettlement) {
       updateSettlementFaction(selected.selectedSettlement, newFaction);
-      log = await refetch('/api/game/settlement');
+      log = await refetch('/api/game/build');
     }
     updateGamemasterLog(log ?? '...');
   };

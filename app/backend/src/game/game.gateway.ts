@@ -42,7 +42,7 @@ export class GameGateway implements OnGatewayInit {
   @SubscribeMessage('rollDice')
     async rollDice(@ConnectedSocket() client: Socket) {
     const gameState = this.gameService.getGameStateByUserId(client.data.user.id);
-    const result = this.gameService.rollDice();
+    const result = this.gameService.diceRequest();
 
     gameState.diceRoll = result.value;
     gameState.masterLog = result.message;

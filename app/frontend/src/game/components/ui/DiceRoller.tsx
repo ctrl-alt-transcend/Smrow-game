@@ -7,52 +7,80 @@ import { useRollDice } from '../../hooks/useRollDice';
 
 export function DiceRoller({diceValue, masterLog}: { diceValue: number | null ; masterLog: string | null }) {
   const [rolledValue, setRolledValue] = useState<DiceValue | null>(null);
-  const [pendingCheatValue, setPendingCheatValue] = useState<DiceValue | null>(null);
-  const pendingResultRef = useRef<{ value: DiceValue | null; message: string | null } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const pendingResultRef = useRef<{ value: DiceValue | number | null; message: string | null} | null>(null);
   const { updateGamemasterLog } = useGameBoard();
   const { roll } = useRollDice();
-  const diceRef = useRef<Dice3DHandle>(null);
 
 
-  const handleRoll = useCallback(async () => {
+  const handleRollRequest = useCallback(async () => {
+    if (busy) return;
+    setBusy(true);
     try {
-      // const result = await roll();
-      // if (!result) return;
-      await roll();
-      pendingResultRef.current = { value: diceValue, message: masterLog };
-      setPendingCheatValue(diceValue);
+      // await roll(); // @Hayden: just that?
+      const result = await roll();
+      if (!result) {
+        setBusy(false);
+        return;
+      }
+      if(result.value === null) {
+        if(result.message)
+          updateGamemasterLog(result.message);
+        setBusy(false);
+        return;
+      }
+
+      pendingResultRef.current = { value: result.value, message: result.message };
+      setRolledValue(result.value);
     } catch (err) {
       console.error('Failed to roll dice:', err);
       updateGamemasterLog('Error rolling dice');
+      setBusy(false);
     }
-  }, [roll, updateGamemasterLog, diceValue, masterLog]);
+  }, [roll, updateGamemasterLog, busy]);
 
-  const handleAnimationComplete = useCallback((finalValue: DiceValue) => {
-    setRolledValue(finalValue);
-    const message =
-    pendingResultRef.current?.message ?? `You rolled a ${finalValue}`;
-    updateGamemasterLog(message);
-    setPendingCheatValue(null)
-  }, [updateGamemasterLog]);
+  const handleAnimationComplete = useCallback(
+    (finalValue: DiceValue) => {
+      const value = pendingResultRef.current?.value ?? finalValue;
+      const message = pendingResultRef.current?.message ?? `You rolled a ${value}`;
+      setRolledValue(value);
+      updateGamemasterLog(message);
+      pendingResultRef.current = null;
+      setRolledValue(null);
+      setBusy(false);
+    },
+    [updateGamemasterLog]
+  );
 
   return (
-    <Box style={{ flex: 1, minWidth: 220, alignContent: 'center' }}>
+    <Box style={{ flex: 1, minWidth: 220, position: 'relative' }}>
       <Card withBorder radius="md" shadow="sm" h={220}>
-        <Stack gap="xs" align="center" justify="center">
+        <Stack gap="xl" align="center" justify="center">
           <Title order={4}>Dice box</Title>
           <Dice3D
-            ref={diceRef}
             size={80}
-            cheatValue={pendingCheatValue ?? undefined}
-            onClick={handleRoll}
+            cheatValue={rolledValue ?? undefined}
             onRoll={handleAnimationComplete}
-            triggers={['click']}
+            triggers={[]}
+            style={{ pointerEvents: 'none' }}
           />
-          <Text>
-            {rolledValue !== null ? `You rolled a ${rolledValue}!` : 'Click the dice!'}
-          </Text>
         </Stack>
       </Card>
+      <button
+        type="button"
+        onClick={handleRollRequest}
+        disabled={busy}
+        aria-label="Roll the dice"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 10,
+          background: 'transparent',
+          border: 'none',
+          borderRadius: 8,
+          cursor: busy ? 'wait' : 'pointer',
+        }}
+      />
     </Box>
   );
 }
