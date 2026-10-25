@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { StatsService } from './stats.service';
 import { Prisma } from '@prisma/client';
 
@@ -22,7 +30,11 @@ export class StatsController {
   }
 
   @Patch(':id')
-  update(@Param('id') userId: string, gameId: string, @Body() updateStatDto: Prisma.GamesPlayerUpdateInput) {
+  update(
+    @Param('id') userId: string,
+    gameId: string,
+    @Body() updateStatDto: Prisma.GamesPlayerUpdateInput,
+  ) {
     return this.statsService.update(userId, gameId, updateStatDto);
   }
 

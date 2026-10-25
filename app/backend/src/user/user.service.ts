@@ -39,7 +39,8 @@ export class UserService {
   }
 
   // include returns the relations data, if set to true
-  async findAll() { // to be deleted
+  async findAll() {
+    // to be deleted
     return this.databaseService.user.findMany({
       include: { profile: true, localAuth: false },
     });
@@ -53,13 +54,13 @@ export class UserService {
     });
   }
 
-//  async findOne(username: string) {
-//    return this.databaseService.user.findUniqueOrThrow({
-//      where: {
-//        username,
-//      },
-//    });
-//  }
+  //  async findOne(username: string) {
+  //    return this.databaseService.user.findUniqueOrThrow({
+  //      where: {
+  //        username,
+  //      },
+  //    });
+  //  }
 
   async findByMail(email: string) {
     return this.databaseService.user.findUniqueOrThrow({
