@@ -27,7 +27,7 @@ export class UserService {
   }
 
   async findById(id: string) {
-    return this.databaseService.user.findUnique({
+    return await this.databaseService.user.findUniqueOrThrow({
       where: { id },
       select: {
         id: true,
@@ -39,7 +39,7 @@ export class UserService {
   }
 
   // include returns the relations data, if set to true
-  async findAll() {
+  async findAll() { // to be deleted
     return this.databaseService.user.findMany({
       include: { profile: true, localAuth: false },
     });
