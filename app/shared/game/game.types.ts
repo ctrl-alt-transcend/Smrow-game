@@ -27,6 +27,7 @@ export type GameState = {
 export type GameData = {
   players: Map<string, Player>;
   startingRolls: Map<string, number | null>;
+  turnCount: number;
   turnOrder: string[];
   currentTurnIndex: number;
   gameId: string;

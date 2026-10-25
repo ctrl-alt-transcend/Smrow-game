@@ -47,9 +47,9 @@ export function rollDice( p: Player ): { value: number | null, message: string |
 }
 
 export function funnyLogs( id: string, value: number ): string {
-  if (value <= 3) { return `${id} rolled an almost useless ${value} ...`; }
-  if (value > 3 && value <= 6) { return `${id} rolled a tiny little ${value} ...`; }
-  if (value > 6 && value <= 9) { return `${id} rolled a solid ${value} .`; }
-  if (value > 9 && value <= 12) { return `${id} rolled a huge ${value} !`; }
+  if (value <= 3) { return `${id} got an almost useless ${value}...`; }
+  if (value > 3 && value <= 6) { return `${id} got a tiny little ${value}...`; }
+  if (value > 6 && value <= 9) { return `${id} got a solid ${value}.`; }
+  if (value > 9 && value <= 12) { return `${id} got a huge ${value}!`; }
   return `${id} rolled a ${value}`;
 }

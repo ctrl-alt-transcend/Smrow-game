@@ -28,6 +28,7 @@ class GameStateContext {
     this.game = {
       players: new Map<string, Player>(),
       startingRolls: new Map<string, number | null>(),
+      turnCount: 0,
       turnOrder: [],
       currentTurnIndex: 0,
       gameId: '0101010'
@@ -80,13 +81,15 @@ class GameStateContext {
   public  getGameData(): GameData { return this.game; }
   public  getPlayers(): Map<string, Player> { return this.game.players; }
   public  getStartingRolls(): Map<string, number | null> { return this.game.startingRolls; }
-  public  getCurrentPlayer(): Player | undefined { return this.game.players.get(this.game.turnOrder[this.game.currentTurnIndex]); }
-
+  public  getTurnCount(): number { return this.game.turnCount; }
+  public  getCurrentTurnIndex(): number { return this.game.currentTurnIndex; }
+  public  getCurrentPlayer(): Player | undefined {
+    return this.game.players.get(this.game.turnOrder[this.game.currentTurnIndex]);
+  }
   public  getPlayerById(playerId: string): Player | undefined {
     return this.game.players.get(playerId);
   }
-
- public isPlayersTurn(playerId: string): Player | null {
+  public isPlayersTurn(playerId: string): Player | null {
     const player = this.getPlayerById(playerId);
     if (!player) {
       throw new Error(`Unknown playerId: ${playerId}`);
@@ -109,30 +112,37 @@ class GameStateContext {
   }
 
   /** Setters */
-  public  setTurnOrder( newTurnOrder: string[] ) { this.game.turnOrder = newTurnOrder; }
   public  resetDices( p: Player ) { p.firstDice = 0; p.secondDice = 0; }
   public  resetAllDices() {
-
     for (let [key, value] of this.game.players) {
       this.resetDices(value);
     }
-
-    //this.game.players.forEach((p: Player) => {
-    //  this.resetDices(p);
-    //});
   }
-
-  public  setCurrentTurnIndex( index: number | null ) {
-    if(index) {
-      this.game.currentTurnIndex = index;
+  public  setTurnOrder( newTurnOrder: string[] ) { this.game.turnOrder = newTurnOrder; }
+  private updateValue(
+    currentValue: number,
+    limit: number,
+    newValue: number | undefined
+  ): number {
+    if (newValue !== undefined) {
+      return newValue;
     }
-    else if(this.game.currentTurnIndex + 1 ===
-      this.game.players.size) {
-      this.game.currentTurnIndex = 0;
+    else if (currentValue + 1 === limit) {
+      return 0;
     }
     else {
-      this.game.currentTurnIndex++;
+      return currentValue + 1;
     }
+  }
+
+  public setTurnCount( count: number | undefined ) {
+    this.game.turnCount = this.updateValue(
+      this.game.turnCount, this.game.players.size + 1, count);
+  }
+
+  public setCurrentTurnIndex( index: number | undefined ) {
+    this.game.currentTurnIndex = this.updateValue(
+      this.game.currentTurnIndex, this.game.players.size, index);
   }
 }
 
@@ -162,16 +172,16 @@ abstract class  State
 class StartingPhase extends State
 {
   public dice( playerId: string ): GameResponse {
-    console.log('StartingPhase:dice: handles diceRequest.');
+    console.log('🏁🎲StartingPhase:dice: handles diceRequest.');
     const p = this.state.getPlayerById(playerId);
     if(p === undefined) {
       throw new Error(`Unknown playerId: ${playerId}`);
     }
     const roll: GameResponse = rollDice(p);
     if(this.state.hasRolledBothDices(p) && roll.value) {
-      console.log(`StartingPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
+      console.log(`🏁🎲StartingPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
-      this.state.setCurrentTurnIndex(null);
+      this.state.setCurrentTurnIndex(undefined);
       return { value: null,
         message: funnyLogs(p.playerId, p.firstDice + p.secondDice) }
     }
@@ -179,8 +189,8 @@ class StartingPhase extends State
   }
 
   public build(): GameResponse {
-    console.log('StartingPhase:build: handles buildRequest.');
-    return { value: null, message: `StartingPhase:build: action forbidden during this phase.`}
+    console.log('🏁StartingPhase:build: handles buildRequest.');
+    return { value: null, message: `🏁StartingPhase:build: action forbidden during this phase.`}
   }
 
   public computeTurnOrder() {
@@ -213,14 +223,13 @@ class StartingPhase extends State
     try {
       this.computeTurnOrder();
     } catch(error) {
-      console.log('StartingPhase:phaseCheck: ' + error);
+      console.log('🏁StartingPhase:phaseCheck: ' + error);
       return;
     }
-    console.log('StartingPhase:phaseCheck: everybody is ready !');
     this.state.resetAllDices();
     const p = this.state.getCurrentPlayer();
     if (p) {
-      console.log(`StartingPhase:phaseCheck: ${p.playerId} is starting !`);
+      console.log(`🏁StartingPhase:phaseCheck: everybody is ready and ${p.playerId} is starting!`);
     }
     this.state.transitionTo(new RessourcePhase);
   }
@@ -230,48 +239,41 @@ class RessourcePhase extends State
 {
   public dice( playerId: string ): GameResponse {
 
-    console.log('RessourcePhase:dice: handles diceRequest.');
+    console.log('🪵🎲RessourcePhase:dice: handles diceRequest.');
     const p = this.state.isPlayersTurn(playerId);
     if(!p) {
       return { value: null, message: "It's not your turn !" };
     }
     const roll: GameResponse = rollDice(p);
     if(this.state.hasRolledBothDices(p) && roll.value) {
-      console.log(`StartingPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
+      console.log(`🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
-      this.state.setCurrentTurnIndex(null);
        // Todo 🚩
       // - collect ressources
       //this.state.resetDices(p); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
-      this.state.setCurrentTurnIndex(null);
+      this.state.setCurrentTurnIndex(undefined);
+      this.state.setTurnCount(undefined);
       return { value: null,
         message: funnyLogs(p.playerId, p.firstDice + p.secondDice) }
     }
     return { value: roll.value, message: roll.message }
-
-
-    //if(this.state.hasRolledBothDices(p)) {
-    //  console.log(`RessourcePhase:dice: player rolled both dices and is now ready to collect ressources from terrains #${p.firstDice + p.secondDice}`);
-    //  // Todo 🚩
-    //  // - collect ressources
-    //  this.state.resetDices(p); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
-    //  // Todo 🚩
-    //  // - return current player dice rolls
-    //  this.state.setCurrentTurnIndex(null);
-    //  return { value: null, message: `You already rolled both dices.`}
-    //}
-    //return rollDice(p)
   }
 
   public build(): GameResponse {
-    console.log('RessourcePhase:build: handles buildRequest.');
-    return { value: null, message: `RessourcePhase:build: action forbidden during this phase.`}
+    console.log('🪵RessourcePhase:build: handles buildRequest.');
+    return { value: null, message: `🪵RessourcePhase:build: action forbidden during this phase.`}
   }
 
   public phaseCheck(): void {
     // Todo 🚩
     // - if everbody played transit to next phase
-    console.log('RessourcePhase:phaseCheck: everybody is ready!');
+    console.log(`🪵RessourcePhase:phaseCheck: turn count: ${this.state.getTurnCount()}`);
+    if(this.state.getTurnCount() !== this.state.getPlayers().size) {
+      console.log("🪵RessourcePhase:phaseCheck: some player didn't't played yet.");
+      return;
+    }
+    this.state.setTurnCount(0);
+    console.log('🪵RessourcePhase:phaseCheck: everybody is ready!');
     this.state.transitionTo(new TradeAndBuildPhase);
   }
 }
@@ -279,23 +281,31 @@ class RessourcePhase extends State
 class TradeAndBuildPhase extends State
 {
   public build( playerId: string ): GameResponse {
+    console.log('🏗️TradeAndBuildPhase:build: handles buildRequest.');
     const p = this.state.isPlayersTurn(playerId);
-    if(p === undefined) {
-      throw new Error(`Unknown playerId: ${playerId}`);
+    if(!p) {
+      return { value: null, message: "It's not your turn !" };
     }
-    console.log('TradeAndBuildPhase:build: handles buildRequest.');
-    return { value: null, message: `TradeAndBuildPhase:build: not handled for the moment...`}
+    this.state.setTurnCount(undefined);
+    this.state.setCurrentTurnIndex(undefined);
+    return { value: null, message: `🏗️TradeAndBuildPhase:build: not handled for the moment...`}
   }
 
   public dice(): { value: number | null, message: string | null } {
-    console.log('TradeAndBuildPhase:dice: handles diceRequest.');
-    return { value: null, message: `TradeAndBuildPhase:dice: action forbidden during this phase.`}
+    console.log('🏗️🎲TradeAndBuildPhase:dice: handles diceRequest.');
+    return { value: null, message: `🏗️🎲TradeAndBuildPhase:dice: action forbidden during this phase.`}
   }
 
   public phaseCheck(): void {
     // Todo 🚩
     // - if everbody is ready (or played?) transit to next phase
-    console.log('TradeAndBuildPhase:phaseCheck: everybody is ready!');
+    console.log(`🏗️TradeAndBuildPhase:phaseCheck: turn count: ${this.state.getTurnCount()}`);
+    if(this.state.getTurnCount() !== this.state.getPlayers().size) {
+      console.log("🏗️TradeAndBuildPhase:phaseCheck: some player didn't't played yet.");
+      return;
+    }
+    this.state.setTurnCount(0);
+    console.log('🏗️TradeAndBuildPhase:phaseCheck: everybody is ready!');
     this.state.transitionTo(new RessourcePhase);
   }
 }
