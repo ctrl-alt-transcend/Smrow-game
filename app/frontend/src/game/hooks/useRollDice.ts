@@ -6,7 +6,7 @@ import type { GameResponse } from '@shared/game/game.types.ts';
 export function useRollDice() {
   const abortRef = useRef<AbortController | null>(null);
 
-  const roll = useCallback(async (): Promise<GameResponse | null> => {
+  const roll = useCallback(async () => {
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac; //OPTIM: Do you still need the signals, given that they don’t seem to be used any more ?

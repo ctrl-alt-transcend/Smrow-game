@@ -26,7 +26,7 @@ export class GameService {
     }
     const gameId = randomUUID();
 
-    this.gamesMap.set(gameId, { gameId: gameId, players: [], playerTurn: '', diceRoll: 0, masterLog: '' });
+    this.gamesMap.set(gameId, { gameId: gameId, players: [], playerTurn: '', diceRoll: 0, masterLog: '...' });
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
   }
