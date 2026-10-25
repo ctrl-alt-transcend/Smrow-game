@@ -28,7 +28,7 @@ export class UserService {
   }
 
   async findById(id: string): Promise<UserProfile | null> {
-    const user = await this.databaseService.user.findUnique({
+    const user = await this.databaseService.user.findUniqueOrThrow({
       where: { id },
       select: {
         id: true,
