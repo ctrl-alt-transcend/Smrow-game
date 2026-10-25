@@ -42,7 +42,7 @@ export class GameGateway implements OnGatewayInit {
   @SubscribeMessage('rollDice')
     async rollDice(@ConnectedSocket() client: Socket) {
     const gameState = this.gameService.getGameStateByUserId(client.data.user.id);
-    const result = this.gameService.diceRequest();
+    const result = this.gameService.diceRequest(client.data.user.username);
 
     gameState.diceRoll = result.value;
     gameState.masterLog = result.message;
@@ -54,7 +54,7 @@ export class GameGateway implements OnGatewayInit {
   @SubscribeMessage('build')
     async buils(@ConnectedSocket() client: Socket) {
     const gameState = this.gameService.getGameStateByUserId(client.data.user.id);
-    const result = this.gameService.buildRequest();
+    const result = this.gameService.buildRequest(client.data.user.username);
 
     gameState.diceRoll = result.value;
     gameState.masterLog = result.message;

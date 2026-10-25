@@ -108,16 +108,18 @@ export class GameService {
   // ⚠️ FOR TESTING ONLY!
   game = new GameStateContext(new StartingPhase());
 
-  diceRequest(): { value: number | null, message: string | null } {
-    let response: GameResponse = this.game.diceRequest('spagg');  // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
-    response = this.game.diceRequest('enriquest');                // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
-    this.game.phaseCheckRequest();
+  diceRequest( username: string ): { value: number | null, message: string | null } {
+    let response: GameResponse = this.game.diceRequest(username);
+    //let response: GameResponse = this.game.diceRequest('spagg');  // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
+    //response = this.game.diceRequest('enriquest');                // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
+    //this.game.phaseCheckRequest();
     return { value: response.value, message: response.message };
   }
 
-  buildRequest(): { value: number | null, message: string | null } {
-    let response: GameResponse = this.game.buildRequest('spagg'); // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
-    response = this.game.buildRequest('enriquest');               // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
+  buildRequest( username: string ): { value: number | null, message: string | null } {
+    let response: GameResponse = this.game.buildRequest(username);
+    //let response: GameResponse = this.game.buildRequest('spagg'); // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
+    //response = this.game.buildRequest('enriquest');               // ⚠️ FOR TESTING ONLY! Replace by requesting player's ID
     this.game.phaseCheckRequest();
     return { value: response.value, message: response.message };
   }
