@@ -2,7 +2,8 @@ import type {
   GameData,
   Player,
   GameResponse
-} from '../../../shared/game/game.types';
+} from '@shared/game/game.types';
+
 import {
   initPlayer,
   rollDice,

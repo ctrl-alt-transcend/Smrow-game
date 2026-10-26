@@ -42,16 +42,16 @@ export class GameGateway implements OnGatewayInit {
     async dice(@ConnectedSocket() client: Socket) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     const result = game.diceRequest(client.data.user.username);
-    game.phaseCheckRequest();
-    game.setDiceRoll(result.value);
-    game.setMasterLog(result.message)
-    client.to(game.getGameId()).emit('gameState'); //INFO: Always return the new gameState to all client in the room
-    //client.broadcast.to(gameState.gameId).emit('diceRolled', );
 
     //⚠️ FOR TESTING
     game.diceRequest('enriquest');
     game.diceRequest('spagg');
 
+    game.phaseCheckRequest();
+    game.setDiceRoll(result.value);
+    game.setMasterLog(result.message)
+    client.to(game.getGameId()).emit('gameState'); //INFO: Always return the new gameState to all client in the room
+    //client.broadcast.to(gameState.gameId).emit('diceRolled', );
     return { ...result };
   }
 
@@ -59,16 +59,16 @@ export class GameGateway implements OnGatewayInit {
     async build(@ConnectedSocket() client: Socket) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     const result = game.buildRequest(client.data.user.username);
-    game.phaseCheckRequest();
-    game.setDiceRoll(result.value);
-    game.setMasterLog(result.message)
-    this.server.to(game.getGameId()).emit('gameState', game.getGameData()); //INFO: Always return the new gameState to all client in the room
-    //client.broadcast.to(gameState.gameId).emit('diceRolled', );
 
     //⚠️ FOR TESTING
     game.buildRequest('enriquest');
     game.buildRequest('spagg');
 
+    game.phaseCheckRequest();
+    game.setDiceRoll(result.value);
+    game.setMasterLog(result.message)
+    this.server.to(game.getGameId()).emit('gameState', game.getGameData()); //INFO: Always return the new gameState to all client in the room
+    //client.broadcast.to(gameState.gameId).emit('diceRolled', );
     return { ...result };
   }
 
