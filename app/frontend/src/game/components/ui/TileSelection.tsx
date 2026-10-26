@@ -11,8 +11,9 @@ import {
 import { modals } from "@mantine/modals";
 import { useSelectionDisplay } from "../../hooks/useSelectionDisplay";
 import type { GameBoardSelection } from "../../types/gameboard.types";
-import { Faction } from "../../types/gameboard.types";
+import { Faction } from "../../../../../shared/game/gameboard.types.tsx";
 import { useGameBoard } from "../../contexts/GameBoardContext";
+import { socket } from "../../../socket.tsx";
 
 interface BuildSelectionButtonProps {
   selected: GameBoardSelection;

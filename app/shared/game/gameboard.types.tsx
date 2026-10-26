@@ -24,23 +24,24 @@ export const LAND_COLORS: Record<LandType, string> = {
 export type LandType = (typeof LandType)[keyof typeof LandType];
 
 export const Faction = {
-  POURPRES_CHYBRES: 'Pourpres Chybres',
-  BOURSES_BLEUES: 'Bourses Bleues',
-  ROUGES_FIACS: 'Rouges Fiacs',
-  UREE_JAUNE: 'Uree Jaune',
-  DEFAULT: 'Kikouneurs (default)',
-  UNOCCUPIED: 'unoccupied ...'
+  POURPRES_CHYBRES: "Pourpres Chybres",
+  BOURSES_BLEUES: "Bourses Bleues",
+  ROUGES_FIACS: "Rouges Fiacs",
+  UREE_JAUNE: "Uree Jaune",
+  DEFAULT: "Kikouneurs (default)",
+  UNOCCUPIED: "unoccupied ...",
 } as const;
-export const FACTION_COLORS: Record<Faction, string> = {
-  [Faction.POURPRES_CHYBRES]: '#6b0b91',
-  [Faction.BOURSES_BLEUES]: '#19aad5',
-  [Faction.ROUGES_FIACS]: '#da1111',
-  [Faction.UREE_JAUNE]: '#ffdd00',
-  [Faction.DEFAULT]: '#fd92e4',
-  [Faction.UNOCCUPIED]: '#e4e4e4'
-};
+
 export type Faction = (typeof Faction)[keyof typeof Faction];
 
+export const FACTION_COLORS: Record<Faction, string> = {
+  [Faction.POURPRES_CHYBRES]: "#6b0b91",
+  [Faction.BOURSES_BLEUES]: "#19aad5",
+  [Faction.ROUGES_FIACS]: "#da1111",
+  [Faction.UREE_JAUNE]: "#ffdd00",
+  [Faction.DEFAULT]: "#fd92e4",
+  [Faction.UNOCCUPIED]: "#e4e4e4",
+};
 /** @description x, y → corner's axial coordinates */
 export interface Vertex {
   id: string;       // "{q}:{r}:{cornerIndex}"
