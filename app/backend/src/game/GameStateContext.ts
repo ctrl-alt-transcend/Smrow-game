@@ -128,9 +128,15 @@ class GameStateContext {
     limit: number,
     newValue: number | undefined
   ): number {
-    if (newValue !== undefined) { return newValue; }
-    else if (currentValue + 1 === limit) { return 0; }
-    else { return currentValue + 1; }
+    if (newValue !== undefined) {
+      return newValue;
+    }
+    else if (currentValue + 1 === limit) {
+      return 0;
+    }
+    else {
+      return currentValue + 1;
+    }
   }
 
   public setTurnCount( count: number | undefined ) {
@@ -170,7 +176,7 @@ abstract class  State
 class StartingPhase extends State
 {
   public dice( playerId: string ): GameResponse {
-    console.log('🏁🎲StartingPhase:dice: handles diceRequest.');
+    console.log(`🏁🎲StartingPhase:dice: handles diceRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
     if(p === undefined) {
       throw new Error(`Unknown playerId: ${playerId}`);
@@ -197,14 +203,14 @@ class StartingPhase extends State
     // 1. Tout le monde doit avoir lancé
     const size: number = this.state.getPlayers().size;
     if (rolls.size !== size) {
-      throw new Error(`🏁StartingPhase:computeTurnOrder: Waiting for ${size - rolls.size} player(s) to roll`);
+      throw new Error(` Waiting for ${size - rolls.size} player(s) to roll`);
     }
 
     const entries = Array.from(rolls.entries());
     const pending = entries.filter(([, value]) => value === null);
     if (pending.length > 0) {
       throw new Error(
-        `🏁StartingPhase:computeTurnOrder: Players who haven't rolled: ${pending.map(([id]) => id).join(', ')}`
+        ` Players who haven't rolled: ${pending.map(([id]) => id).join(', ')}`
       );
     }
 
@@ -218,7 +224,7 @@ class StartingPhase extends State
     try {
       this.computeTurnOrder();
     } catch(error) {
-      console.log('🏁🔎StartingPhase:phaseCheck: ' + error);
+      //console.log('🏁🔎StartingPhase:phaseCheck: ' + error);
       return;
     }
     this.state.resetAllDices();
@@ -234,7 +240,7 @@ class RessourcePhase extends State
 {
   public dice( playerId: string ): GameResponse {
 
-    console.log('🪵🎲RessourcePhase:dice: handles diceRequest.');
+    console.log(`🪵🎲RessourcePhase:dice: handles diceRequest from ${playerId}`);
     const p = this.state.isPlayersTurn(playerId);
     if(!p) {
       return { value: null, message: "It's not your turn !" };
@@ -242,6 +248,7 @@ class RessourcePhase extends State
     const roll: GameResponse = rollDice(p);
     if(this.state.hasRolledBothDices(p) && roll.value) {
       console.log(`🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
+      this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
        // Todo 🚩
       // - collect ressources
       //this.state.resetDices(p); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
@@ -260,11 +267,11 @@ class RessourcePhase extends State
 
   public phaseCheck(): void {
     if(this.state.getTurnCount() !== this.state.getPlayers().size) {
-      console.log(`🪵🔎RessourcePhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
+      //console.log(`🪵🔎RessourcePhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
-    this.state.setCurrentTurnIndex(0);
     this.state.setTurnCount(0);
+    this.state.setCurrentTurnIndex(0);
     this.state.resetAllDices();
     console.log('🪵🔎RessourcePhase:phaseCheck: everybody is ready!');
     this.state.transitionTo(new TradeAndBuildPhase);
@@ -274,14 +281,14 @@ class RessourcePhase extends State
 class TradeAndBuildPhase extends State
 {
   public build( playerId: string ): GameResponse {
-    console.log('🤝🔨TradeAndBuildPhase:build: handles buildRequest.');
+    console.log(`🤝🔨TradeAndBuildPhase:build: handles buildRequest from ${playerId}`);
     const p = this.state.isPlayersTurn(playerId);
     if(!p) {
       return { value: null, message: "🤝🔨TradeAndBuildPhase:build: It's not your turn !" };
     }
     console.log(`🤝🔨TradeAndBuildPhase:build: ${playerId} built something ...`);
-    this.state.setCurrentTurnIndex(undefined);
     this.state.setTurnCount(undefined);
+    this.state.setCurrentTurnIndex(undefined);
     return { value: null, message: `🤝🔨TradeAndBuildPhase:build: not handled for the moment...`}
   }
 
@@ -292,11 +299,11 @@ class TradeAndBuildPhase extends State
 
   public phaseCheck(): void {
     if(this.state.getTurnCount() !== this.state.getPlayers().size) {
-      console.log(`🤝🔎TradeAndBuildPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
+      //console.log(`🤝🔎TradeAndBuildPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
-    this.state.setCurrentTurnIndex(0);
     this.state.setTurnCount(0);
+    this.state.setCurrentTurnIndex(0);
     console.log('🤝🔎TradeAndBuildPhase:phaseCheck: everybody is ready!');
     this.state.transitionTo(new RessourcePhase);
   }

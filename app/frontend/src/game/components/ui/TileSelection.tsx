@@ -3,7 +3,7 @@ import { modals } from '@mantine/modals';
 import { socket } from '../../../socket';
 import { useSelectionDisplay } from '../../hooks/useSelectionDisplay';
 import type { GameBoardSelection } from '../../types/gameboard.types';
-import { Faction } from '../../types/gameboard.types';
+import { Faction } from "../../../../../shared/game/gameboard.types";
 import { useGameBoard } from '../../contexts/GameBoardContext';
 //import { useGamemasterLog } from '../../hooks/useGamemasterLog';
 

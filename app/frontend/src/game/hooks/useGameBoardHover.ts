@@ -1,10 +1,11 @@
 import { useState, useCallback } from "react";
+import type { HoverEntity } from "../types/gameboard.types";
 import type {
   TileData,
   RoadData,
-  SettlementData,
-  HoverEntity,
-} from "../types/gameboard.types";
+  SettlementData
+} from "../../../../shared/game/gameboard.types";
+
 
 /** @description generic hook for gameboard interactive elements */
 export const useHover = (

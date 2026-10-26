@@ -2,7 +2,7 @@ import { AppShell, Burger, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import GameBoard from './components/gameboard/GameBoard.tsx';
 import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
-import { classicLayout } from './types/gameboard.types.tsx';
+import { classicLayout } from "../../../shared/game/gameboard.types";
 import { TileSelection } from './components/ui/TileSelection.tsx';
 import { DiceRoller } from './components/ui/DiceRoller.tsx';
 import GameMasterLog from './components/ui/GameMasterLog.tsx';

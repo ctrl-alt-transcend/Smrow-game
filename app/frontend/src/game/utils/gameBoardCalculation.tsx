@@ -6,7 +6,7 @@ import {
   type SettlementData,
   type GameBoardData,
   Faction
-} from '../types/gameboard.types';
+} from "../../../../shared/game/gameboard.types";
 import { getHexCorners, getHexEdges, HEX_SIZE } from './hexCalculation';
 
 /** @description calculate and render an SVG board game based on the given layout */

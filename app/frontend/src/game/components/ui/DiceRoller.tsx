@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
-import { Card, Text, Stack, Title, Box } from '@mantine/core';
-import { Dice3D, type Dice3DHandle, type DiceValue } from '../gameboard/Dice/Dice';
+import { Card, Stack, Title, Box } from '@mantine/core';
+import { Dice3D, type DiceValue } from '../gameboard/Dice/Dice';
 import { useGameBoard } from '../../contexts/GameBoardContext';
 import { useRollDice } from '../../hooks/useRollDice';
 

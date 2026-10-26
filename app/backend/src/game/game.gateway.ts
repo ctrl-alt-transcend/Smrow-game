@@ -44,8 +44,11 @@ export class GameGateway implements OnGatewayInit {
     const result = game.diceRequest(client.data.user.username);
 
     //⚠️ FOR TESTING
+    game.phaseCheckRequest();
     game.diceRequest('enriquest');
+    game.phaseCheckRequest();
     game.diceRequest('spagg');
+    // -------------
 
     game.phaseCheckRequest();
     game.setDiceRoll(result.value);
@@ -61,8 +64,11 @@ export class GameGateway implements OnGatewayInit {
     const result = game.buildRequest(client.data.user.username);
 
     //⚠️ FOR TESTING
+    game.phaseCheckRequest();
     game.buildRequest('enriquest');
+    game.phaseCheckRequest();
     game.buildRequest('spagg');
+    // -------------
 
     game.phaseCheckRequest();
     game.setDiceRoll(result.value);

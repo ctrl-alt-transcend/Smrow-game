@@ -12,7 +12,7 @@ import type {
   SettlementData,
   Faction,
   TileData
-} from '../types/gameboard.types'
+} from "../../../../shared/game/gameboard.types";
 
 type GameBoardContextType = {
   gameboard: GameBoardData;

@@ -1,6 +1,7 @@
 import { useGameBoardSelection } from "./useGameBoardSelection";
 import { useGameBoardHover } from "./useGameBoardHover";
-import type { TileData } from "../types/gameboard.types";
+import type { TileData } from "../../../../shared/game/gameboard.types";
+
 
 /** @description "factory" hook combining: calculated board game, selected state, hover state and handlers */
 export const useGameBoardFactory = (

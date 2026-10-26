@@ -6,7 +6,7 @@ import {
   SELECTED_COLOR,
   HOVER_COLOR,
   DEFAULT_COLOR
-} from '../types/gameboard.types';
+} from "../../../../shared/game/gameboard.types";
 
 /** @description render tile color based on state, land type or faction */
 export const getTileFillColor = (
