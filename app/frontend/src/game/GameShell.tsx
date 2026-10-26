@@ -18,13 +18,20 @@ export default function FullLayout() {
   if (!game) return <div>Loading game...</div>;
 
   return (
-
-    <GameBoardProvider layout={classicLayout} >
+    <GameBoardProvider layout={classicLayout}>
       <AppShell
         header={{ height: 60 }}
-        footer={{ height: 100 }}
-        navbar={{ width: 300, breakpoint: 'xs', collapsed: { desktop: !opened, mobile: !opened } }}
-        aside={{ width: 300, breakpoint: 'xl', collapsed: { desktop: false, mobile: true } }}
+        footer={{ height: 60 }}
+        navbar={{
+          width: 300,
+          breakpoint: "xs",
+          collapsed: { desktop: !opened, mobile: !opened },
+        }}
+        aside={{
+          width: 300,
+          breakpoint: "xl",
+          collapsed: { desktop: false, mobile: true },
+        }}
         padding="xs"
       >
         <AppShell.Header>
@@ -40,7 +47,7 @@ export default function FullLayout() {
         </Group>
       </AppShell.Navbar>
         <AppShell.Main>
-          <Group justify='center' align='center'>
+          <Group justify="center" align="center">
             <GameBoard {...GameBoardProps} />
           </Group>
         </AppShell.Main>
@@ -55,4 +62,3 @@ export default function FullLayout() {
     </GameBoardProvider>
   );
 }
-

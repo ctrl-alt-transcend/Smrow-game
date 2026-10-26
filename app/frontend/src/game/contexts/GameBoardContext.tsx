@@ -1,11 +1,11 @@
-import { calculateGameBoardData } from '../utils/gameBoardCalculation';
+import { calculateGameBoardData } from "../utils/gameBoardCalculation";
 import {
   createContext,
   useState,
   useContext,
   useCallback,
   useMemo,
-} from 'react';
+} from "react";
 import type {
   GameBoardData,
   RoadData,
@@ -23,13 +23,17 @@ type GameBoardContextType = {
   gamemasterlog: string | null;
 }
 
-export const GameBoardContext = createContext<GameBoardContextType | null>(null);
+export const GameBoardContext = createContext<GameBoardContextType | null>(
+  null,
+);
 
-const GameBoardProvider: React.FC<{ children: React.ReactNode; layout: TileData[] }> = ({
-  children,
-  layout
-}) => {
-  const [gameboard, setGameboard] = useState<GameBoardData>(() => calculateGameBoardData(layout));
+const GameBoardProvider: React.FC<{
+  children: React.ReactNode;
+  layout: TileData[];
+}> = ({ children, layout }) => {
+  const [gameboard, setGameboard] = useState<GameBoardData>(() =>
+    calculateGameBoardData(layout),
+  );
 
   const updateGameboard = useCallback((newGameboard: GameBoardData) => {
     setGameboard(newGameboard);
@@ -50,14 +54,19 @@ const GameBoardProvider: React.FC<{ children: React.ReactNode; layout: TileData[
     }));
   }, []);
 
-  const updateSettlementFaction = useCallback((newSettlement: SettlementData, faction: Faction) => {
-    setGameboard(prev => ({
-      ...prev,
-      settlements: prev.settlements.map(settlement =>
-        settlement.id === newSettlement.id ? { ...settlement, faction } : settlement
-      )
-    }));
-  }, []);
+  const updateSettlementFaction = useCallback(
+    (newSettlement: SettlementData, faction: Faction) => {
+      setGameboard((prev) => ({
+        ...prev,
+        settlements: prev.settlements.map((settlement) =>
+          settlement.id === newSettlement.id
+            ? { ...settlement, faction }
+            : settlement,
+        ),
+      }));
+    },
+    [],
+  );
 
   const value = useMemo(() => ({
     gameboard,
@@ -85,7 +94,7 @@ const GameBoardProvider: React.FC<{ children: React.ReactNode; layout: TileData[
 export const useGameBoard = () => {
   const context = useContext(GameBoardContext);
   if (!context) {
-    throw new Error('useGameBoard must be used within GameBoardProvider');
+    throw new Error("useGameBoard must be used within GameBoardProvider");
   }
   return context;
 };

@@ -1,11 +1,18 @@
-import { Card, Stack, Title, Text, Group, Button, Anchor, Box } from '@mantine/core';
-import { modals } from '@mantine/modals';
-import { socket } from '../../../socket';
-import { useSelectionDisplay } from '../../hooks/useSelectionDisplay';
-import type { GameBoardSelection } from '../../types/gameboard.types';
-import { Faction } from "../../../../../shared/game/gameboard.types";
-import { useGameBoard } from '../../contexts/GameBoardContext';
-//import { useGamemasterLog } from '../../hooks/useGamemasterLog';
+import {
+  Card,
+  Stack,
+  Title,
+  Text,
+  Group,
+  Button,
+  Anchor,
+  Box,
+} from "@mantine/core";
+import { modals } from "@mantine/modals";
+import { useSelectionDisplay } from "../../hooks/useSelectionDisplay";
+import type { GameBoardSelection } from "../../types/gameboard.types";
+import { Faction } from "../../types/gameboard.types";
+import { useGameBoard } from "../../contexts/GameBoardContext";
 
 interface BuildSelectionButtonProps {
   selected: GameBoardSelection;
@@ -14,7 +21,7 @@ interface BuildSelectionButtonProps {
 
 const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   selected,
-  faction
+  faction,
 }) => {
   const { updateRoadFaction, updateSettlementFaction, updateGamemasterLog } = useGameBoard();
   //const { refetch } = useGamemasterLog(null);
@@ -38,28 +45,42 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   const openModal = () => {
     if (!selected.selectedRoad && !selected.selectedSettlement) {
       modals.openConfirmModal({
-        title: 'Pick a valid construction location',
-        labels: { confirm: 'OK', cancel: 'Cancel' },
+        title: "Pick a valid construction location",
+        labels: { confirm: "OK", cancel: "Cancel" },
         centered: true,
       });
     } else {
       modals.openConfirmModal({
-        title: 'Confirm construction',
+        title: "Confirm construction",
         children: (
           <Text size="sm">
-            Are you sure you want to build:{' '}
+            Are you sure you want to build:{" "}
             {selected.selectedRoad ? (
-              <Anchor href="#" onClick={() => console.log('Build road at:', selected.selectedRoad?.edge.id)}>
+              <Anchor
+                href="#"
+                onClick={() =>
+                  console.log("Build road at:", selected.selectedRoad?.edge.id)
+                }
+              >
                 Road ({selected.selectedRoad.edge.id})
               </Anchor>
             ) : (
-              <Anchor href="#" onClick={() => console.log('Build settlement at:', selected.selectedSettlement?.vertex.id)}>
+              <Anchor
+                href="#"
+                onClick={() =>
+                  console.log(
+                    "Build settlement at:",
+                    selected.selectedSettlement?.vertex.id,
+                  )
+                }
+              >
                 Settlement ({selected.selectedSettlement?.vertex.id})
               </Anchor>
-            )}?
+            )}
+            ?
           </Text>
         ),
-        labels: { confirm: 'Confirm', cancel: 'Cancel' },
+        labels: { confirm: "Confirm", cancel: "Cancel" },
         onConfirm: handleConfirm,
         centered: true,
       });
@@ -82,15 +103,17 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
       <Card withBorder radius="md" shadow="sm" h={220}>
         <Stack gap="xs" justify='center' align='center'>
           <Title order={4}>Selection</Title>
-            <Group justify='left' gap={'xs'}>
-              {items.length > 0 ? (
-                items.map((item, idx) => (
-                  <Text key={idx} ml="xs">• {item.label}</Text>
-                ))
-              ) : (
-                <Text c="dimmed">No selection</Text>
-              )}
-            </Group>
+          <Group justify="left" gap={"xs"}>
+            {items.length > 0 ? (
+              items.map((item, idx) => (
+                <Text key={idx} ml="xs">
+                  • {item.label}
+                </Text>
+              ))
+            ) : (
+              <Text c="dimmed">No selection</Text>
+            )}
+          </Group>
           <BuildSelectionButton selected={selected} faction={Faction.DEFAULT} />
         </Stack>
       </Card>

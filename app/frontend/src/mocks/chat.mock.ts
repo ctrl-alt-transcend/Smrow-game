@@ -1,6 +1,6 @@
 export type ChatMessage = {
   id: string;
-  author: string;
+  author: string | undefined; // should contain the user object
   content: string;
 };
 

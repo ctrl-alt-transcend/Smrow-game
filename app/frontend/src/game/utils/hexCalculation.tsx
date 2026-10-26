@@ -5,8 +5,8 @@ export const HEX_SIZE = 50;
 
 /** @description axial coordinates (col & row) to pixels (pointy-topped) */
 export const axialToPixel = (q: number, r: number, size: number) => ({
-  x: size * (Math.sqrt(3) * q + Math.sqrt(3) / 2 * r),
-  y: size * (3 / 2 * r)
+  x: size * (Math.sqrt(3) * q + (Math.sqrt(3) / 2) * r),
+  y: size * ((3 / 2) * r),
 });
 
 /** @description generates hextile's vertices (6 corners per hex) */
@@ -20,7 +20,7 @@ export const getHexCorners = (q: number, r: number, size: number): Vertex[] => {
     corners.push({
       id: `${q}:${r}:${i}`,
       x: center.x + size * Math.cos(angle_rad),
-      y: center.y + size * Math.sin(angle_rad)
+      y: center.y + size * Math.sin(angle_rad),
     });
   }
   return corners;
@@ -36,7 +36,7 @@ export const getHexEdges = (q: number, r: number, size: number): Edge[] => {
     edges.push({
       id: `${corners[i].id}-${corners[nextIndex].id}`,
       p1: corners[i],
-      p2: corners[nextIndex]
+      p2: corners[nextIndex],
     });
   }
   return edges;

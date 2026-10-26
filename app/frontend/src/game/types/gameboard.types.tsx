@@ -28,18 +28,18 @@ export interface GameBoardSelection {
 
 // Hover effects
 export interface TileHover {
-  type: 'tile';
+  type: "tile";
   q: number;
   r: number;
 }
 
 export interface RoadHover {
-  type: 'road';
+  type: "road";
   id: string;
 }
 
 export interface SettlementHover {
-  type: 'settlement';
+  type: "settlement";
   id: string;
 }
 
@@ -59,7 +59,10 @@ export interface GameBoardProps {
   hovered: HoverEntity;
   handleTileHover: (isHovered: boolean, tile: TileData) => void;
   handleRoadHover: (isHovered: boolean, road: RoadData) => void;
-  handleSettlementHover: (isHovered: boolean, settlement: SettlementData) => void;
+  handleSettlementHover: (
+    isHovered: boolean,
+    settlement: SettlementData,
+  ) => void;
   isTileHovered: (tile: TileData) => boolean;
   isRoadHovered: (road: RoadData) => boolean;
   isSettlementHovered: (settlement: SettlementData) => boolean;

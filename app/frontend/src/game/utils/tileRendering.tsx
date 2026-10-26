@@ -13,7 +13,7 @@ export const getTileFillColor = (
   landType: LandType | null,
   faction: Faction | null,
   isSelected: boolean,
-  isHovered: boolean
+  isHovered: boolean,
 ): string => {
   if (isSelected) return SELECTED_COLOR;
   if (isHovered) return HOVER_COLOR;
@@ -23,7 +23,7 @@ export const getTileFillColor = (
 };
 
 export const getTileStrokeColor = (isHovered: boolean): string => {
-  return isHovered ? '#666' : '#444';
+  return isHovered ? "#666" : "#444";
 };
 
 export const getTileStrokeWidth = (isHovered: boolean): number => {
