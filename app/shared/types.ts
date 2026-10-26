@@ -16,6 +16,16 @@ export type UserPublic = {
     email: string;
 };
 
+export type UserProfile = {
+    id: string;
+    name: string;
+    email: string;
+    username: string;
+    createdAt: string;
+    bio: string | null;
+    avatarURL: string | null;
+};
+
 export type RegisterResponse = {
     message: string;
     user: UserPublic;
@@ -24,4 +34,11 @@ export type RegisterResponse = {
 
 export type LoginResponse = {
     access_token: string;
+}
+
+// Payload
+
+export interface JwtPayload {
+    sub: string;
+    username: string;
 }

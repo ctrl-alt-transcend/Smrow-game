@@ -64,3 +64,4 @@ model Account {
 
   @@id([provider, providerAccountId])
 }
+

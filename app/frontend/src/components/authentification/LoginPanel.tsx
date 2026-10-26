@@ -1,155 +1,168 @@
 import {
-    Button,
-    Anchor,
-    Group,
-    Paper,
-    Stack,
-    PasswordInput,
-    Text,
-    TextInput,
-    type PaperProps,
-} from '@mantine/core';
+  Button,
+  Anchor,
+  Group,
+  Paper,
+  Stack,
+  PasswordInput,
+  Text,
+  TextInput,
+  type PaperProps,
+} from "@mantine/core";
 
-import { useForm } from '@mantine/form';
-import { upperFirst, useToggle } from '@mantine/hooks';
+import { useForm } from "@mantine/form";
+import { upperFirst, useToggle } from "@mantine/hooks";
+import { useState } from "react";
 
-import { createUser, loginPost } from './handlePost'
+import { useAuth } from "../../hooks/useAuth";
+import ErrorMessages from "../utils/ErrorMessages";
 
 export function LoginPanel(props: PaperProps) {
+  const { register, login } = useAuth();
+  const [type, toggle] = useToggle(["register", "login"]);
+  const [error, setError] = useState<string | string[] | null>(null);
 
-    const [type, toggle] = useToggle(['register', 'login']);
+  const registerForm = useForm({
+    initialValues: {
+      email: "",
+      name: "",
+      username: "",
+      password: "",
+    },
+    validate: {
+      email: (val) => (/^\S+@\S+$/.test(val) ? null : "Invalid email"),
+      password: (val) =>
+        val.length <= 6
+          ? "Password should include at least 6 characters"
+          : null,
+    },
+  });
 
-    const registerForm = useForm({
-        initialValues: {
-            email: '',
-            name: '',
-            username: '',
-            password: '',
-            // terms: false,
-        },
+  const loginForm = useForm({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-        validate: {
-            email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email'),
-            password: (val) => (val.length <= 6 ? 'Password should include at least 6 characters' : null),
-            // terms: (val) => (val === true ? null : 'You need to accept the terms and conditions'),
-        },
-    });
+  const handleRegister = registerForm.onSubmit(async (data) => {
+    setError(null);
+    try {
+      await register(data);
+    } catch (error: any) {
+      setError(error);
+    }
+  });
 
-    const loginForm = useForm({
-        initialValues: {
-            email: '',
-            password: '',
-        }
-    })
+  const handleLogin = loginForm.onSubmit(async (data) => {
+    setError(null);
+    try {
+      await login(data);
+    } catch (errorMessage: any) {
+      setError(errorMessage);
+    }
+  });
 
-    return (
-        <Paper p="xs" withBorder
-        {...props}>
-            <Text p="xs" size="lg" fw="500" c="Red">
-                Login to play !
-            </Text>
+  return (
+    <Paper p="xs" withBorder {...props}>
+      <Text p="xs" size="lg" fw="500" c="Red">
+        Login to play !
+      </Text>
 
-            <form onSubmit={registerForm.onSubmit(createUser)}>
-                <Stack>
-                    {type === 'register' && (
-                        <TextInput
-                        placeholder="Your name"
-                        value={registerForm.values.name}
-                        onChange={(event) => registerForm.setFieldValue('name', event.currentTarget.value)}
-                    />
-                    )}
+      {type === "register" && (
+        <form onSubmit={handleRegister}>
+          <Stack>
+            <TextInput
+              placeholder="Your name"
+              value={registerForm.values.name}
+              onChange={(event) =>
+                registerForm.setFieldValue("name", event.currentTarget.value)
+              }
+            />
+            <TextInput
+              placeholder="Your username"
+              value={registerForm.values.username}
+              onChange={(event) =>
+                registerForm.setFieldValue(
+                  "username",
+                  event.currentTarget.value,
+                )
+              }
+            />
+            <TextInput
+              required
+              placeholder="Your email"
+              value={registerForm.values.email}
+              onChange={(event) =>
+                registerForm.setFieldValue("email", event.currentTarget.value)
+              }
+              error={registerForm.errors.email && "Invalid email"}
+            />
+            <PasswordInput
+              required
+              placeholder="Your password"
+              value={registerForm.values.password}
+              onChange={(event) =>
+                registerForm.setFieldValue(
+                  "password",
+                  event.currentTarget.value,
+                )
+              }
+              error={
+                registerForm.errors.password &&
+                "Password should include at least 6 characters"
+              }
+            />
+          </Stack>
 
-                    {type === 'register' && (
-                        <TextInput
-                        placeholder='Your username'
-                        value={registerForm.values.username}
-                        onChange={(event) => registerForm.setFieldValue('username', event.currentTarget.value)}
-                    />
-                    )}
+          <Group justify="space-between" mt="xl">
+            <Button type="submit">{upperFirst(type)}</Button>
+          </Group>
+        </form>
+      )}
 
-                    {type === 'register' && (
-                        <TextInput
-                        required
-                        placeholder="Your email"
-                        value={registerForm.values.email.toLowerCase()}
-                        onChange={(event) => registerForm.setFieldValue('email', event.currentTarget.value)}
-                        error={registerForm.errors.email && 'Invalid email'}
-                    />
-                    )}
+      {type === "login" && (
+        <form onSubmit={handleLogin}>
+          <Stack>
+            <TextInput
+              required
+              placeholder="Your email"
+              value={loginForm.values.email}
+              onChange={(event) =>
+                loginForm.setFieldValue("email", event.currentTarget.value)
+              }
+              error={loginForm.errors.email && "Invalid email"}
+            />
+            <PasswordInput
+              required
+              placeholder="Your password"
+              value={loginForm.values.password}
+              onChange={(event) =>
+                loginForm.setFieldValue("password", event.currentTarget.value)
+              }
+            />
+          </Stack>
 
-                    {type === 'register' && (
-                        <PasswordInput
-                        required
-                        placeholder="Your password"
-                        value={registerForm.values.password}
-                        onChange={(event) => registerForm.setFieldValue('password', event.currentTarget.value)}
-                        error={registerForm.errors.password && 'Password should include at least 6 characters'}
-                    />
-                    )}
+          <Group justify="space-between" mt="xl">
+            <Button type="submit">{upperFirst(type)}</Button>
+          </Group>
+        </form>
+      )}
 
-                    {/* {type === 'register' && (
-                        <Checkbox
-                            label="I accept terms and conditions"
-                            checked={registerForm.values.terms}
-                            onChange={(event) => form.setFieldValue('terms', event.currentTarget.checked)}
-                        />
-                    )} */}
-                </Stack>
+      <ErrorMessages error={error} />
 
-                {type === 'register' && (
-                    <Group justify="space-between" mt="xl">
-                    <Button type="submit">
-                        {upperFirst(type)}
-                    </Button>
-                </Group>
-                )}
-
-            </form>
-
-            <form onSubmit={loginForm.onSubmit(loginPost)}>
-                {type === 'login' && (
-                    <TextInput
-                        required
-                        placeholder="Your email"
-                        value={loginForm.values.email.toLowerCase()}
-                        onChange={(event) => loginForm.setFieldValue('email', event.currentTarget.value)}
-                        error={loginForm.errors.email && 'Invalid email'}
-                    />
-                )}
-
-                {type === 'login' && (
-                    <PasswordInput
-                        required
-                        placeholder="Your password"
-                        value={loginForm.values.password}
-                        onChange={(event) => loginForm.setFieldValue('password', event.currentTarget.value)}
-                        error={loginForm.errors.password && 'Password should include at least 6 characters'}
-                    />
-                )}
-
-                { type === 'login' && (
-                    <Group justify="space-between" mt="xl">
-                    <Button type="submit">
-                        {upperFirst(type)}
-                    </Button>
-                </Group>
-                )}
-            </form>
-
-<Anchor
-                    component="button"
-                    type="button"
-                    c="bright"
-                    opacity={0.85}
-                    onClick={() => toggle()}
-                    size="xs"
-                    >
-                {type === 'register'
-                    ? 'Already have an account? Login'
-                    : "Don't have an account? Register"}
-                </Anchor>
-
-            <form onReset={registerForm.onReset}></form>
-        </Paper>
-    )
+      <Anchor
+        component="button"
+        type="button"
+        c="bright"
+        opacity={0.85}
+        onClick={() => toggle()}
+        size="xs"
+      >
+        {type === "register"
+          ? "Already have an account? Login"
+          : "Don't have an account? Register"}
+      </Anchor>
+    </Paper>
+  );
 }

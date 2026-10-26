@@ -5,6 +5,10 @@ ifeq ($(ENV), dev)
 	DOCKER_COMPOSE_FILE = ./app/docker-compose.dev.yml
 endif
 
+SECRETS_DIR=app/secrets
+ENV_DIR=app
+MIGRATION_NAME ?= init
+
 all: up
 
 refresh: build up
@@ -12,7 +16,7 @@ refresh: build up
 build:
 	docker compose -f $(DOCKER_COMPOSE_FILE) build
 
-up:
+up: secrets
 	docker compose -f $(DOCKER_COMPOSE_FILE) up -d
 
 watch: up
@@ -25,13 +29,44 @@ watch: up
 down:
 	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
+lint:
+	cd ./app/frontend && npm run lint && cd ../..
+
+type:
+	cd ./app/frontend && npm run type-check && cd ../..
+
+secrets:
+	@mkdir -p $(SECRETS_DIR)
+
+	@if [ ! -s $(SECRETS_DIR)/db_password.txt ]; then \
+		openssl rand -hex 32 | tr -dc 'A-Za-z0-9@%^*_+=-' | head -c 16 > "$(SECRETS_DIR)/db_password.txt"; \
+	fi;
+
+	@if [ ! -s $(SECRETS_DIR)/jwt_secret.txt ]; then \
+		openssl rand -hex 32 | tr -dc 'A-Za-z0-9@%^*_+=-' | head -c 16 > "$(SECRETS_DIR)/jwt_secret.txt"; \
+	fi
+
+prepush: lint type
+
 fclean: down
 	docker compose -f $(DOCKER_COMPOSE_FILE) down --rmi all --volumes --remove-orphans
 
 re: fclean
 	docker compose -f $(DOCKER_COMPOSE_FILE) build --no-cache
 	$(MAKE) up
-	docker exec nestjs npx prisma migrate dev --name init
+	$(MAKE) initdb
 
-.PHONY: all refresh build up down fclean re
+initdb:
+	docker compose -f $(DOCKER_COMPOSE_FILE) exec backend npx prisma migrate deploy
+
+migrate:
+	@cd app/backend && \
+	DB_HOST=localhost \
+	DB_PORT=5432 \
+	DB_NAME=mydb \
+	DB_USER=the_boss \
+	DB_PASSWORD_FILE=../secrets/db_password.txt \
+	npx prisma migrate dev --name $(MIGRATION_NAME)
+
+.PHONY: all refresh build up down fclean re secrets migrate initdb
 

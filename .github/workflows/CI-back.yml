@@ -1,4 +1,4 @@
-name: Build
+name: ci-back
 
 on:
   push:
@@ -89,12 +89,26 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_LOCAL }}
 
-      - name: Prisma DB Push
+      - name: Prisma DB migrate deploy
         working-directory: app/backend
-        run: npx prisma db push
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_LOCAL }}
-
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: ${{ vars.POSTGRES_USER }}
+          DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          DB_NAME: ${{ vars.POSTGRES_DB }}
+        run: |
+          export DATABASE_URL="$(node -e '
+            const u = encodeURIComponent(process.env.DB_USER);
+            const p = encodeURIComponent(process.env.DB_PASSWORD);
+            const h = process.env.DB_HOST;
+            const port = process.env.DB_PORT;
+            const db = process.env.DB_NAME;
+            process.stdout.write(
+              `postgresql://${u}:${p}@${h}:${port}/${db}?schema=public`
+            );
+          ')"
+          npx prisma migrate deploy
       - name: Build Application
         working-directory: app/backend
         run: npm run build

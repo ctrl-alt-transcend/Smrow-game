@@ -1,10 +1,10 @@
 name: ft-catan
 services:
 
-  nestjs:
+  backend:
     build:
       context: ./backend
-    container_name: nestjs
+    container_name: backend
     restart: unless-stopped
     networks:
       - ft-network
