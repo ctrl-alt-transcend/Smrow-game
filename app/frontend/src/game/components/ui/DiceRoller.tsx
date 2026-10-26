@@ -17,20 +17,14 @@ export function DiceRoller({diceValue, masterLog}: { diceValue: number | null ; 
     if (busy) return;
     setBusy(true);
     try {
-      await roll(); // @Hayden: just that?
+      await roll();
       setBusy(false);
-      //const result = await roll();
-      //if (!result) {
-      //  setBusy(false);
-      //  return;
-      //}
-      //if(result.value === null) {
-      //  if(result.message)
-      //    updateGamemasterLog(result.message);
-      //  setBusy(false);
-      //  return;
-      //}
-
+      if(diceValue === null) {
+        if(masterLog)
+          updateGamemasterLog(masterLog);
+        setBusy(false);
+        return;
+      }
       pendingResultRef.current = { value: diceValue, message: masterLog };
       setRolledValue(diceValue);
     } catch (err) {

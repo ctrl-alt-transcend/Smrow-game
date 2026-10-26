@@ -32,7 +32,6 @@ export class GameGateway implements OnGatewayInit {
 
   // @SubscribeMessage('gameMasterLog')
 
-
 /**
  * @brief Handle the 'rollDice' event from the client.
  * @details SubscribeMessage is used to listen for the 'rollDice' event.
@@ -41,29 +40,35 @@ export class GameGateway implements OnGatewayInit {
  */
   @SubscribeMessage('dice')
     async dice(@ConnectedSocket() client: Socket) {
-    //const game = this.gameService.getGameStateByUserId(client.data.user.id); // v.1
-    const game = this.gameService.getGameInstanceByUserId(client.data.user.id); // v.2
-    //const result = this.gameService.diceRequest(client.data.user.username); // v.1
-    const result = game.diceRequest(client.data.user.username); // v.2
+    const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    const result = game.diceRequest(client.data.user.username);
     game.phaseCheckRequest();
-    game.setDiceRoll(result.value); // v.2
-    game.setMasterLog(result.message) // v.2
+    game.setDiceRoll(result.value);
+    game.setMasterLog(result.message)
     client.to(game.getGameId()).emit('gameState'); //INFO: Always return the new gameState to all client in the room
     //client.broadcast.to(gameState.gameId).emit('diceRolled', );
+
+    //⚠️ FOR TESTING
+    game.diceRequest('enriquest');
+    game.diceRequest('spagg');
+
     return { ...result };
   }
 
   @SubscribeMessage('build')
     async build(@ConnectedSocket() client: Socket) {
-    //const game = this.gameService.getGameStateByUserId(client.data.user.id); // v.1
-    const game = this.gameService.getGameInstanceByUserId(client.data.user.id); // v.2
-    //const result = this.gameService.buildRequest(client.data.user.username); // v.1
-    const result = game.buildRequest(client.data.user.username); // v.2
+    const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    const result = game.buildRequest(client.data.user.username);
     game.phaseCheckRequest();
-    game.setDiceRoll(result.value); // v.2
-    game.setMasterLog(result.message) // v.2
+    game.setDiceRoll(result.value);
+    game.setMasterLog(result.message)
     this.server.to(game.getGameId()).emit('gameState', game.getGameData()); //INFO: Always return the new gameState to all client in the room
     //client.broadcast.to(gameState.gameId).emit('diceRolled', );
+
+    //⚠️ FOR TESTING
+    game.buildRequest('enriquest');
+    game.buildRequest('spagg');
+
     return { ...result };
   }
 
@@ -71,29 +76,19 @@ export class GameGateway implements OnGatewayInit {
   async handleJoinRoom(@ConnectedSocket() client: Socket) {
     const userId = client.data.user.id;
     try {
-      //const game = this.gameService.getGameStateByUserId(userId) // v.1
-      const game = this.gameService.getGameInstanceByUserId(userId) // v.2
+      const game = this.gameService.getGameInstanceByUserId(userId)
       if (!game) throw new Error('Game not found');
-      //await client.join(game.gameId); // v.1
-      await client.join(game.getGameId()); // v.2
-      //game.masterLog = `${client.data.user.username} joined the room`; // v.1
-      game.setMasterLog(`${client.data.user.username} joined the room`); // v.2
-      //this.server.to(game.gameId).emit('gameState', game); // v.1
+      await client.join(game.getGameId());
+      game.setMasterLog(`${client.data.user.username} joined the room`);
       console.log(game.getGameId());
-      this.server.to(game.getGameId()).emit('gameState', game.getGameData()); // v.2
+      this.server.to(game.getGameId()).emit('gameState', game.getGameData());
       return { ok: true, data: game.getGameData() };
     }
     catch (e) {
       console.log('joinRoom failed', e);
-      //this.logger.error('joinRoom a échoué', e);
       return { ok: false, error: 'not in game' };
     }
-    //catch {
-    //  return { ok: false, error: "not in game" };
-    //}
   }
-
-
 
   handleConnection(client: Socket) { //TODO: Use middleware to check the token before the connection is established "next()"
     try {
