@@ -1,6 +1,5 @@
-
-import { Card, Image, Text, Badge, Box } from '@mantine/core';
-import { useState } from 'react';
+import { Card, Image, Text, Badge, Box } from "@mantine/core";
+import { useState } from "react";
 
 interface CardProps {
   name: string;
@@ -25,19 +24,19 @@ export function CardModel({
       style={{
         width: 180,
         height: 240,
-        perspective: '1000px',
-        cursor: 'pointer',
+        perspective: "1000px",
+        cursor: "pointer",
         flexShrink: 0,
       }}
     >
       <Box
         style={{
-          width: '100%',
-          height: '100%',
-          position: 'relative',
-          transformStyle: 'preserve-3d',
-          transition: 'transform 0.6s ease',
-          transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          transformStyle: "preserve-3d",
+          transition: "transform 0.6s ease",
+          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
         }}
       >
         {/* FRONT */}
@@ -47,38 +46,27 @@ export function CardModel({
           radius="lg"
           withBorder
           style={{
-            position: 'absolute',
+            position: "absolute",
             inset: 0,
-            backfaceVisibility: 'hidden',
-            overflow: 'hidden',
+            backfaceVisibility: "hidden",
+            overflow: "hidden",
             borderColor: `var(--mantine-color-${color}-5)`,
           }}
         >
-          <Box
-            bg={`${color}.1`}
-            p="xs"
-            style={{ textAlign: 'center' }}
-          >
+          <Box bg={`${color}.1`} p="xs" style={{ textAlign: "center" }}>
             <Text
               fw={700}
               size="lg"
               c={`${color}.9`}
-              style={{ letterSpacing: '1px' }}
+              style={{ letterSpacing: "1px" }}
             >
               {name.toUpperCase()}
             </Text>
           </Box>
-
-          <Image
-            src={imageUrl}
-            height={190}
-            alt={name}
-            fit="cover"
-          />
-
+          <Image src={imageUrl} height={190} alt={name} fit="cover" />
           <Box
             style={{
-              position: 'absolute',
+              position: "absolute",
               bottom: 10,
               left: 10,
             }}
@@ -86,11 +74,11 @@ export function CardModel({
             <Badge
               size="xl"
               circle
-              color={count > 0 ? color : 'gray'}
-              variant={count > 0 ? 'filled' : 'outline'}
+              color={count > 0 ? color : "gray"}
+              variant={count > 0 ? "filled" : "outline"}
               style={{
-                boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                fontSize: '1rem',
+                boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                fontSize: "1rem",
                 width: 36,
                 height: 36,
               }}
@@ -108,24 +96,19 @@ export function CardModel({
           withBorder
           bg={`${color}.0`}
           style={{
-            position: 'absolute',
+            position: "absolute",
             inset: 0,
-            transform: 'rotateY(180deg)',
-            backfaceVisibility: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
+            transform: "rotateY(180deg)",
+            backfaceVisibility: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
             borderColor: `var(--mantine-color-${color}-5)`,
           }}
         >
-          <Text
-            fw={800}
-            size="lg"
-            c={`${color}.9`}
-            mb="sm"
-          >
+          <Text fw={800} size="lg" c={`${color}.9`} mb="sm">
             {name.toUpperCase()}
           </Text>
 
@@ -134,7 +117,7 @@ export function CardModel({
           </Text>
 
           <Text size="xs" c="dimmed" mt="lg">
-            Click to flip back
+            Click to flip back {/* Translate */}
           </Text>
         </Card>
       </Box>
