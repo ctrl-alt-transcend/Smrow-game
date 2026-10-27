@@ -16,7 +16,7 @@ import {
   type HarvestReport,
   LAND_TO_RESOURCE
 } from 'src/game/calculation/ressourceCheck.types';
-import { axialToPixel } from './hexCalculation';
+import { axialToPixel } from '@shared/game/hexCalculation';
 
 /**
  * Identifie les trois identifiants canoniques équivalents pour un sommet physique.

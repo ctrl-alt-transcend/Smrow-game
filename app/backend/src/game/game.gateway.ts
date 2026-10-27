@@ -1,5 +1,6 @@
 import {
   ConnectedSocket,
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -10,6 +11,7 @@ import { GameService } from './game.service';
 import { Server, Socket } from 'socket.io';
 import { instrument } from '@socket.io/admin-ui';
 import { readSecret } from '../strategies/readSecret';
+import type { BuildRequestPayload } from '@shared/game/game.types';
 
 @WebSocketGateway(3001, {
   cors: {
@@ -59,22 +61,24 @@ export class GameGateway implements OnGatewayInit {
   }
 
   @SubscribeMessage('build')
-    async build(@ConnectedSocket() client: Socket) {
+  async build(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: BuildRequestPayload
+  ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
-    const result = game.buildRequest(client.data.user.username);
+    const result = game.buildRequest(client.data.user.username, payload);
 
-    //⚠️ FOR TESTING
-    game.phaseCheckRequest();
-    game.buildRequest('enriquest');
-    game.phaseCheckRequest();
-    game.buildRequest('spagg');
-    // -------------
+      //⚠️ FOR TESTING
+      game.phaseCheckRequest();
+      game.buildRequest('enriquest', payload);
+      game.phaseCheckRequest();
+      game.buildRequest('spagg',payload);
+      // -------------
 
     game.phaseCheckRequest();
     game.setDiceRoll(result.value);
-    game.setMasterLog(result.message)
-    this.server.to(game.getGameId()).emit('gameState', game.getGameData()); //INFO: Always return the new gameState to all client in the room
-    //client.broadcast.to(gameState.gameId).emit('diceRolled', );
+    game.setMasterLog(result.message);
+    this.server.to(game.getGameId()).emit('gameState', game.getGameData());
     return { ...result };
   }
 

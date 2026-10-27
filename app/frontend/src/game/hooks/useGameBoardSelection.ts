@@ -6,7 +6,6 @@ import type {
   RoadData
 } from "../../../../shared/game/gameboard.types";
 
-
 const resetSelection = (): GameBoardSelection => ({
   selectedTile: null,
   selectedSettlement: null,

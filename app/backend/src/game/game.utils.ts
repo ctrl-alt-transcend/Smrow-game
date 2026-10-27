@@ -1,6 +1,13 @@
-import type { Player } from '@shared/game/game.types';
+import type { GameResponse, Player, BuildRequestPayload } from '@shared/game/game.types';
 
-export function rollDice( p: Player ): { value: number | null, message: string | null } {
+export function isBuildRequestPayload(p: unknown): p is BuildRequestPayload {
+  if (typeof p !== 'object' || p === null) return false;
+  const o = p as Record<string, unknown>;
+  if (o.kind !== 'road' && o.kind !== 'settlement') return false;
+  return typeof o.id === 'string' && typeof o.data === 'object' && o.data !== null;
+}
+
+export function rollDice( p: Player ): GameResponse {
   let value: number | null = Math.floor(Math.random() * 6) + 1;
   let message: string | null = null;
 
@@ -16,7 +23,7 @@ export function rollDice( p: Player ): { value: number | null, message: string |
     value = null;
     message = `utils:rollDice: You (${p.playerId}) already rolled both dices.`;
   }
-  return { value, message };
+  return { value, message, board: null };
 }
 
 export function funnyLogs( id: string, value: number ): string {

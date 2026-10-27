@@ -3,7 +3,7 @@ import { socket } from '../../socket.tsx';
 //import type { GameState } from  "@shared/game/game.types.ts";
 import type { GameData } from "@shared/game/game.types.ts";
 
-export function useGameState() : GameData | null {
+export function useGameState() : { game: GameData | null; } {
 //  //const [game, setGame] = useState<GameState | null>(null); //INFO: game is the state variable that will hold the game state, and setGame is the function that will update it.
   const [game, setGame] = useState< GameData | null>(null); //INFO: game is the state variable that will hold the game state, and setGame is the function that will update it.
 //  //const [error, setError] = useState<string | null>(null);
@@ -57,5 +57,5 @@ export function useGameState() : GameData | null {
     };
   }, []);
 
-  return (game);
+  return { game };
 }

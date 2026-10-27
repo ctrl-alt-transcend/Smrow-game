@@ -1,15 +1,15 @@
 import { useState, useCallback, useRef } from 'react';
 import { Card, Stack, Title, Box } from '@mantine/core';
 import { Dice3D, type DiceValue } from '../gameboard/Dice/Dice';
-import { useGameBoard } from '../../contexts/GameBoardContext';
 import { useRollDice } from '../../hooks/useRollDice';
+import type { GameResponse } from '@shared/game/game.types';
 
 
-export function DiceRoller({diceValue, masterLog}: { diceValue: number | null ; masterLog: string | null }) {
+export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; masterLog: string | null }) {
   const [rolledValue, setRolledValue] = useState<DiceValue | null>(null);
   const [busy, setBusy] = useState(false);
-  const pendingResultRef = useRef<{ value: DiceValue | number | null; message: string | null} | null>(null);
-  const { updateGamemasterLog } = useGameBoard();
+  //const pendingResultRef = useRef<{ value: DiceValue | number | null; message: string | null} | null>(null);
+  const pendingResultRef = useRef<GameResponse | null>(null);
   const { roll } = useRollDice();
 
 
@@ -19,32 +19,33 @@ export function DiceRoller({diceValue, masterLog}: { diceValue: number | null ; 
     try {
       await roll();
       setBusy(false);
-      if(diceValue === null) {
-        if(masterLog)
-          updateGamemasterLog(masterLog);
+      if(diceRoll === null) {
+        //if(masterLog)
+        //  updateMasterLog(masterLog);
         setBusy(false);
         return;
       }
-      pendingResultRef.current = { value: diceValue, message: masterLog };
-      setRolledValue(diceValue);
+      pendingResultRef.current = { value: diceRoll, message: masterLog, board: null };
+      setRolledValue(diceRoll);
     } catch (err) {
       console.error('Failed to roll dice:', err);
-      updateGamemasterLog('Error rolling dice');
+      //updateMasterLog('Error rolling dice');
       setBusy(false);
     }
-  }, [roll, updateGamemasterLog, busy]);
+  }, [roll, busy]);
+  //}, [roll, updateMasterLog, busy]);
 
   const handleAnimationComplete = useCallback(
     (finalValue: DiceValue) => {
       const value = pendingResultRef.current?.value ?? finalValue;
-      const message = pendingResultRef.current?.message ?? `You rolled a ${value}`;
+      //const message = pendingResultRef.current?.message ?? `You rolled a ${value}`;
       setRolledValue(value);
-      updateGamemasterLog(message);
+      //updateMasterLog(message);
       pendingResultRef.current = null;
       setRolledValue(null);
       setBusy(false);
-    },
-    [updateGamemasterLog]
+    }, []
+    //[updateMasterLog]
   );
 
   return (

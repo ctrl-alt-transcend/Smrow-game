@@ -7,7 +7,7 @@ import {
   type GameBoard,
   Faction
 } from "../../../../shared/game/gameboard.types";
-import { getHexCorners, getHexEdges, HEX_SIZE } from './hexCalculation';
+import { getHexCorners, getHexEdges, HEX_SIZE } from '@shared/game/hexCalculation';
 
 /** @description calculate and render an SVG board game based on the given layout */
 export const initGameBoard = (tiles: TileData[]): GameBoard => {

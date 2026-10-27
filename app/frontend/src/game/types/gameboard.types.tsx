@@ -1,7 +1,8 @@
 import {
   type TileData,
   type RoadData,
-  type SettlementData
+  type SettlementData,
+  type GameBoard
 } from "../../../../shared/game/gameboard.types";
 
 /** @description common definition for all interactive game features */
@@ -46,7 +47,7 @@ export interface SettlementHover {
 export type HoverEntity = TileHover | RoadHover | SettlementHover | null;
 
 export interface GameBoardProps {
-  layout: TileData[];
+  board: GameBoard;
 
   //useGameBoardSelection
   selected: GameBoardSelection;

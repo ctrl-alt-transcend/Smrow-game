@@ -1,4 +1,8 @@
-import { Faction } from "./gameboard.types";
+import { Faction,
+  type GameBoard,
+  type RoadData,
+  type SettlementData
+} from "./gameboard.types";
 
 export type Ressources = {
   wood: number;
@@ -22,14 +26,6 @@ export type Player = {
   avatarURL: string | null;
 }
 
-export type GameState = {
-  gameId: string;
-  players: Player[];
-  playerTurn: string;
-  diceRoll: number | null;
-  masterLog: string | null;
-}
-
 //INFO: data we need to colect from the database when a client join a game
 export type PlayerProfile = {
   id: string;
@@ -48,9 +44,15 @@ export type GameData = {
   gameId: string;
   diceRoll: number | null;
   masterLog: string | null;
+  board: GameBoard;
 }
 
 export interface GameResponse {
   value: number | null;
   message: string | null;
+  board: GameData | null;
 }
+
+export type BuildRequestPayload =
+  | { kind: 'road';       id: string; data: RoadData }
+  | { kind: 'settlement'; id: string; data: SettlementData };
