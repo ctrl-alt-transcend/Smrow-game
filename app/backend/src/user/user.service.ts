@@ -28,7 +28,7 @@ export class UserService {
   }
 
   async findById(id: string): Promise<UserProfile | null> {
-    const user = await this.databaseService.user.findUnique({
+    const user = await this.databaseService.user.findUniqueOrThrow({
       where: { id },
       select: {
         id: true,
@@ -60,6 +60,7 @@ export class UserService {
 
   // include returns the relations data, if set to true
   async findAll() {
+    // to be deleted
     return this.databaseService.user.findMany({
       include: { profile: true, localAuth: false },
     });
@@ -73,13 +74,13 @@ export class UserService {
     });
   }
 
-  async findOne(username: string) {
-    return this.databaseService.user.findUniqueOrThrow({
-      where: {
-        username,
-      },
-    });
-  }
+  //  async findOne(username: string) {
+  //    return this.databaseService.user.findUniqueOrThrow({
+  //      where: {
+  //        username,
+  //      },
+  //    });
+  //  }
 
   async findByMail(email: string) {
     return this.databaseService.user.findUniqueOrThrow({
