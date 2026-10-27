@@ -1,34 +1,4 @@
-import type {
-  Player,
-  Ressources
-} from '@shared/game/game.types';
-
-function initRessources(): Ressources {
-  return {
-    wood: 0,
-    brick: 0,
-    hay: 0,
-    sheep: 0,
-    rock: 0,
-  };
-}
-
-//TODO: use PlayerProfile instead of playerId
-export function initPlayer( playerId: string ): Player {
-  return {
-    playerId: playerId,
-    score: 0,
-    firstDice: 0,
-    secondDice: 0,
-    settlementsBuilt: 0,
-    roadsBuilt: 0,
-    level: 1,
-    username: playerId,
-    avatarURL: null,
-    ressources: initRessources()
-    //color TODO: add color to player
-  };
-}
+import type { Player } from '@shared/game/game.types';
 
 export function rollDice( p: Player ): { value: number | null, message: string | null } {
   let value: number | null = Math.floor(Math.random() * 6) + 1;

@@ -1,11 +1,13 @@
+import {
+  Faction,
+  FACTION_COLORS
+} from '@shared/game/gameboard.types';
 import type {
   GameData,
   Player,
   GameResponse
 } from '@shared/game/game.types';
-
 import {
-  initPlayer,
   rollDice,
   funnyLogs
 } from './game.utils';
@@ -23,6 +25,7 @@ class GameStateContext {
    /** @type {State} A reference to the current state of the Context. */
   private   state!: State;
   protected game!: GameData;
+  private   factionSwitch: number = 0;
 
   constructor( gameId: string, state: State ) {
     this.game = {
@@ -43,13 +46,50 @@ class GameStateContext {
     });
   }
 
-  /** WORK IN PROGRESS: to do:
-   * - init every player with their current name
-   * - init ressources
+  /**
+   * assignFaction();
+   * Watchout for client disconnection! Must handle that properly later!
    */
+  private assignFaction(): Faction {
+    switch (this.factionSwitch) {
+      case 1:
+        return Faction.BOURSES_BLEUES;
+      case 2:
+        return Faction.POURPRES_CHYBRES;
+      case 3:
+        return Faction.ROUGES_FIACS;
+      case 4:
+        return Faction.UREE_JAUNE;
+      default:
+        return Faction.DEFAULT;
+    }
+  }
+
+  public initPlayer( playerId: string ): Player {
+  return {
+    playerId: playerId,
+    score: 0,
+    firstDice: 0,
+    secondDice: 0,
+    settlementsBuilt: 0,
+    roadsBuilt: 0,
+    level: 1,
+    username: playerId,
+    avatarURL: null,
+    faction: this.assignFaction(),
+    ressources: {
+      wood: 0,
+      brick: 0,
+      hay: 0,
+      sheep: 0,
+      rock: 0,
+    },
+  };
+}
+
   protected initGameData() {  //⚠️ FOR TESTING //TEST: REMOVE THIS IN PROD
-    this.game.players.set('spagg', initPlayer('spagg'));
-    this.game.players.set('enriquest', initPlayer('enriquest'));
+    this.game.players.set('spagg', this.initPlayer('spagg'));
+    this.game.players.set('enriquest', this.initPlayer('enriquest'));
   }
 
   private initStartingRolls(): void {
@@ -84,6 +124,15 @@ class GameStateContext {
   public  getStartingRolls(): Map<string, number | null> { return this.game.startingRolls; }
   public  getTurnCount(): number { return this.game.turnCount; }
   public  getCurrentTurnIndex(): number { return this.game.currentTurnIndex; }
+
+  public  getFactionColor( playerId: string ): string {
+    const player = this.getPlayerById(playerId);
+    if (!player) {
+      throw new Error(`Unknown playerId: ${playerId}`);
+    }
+    return FACTION_COLORS[player.faction];
+  }
+
   public  getCurrentPlayer(): Player | undefined {
     return this.game.players.get(this.game.turnOrder[this.game.currentTurnIndex]);
   }
@@ -239,7 +288,6 @@ class StartingPhase extends State
 class RessourcePhase extends State
 {
   public dice( playerId: string ): GameResponse {
-
     console.log(`🪵🎲RessourcePhase:dice: handles diceRequest from ${playerId}`);
     const p = this.state.isPlayersTurn(playerId);
     if(!p) {

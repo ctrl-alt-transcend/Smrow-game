@@ -5,7 +5,6 @@ import {
   GameStateContext,
   StartingPhase
 } from './GameStateContext';
-import { initPlayer } from './game.utils';
 
 @Injectable()
 export class GameService {
@@ -72,6 +71,6 @@ export class GameService {
   private addPlayerToGame(gameId: string, playerProfile: PlayerProfile) {
     const game = this.getGameInstance(gameId);
     this.playersMap.set(playerProfile.id, gameId);
-    game.getPlayers().set(playerProfile.username, initPlayer(playerProfile.username));
+    game.getPlayers().set(playerProfile.username, game.initPlayer(playerProfile.username));
   }
 }

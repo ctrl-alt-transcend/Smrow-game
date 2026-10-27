@@ -21,7 +21,7 @@ export default function FullLayout() {
     <GameBoardProvider layout={classicLayout}>
       <AppShell
         header={{ height: 60 }}
-        footer={{ height: 60 }}
+        footer={{ height: 95 }}
         navbar={{
           width: 300,
           breakpoint: "xs",

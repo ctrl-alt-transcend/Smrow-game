@@ -1,3 +1,5 @@
+import { Faction } from "./gameboard.types";
+
 export type Ressources = {
   wood: number;
   brick: number;
@@ -16,7 +18,7 @@ export type Player = {
   secondDice: number,
   settlementsBuilt: number;
   roadsBuilt: number;
-  //color: ""
+  faction: Faction;
   avatarURL: string | null;
 }
 
