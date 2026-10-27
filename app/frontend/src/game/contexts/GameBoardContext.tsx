@@ -7,7 +7,7 @@ import {
   useMemo,
 } from "react";
 import type {
-  GameBoardData,
+  GameBoard,
   RoadData,
   SettlementData,
   Faction,
@@ -15,8 +15,8 @@ import type {
 } from "../../../../shared/game/gameboard.types";
 
 type GameBoardContextType = {
-  gameboard: GameBoardData;
-  updateGameboard: (newGameboard: GameBoardData) => void;
+  gameboard: GameBoard;
+  updateGameboard: (newGameboard: GameBoard) => void;
   updateRoadFaction: (road: RoadData, faction: Faction) => void;
   updateSettlementFaction: (settlement: SettlementData, faction: Faction) => void;
   updateGamemasterLog: (newLog: string) => void;
@@ -31,11 +31,11 @@ const GameBoardProvider: React.FC<{
   children: React.ReactNode;
   layout: TileData[];
 }> = ({ children, layout }) => {
-  const [gameboard, setGameboard] = useState<GameBoardData>(() =>
+  const [gameboard, setGameboard] = useState<GameBoard>(() =>
     calculateGameBoardData(layout),
   );
 
-  const updateGameboard = useCallback((newGameboard: GameBoardData) => {
+  const updateGameboard = useCallback((newGameboard: GameBoard) => {
     setGameboard(newGameboard);
   }, []);
 

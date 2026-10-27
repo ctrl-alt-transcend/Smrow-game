@@ -9,7 +9,7 @@ export const LandType = {
   MOUNTAIN: 'mountain',
   FIELD: 'field',
   DESERT: 'desert',
-  DEFAULT: 'purple'
+  DEFAULT: 'default'
 } as const;
 
 export const LAND_COLORS: Record<LandType, string> = {
@@ -84,7 +84,7 @@ export interface SettlementData {
   hasOwner?: boolean;
 }
 
-export interface GameBoardData {
+export interface GameBoard {
   layout: TileData[];
   vertices: Vertex[];
   edges: Edge[];

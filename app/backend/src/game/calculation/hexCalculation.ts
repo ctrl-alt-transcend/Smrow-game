@@ -1,4 +1,4 @@
-import type { Edge, Vertex } from "./gameboard.types";
+import type { Edge, Vertex } from "@shared/game/gameboard.types";
 
 /** @description hextile pixel height */
 export const HEX_SIZE = 50;

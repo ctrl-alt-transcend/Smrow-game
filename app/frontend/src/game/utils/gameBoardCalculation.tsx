@@ -4,13 +4,13 @@ import {
   type TileData,
   type RoadData,
   type SettlementData,
-  type GameBoardData,
+  type GameBoard,
   Faction
 } from "../../../../shared/game/gameboard.types";
 import { getHexCorners, getHexEdges, HEX_SIZE } from './hexCalculation';
 
 /** @description calculate and render an SVG board game based on the given layout */
-export const calculateGameBoardData = (tiles: TileData[]): GameBoardData => {
+export const calculateGameBoardData = (tiles: TileData[]): GameBoard => {
   const allVertices = new Map<string, Vertex>();
   tiles.forEach((tile) => {
     getHexCorners(tile.q, tile.r, HEX_SIZE).forEach((v) => {

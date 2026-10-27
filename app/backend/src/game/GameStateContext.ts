@@ -1,4 +1,6 @@
 import {
+  type GameBoard,
+  classicLayout,
   Faction,
   FACTION_COLORS
 } from '@shared/game/gameboard.types';
@@ -7,10 +9,8 @@ import type {
   Player,
   GameResponse
 } from '@shared/game/game.types';
-import {
-  rollDice,
-  funnyLogs
-} from './game.utils';
+import { rollDice, funnyLogs } from './game.utils';
+import { initGameBoard } from './calculation/initGameBoard';
 
 /**
  * STATE DESIGN PATTERN
@@ -23,9 +23,11 @@ import {
  */
 class GameStateContext {
    /** @type {State} A reference to the current state of the Context. */
-  private   state!: State;
-  protected game!: GameData;
-  private   factionSwitch: number = 0;
+   private   state!: State;
+   protected game!: GameData;
+   protected board: GameBoard = initGameBoard(classicLayout);
+
+   private   factionSwitch: number = 0;
 
   constructor( gameId: string, state: State ) {
     this.game = {
@@ -38,7 +40,7 @@ class GameStateContext {
       masterLog: '...',
       diceRoll: 0
     };
-    this.initGameData();
+    this.initGameData(); //⚠️ FOR TESTING WITH MOCKED VALUE
     this.initStartingRolls();
     this.transitionTo(state);
     this.game.players.forEach((value: Player, key: string) => {
@@ -88,8 +90,12 @@ class GameStateContext {
 }
 
   protected initGameData() {  //⚠️ FOR TESTING //TEST: REMOVE THIS IN PROD
+    // Mock other players
     this.game.players.set('spagg', this.initPlayer('spagg'));
     this.game.players.set('enriquest', this.initPlayer('enriquest'));
+    // Mock prebuilt map
+    // ...
+
   }
 
   private initStartingRolls(): void {
@@ -128,7 +134,7 @@ class GameStateContext {
   public  getFactionColor( playerId: string ): string {
     const player = this.getPlayerById(playerId);
     if (!player) {
-      throw new Error(`Unknown playerId: ${playerId}`);
+      throw new Error(`getFactionColor: Unknown playerId: ${playerId}`);
     }
     return FACTION_COLORS[player.faction];
   }
