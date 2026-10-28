@@ -34,7 +34,6 @@ export type PlayerProfile = {
   avatarURL: string | null;
 }
 
-// test copy of GameState to implement in GameStateContext
 export type GameData = {
   players: Map<string, Player>;
   startingRolls: Map<string, number | null>;
@@ -53,6 +52,18 @@ export interface GameResponse {
   board: GameData | null;
 }
 
+export type GameDataDto = { //INFO: data we send to the client every time the game state changes
+  players: Player[];
+  //turnCount: number;
+  //turnOrder: string[];
+  //currentTurnIndex: number;
+  gameId: string;
+  diceRoll: number | null;
+  masterLog: string | null;
+  board: GameBoard;
+}
+
 export type BuildRequestPayload =
   | { kind: 'road';       id: string; data: RoadData }
   | { kind: 'settlement'; id: string; data: SettlementData };
+

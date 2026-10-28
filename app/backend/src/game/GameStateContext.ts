@@ -8,6 +8,7 @@ import {
 } from '@shared/game/gameboard.types';
 import type {
   GameData,
+  GameDataDto,
   Player,
   GameResponse,
   BuildRequestPayload
@@ -137,6 +138,17 @@ class GameStateContext {
   public  getStartingRolls(): Map<string, number | null> { return this.game.startingRolls; }
   public  getTurnCount(): number { return this.game.turnCount; }
   public  getCurrentTurnIndex(): number { return this.game.currentTurnIndex; }
+
+  public  getGameDataDto(): GameDataDto {
+    const gameData = this.getGameData();
+    return ({
+      players: Array.from(gameData.players.values()),
+      gameId: gameData.gameId,
+      diceRoll: gameData.diceRoll,
+      masterLog: gameData.masterLog,
+      board: gameData.board
+    });
+  }
 
   public  getFactionColor( playerId: string ): string {
     const player = this.getPlayerById(playerId);

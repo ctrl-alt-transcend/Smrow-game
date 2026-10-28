@@ -78,7 +78,7 @@ export class GameGateway implements OnGatewayInit {
     game.phaseCheckRequest();
     game.setDiceRoll(result.value);
     game.setMasterLog(result.message);
-    this.server.to(game.getGameId()).emit('gameState', game.getGameData());
+    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
     return { ...result };
   }
 
@@ -91,8 +91,8 @@ export class GameGateway implements OnGatewayInit {
       await client.join(game.getGameId());
       game.setMasterLog(`${client.data.user.username} joined the room`);
       console.log(game.getGameId());
-      this.server.to(game.getGameId()).emit('gameState', game.getGameData());
-      return { ok: true, data: game.getGameData() };
+      this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
+      return { ok: true, data: game.getGameDataDto() };
     }
     catch (e) {
       console.log('joinRoom failed', e);
