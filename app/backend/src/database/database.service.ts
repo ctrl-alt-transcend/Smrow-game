@@ -9,7 +9,7 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
   constructor() {
     const dbHost = DB.DB_HOST;
     const dbUser = DB.DB_USER;
-    const dbPassword: string = readSecret(DB.DB_PASS_FILE); // readSecret('DB_PASSWORD_FILE');  'run/secrets/db_password'
+    const dbPassword: string = readSecret(DB.DB_PASS_FILE);
     const dbPort = DB.DB_PORT;
     const dbName = DB.DB_NAME;
 
