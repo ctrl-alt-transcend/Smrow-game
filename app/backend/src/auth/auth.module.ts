@@ -13,7 +13,7 @@ import { AUTH } from '../config/config'
     UserModule,
     PassportModule,
     JwtModule.register({
-      secret: readSecret(AUTH.JWT_FILE),
+      secret: readSecret('JWT_SECRET_FILE'),
       signOptions: { expiresIn: AUTH.TOKEN_EXPIRATION_TIME},
     }),
   ],
