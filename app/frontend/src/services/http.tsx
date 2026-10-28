@@ -1,5 +1,5 @@
 import axios from "axios";
-import { KEY } from "../config/config"
+import { KEY } from "../config/config";
 import { authEvents } from "../context/AuthEvents";
 
 export const http = axios.create({
