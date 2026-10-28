@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { readSecret } from 'src/strategies/readSecret';
-import { DB } from '../config/config'
+import { DB } from '../config/config';
 
 @Injectable()
 export class DatabaseService extends PrismaClient implements OnModuleInit {
