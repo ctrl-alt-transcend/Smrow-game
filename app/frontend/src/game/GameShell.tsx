@@ -39,7 +39,7 @@ function GameShell({ game }: { game: GameDataDto }) {
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} size="sm" />
-          Header
+          Header gameId: {game.gameId}
         </Group>
       </AppShell.Header>
 

@@ -97,8 +97,8 @@ class GameStateContext {
 
   protected initGameData() {  //⚠️ FOR TESTING //TEST: REMOVE THIS IN PROD
     // Mock other players
-    this.game.players.set('spagg', this.initPlayer('spagg'));
-    this.game.players.set('enriquest', this.initPlayer('enriquest'));
+    //this.game.players.set('spagg', this.initPlayer('spagg'));
+    //this.game.players.set('enriquest', this.initPlayer('enriquest'));
     // Mock prebuilt map
     // ...
 

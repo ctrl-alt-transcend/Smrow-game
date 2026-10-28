@@ -46,16 +46,16 @@ export class GameGateway implements OnGatewayInit {
     const result = game.diceRequest(client.data.user.username);
 
     //⚠️ FOR TESTING
-    game.phaseCheckRequest();
-    game.diceRequest('enriquest');
-    game.phaseCheckRequest();
-    game.diceRequest('spagg');
+    // game.phaseCheckRequest();
+    // game.diceRequest('enriquest');
+    // game.phaseCheckRequest();
+    // game.diceRequest('spagg');
     // -------------
 
     game.phaseCheckRequest();
     game.setDiceRoll(result.value);
     game.setMasterLog(result.message)
-    client.to(game.getGameId()).emit('gameState'); //INFO: Always return the new gameState to all client in the room
+    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto()); //INFO: Always return the new gameState to all client in the room
     //client.broadcast.to(gameState.gameId).emit('diceRolled', );
     return { ...result };
   }
@@ -69,10 +69,10 @@ export class GameGateway implements OnGatewayInit {
     const result = game.buildRequest(client.data.user.username, payload);
 
       //⚠️ FOR TESTING
-      game.phaseCheckRequest();
-      game.buildRequest('enriquest', payload);
-      game.phaseCheckRequest();
-      game.buildRequest('spagg',payload);
+      // game.phaseCheckRequest();
+      // game.buildRequest('enriquest', payload);
+      // game.phaseCheckRequest();
+      // game.buildRequest('spagg',payload);
       // -------------
 
     game.phaseCheckRequest();
