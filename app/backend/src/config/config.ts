@@ -7,7 +7,7 @@ export const AUTH = {
 
 export const DB = {
   DEFAULT_DB_PORT: process.env.DEFAULT_DB_PORT as string,
-  DB_PASSWORD_FILE: process.env.DB_PASSWORD_FILE as string,
+  DB_PASS_FILE: process.env.DB_PASSWORD_FILE as string,
 
   DB_HOST: process.env.DB_HOST as string,
   DB_PORT: process.env.DB_PORT as string,

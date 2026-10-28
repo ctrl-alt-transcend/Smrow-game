@@ -8,8 +8,8 @@ import { DB } from './src/config/config'
   let dbPassword = process.env.DB_PASSWORD || "";
 
   try {
-    if (process.env.DB_PASSWORD_FILE) {
-      dbPassword = readSecret('DB_PASSWORD_FILE');
+    if (process.env.DB_PASSWORD_FILE) { // redondant
+      dbPassword = readSecret(DB.DB_PASS_FILE);
     }
   }
   catch (error) {
