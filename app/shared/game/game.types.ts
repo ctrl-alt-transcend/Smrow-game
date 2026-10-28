@@ -50,7 +50,7 @@ export type GameData = {
 export interface GameResponse {
   value: number | null;
   message: string | null;
-  board: GameData | null;
+  data: GameData | null;
 }
 
 export type BuildRequestPayload =

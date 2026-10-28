@@ -11,8 +11,10 @@ import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
 
 export default function Game() {
   const { game } = useGameState();
-  if (!game || !game.board)
+  if (!game)
     return <div>Loading game...</div>;
+  if (!game.board)
+    return <div>Loading gameboard...</div>;
   return <GameShell game={game} />;
 }
 

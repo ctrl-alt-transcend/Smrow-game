@@ -82,8 +82,10 @@ export interface SettlementData {
   vertex: Vertex;
   faction: Faction;
   hasOwner?: boolean;
+
 }
 
+/** @description sent to the front, serializable without risk */
 export interface GameBoard {
   layout: TileData[];
   vertices: Vertex[];
@@ -92,6 +94,15 @@ export interface GameBoard {
   roads: RoadData[];
   svgBounds: SvgBounds;
 }
+
+export interface ConnectedElements {
+  connectedRoads: RoadData[];
+  connectedSettlements: SettlementData[]; // Pointeurs vers les colonies connectées (max 3)
+  adjacentTiles: TileData[];
+}
+
+  /** @description retained on the back-end only, never sent to front */
+export type ElementGraph = Map<string, ConnectedElements>;
 
 /** @description classic Catan gameboard layout (19 tiles) */
 export const classicLayout: TileData[] = [

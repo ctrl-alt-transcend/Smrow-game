@@ -23,7 +23,7 @@ export function rollDice( p: Player ): GameResponse {
     value = null;
     message = `utils:rollDice: You (${p.playerId}) already rolled both dices.`;
   }
-  return { value, message, board: null };
+  return { value, message, data: null };
 }
 
 export function funnyLogs( id: string, value: number ): string {

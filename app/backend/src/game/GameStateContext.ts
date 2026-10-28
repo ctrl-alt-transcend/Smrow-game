@@ -1,10 +1,9 @@
 import {
   type GameBoard,
+  type ElementGraph,
   classicLayout,
-  RoadData,
-  SettlementData,
   Faction,
-  FACTION_COLORS
+  FACTION_COLORS,
 } from '@shared/game/gameboard.types';
 import type {
   GameData,
@@ -12,8 +11,10 @@ import type {
   GameResponse,
   BuildRequestPayload
 } from '@shared/game/game.types';
-import { rollDice, funnyLogs, isBuildRequestPayload } from './game.utils';
 import { initGameBoard } from './calculation/initGameBoard';
+import { rollDice, funnyLogs, isBuildRequestPayload } from './game.utils';
+import { buildCheck } from './calculation/buildCheck';
+import { createGameBoard } from './calculation/createGameBoard';
 
 /**
  * STATE DESIGN PATTERN
@@ -28,11 +29,17 @@ class GameStateContext {
    /** @type {State} A reference to the current state of the Context. */
    private   state!: State;
    protected game!: GameData;
+   protected graph!: ElementGraph;
+  // protected board!: GameBoard;
+
   // protected board!: GameBoard;
 
    private   factionSwitch: number = 0;
 
   constructor( gameId: string, state: State ) {
+    const { board, graph } = createGameBoard(classicLayout);
+    this.graph = graph;
+    //this.board = board;
     this.game = {
       players: new Map<string, Player>(),
       startingRolls: new Map<string, number | null>(),
@@ -42,9 +49,9 @@ class GameStateContext {
       gameId: gameId,
       masterLog: '...',
       diceRoll: 0,
-      board: initGameBoard(classicLayout)
+      board: board,
+      //board: initGameBoard(classicLayout)
     };
-    //this.board = initGameBoard(classicLayout);
     this.initGameData(); //⚠️ FOR TESTING WITH MOCKED VALUE
     this.initStartingRolls();
     this.transitionTo(state);
@@ -132,6 +139,9 @@ class GameStateContext {
 
   /** Getters */
   public  getGameData(): GameData { return this.game; }
+  //public  getBoard(): GameBoard { return this.board; }
+  public  getBoard(): GameBoard { return this.game.board; }
+  public  getGraph(): ElementGraph { return this.graph; }
   public  getGameId(): string { return this.game.gameId; }
   public  getPlayers(): Map<string, Player> { return this.game.players; }
   public  getStartingRolls(): Map<string, number | null> { return this.game.startingRolls; }
@@ -249,14 +259,14 @@ class StartingPhase extends State
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
       this.state.setCurrentTurnIndex(undefined);
       return { value: null,
-        message: funnyLogs(p.playerId, p.firstDice + p.secondDice), board: null }
+        message: funnyLogs(p.playerId, p.firstDice + p.secondDice), data: null }
     }
-    return { value: roll.value, message: roll.message, board: null }
+    return { value: roll.value, message: roll.message, data: null }
   }
 
   public build(): GameResponse {
     console.log('🏁🔨StartingPhase:build: handles buildRequest.');
-    return { value: null, message: `🏁🔨StartingPhase:build: action forbidden during this phase.`, board: null }
+    return { value: null, message: `🏁🔨StartingPhase:build: action forbidden during this phase.`, data: null }
   }
 
   public computeTurnOrder() {
@@ -304,7 +314,7 @@ class RessourcePhase extends State
     console.log(`🪵🎲RessourcePhase:dice: handles diceRequest from ${playerId}`);
     const p = this.state.isPlayersTurn(playerId);
     if(!p) {
-      return { value: null, message: "It's not your turn !", board: null };
+      return { value: null, message: "It's not your turn !", data: null };
     }
     const roll: GameResponse = rollDice(p);
     if(this.state.hasRolledBothDices(p) && roll.value) {
@@ -316,14 +326,14 @@ class RessourcePhase extends State
       this.state.setCurrentTurnIndex(undefined);
       this.state.setTurnCount(undefined);
       return { value: null,
-        message: funnyLogs(p.playerId, p.firstDice + p.secondDice), board: null }
+        message: funnyLogs(p.playerId, p.firstDice + p.secondDice), data: null }
     }
-    return { value: roll.value, message: roll.message, board: null }
+    return { value: roll.value, message: roll.message, data: null }
   }
 
   public build(): GameResponse {
     console.log('🪵🔨RessourcePhase:build: handles buildRequest.');
-    return { value: null, message: `🪵RessourcePhase:build: action forbidden during this phase.`, board: null }
+    return { value: null, message: `🪵RessourcePhase:build: action forbidden during this phase.`, data: null }
   }
 
   public phaseCheck(): void {
@@ -345,21 +355,22 @@ class TradeAndBuildPhase extends State
     console.log(`🤝🔨TradeAndBuildPhase:build: handles buildRequest from ${playerId}`);
     if(!isBuildRequestPayload(payload)) {
       console.log(`🤝🔨TradeAndBuildPhase:build: invalid payload !`);
-      return { value: null, message: "🤝🔨TradeAndBuildPhase:build: invalid payload !", board: null };
+      return { value: null, message: "🤝🔨TradeAndBuildPhase:build: invalid payload !", data: null };
     }
     const p = this.state.isPlayersTurn(playerId);
     if(!p) {
-      return { value: null, message: "🤝🔨TradeAndBuildPhase:build: It's not your turn !", board: null };
+      return { value: null, message: "🤝🔨TradeAndBuildPhase:build: It's not your turn !", data: null };
     }
     console.log(`🤝🔨TradeAndBuildPhase:build: ${playerId} built something ...`);
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
-    return { value: null, message: `🤝🔨TradeAndBuildPhase:build: not handled for the moment...`, board: null}
+    const response = buildCheck(payload, p.faction, this.state.getBoard(), this.state.getGraph());
+    return { value: response.value, message: response.message, data: this.state.getGameData() }
   }
 
   public dice(): GameResponse {
     console.log('🤝🎲TradeAndBuildPhase:dice: handles diceRequest.');
-    return { value: null, message: `🤝🎲TradeAndBuildPhase:dice: action forbidden during this phase.`, board: null }
+    return { value: null, message: `🤝🎲TradeAndBuildPhase:dice: action forbidden during this phase.`, data: null }
   }
 
   public phaseCheck(): void {

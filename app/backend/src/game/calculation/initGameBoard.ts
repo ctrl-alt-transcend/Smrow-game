@@ -31,6 +31,8 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
       vertex: v,
       faction: Faction.UNOCCUPIED,
       hasOwner: false,
+      connectedSettlements: [],
+      adjacentTiles: []
     }),
   );
 
@@ -39,6 +41,7 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
     edge: e,
     faction: Faction.UNOCCUPIED,
     hasOwner: false,
+    connectedRoads: []
   }));
 
   // SVG calculation
