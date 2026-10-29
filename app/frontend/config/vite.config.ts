@@ -12,6 +12,10 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
+      '/socket.io': {
+      target: 'http://backend:3000', // OK ici : le proxy tourne dans le conteneur
+      ws: true,
+      },
     },
   },
   test: {

@@ -12,7 +12,11 @@ RUN npx prisma generate
 EXPOSE 3000
 ENTRYPOINT ["npm"]
 CMD ["run", "start:dev"]
+EXPOSE 3000
+EXPOSE 3001
 
+#INFO: build for production
+#
 FROM node:26-alpine AS builder
 WORKDIR /app
 COPY --from=dev /app ./
@@ -40,6 +44,7 @@ COPY --from=pruner /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=pruner /app/generated ./generated
 COPY --from=builder /app/dist ./dist
 USER nestjs
-EXPOSE 3000
 CMD ["node", "/app/dist/src/main.js"]
+EXPOSE 3000
+EXPOSE 3001
 

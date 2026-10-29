@@ -1,11 +1,10 @@
 import { HexTile } from "./HexTile";
 import { Road } from "./Road";
 import { Settlement } from "./Settlement";
-import { useGameBoard } from "../../contexts/GameBoardContext";
 import type { GameBoardProps } from "../../types/gameboard.types";
 
 export const GameBoard: React.FC<GameBoardProps> = ({
-  layout,
+  board,
   selected,
   handleTileClick,
   handleRoadClick,
@@ -17,8 +16,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   handleRoadHover,
   handleSettlementHover,
 }) => {
-  const { gameboard } = useGameBoard();
-  const { roads, settlements, svgBounds } = gameboard;
+  const { layout, roads, settlements, svgBounds } = board;
 
   return (
     <div
