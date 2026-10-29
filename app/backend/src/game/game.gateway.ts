@@ -24,8 +24,18 @@ export interface SocketData {
   user: SocketUser;
 }
 
-export type SocketServer = Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>;
-export type SocketClient = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>;
+export type SocketServer = Server<
+  DefaultEventsMap,
+  DefaultEventsMap,
+  DefaultEventsMap,
+  SocketData
+>;
+export type SocketClient = Socket<
+  DefaultEventsMap,
+  DefaultEventsMap,
+  DefaultEventsMap,
+  SocketData
+>;
 
 @WebSocketGateway({
   cors: {
@@ -115,7 +125,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       });
       client.data.user = { id: payload.sub, username: payload.username };
     } catch (error) {
-      console.log('Client connection rejected:', client.id, ' - ', (error as Error).message);
+      console.log(
+        'Client connection rejected:',
+        client.id,
+        ' - ',
+        (error as Error).message,
+      );
       client.disconnect(true); //WARN: what happens in the frontend ?
       //TODO: remove player of the GameStat
     }
