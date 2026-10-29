@@ -2,15 +2,19 @@
 import { LandType, Faction } from '@shared/game/gameboard.types'; // ajuste l'import si nécessaire
 
 /** Représente une carte de ressource */
-export type ResourceKind = 'wood' | 'brick' | 'sheep' | 'wheat' | 'ore' | 'desert';
+export type ResourceKind =
+  'wood' | 'brick' | 'sheep' | 'wheat' | 'ore' | 'desert';
 
 /** Mapping des terrains vers les ressources produites */
-export const LAND_TO_RESOURCE: Record<Exclude<LandType, 'desert' | 'default'>, ResourceKind> = {
+export const LAND_TO_RESOURCE: Record<
+  Exclude<LandType, 'desert' | 'default'>,
+  ResourceKind
+> = {
   [LandType.FOREST]: 'wood',
   [LandType.PASTURE]: 'sheep',
   [LandType.HILL]: 'brick',
   [LandType.MOUNTAIN]: 'ore',
-  [LandType.FIELD]: 'wheat'
+  [LandType.FIELD]: 'wheat',
 };
 
 /** Représente une main de joueur (ressources possédées) */
@@ -22,11 +26,11 @@ export interface PlayerHand {
 /** Représente un bâtiment posé sur un sommet */
 export interface SettlementInfo {
   id: string;
-  vertexQ: number;        // q du sommet (pour debug/mapping)
-  vertexR: number;        // r du sommet
-  vertexCorner: number;   // index du coin (0–5)
+  vertexQ: number; // q du sommet (pour debug/mapping)
+  vertexR: number; // r du sommet
+  vertexCorner: number; // index du coin (0–5)
   faction: Faction;
-  isCity: boolean;        // true = ville (double rendement), false = colonie
+  isCity: boolean; // true = ville (double rendement), false = colonie
 }
 
 /** Représente une tuile avec son statut brigand */
@@ -34,8 +38,8 @@ export interface TileInfo {
   q: number;
   r: number;
   land: LandType | null;
-  value: number | null;   // null = désert
-  hasRobber: boolean;     // vrai si brigand présent
+  value: number | null; // null = désert
+  hasRobber: boolean; // vrai si brigand présent
   settlements: SettlementInfo[]; // bâtiments dessus
 }
 

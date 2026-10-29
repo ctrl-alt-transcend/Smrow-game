@@ -34,7 +34,7 @@ import {
 import { modals } from "@mantine/modals";
 import { useSelectionDisplay } from "../../hooks/useSelectionDisplay";
 import type { GameBoardSelection } from "../../types/gameboard.types";
-import { Faction, type RoadData, type SettlementData } from "../../../../../shared/game/gameboard.types.ts";
+import { Faction, /*type RoadData, type SettlementData*/ } from "../../../../../shared/game/gameboard.types.ts";
 import type { BuildRequestPayload } from "@shared/game/game.types.ts";
 import { socket } from "../../../socket.tsx";
 
@@ -87,7 +87,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
         data: selected.selectedSettlement };
     }
     return null;
-  }, [selected.selectedRoad?.edge.id, selected.selectedSettlement?.vertex.id]);
+  }, [selected.selectedRoad, selected.selectedSettlement]);
 
   /* ------------------------------------------------------------------------ */
   /* 1. Émission vers le backend (≈ handleRollRequest de DiceRoller)           */

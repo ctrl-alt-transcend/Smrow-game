@@ -82,6 +82,7 @@ export interface SettlementData {
   vertex: Vertex;
   faction: Faction;
   hasOwner?: boolean;
+  isCity?: boolean;
 }
 
 export interface GameBoard {

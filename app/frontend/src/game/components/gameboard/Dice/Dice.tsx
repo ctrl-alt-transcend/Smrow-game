@@ -297,7 +297,7 @@ const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
   const [value, setValue] = useState<DiceValue>(defaultValue);
   const [rolling, setRolling] = useState(false);
   const isControlled = value !== undefined;
-const [internalValue, setInternalValue] = useState<DiceValue>(defaultValue);
+const [internalValue, /*setInternalValue*/] = useState<DiceValue>(defaultValue);
 const displayedValue: DiceValue = isControlled && value !== undefined ? value : internalValue;
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -326,9 +326,9 @@ const displayedValue: DiceValue = isControlled && value !== undefined ? value : 
   // Si cheatValue change, on déclenche automatiquement l'animation
   useEffect(() => {
     if (cheatValue !== undefined && !rolling && !disabled) {
-      animateCheat(cheatValue);
+      animateCheat(cheatValue); //WARN: Hook error here
     }
-  }, [cheatValue]);
+  }, [cheatValue, rolling, disabled]);
 
 const animateCheat = useCallback(
   (forcedValue: DiceValue) => {
