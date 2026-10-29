@@ -1,9 +1,19 @@
 import { Title, Text, Paper, Table } from "@mantine/core";
-import { games } from "../../mocks/games.mock";
+import {useEffect, useState} from "react";
 import GameRow from "./GameRow";
+import type { AxiosResponse } from "axios";
+import type { GameDataDto } from "@shared/game/game.types";
+import { http } from "../../services/http";
 
 export default function GameList() {
-  const noGame = games.length === 0;
+
+  const [games, setGames] = useState<GameDataDto[]>([]);
+
+  useEffect(() => {
+    http.get<GameDataDto[]>("/game").then((res: AxiosResponse) => setGames(res.data));
+  }, []);
+
+  //const res: AxiosResponse = http.get<GameDataDto[]>("/game"); //WARN: what happend if request failed
 
   return (
     <Paper withBorder p="md" mih={600} h="100%">
@@ -11,7 +21,7 @@ export default function GameList() {
         Game in progress
       </Title>
 
-      {noGame ? (
+      {games.length === 0 ? (
         <Text c="dimmed" ta="center" py="xl">
           No game in progress ..
         </Text>
@@ -29,7 +39,7 @@ export default function GameList() {
 
           <Table.Tbody>
             {games.map((game) => (
-              <GameRow key={game.id} game={game} />
+              <GameRow key={game.gameId} game={game} />
             ))}
           </Table.Tbody>
         </Table>

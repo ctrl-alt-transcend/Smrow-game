@@ -1,9 +1,9 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { PlayerProfile } from '@shared/game/game.types';
+import type { PlayerProfile, GameDataDto } from '@shared/game/game.types';
 import {
   GameStateContext,
-  StartingPhase
+  StartingPhase,
 } from './GameStateContext';
 
 @Injectable()
@@ -60,6 +60,10 @@ export class GameService {
       throw new NotFoundException(`Player with id ${playerId} is not in a game`);
     }
     return gameId;
+  }
+
+  getGames(): GameDataDto[] {
+    return Array.from(this.gameInstances.values()).map((game: GameStateContext ) => game.getGameDataDto());
   }
 
   /**
