@@ -35,7 +35,7 @@ export const FACTION_COLORS: Record<Faction, string> = {
   [Faction.POURPRES_CHYBRES]: '#6b0b91',
   [Faction.BOURSES_BLEUES]: '#53cef3',
   [Faction.ROUGES_FIACS]: '#ff7a7a',
-  [Faction.UREE_JAUNE]: '#ffdd00',
+  [Faction.UREE_JAUNE]: '#ffc400',
   [Faction.DEFAULT]: '#19af89',
   [Faction.UNOCCUPIED]: '#e4e4e4'
 };
@@ -99,6 +99,7 @@ export interface ConnectedElements {
   connectedRoads: RoadData[];
   connectedSettlements: SettlementData[]; // Pointeurs vers les colonies connectées (max 3)
   adjacentTiles: TileData[];
+  adjacentSettlements: SettlementData[];
 }
 
   /** @description retained on the back-end only, never sent to front */

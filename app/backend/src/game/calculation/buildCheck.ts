@@ -40,16 +40,75 @@ const indexRoadsByVertex = (
   return map;
 };
 
+
 /* ================================================================== *
  * VALIDATEUR ROUTE
  * ================================================================== */
+
+//export const validateRoadPlacement = (
+//  road: RoadData,
+//  ownerFaction: Faction,
+//  graph: ElementGraph,
+//): { valid: true } | { valid: false; reason: string } => {
+//  if (road.hasOwner) {
+//    console.log(`👀⛔buildCheck:road: already occupied`);
+//    return { valid: false, reason: 'Cette route est déjà occupée' };
+//  }
+
+//  const settlementsByVertex = indexSettlementsByVertex([]); // à passer depuis board.settlements
+//  const graphEntry = graph.get(road.id);
+
+//  if (!graphEntry) {
+//    console.log(`👀⛔buildCheck:road: doesn't exists ...`);
+//    return { valid: false, reason: 'Route introuvable dans le graphe' };
+//  }
+
+//  const endpoints = [road.edge.p1.id, road.edge.p2.id];
+//  let connectedToNetwork = false;
+
+//  for (const vertexId of endpoints) {
+//    const settlement = settlementsByVertex.get(vertexId);
+
+//    // Blocage par adversaire
+//    if (settlement?.hasOwner && settlement.faction !== ownerFaction) {
+//      console.log(`👀⛔buildCheck:road: blocked by opponent`);
+//      continue;
+//    }
+
+//    // Connexion directe à son propre bâtiment
+//    if (settlement?.hasOwner && settlement.faction === ownerFaction) {
+//      connectedToNetwork = true;
+//      break;
+//    }
+
+//    // Connexion via une de ses routes voisines (lu depuis le graph)
+//    const hasConnectionViaNeighbor = graphEntry.connectedRoads.some(
+//      (neighbor) =>
+//        neighbor.hasOwner &&
+//        neighbor.faction === ownerFaction &&
+//        (neighbor.edge.p1.id === vertexId || neighbor.edge.p2.id === vertexId),
+//    );
+
+//    if (hasConnectionViaNeighbor) {
+//      connectedToNetwork = true;
+//      break;
+//    }
+//  }
+
+//  if (!connectedToNetwork) {
+//    console.log(`👀⛔buildCheck:road: must be connected`);
+//    return { valid: false, reason: 'La route doit être connectée à votre réseau' };
+//  }
+//  console.log(`👀✅buildCheck:road: is valid`);
+//  return { valid: true };
+//};
 
 export const validateRoadPlacement = (
   road: RoadData,
   ownerFaction: Faction,
   graph: ElementGraph,
 ): { valid: true } | { valid: false; reason: string } => {
-  if (road.hasOwner) {
+ if (road.hasOwner) {
     console.log(`👀⛔buildCheck:road: already occupied`);
     return { valid: false, reason: 'Cette route est déjà occupée' };
   }
@@ -61,12 +120,11 @@ export const validateRoadPlacement = (
     console.log(`👀⛔buildCheck:road: doesn't exists ...`);
     return { valid: false, reason: 'Route introuvable dans le graphe' };
   }
-
   const endpoints = [road.edge.p1.id, road.edge.p2.id];
   let connectedToNetwork = false;
 
   for (const vertexId of endpoints) {
-    const settlement = settlementsByVertex.get(vertexId);
+  const settlement = settlementsByVertex.get(vertexId);
 
     // Blocage par adversaire
     if (settlement?.hasOwner && settlement.faction !== ownerFaction) {
@@ -94,8 +152,19 @@ export const validateRoadPlacement = (
     }
   }
 
-  if (!connectedToNetwork) {
-    console.log(`👀⛔buildCheck:road: must be connected`);
+  // OPTIONNEL : exige qu'une extrémité touche TOUJOURS un settlement possédé
+  // (règle stricte Catan classique)
+  const hasOwnAdjacentSettlement = graphEntry.adjacentSettlements.some(
+    s => s.hasOwner && s.faction === ownerFaction
+  );
+  if (!hasOwnAdjacentSettlement) {
+    if (connectedToNetwork) {
+      console.log(`👀✅buildCheck:road: is valid`);
+      return { valid: true };
+    }
+  }
+  if (!connectedToNetwork && !hasOwnAdjacentSettlement) {
+    console.log(`👀⛔buildCheck:road: must be connected to network`);
     return { valid: false, reason: 'La route doit être connectée à votre réseau' };
   }
   console.log(`👀✅buildCheck:road: is valid`);

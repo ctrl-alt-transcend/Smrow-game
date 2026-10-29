@@ -70,6 +70,7 @@ const emptyConnections = (): ConnectedElements => ({
   connectedRoads: [],
   connectedSettlements: [],
   adjacentTiles: [],
+  adjacentSettlements: []
 });
 
 /** @description réserve une entrée dans le graphe et détecte les collisions d'id */
@@ -146,6 +147,21 @@ export const linkGameBoard = (board: GameBoard): ElementGraph => {
   const settlementByVertex = new Map<string, SettlementData>(
     board.settlements.map((s) => [s.vertex.id, s]),
   );
+
+  for (const road of board.roads) {
+    const entry = graph.get(road.id);
+    if (!entry) continue;
+
+    const adjacent: SettlementData[] = [];
+
+    const s1 = settlementByVertex.get(road.edge.p1.id);
+    if (s1) adjacent.push(s1);
+
+    const s2 = settlementByVertex.get(road.edge.p2.id);
+    if (s2 && s2.id !== s1?.id) adjacent.push(s2);
+
+    entry.adjacentSettlements = adjacent;
+  }
 
   for (const edge of board.edges) {
     const a = settlementByVertex.get(edge.p1.id);
