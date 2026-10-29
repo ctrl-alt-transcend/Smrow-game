@@ -1,9 +1,9 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { PlayerProfile } from '@shared/game/game.types';
+import type { PlayerProfile, Player } from '@shared/game/game.types';
 import {
   GameStateContext,
-  StartingPhase
+  WhoStartsPhase
 } from './GameStateContext';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class GameService {
     }
     const gameId = randomUUID();
 
-    this.gameInstances.set(gameId, new GameStateContext(gameId, new StartingPhase()));  // v.2
+    this.gameInstances.set(gameId, new GameStateContext(gameId, new WhoStartsPhase()));  // v.2
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
   }

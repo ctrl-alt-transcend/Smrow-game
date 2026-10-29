@@ -33,10 +33,10 @@ export const Faction = {
 } as const;
 export const FACTION_COLORS: Record<Faction, string> = {
   [Faction.POURPRES_CHYBRES]: '#6b0b91',
-  [Faction.BOURSES_BLEUES]: '#19aad5',
-  [Faction.ROUGES_FIACS]: '#da1111',
+  [Faction.BOURSES_BLEUES]: '#53cef3',
+  [Faction.ROUGES_FIACS]: '#ff7a7a',
   [Faction.UREE_JAUNE]: '#ffdd00',
-  [Faction.DEFAULT]: '#fd92e4',
+  [Faction.DEFAULT]: '#19af89',
   [Faction.UNOCCUPIED]: '#e4e4e4'
 };
 export type Faction = (typeof Faction)[keyof typeof Faction];

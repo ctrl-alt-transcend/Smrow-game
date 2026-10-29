@@ -34,7 +34,6 @@ export type PlayerProfile = {
   avatarURL: string | null;
 }
 
-// test copy of GameState to implement in GameStateContext
 export type GameData = {
   players: Map<string, Player>;
   startingRolls: Map<string, number | null>;

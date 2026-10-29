@@ -55,9 +55,6 @@ class GameStateContext {
     this.initGameData(); //⚠️ FOR TESTING WITH MOCKED VALUE
     this.initStartingRolls();
     this.transitionTo(state);
-    this.game.players.forEach((value: Player, key: string) => {
-      console.log(`GameStateContext:constructor: playerId: ${key}, value: ${value}`);
-    });
   }
 
   /**
@@ -65,14 +62,14 @@ class GameStateContext {
    * Watchout for client disconnection! Must handle that properly later!
    */
   private assignFaction(): Faction {
-    switch (this.factionSwitch) {
-      case 1:
+    switch (this.factionSwitch++) {
+      case 0:
         return Faction.BOURSES_BLEUES;
-      case 2:
+      case 1:
         return Faction.POURPRES_CHYBRES;
-      case 3:
+      case 2:
         return Faction.ROUGES_FIACS;
-      case 4:
+      case 3:
         return Faction.UREE_JAUNE;
       default:
         return Faction.DEFAULT;
@@ -80,7 +77,8 @@ class GameStateContext {
   }
 
   public initPlayer( playerId: string ): Player {
-  return {
+
+  const newPlayer = {
     playerId: playerId,
     score: 0,
     firstDice: 0,
@@ -99,6 +97,8 @@ class GameStateContext {
       rock: 0,
     },
   };
+  console.log(`💾GameStateContext:initPLayer: player: ${newPlayer.playerId}, faction: ${newPlayer.faction}`);
+  return newPlayer;
 }
 
   protected initGameData() {  //⚠️ FOR TESTING //TEST: REMOVE THIS IN PROD
@@ -245,17 +245,46 @@ abstract class  State
  * Concrete States implement various behaviors, associated with a state of the
  * Context.
  */
-class StartingPhase extends State
+//class WaitingPhase extends State
+//{
+//  public dice(): GameResponse {
+//    console.log('🏁🔨WhoStartsPhase:build: handles buildRequest.');
+//    return { value: null, message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`, data: null }
+//  }
+
+//  public build(): GameResponse {
+//    console.log('🏁🔨WhoStartsPhase:build: handles buildRequest.');
+//    return { value: null, message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`, data: null }
+//  }
+
+//  public phaseCheck(): void {
+//    try {
+//      this.computeTurnOrder();
+//    } catch(error) {
+//      //console.log('🏁🔎WhoStartsPhase:phaseCheck: ' + error);
+//      return;
+//    }
+//    this.state.resetAllDices();
+//    const p = this.state.getCurrentPlayer();
+//    if (p) {
+//      console.log(`🏁🔎WhoStartsPhase:phaseCheck: everybody is ready and ${p.playerId} is starting!`);
+//    }
+//    this.state.transitionTo(new PlacementPhase);
+//  }
+//}
+
+
+class WhoStartsPhase extends State
 {
   public dice( playerId: string ): GameResponse {
-    console.log(`🏁🎲StartingPhase:dice: handles diceRequest from ${playerId}`);
+    console.log(`🏁🎲WhoStartsPhase:dice: handles diceRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
     if(p === undefined) {
       throw new Error(`Unknown playerId: ${playerId}`);
     }
     const roll: GameResponse = rollDice(p);
     if(this.state.hasRolledBothDices(p) && roll.value) {
-      console.log(`🏁🎲StartingPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
+      console.log(`🏁🎲WhoStartsPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
       this.state.setCurrentTurnIndex(undefined);
       return { value: null,
@@ -265,8 +294,8 @@ class StartingPhase extends State
   }
 
   public build(): GameResponse {
-    console.log('🏁🔨StartingPhase:build: handles buildRequest.');
-    return { value: null, message: `🏁🔨StartingPhase:build: action forbidden during this phase.`, data: null }
+    console.log('🏁🔨WhoStartsPhase:build: handles buildRequest.');
+    return { value: null, message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`, data: null }
   }
 
   public computeTurnOrder() {
@@ -296,17 +325,61 @@ class StartingPhase extends State
     try {
       this.computeTurnOrder();
     } catch(error) {
-      //console.log('🏁🔎StartingPhase:phaseCheck: ' + error);
+      //console.log('🏁🔎WhoStartsPhase:phaseCheck: ' + error);
       return;
     }
     this.state.resetAllDices();
     const p = this.state.getCurrentPlayer();
     if (p) {
-      console.log(`🏁🔎StartingPhase:phaseCheck: everybody is ready and ${p.playerId} is starting!`);
+      console.log(`🏁🔎WhoStartsPhase:phaseCheck: everybody is ready and ${p.playerId} is starting!`);
     }
+    this.state.getGameData().players.forEach((value: Player, key: string) => {
+      console.log(`🖨️WhoStartsPhase:phaseCheck: id: ${key}, faction: ${value.faction}`);
+    });
+    this.state.transitionTo(new PlacementPhase);
+  }
+}
+
+
+class PlacementPhase extends State
+{
+  public dice(): GameResponse {
+    console.log('🗺️🎲PlacementPhase:dice: handles diceRequest.');
+    return { value: null, message: `🗺️🎲PlacementPhase:dice: action forbidden during this phase.`, data: null }
+  }
+
+  public build( playerId: string, payload: BuildRequestPayload ): GameResponse {
+    console.log(`🗺️🔨PlacementPhasee:build: handles buildRequest from ${playerId}`);
+    if(!isBuildRequestPayload(payload)) {
+      console.log(`🗺️🔨PlacementPhasee:build: invalid payload !`);
+      return { value: null, message: "🗺️🔨PlacementPhasee:build: invalid payload !", data: null };
+    }
+    const p = this.state.isPlayersTurn(playerId);
+    if(!p) {
+      return { value: null, message: "🗺️🔨PlacementPhasee:build: It's not your turn !", data: null };
+    }
+    const response = buildCheck(payload, p.faction, this.state.getBoard(), this.state.getGraph(), true);
+    if(response.value === null) {
+      return { value: null, message: "🗺️🔨PlacementPhasee:build: Invalid placement", data: null };
+    }
+    console.log(`🗺️🔨PlacementPhasee:build: ${playerId} built something ...`);
+    this.state.setTurnCount(undefined);
+    this.state.setCurrentTurnIndex(undefined);
+    return { value: response.value, message: response.message, data: this.state.getGameData() }
+  }
+
+  public phaseCheck(): void {
+    if(this.state.getTurnCount() !== this.state.getPlayers().size) {
+      //console.log(`🗺️🔎PlacementPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
+      return;
+    }
+    this.state.setTurnCount(0);
+    this.state.setCurrentTurnIndex(0);
+    console.log('🗺️🔎PlacementPhase:phaseCheck: everybody is ready!');
     this.state.transitionTo(new RessourcePhase);
   }
 }
+
 
 class RessourcePhase extends State
 {
@@ -361,10 +434,13 @@ class TradeAndBuildPhase extends State
     if(!p) {
       return { value: null, message: "🤝🔨TradeAndBuildPhase:build: It's not your turn !", data: null };
     }
+    const response = buildCheck(payload, p.faction, this.state.getBoard(), this.state.getGraph());
+    if (response.value === null) {
+      return { value: null, message: "🤝🔨TradeAndBuildPhase:build: Invalid placement", data: null };
+    }
     console.log(`🤝🔨TradeAndBuildPhase:build: ${playerId} built something ...`);
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
-    const response = buildCheck(payload, p.faction, this.state.getBoard(), this.state.getGraph());
     return { value: response.value, message: response.message, data: this.state.getGameData() }
   }
 
@@ -385,4 +461,4 @@ class TradeAndBuildPhase extends State
   }
 }
 
-export { GameStateContext, StartingPhase, RessourcePhase, TradeAndBuildPhase }
+export { GameStateContext, WhoStartsPhase }

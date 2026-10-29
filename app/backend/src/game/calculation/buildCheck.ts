@@ -50,6 +50,7 @@ export const validateRoadPlacement = (
   graph: ElementGraph,
 ): { valid: true } | { valid: false; reason: string } => {
   if (road.hasOwner) {
+    console.log(`👀⛔buildCheck:road: already occupied`);
     return { valid: false, reason: 'Cette route est déjà occupée' };
   }
 
@@ -57,6 +58,7 @@ export const validateRoadPlacement = (
   const graphEntry = graph.get(road.id);
 
   if (!graphEntry) {
+    console.log(`👀⛔buildCheck:road: doesn't exists ...`);
     return { valid: false, reason: 'Route introuvable dans le graphe' };
   }
 
@@ -68,6 +70,7 @@ export const validateRoadPlacement = (
 
     // Blocage par adversaire
     if (settlement?.hasOwner && settlement.faction !== ownerFaction) {
+      console.log(`👀⛔buildCheck:road: blocked by opponent`);
       continue;
     }
 
@@ -92,9 +95,10 @@ export const validateRoadPlacement = (
   }
 
   if (!connectedToNetwork) {
+    console.log(`👀⛔buildCheck:road: must be connected`);
     return { valid: false, reason: 'La route doit être connectée à votre réseau' };
   }
-
+  console.log(`👀✅buildCheck:road: is valid`);
   return { valid: true };
 };
 
@@ -106,20 +110,24 @@ export const validateSettlementPlacement = (
   settlement: SettlementData,
   ownerFaction: Faction,
   graph: ElementGraph,
+  WhoStartsPhase?: boolean
 ): { valid: true } | { valid: false; reason: string } => {
   if (settlement.hasOwner) {
+    console.log(`👀⛔buildCheck:settlement: already occupied`);
     return { valid: false, reason: 'Cette colonie est déjà occupée' };
   }
 
   const graphEntry = graph.get(settlement.id);
 
   if (!graphEntry) {
+    console.log(`👀⛔buildCheck:settlement: doesn't exists ...`);
     return { valid: false, reason: 'Colonne introuvable dans le graphe' };
   }
 
   // Règle de distance : aucun sommet adjacent occupé (lu depuis le graph)
   const nearbyOccupied = graphEntry.connectedSettlements.some((s) => s.hasOwner);
   if (nearbyOccupied) {
+    console.log(`👀⛔buildCheck:settlement: too close to another one`);
     return { valid: false, reason: 'Colonie trop proche d\'une construction existante' };
   }
 
@@ -130,10 +138,11 @@ export const validateSettlementPlacement = (
     (r) => r.hasOwner && r.faction === ownerFaction,
   );
 
-  if (!hasOwnAdjacentRoad) {
+  if (!hasOwnAdjacentRoad && WhoStartsPhase === undefined) {
+    console.log(`👀⛔buildCheck:settlement: must be connected`);
     return { valid: false, reason: 'La colonie doit toucher une de vos routes' };
   }
-
+  console.log(`👀✅buildCheck:settlement: is valid`);
   return { valid: true };
 };
 
@@ -146,6 +155,7 @@ export const buildCheck = (
   ownerFaction: Faction,
   board: GameBoard,
   graph: ElementGraph,
+  WhoStartsPhase?: boolean
 ): { value: number | null, message: string, data: GameBoard | null } => {
   try {
     // Cohérence de l'ID
@@ -156,10 +166,23 @@ export const buildCheck = (
         data: null,
       };
     }
-
+    const targetId = payload.id;
     switch (payload.kind) {
       case 'road': {
-        const roadResult = validateRoadPlacement(payload.data, ownerFaction, graph);
+        const target = board.roads.find(r => r.id === targetId);
+        if (!target) {
+          console.log(`👀⛔buildCheck:road: invalid, element doesn't exist`);
+          return {
+            value: null,
+            message: 'unknown road',
+            data: null,
+          };
+        }
+        const roadResult = validateRoadPlacement(
+          target,
+          ownerFaction,
+          graph
+        );
         if (!roadResult.valid) {
           return {
             value: null,
@@ -167,6 +190,8 @@ export const buildCheck = (
             data: null,
           };
         }
+        target.faction = ownerFaction;
+        target.hasOwner = true;
         return {
           value: 1,
           message: 'Route valide',
@@ -175,18 +200,31 @@ export const buildCheck = (
       }
 
       case 'settlement': {
+        const target = board.settlements.find(s => s.id === targetId);
+        if (!target) {
+          console.log(`👀⛔buildCheck:road: invalid, element doesn't exist`);
+          return {
+            value: null,
+            message: 'unknown settlement',
+            data: null,
+          };
+        }
         const settlementResult = validateSettlementPlacement(
-          payload.data,
+          target,
           ownerFaction,
           graph,
+          WhoStartsPhase
         );
         if (!settlementResult.valid) {
+          console.log(`👀⛔buildCheck:settlement: invalid, element doesn't exist`);
           return {
             value: null,
             message: settlementResult.reason,
             data: null,
           };
         }
+        target.faction = ownerFaction;
+        target.hasOwner = true;
         return {
           value: 4,
           message: 'Colonie valide',
