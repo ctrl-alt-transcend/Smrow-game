@@ -7,9 +7,12 @@ import {
   type GameBoard,
   type ConnectedElements,
   type ElementGraph,
+  HEX_SIZE,
   Faction,
 } from "../../../../shared/game/gameboard.types";
-import { getHexCorners, getHexEdges, HEX_SIZE } from "@shared/game/hexCalculation";
+import { getHexCorners, getHexEdges } from "@shared/game/hexCalculation";
+
+
 
 /** @description calculate and render an SVG board game based on the given layout */
 export const initGameBoard = (tiles: TileData[]): GameBoard => {
@@ -70,7 +73,7 @@ const emptyConnections = (): ConnectedElements => ({
   connectedRoads: [],
   connectedSettlements: [],
   adjacentTiles: [],
-  adjacentSettlements: []
+  adjacentSettlements: [],
 });
 
 /** @description réserve une entrée dans le graphe et détecte les collisions d'id */
@@ -98,7 +101,7 @@ const indexRoadsByVertex = (roads: RoadData[]): Map<string, RoadData[]> => {
   return index;
 };
 
-/** @description vertexId → tiles for which this vertex is a corner (6 entries per tile) */
+/** @description vertexId → tuiles dont ce sommet est un coin (6 entrées par tuile) */
 const indexTilesByVertex = (tiles: TileData[]): Map<string, TileData[]> => {
   const index = new Map<string, TileData[]>();
 
@@ -117,19 +120,37 @@ const byId = <T extends { id: string }>(a: T, b: T): number =>
   a.id.localeCompare(b.id);
 
 /**
-* @description Constructs the adjacency graph from the board.
-* Returns an independent Map: it is NEVER linked to `board`,
-* otherwise the board becomes cyclic again and causes socket.io to crash.
-*/
+ * @description Construit le graphe d'adjacence depuis le plateau.
+ * ORDRE CRITIQUE : les index doivent tous être prêts AVANT de les utiliser.
+ */
 export const linkGameBoard = (board: GameBoard): ElementGraph => {
   const graph: ElementGraph = new Map();
 
-  // 1. one empty entry per element
+  // =========================================================================
+  // ÉTAPE 0 : INDEXTATION COMPLÈTE (avant toute utilisation)
+  // =========================================================================
+
+  // Index settlements par vertex (nécessaire pour routes↔settlements ET settlements↔settlements)
+  const settlementByVertex = new Map<string, SettlementData>(
+    board.settlements.map((s) => [s.vertex.id, s]),
+  );
+
+  // Index routes par vertex (nécessaire pour routes↔routes)
+  const roadsByVertex = indexRoadsByVertex(board.roads);
+
+  // Index tuiles par vertex (nécessaire pour settlements↔tuiles)
+  const tilesByVertex = indexTilesByVertex(board.layout);
+
+  // =========================================================================
+  // ÉTAPE 1 : Créer une entrée vide par élément
+  // =========================================================================
+
   for (const road of board.roads) register(graph, road.id);
   for (const settlement of board.settlements) register(graph, settlement.id);
 
-  // 2. roads ↔ roads (share at least one vertex, ≤ 4)
-  const roadsByVertex = indexRoadsByVertex(board.roads);
+  // =========================================================================
+  // ÉTAPE 2 : Routes ↔ Routes (partagent au moins un sommet, max 4)
+  // =========================================================================
 
   for (const road of board.roads) {
     const neighbours = new Map<string, RoadData>();
@@ -143,10 +164,9 @@ export const linkGameBoard = (board: GameBoard): ElementGraph => {
     graph.get(road.id)!.connectedRoads = [...neighbours.values()].sort(byId);
   }
 
-  // 3. colonies ↔ colonies (connected by an edge, ≤ 3)
-  const settlementByVertex = new Map<string, SettlementData>(
-    board.settlements.map((s) => [s.vertex.id, s]),
-  );
+  // =========================================================================
+  // ÉTAPE 3 : Routes ↔ Settlements (sur les 2 extrémités de l'edge, 0 à 2)
+  // =========================================================================
 
   for (const road of board.roads) {
     const entry = graph.get(road.id);
@@ -154,30 +174,40 @@ export const linkGameBoard = (board: GameBoard): ElementGraph => {
 
     const adjacent: SettlementData[] = [];
 
+    // Sommet 1
     const s1 = settlementByVertex.get(road.edge.p1.id);
     if (s1) adjacent.push(s1);
 
+    // Sommet 2
     const s2 = settlementByVertex.get(road.edge.p2.id);
     if (s2 && s2.id !== s1?.id) adjacent.push(s2);
 
     entry.adjacentSettlements = adjacent;
   }
 
+  // =========================================================================
+  // ÉTAPE 4 : Settlements ↔ Settlements (connectés par une edge, max 3)
+  // =========================================================================
+
   for (const edge of board.edges) {
     const a = settlementByVertex.get(edge.p1.id);
     const b = settlementByVertex.get(edge.p2.id);
+
+    // Ignore les edges sans settlements aux deux bouts
     if (!a || !b || a.id === b.id) continue;
 
     graph.get(a.id)!.connectedSettlements.push(b);
     graph.get(b.id)!.connectedSettlements.push(a);
   }
 
+  // Tri final des settlements voisins
   for (const settlement of board.settlements) {
     graph.get(settlement.id)!.connectedSettlements.sort(byId);
   }
 
-  // 4. colonies ↔ tiles (3 on the inside, 1–2 on the edge)
-  const tilesByVertex = indexTilesByVertex(board.layout);
+  // =========================================================================
+  // ÉTAPE 5 : Settlements ↔ Tuiles (max 3 tuiles par sommet)
+  // =========================================================================
 
   for (const settlement of board.settlements) {
     graph.get(settlement.id)!.adjacentTiles =
@@ -201,3 +231,25 @@ export const getConnections = (
   graph: ElementGraph,
   elementId: string,
 ): ConnectedElements | undefined => graph.get(elementId);
+
+/* ================================================================== *
+ * DEBUG HELPERS (décommenter en dev pour vérifier les liens)
+ * ================================================================== */
+
+export const debugPrintConnections = (graph: ElementGraph, kind: 'road' | 'settlement', id: string) => {
+  const entry = graph.get(id);
+  if (!entry) {
+    console.log(`⛔ ${kind}:${id} NOT FOUND in graph`);
+    return;
+  }
+
+  if (kind === 'road') {
+    console.log(`🛣️ Road ${id}:`);
+    console.log(`   ├─ connectedRoads (${entry.connectedRoads.length}): ${entry.connectedRoads.map(r => r.id).join(', ')}`);
+    console.log(`   └─ adjacentSettlements (${entry.adjacentSettlements.length}): ${entry.adjacentSettlements.map(s => s.id).join(', ')}`);
+  } else {
+    console.log(`🏘️ Settlement ${id}:`);
+    console.log(`   ├─ connectedSettlements (${entry.connectedSettlements.length}): ${entry.connectedSettlements.map(s => s.id).join(', ')}`);
+    console.log(`   └─ adjacentTiles (${entry.adjacentTiles.length}): ${entry.adjacentTiles.map(t => `${t.q},${t.r}`).join(', ')}`);
+  }
+};

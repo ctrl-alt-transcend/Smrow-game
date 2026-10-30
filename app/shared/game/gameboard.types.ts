@@ -1,6 +1,12 @@
-export const SELECTED_COLOR = '#e30000';
-export const HOVER_COLOR = '#fe5b5b';
+export const SELECTED_COLOR = '#c30000';
+export const HOVER_COLOR = '#ff0f0f';
 export const DEFAULT_COLOR = '#e4e4e4';
+
+export const RENDER_SIZE = 50;
+export const HEX_SIZE = RENDER_SIZE;
+export const SETTLEMENT_SIZE = RENDER_SIZE / 6;
+export const ROAD_SIZE = RENDER_SIZE / 8;
+export const HOVER_EFFECT = 1.4;
 
 export const LandType = {
   FOREST: 'forest',
@@ -26,7 +32,7 @@ export type LandType = (typeof LandType)[keyof typeof LandType];
 export const Faction = {
   POURPRES_CHYBRES: 'Pourpres Chybres',
   BOURSES_BLEUES: 'Bourses Bleues',
-  ROUGES_FIACS: 'Rouges Fiacs',
+  ROSES_FIACS: 'Roses Fiacs',
   UREE_JAUNE: 'Uree Jaune',
   DEFAULT: 'Kikouneurs (default)',
   UNOCCUPIED: 'unoccupied ...'
@@ -34,7 +40,7 @@ export const Faction = {
 export const FACTION_COLORS: Record<Faction, string> = {
   [Faction.POURPRES_CHYBRES]: '#6b0b91',
   [Faction.BOURSES_BLEUES]: '#53cef3',
-  [Faction.ROUGES_FIACS]: '#ff7a7a',
+  [Faction.ROSES_FIACS]: '#ff9595',
   [Faction.UREE_JAUNE]: '#ffc400',
   [Faction.DEFAULT]: '#19af89',
   [Faction.UNOCCUPIED]: '#e4e4e4'

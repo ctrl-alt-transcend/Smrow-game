@@ -1,6 +1,7 @@
 import type { RoadProps } from "../../types/gameboard.types";
 import { useHover } from "../../hooks/useGameBoardHover";
 import { getTileFillColor } from "../../utils/tileRendering";
+import { ROAD_SIZE, HOVER_EFFECT } from "../../../../../shared/game/gameboard.types";
 
 export const Road: React.FC<RoadProps> = ({
   data,
@@ -28,7 +29,7 @@ export const Road: React.FC<RoadProps> = ({
       x2={data.edge.p2.x}
       y2={data.edge.p2.y}
       stroke={fillColor}
-      strokeWidth={isSelected ? 8 : 6}
+      strokeWidth={effectiveIsHovered ? ROAD_SIZE * HOVER_EFFECT : ROAD_SIZE}
       strokeLinecap="round"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

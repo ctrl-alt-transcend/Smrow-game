@@ -68,7 +68,7 @@ class GameStateContext {
       case 1:
         return Faction.POURPRES_CHYBRES;
       case 2:
-        return Faction.ROUGES_FIACS;
+        return Faction.ROSES_FIACS;
       case 3:
         return Faction.UREE_JAUNE;
       default:
