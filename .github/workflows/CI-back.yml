@@ -1,0 +1,116 @@
+name: ci-back
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: './app/backend/package-lock.json'
+      - name: Install dependencies
+        working-directory: app/backend
+        run: npm ci
+      - name: Check Format
+        working-directory: app/backend
+        run: npm run format
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Link Shared folder for linter
+        run: cp -r ./app/shared ./app/backend/shared
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: './app/backend/package-lock.json'
+      - name: Install dependencies
+        working-directory: app/backend
+        run: npm ci
+      - name: Prisma generate (for linter)
+        working-directory: app/backend
+        run: npx prisma generate
+      - name: Lint Code
+        working-directory: app/backend
+        run: npx eslint "src/**/*.ts" --ext .ts
+
+  build:
+    needs: [format, lint]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare shared context
+        run: cp -r ./app/shared ./app/backend/shared
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: './app/backend/package-lock.json'
+          
+      - name: Install dependencies
+        working-directory: app/backend
+        run: npm ci
+
+      - name: Prisma Generate
+        working-directory: app/backend
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_LOCAL }}
+
+      - name: Prisma DB migrate deploy
+        working-directory: app/backend
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: ${{ vars.POSTGRES_USER }}
+          DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          DB_NAME: ${{ vars.POSTGRES_DB }}
+        run: |
+          export DATABASE_URL="$(node -e '
+            const u = encodeURIComponent(process.env.DB_USER);
+            const p = encodeURIComponent(process.env.DB_PASSWORD);
+            const h = process.env.DB_HOST;
+            const port = process.env.DB_PORT;
+            const db = process.env.DB_NAME;
+            process.stdout.write(
+              `postgresql://${u}:${p}@${h}:${port}/${db}?schema=public`
+            );
+          ')"
+          npx prisma migrate deploy
+      - name: Build Application
+        working-directory: app/backend
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_LOCAL }}

@@ -1,0 +1,47 @@
+name: ft-catan
+services:
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    restart: unless-stopped
+    networks:
+      - ft-network
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    env_file:
+      - .env
+    #using the .env file directly in the compose to set user
+    volumes:
+      - postgres-data:/var/lib/postgresql/
+    networks:
+      - ft-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - 5173:5173
+    restart: unless-stopped
+    networks:
+      - ft-network
+
+# --- Volumes --- #
+volumes:
+  postgres-data:
+
+# --- Networks --- #
+
+networks:
+  ft-network:
+
+# --- Secrets --- #

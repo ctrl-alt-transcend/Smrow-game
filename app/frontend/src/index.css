@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Basteleur-Bold';
+  src: url('fonts/Basteleur/Basteleur-Bold.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --text: #ffffff;
   --text-h: #000000;
@@ -54,8 +62,6 @@
   width: 1126px;
   max-width: 100%;
   margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
