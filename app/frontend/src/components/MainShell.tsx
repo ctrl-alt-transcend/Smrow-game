@@ -2,6 +2,7 @@ import CardImage from "./Card";
 import { LoginPanel } from "./authentification/LoginPanel";
 import { AppShell, BackgroundImage, Group, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { TitleBoxImage } from "./titles/TitleBoxImage"
 
 import { useEffect } from "react";
 import { Navigate } from "react-router";
@@ -32,22 +33,14 @@ export default function MainShell() {
       mode="static"
       header={{ height: 200 }}
       aside={{ width: 300, breakpoint: "sm" }}
-      padding="xs"
     >
-      <BackgroundImage
-        src="https://github.com/makccr/wallpapers/blob/master/wallpapers/psychedelic/Alex%20Grey%20-%20Net%20of%20Being.jpg"
-        h={"100%"}
-        w={"100%"}
-        style={{
-          objectFit: "cover",
-          position: "absolute",
-          inset: 0,
-        }}
-      />
 
-      <AppShell.Header>
+      <AppShell.Header
+        mt="lg"
+        mb="lg"
+      >
         <BackgroundImage
-          src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperaccess.com%2Ffull%2F117951.jpg&f=1&nofb=1&ipt=b0cd04325308305c02bf1a7d5fe7b202f95ce1e12253a29225022b5eef822969"
+          src="https://i.pinimg.com/736x/2f/95/d9/2f95d99b1bf9c8da12f7bb61d1e57695.jpg"
           h="100%"
           w="100%"
           style={{
@@ -57,17 +50,18 @@ export default function MainShell() {
           }}
         >
           <Group h="100%" px="md" justify="center">
-            <Title c={"Cream"}>This is Da Game</Title>
+            <Title
+            c={"white"}
+            >
+              This is Da Game
+              </Title>
           </Group>
         </BackgroundImage>
       </AppShell.Header>
 
       <AppShell.Main
-      // m={"xl"}
       >
-        <Title order={1} c={"Red"}>
-          Amazing Catan
-        </Title>
+        <TitleBoxImage content="Welcome to Catan" />
         <CardImage></CardImage>
         <Text>
           Cras maximus mauris a nisl maximus porta efficitur ac lacus. Donec

@@ -1,4 +1,4 @@
-import { createTheme } from "@mantine/core";
+import { AppShell, createTheme } from "@mantine/core";
 import "@mantine/core/styles.css";
 
 export const theme = createTheme({
@@ -128,6 +128,14 @@ export const theme = createTheme({
   },
 
   components: {
+
+    AppShell: {
+      styles: {
+        root: {
+        }
+      }
+    },
+
     Paper: {
       styles: {
         root: {
