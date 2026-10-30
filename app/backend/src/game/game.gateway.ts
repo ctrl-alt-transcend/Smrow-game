@@ -14,7 +14,7 @@ import type { JwtPayload } from '@shared/types';
 import type { BuildRequestPayload } from '@shared/game/game.types';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
-import { AUTH } from '../config/config'
+import { AUTH } from '../config/config';
 
 export interface SocketUser {
   id: string;
