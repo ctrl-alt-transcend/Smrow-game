@@ -14,6 +14,7 @@ import type { JwtPayload } from '@shared/types';
 import type { BuildRequestPayload } from '@shared/game/game.types';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
+import { AUTH } from '../config/config'
 
 export interface SocketUser {
   id: string;
@@ -121,7 +122,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       console.log('Client connected:', client.id); //TEST:
       const token = client.handshake.auth.token as string;
       const payload = this.jwtService.verify<JwtPayload>(token, {
-        secret: readSecret('JWT_SECRET_FILE'),
+        secret: readSecret(AUTH.JWT_FILE),
       });
       client.data.user = { id: payload.sub, username: payload.username };
     } catch (error) {
