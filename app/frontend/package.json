@@ -1,7 +1,9 @@
 {
   "name": "test-transcendts",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1",
+  "author": "Enrique Murillo Orosco, Hayden Dougoud, Matthieu Gillieron, Eliot Monachon, Théo Immi",
+  "license": "MIT License",
   "type": "module",
   "scripts": {
     "dev": "vite --host '0.0.0.0' --config config/vite.config.ts",

@@ -3,12 +3,13 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 import { readSecret } from "./src/strategies/readSecret";
+import { DB } from './src/config/config'
 
   let dbPassword = process.env.DB_PASSWORD || "";
 
   try {
-    if (process.env.DB_PASSWORD_FILE) {
-      dbPassword = readSecret('DB_PASSWORD_FILE');
+    if (process.env.DB_PASSWORD_FILE) { // redondant
+      dbPassword = readSecret(DB.DB_PASS_FILE);
     }
   }
   catch (error) {
@@ -17,11 +18,11 @@ import { readSecret } from "./src/strategies/readSecret";
 
 
   const config = {
-   dbHost: process.env.DB_HOST || "",
-   dbUser: process.env.DB_USER || "",
+   dbHost: DB.DB_HOST,
+   dbUser: DB.DB_USER,
    dbPassword: dbPassword, // readSecret('DB_PASSWORD_FILE'),  'run/secrets/db_password'
-   dbPort: process.env.DB_PORT ?? '5432',
-   dbName: process.env.DB_NAME || "",
+   dbPort: DB.DB_PORT,
+   dbName: DB.DB_NAME,
 }
 
 const DATABASE_URL =
