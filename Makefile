@@ -29,10 +29,10 @@ watch: up
 down:
 	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
-lint:
+lint-front:
 	cd ./app/frontend && npm run lint && cd ../..
 
-type:
+type-front:
 	cd ./app/frontend && npm run type-check && cd ../..
 
 secrets:

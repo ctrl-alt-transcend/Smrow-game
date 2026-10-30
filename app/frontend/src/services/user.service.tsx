@@ -11,3 +11,9 @@ export const getCurrentUser = async (): Promise<UserPublic> => {
     throw err_msg;
   }
 };
+
+export function getUserToken(): string {
+  const token = localStorage.getItem("access_token");
+  if (!token) throw new Error("Not authenticated");
+  return token;
+}

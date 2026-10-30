@@ -1,10 +1,11 @@
 import { useState, useCallback } from "react";
+import type { HoverEntity } from "../types/gameboard.types";
 import type {
   TileData,
   RoadData,
-  SettlementData,
-  HoverEntity,
-} from "../types/gameboard.types";
+  SettlementData
+} from "../../../../shared/game/gameboard.types";
+
 
 /** @description generic hook for gameboard interactive elements */
 export const useHover = (
@@ -42,11 +43,13 @@ export const useHover = (
 export const useGameBoardHover = () => {
   const [hovered, setHovered] = useState<HoverEntity>(null);
 
-  const handleTileHover = useCallback((isHovered: boolean, tile: TileData) => {
+  const handleTileHover = useCallback(
+    (isHovered: boolean, tile: TileData) => {
     setHovered(isHovered ? { type: "tile", q: tile.q, r: tile.r } : null);
   }, []);
 
-  const handleRoadHover = useCallback((isHovered: boolean, road: RoadData) => {
+  const handleRoadHover = useCallback(
+    (isHovered: boolean, road: RoadData) => {
     setHovered(isHovered ? { type: "road", id: road.id } : null);
   }, []);
 
