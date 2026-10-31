@@ -101,10 +101,15 @@ export interface GameBoard {
   svgBounds: SvgBounds;
 }
 
+/** @description keeps relations between each gameboard's elements*/
 export interface ConnectedElements {
+  /** @description keeps for one road every "neighbours" roads (up to 4 neighbours)*/
   connectedRoads: RoadData[];
-  connectedSettlements: SettlementData[]; // Pointeurs vers les colonies connectées (max 3)
+  /** @description keeps for one settlement every "neighbours" settlement (up to 3 neighbours)*/
+  connectedSettlements: SettlementData[];
+  /** @description keeps for one settlement every hex tiles it is touching (up to 3 hex tiles -> lands)*/
   adjacentTiles: TileData[];
+  /** @description keeps for one road every settlement it is touching (up to 2 settlements)*/
   adjacentSettlements: SettlementData[];
 }
 

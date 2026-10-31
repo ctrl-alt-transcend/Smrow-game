@@ -76,7 +76,7 @@ const emptyConnections = (): ConnectedElements => ({
   adjacentSettlements: [],
 });
 
-/** @description réserve une entrée dans le graphe et détecte les collisions d'id */
+/** @description reserves an entry in the graph and detects ID collisions */
 const register = (graph: ElementGraph, id: string): ConnectedElements => {
   if (graph.has(id)) {
     throw new Error(`[linkGameBoard] id dupliqué dans le plateau : "${id}"`);
@@ -86,7 +86,7 @@ const register = (graph: ElementGraph, id: string): ConnectedElements => {
   return entry;
 };
 
-/** @description vertexId → routes touchant ce sommet (2 entrées par route) */
+/** @description vertexId → routes touching this vertex (2 entries per route) */
 const indexRoadsByVertex = (roads: RoadData[]): Map<string, RoadData[]> => {
   const index = new Map<string, RoadData[]>();
 
@@ -101,7 +101,7 @@ const indexRoadsByVertex = (roads: RoadData[]): Map<string, RoadData[]> => {
   return index;
 };
 
-/** @description vertexId → tuiles dont ce sommet est un coin (6 entrées par tuile) */
+/** @description vertexId → tiles for which this vertex serves as a corner (6 entries per tile) */
 const indexTilesByVertex = (tiles: TileData[]): Map<string, TileData[]> => {
   const index = new Map<string, TileData[]>();
 
@@ -120,36 +120,36 @@ const byId = <T extends { id: string }>(a: T, b: T): number =>
   a.id.localeCompare(b.id);
 
 /**
- * @description Construit le graphe d'adjacence depuis le plateau.
- * ORDRE CRITIQUE : les index doivent tous être prêts AVANT de les utiliser.
- */
+* @description Builds the adjacency graph from the board.
+* CRITICAL ORDER: all indices must be ready BEFORE they are used.
+*/
 export const linkGameBoard = (board: GameBoard): ElementGraph => {
   const graph: ElementGraph = new Map();
 
   // =========================================================================
-  // ÉTAPE 0 : INDEXTATION COMPLÈTE (avant toute utilisation)
+  // STEP 0: COMPLETE INDEXTATION (before any use)
   // =========================================================================
 
-  // Index settlements par vertex (nécessaire pour routes↔settlements ET settlements↔settlements)
+ // Index of settlements by vertex (required for roads↔settlements AND settlements↔settlements)
   const settlementByVertex = new Map<string, SettlementData>(
     board.settlements.map((s) => [s.vertex.id, s]),
   );
 
-  // Index routes par vertex (nécessaire pour routes↔routes)
+// Index routes by vertex (required for routes↔routes)
   const roadsByVertex = indexRoadsByVertex(board.roads);
 
-  // Index tuiles par vertex (nécessaire pour settlements↔tuiles)
+  // Index of tiles by vertex (required for settlements↔tiles)
   const tilesByVertex = indexTilesByVertex(board.layout);
 
   // =========================================================================
-  // ÉTAPE 1 : Créer une entrée vide par élément
-  // =========================================================================
+  // STEP 1: Create an empty entry for each element
+  // // =========================================================================
 
   for (const road of board.roads) register(graph, road.id);
   for (const settlement of board.settlements) register(graph, settlement.id);
 
   // =========================================================================
-  // ÉTAPE 2 : Routes ↔ Routes (partagent au moins un sommet, max 4)
+  // STEP 2: Roads ↔ Roads (share at least one vertex, max 4)
   // =========================================================================
 
   for (const road of board.roads) {
@@ -165,7 +165,7 @@ export const linkGameBoard = (board: GameBoard): ElementGraph => {
   }
 
   // =========================================================================
-  // ÉTAPE 3 : Routes ↔ Settlements (sur les 2 extrémités de l'edge, 0 à 2)
+  // STEP 3: Roads ↔ Settlements (at the 2 endpoints of the edge, 0 to 2)
   // =========================================================================
 
   for (const road of board.roads) {
@@ -186,27 +186,27 @@ export const linkGameBoard = (board: GameBoard): ElementGraph => {
   }
 
   // =========================================================================
-  // ÉTAPE 4 : Settlements ↔ Settlements (connectés par une edge, max 3)
+  // STEP 4: Settlements ↔ Settlements (connected by an edge, max 3)
   // =========================================================================
 
   for (const edge of board.edges) {
     const a = settlementByVertex.get(edge.p1.id);
     const b = settlementByVertex.get(edge.p2.id);
 
-    // Ignore les edges sans settlements aux deux bouts
+    // Ignore edges that do not have settlements at both ends
     if (!a || !b || a.id === b.id) continue;
 
     graph.get(a.id)!.connectedSettlements.push(b);
     graph.get(b.id)!.connectedSettlements.push(a);
   }
 
-  // Tri final des settlements voisins
+ // Final sorting of neighboring settlements
   for (const settlement of board.settlements) {
     graph.get(settlement.id)!.connectedSettlements.sort(byId);
   }
 
   // =========================================================================
-  // ÉTAPE 5 : Settlements ↔ Tuiles (max 3 tuiles par sommet)
+  // STEP 5: Settlements ↔ Tiles (max 3 tiles per vertex)
   // =========================================================================
 
   for (const settlement of board.settlements) {
@@ -233,7 +233,7 @@ export const getConnections = (
 ): ConnectedElements | undefined => graph.get(elementId);
 
 /* ================================================================== *
- * DEBUG HELPERS (décommenter en dev pour vérifier les liens)
+ * DEBUG HELPERS
  * ================================================================== */
 
 export const debugPrintConnections = (graph: ElementGraph, kind: 'road' | 'settlement', id: string) => {

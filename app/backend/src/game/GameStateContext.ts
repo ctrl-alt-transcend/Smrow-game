@@ -11,7 +11,6 @@ import type {
   GameResponse,
   BuildRequestPayload
 } from '@shared/game/game.types';
-import { initGameBoard } from './calculation/initGameBoard';
 import { rollDice, funnyLogs, isBuildRequestPayload } from './game.utils';
 import { buildCheck } from './calculation/buildCheck';
 import { createGameBoard } from './calculation/createGameBoard';
@@ -359,13 +358,13 @@ class PlacementPhase extends State
       return { value: null, message: "🗺️🔨PlacementPhasee:build: It's not your turn !", data: null };
     }
     const response = buildCheck(payload, p.faction, this.state.getBoard(), this.state.getGraph(), true);
-    if(response.value === null) {
+    if(response.valid === false) {
       return { value: null, message: "🗺️🔨PlacementPhasee:build: Invalid placement", data: null };
     }
     console.log(`🗺️🔨PlacementPhasee:build: ${playerId} built something ...`);
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
-    return { value: response.value, message: response.message, data: this.state.getGameData() }
+    return { value: 1, message: response.message, data: this.state.getGameData() }
   }
 
   public phaseCheck(): void {
@@ -435,13 +434,13 @@ class TradeAndBuildPhase extends State
       return { value: null, message: "🤝🔨TradeAndBuildPhase:build: It's not your turn !", data: null };
     }
     const response = buildCheck(payload, p.faction, this.state.getBoard(), this.state.getGraph());
-    if (response.value === null) {
+    if (response.valid === false) {
       return { value: null, message: "🤝🔨TradeAndBuildPhase:build: Invalid placement", data: null };
     }
     console.log(`🤝🔨TradeAndBuildPhase:build: ${playerId} built something ...`);
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
-    return { value: response.value, message: response.message, data: this.state.getGameData() }
+    return { value: 1, message: response.message, data: this.state.getGameData() }
   }
 
   public dice(): GameResponse {
