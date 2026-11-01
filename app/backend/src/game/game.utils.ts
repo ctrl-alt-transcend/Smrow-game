@@ -1,5 +1,7 @@
-import type { GameResponse, Player, BuildRequestPayload } from '@shared/game/game.types';
+import type { Player, BuildRequestPayload } from '@shared/game/game.types';
 
+
+// TODO: move to DTO??
 export function isBuildRequestPayload(p: unknown): p is BuildRequestPayload {
   if (typeof p !== 'object' || p === null) return false;
   const o = p as Record<string, unknown>;
@@ -7,23 +9,20 @@ export function isBuildRequestPayload(p: unknown): p is BuildRequestPayload {
   return typeof o.id === 'string' && typeof o.data === 'object' && o.data !== null;
 }
 
-export function rollDice( p: Player ): GameResponse {
-  let value: number | null = Math.floor(Math.random() * 6) + 1;
-  let message: string | null = null;
-
-  if (p.firstDice === 0) {
-    p.firstDice = value;
-    //console.log(`utils:rollDice: FIRST dice: ${p.playerId} rolled [${value}]`);
+export function updateValue(
+  currentValue: number,
+  limit: number,
+  newValue: number | undefined
+): number {
+  if (newValue !== undefined) {
+    return newValue;
   }
-  else if (p.secondDice === 0) {
-    p.secondDice = value;
-    //console.log(`utils:rollDice: SECOND dice: ${p.playerId} rolled [${value}]`);
+  else if (currentValue + 1 === limit) {
+    return 0;
   }
   else {
-    value = null;
-    message = `utils:rollDice: You (${p.playerId}) already rolled both dices.`;
+    return currentValue + 1;
   }
-  return { value, message, data: null };
 }
 
 export function funnyLogs( id: string, value: number ): string {
@@ -34,3 +33,17 @@ export function funnyLogs( id: string, value: number ): string {
   return `${id} rolled a ${value}`;
 }
 
+export function printPlayer( p: Player ) {
+  console.log(`${p.playerId}:`);
+  console.log(`- wood: ${p.ressources.wood}`);
+  console.log(`- sheep: ${p.ressources.sheep}`);
+  console.log(`- brick: ${p.ressources.brick}`);
+  console.log(`- rock: ${p.ressources.rock}`);
+  console.log(`- hay: ${p.ressources.hay}`);
+}
+
+export function printAllPlayers( p: Map<string, Player> ) {
+  p.forEach(p => {
+    printPlayer(p);
+  });
+}

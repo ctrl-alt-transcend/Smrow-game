@@ -1,6 +1,7 @@
 import {
   type GameBoard,
-  type ElementGraph,
+  type GameBoardGraph,
+  Buildings,
   classicLayout,
   Faction,
   FACTION_COLORS,
@@ -11,9 +12,15 @@ import type {
   GameResponse,
   BuildRequestPayload
 } from '@shared/game/game.types';
-import { rollDice, funnyLogs, isBuildRequestPayload } from './game.utils';
+import {
+  isBuildRequestPayload,
+  updateValue,
+  funnyLogs,
+  printAllPlayers,
+} from './game.utils';
 import { buildCheck } from './calculation/buildCheck';
 import { createGameBoard } from './calculation/createGameBoard';
+import { ressoucesCheck } from './calculation/ressourcesCheck';
 
 /**
  * STATE DESIGN PATTERN
@@ -25,21 +32,18 @@ import { createGameBoard } from './calculation/createGameBoard';
  * state of the Context.
  */
 class GameStateContext {
-   /** @type {State} A reference to the current state of the Context. */
-   private   state!: State;
-   protected game!: GameData;
-   protected graph!: ElementGraph;
-  // protected board!: GameBoard;
-
-  // protected board!: GameBoard;
-
-   private   factionSwitch: number = 0;
+  /** @type {State} A reference to the current state of the Context. */
+  private   state!: State;
+  protected data!: GameData;
+  protected graph!: GameBoardGraph;
+  protected buildings: Buildings = new Map();
+  private   factionSwitch: number = 0;
 
   constructor( gameId: string, state: State ) {
     const { board, graph } = createGameBoard(classicLayout);
     this.graph = graph;
     //this.board = board;
-    this.game = {
+    this.data = {
       players: new Map<string, Player>(),
       startingRolls: new Map<string, number | null>(),
       turnCount: 0,
@@ -57,6 +61,7 @@ class GameStateContext {
   }
 
   /**
+   * TODO
    * assignFaction();
    * Watchout for client disconnection! Must handle that properly later!
    */
@@ -76,12 +81,12 @@ class GameStateContext {
   }
 
   public initPlayer( playerId: string ): Player {
-
   const newPlayer = {
     playerId: playerId,
     score: 0,
     firstDice: 0,
     secondDice: 0,
+    totalDice: 0,
     settlementsBuilt: 0,
     roadsBuilt: 0,
     level: 1,
@@ -101,18 +106,14 @@ class GameStateContext {
 }
 
   protected initGameData() {  //⚠️ FOR TESTING //TEST: REMOVE THIS IN PROD
-    // Mock other players
-    this.game.players.set('spagg', this.initPlayer('spagg'));
-    this.game.players.set('enriquest', this.initPlayer('enriquest'));
-    // Mock prebuilt map
-    // ...
-
+    this.data.players.set('spagg', this.initPlayer('spagg'));
+    this.data.players.set('enriquest', this.initPlayer('enriquest'));
   }
 
   private initStartingRolls(): void {
-    this.game.startingRolls.clear();
-    for (const playerId of this.game.players.keys()) {
-      this.game.startingRolls.set(playerId, null);
+    this.data.startingRolls.clear();
+    for (const playerId of this.data.players.keys()) {
+      this.data.startingRolls.set(playerId, null);
     }
   }
 
@@ -123,29 +124,42 @@ class GameStateContext {
     this.state.setGameState(this);
   }
 
-  //@MessageBody() payload: { kind: 'road' | 'settlement'; id: string; data: RoadData | SettlementData }
-
-  /** The Context delegates part of its behavior to the current State object. */
   public diceRequest( playerId: string | null ): GameResponse {
       return this.state.dice(playerId);
   }
+
   public buildRequest( playerId: string | null, payload: BuildRequestPayload | null ): GameResponse {
       return this.state.build(playerId, payload );
   }
+
   public phaseCheckRequest() {
       return this.state.phaseCheck();
   }
 
   /** Getters */
-  public  getGameData(): GameData { return this.game; }
+  public  getGameData(): GameData { return this.data; }
   //public  getBoard(): GameBoard { return this.board; }
-  public  getBoard(): GameBoard { return this.game.board; }
-  public  getGraph(): ElementGraph { return this.graph; }
-  public  getGameId(): string { return this.game.gameId; }
-  public  getPlayers(): Map<string, Player> { return this.game.players; }
-  public  getStartingRolls(): Map<string, number | null> { return this.game.startingRolls; }
-  public  getTurnCount(): number { return this.game.turnCount; }
-  public  getCurrentTurnIndex(): number { return this.game.currentTurnIndex; }
+  public  getBoard(): GameBoard { return this.data.board; }
+  public  getGraph(): GameBoardGraph { return this.graph; }
+  public  getBuildings(): Buildings { return this.buildings; }
+  public  getGameId(): string { return this.data.gameId; }
+  public  getPlayers(): Map<string, Player> { return this.data.players; }
+  public  getStartingRolls(): Map<string, number | null> { return this.data.startingRolls; }
+  public  getTurnCount(): number { return this.data.turnCount; }
+  public  getCurrentTurnIndex(): number { return this.data.currentTurnIndex; }
+
+  public  getCurrentPlayer(): Player | undefined {
+    return this.data.players.get(this.data.turnOrder[this.data.currentTurnIndex]);
+  }
+
+  public  getPlayerById(playerId: string): Player | undefined {
+    return this.data.players.get(playerId);
+  }
+
+  public  hasRolledBothDices( p: Player ): boolean {
+    if (p.firstDice !== 0 && p.secondDice !== 0) { return true; }
+    return false;
+  }
 
   public  getFactionColor( playerId: string ): string {
     const player = this.getPlayerById(playerId);
@@ -155,12 +169,6 @@ class GameStateContext {
     return FACTION_COLORS[player.faction];
   }
 
-  public  getCurrentPlayer(): Player | undefined {
-    return this.game.players.get(this.game.turnOrder[this.game.currentTurnIndex]);
-  }
-  public  getPlayerById(playerId: string): Player | undefined {
-    return this.game.players.get(playerId);
-  }
   public isPlayersTurn(playerId: string): Player | null {
     const player = this.getPlayerById(playerId);
     if (!player) {
@@ -176,50 +184,51 @@ class GameStateContext {
     return player;
   }
 
-  public  hasRolledBothDices( p: Player ): boolean {
-    if (p.firstDice !== 0 && p.secondDice !== 0) {
-      return true;
-    }
-    return false;
-  }
-
   /** Setters */
-  public setDiceRoll( roll: number | null ) { this.game.diceRoll = roll; }
-  public setMasterLog( log: string | null ) { this.game.masterLog = log; }
-  public  setTurnOrder( newTurnOrder: string[] ) { this.game.turnOrder = newTurnOrder; }
-  public  resetDices( p: Player ) { p.firstDice = 0; p.secondDice = 0; }
+  public  setDiceRoll( roll: number | null ) { this.data.diceRoll = roll; }
+  public  setMasterLog( log: string | null ) { this.data.masterLog = log; }
+  public  setTurnOrder( newTurnOrder: string[] ) { this.data.turnOrder = newTurnOrder; }
+  public  resetDices( p: Player ) { p.firstDice = 0; p.secondDice = 0; p.totalDice = 0; }
+
   public  resetAllDices() {
-    for (let [key, value] of this.game.players) {
+    for (let [key, value] of this.data.players) {
       this.resetDices(value);
     }
   }
 
-  private updateValue(
-    currentValue: number,
-    limit: number,
-    newValue: number | undefined
-  ): number {
-    if (newValue !== undefined) {
-      return newValue;
-    }
-    else if (currentValue + 1 === limit) {
-      return 0;
-    }
-    else {
-      return currentValue + 1;
-    }
-  }
-
   public setTurnCount( count: number | undefined ) {
-    this.game.turnCount = this.updateValue(
-      this.game.turnCount, this.game.players.size + 1, count);
+    this.data.turnCount = updateValue(
+      this.data.turnCount, this.data.players.size + 1, count);
   }
 
   public setCurrentTurnIndex( index: number | undefined ) {
-    this.game.currentTurnIndex = this.updateValue(
-      this.game.currentTurnIndex, this.game.players.size, index);
+    this.data.currentTurnIndex = updateValue(
+      this.data.currentTurnIndex, this.data.players.size, index);
   }
+
+  /** Methods */
+  public rollDice( p: Player ): GameResponse {
+  let value: number | null = Math.floor(Math.random() * 6) + 1;
+  let message: string | null = null;
+
+  if (p.firstDice === 0) {
+    p.firstDice = value;
+    //console.log(`utils:rollDice: FIRST dice: ${p.playerId} rolled [${value}]`);
+  }
+  else if (p.secondDice === 0) {
+    p.secondDice = value;
+    p.totalDice = p.secondDice + p.firstDice;
+    //console.log(`utils:rollDice: SECOND dice: ${p.playerId} rolled [${value}]`);
+  }
+  else {
+    value = null;
+    message = `utils:rollDice: You (${p.playerId}) already rolled both dices.`;
+  }
+  return { value, message, data: null };
 }
+}
+
+
 
 /**
  * The base State class declares methods that all Concrete State should
@@ -239,40 +248,6 @@ abstract class  State
   public abstract phaseCheck(): void;
 }
 
-// Concrete game loop phases
-/**
- * Concrete States implement various behaviors, associated with a state of the
- * Context.
- */
-//class WaitingPhase extends State
-//{
-//  public dice(): GameResponse {
-//    console.log('🏁🔨WhoStartsPhase:build: handles buildRequest.');
-//    return { value: null, message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`, data: null }
-//  }
-
-//  public build(): GameResponse {
-//    console.log('🏁🔨WhoStartsPhase:build: handles buildRequest.');
-//    return { value: null, message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`, data: null }
-//  }
-
-//  public phaseCheck(): void {
-//    try {
-//      this.computeTurnOrder();
-//    } catch(error) {
-//      //console.log('🏁🔎WhoStartsPhase:phaseCheck: ' + error);
-//      return;
-//    }
-//    this.state.resetAllDices();
-//    const p = this.state.getCurrentPlayer();
-//    if (p) {
-//      console.log(`🏁🔎WhoStartsPhase:phaseCheck: everybody is ready and ${p.playerId} is starting!`);
-//    }
-//    this.state.transitionTo(new PlacementPhase);
-//  }
-//}
-
-
 class WhoStartsPhase extends State
 {
   public dice( playerId: string ): GameResponse {
@@ -281,7 +256,7 @@ class WhoStartsPhase extends State
     if(p === undefined) {
       throw new Error(`Unknown playerId: ${playerId}`);
     }
-    const roll: GameResponse = rollDice(p);
+    const roll: GameResponse = this.state.rollDice(p);
     if(this.state.hasRolledBothDices(p) && roll.value) {
       console.log(`🏁🎲WhoStartsPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
@@ -357,7 +332,7 @@ class PlacementPhase extends State
     if(!p) {
       return { value: null, message: "🗺️🔨PlacementPhasee:build: It's not your turn !", data: null };
     }
-    const response = buildCheck(payload, p.faction, this.state.getBoard(), this.state.getGraph(), true);
+    const response = buildCheck(this.state.getGameData(), payload, p, p.faction, this.state.getBoard(), this.state.getGraph(), this.state.getBuildings(), true);
     if(response.valid === false) {
       return { value: null, message: "🗺️🔨PlacementPhasee:build: Invalid placement", data: null };
     }
@@ -372,6 +347,8 @@ class PlacementPhase extends State
       //console.log(`🗺️🔎PlacementPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
+    ressoucesCheck(this.state.getBuildings(), this.state.getGraph(), true);
+    printAllPlayers(this.state.getGameData().players); // ⚠️DEBUG: remove in prod
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     console.log('🗺️🔎PlacementPhase:phaseCheck: everybody is ready!');
@@ -388,13 +365,10 @@ class RessourcePhase extends State
     if(!p) {
       return { value: null, message: "It's not your turn !", data: null };
     }
-    const roll: GameResponse = rollDice(p);
+    const roll: GameResponse = this.state.rollDice(p);
     if(this.state.hasRolledBothDices(p) && roll.value) {
       console.log(`🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
-       // Todo 🚩
-      // - collect ressources
-      //this.state.resetDices(p); //⚠️ HARDCODED: dont reset here? (dispatch ressources before)
       this.state.setCurrentTurnIndex(undefined);
       this.state.setTurnCount(undefined);
       return { value: null,
@@ -413,6 +387,8 @@ class RessourcePhase extends State
       //console.log(`🪵🔎RessourcePhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
+    ressoucesCheck(this.state.getBuildings(), this.state.getGraph());
+    printAllPlayers(this.state.getGameData().players); // ⚠️DEBUG: remove in prod
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     this.state.resetAllDices();
@@ -433,7 +409,7 @@ class TradeAndBuildPhase extends State
     if(!p) {
       return { value: null, message: "🤝🔨TradeAndBuildPhase:build: It's not your turn !", data: null };
     }
-    const response = buildCheck(payload, p.faction, this.state.getBoard(), this.state.getGraph());
+    const response = buildCheck(this.state.getGameData(), payload, p, p.faction, this.state.getBoard(), this.state.getGraph(), this.state.getBuildings());
     if (response.valid === false) {
       return { value: null, message: "🤝🔨TradeAndBuildPhase:build: Invalid placement", data: null };
     }

@@ -6,7 +6,7 @@ import {
   type SettlementData,
   type GameBoard,
   type ConnectedElements,
-  type ElementGraph,
+  type GameBoardGraph,
   HEX_SIZE,
   Faction,
 } from "../../../../shared/game/gameboard.types";
@@ -77,7 +77,7 @@ const emptyConnections = (): ConnectedElements => ({
 });
 
 /** @description reserves an entry in the graph and detects ID collisions */
-const register = (graph: ElementGraph, id: string): ConnectedElements => {
+const register = (graph: GameBoardGraph, id: string): ConnectedElements => {
   if (graph.has(id)) {
     throw new Error(`[linkGameBoard] id dupliqué dans le plateau : "${id}"`);
   }
@@ -123,8 +123,8 @@ const byId = <T extends { id: string }>(a: T, b: T): number =>
 * @description Builds the adjacency graph from the board.
 * CRITICAL ORDER: all indices must be ready BEFORE they are used.
 */
-export const linkGameBoard = (board: GameBoard): ElementGraph => {
-  const graph: ElementGraph = new Map();
+export const linkGameBoard = (board: GameBoard): GameBoardGraph => {
+  const graph: GameBoardGraph = new Map();
 
   // =========================================================================
   // STEP 0: COMPLETE INDEXTATION (before any use)
@@ -219,7 +219,7 @@ export const linkGameBoard = (board: GameBoard): ElementGraph => {
 
 export interface LinkedGameBoard {
   board: GameBoard;
-  graph: ElementGraph;
+  graph: GameBoardGraph;
 }
 
 export const createGameBoard = (tiles: TileData[]): LinkedGameBoard => {
@@ -228,7 +228,7 @@ export const createGameBoard = (tiles: TileData[]): LinkedGameBoard => {
 };
 
 export const getConnections = (
-  graph: ElementGraph,
+  graph: GameBoardGraph,
   elementId: string,
 ): ConnectedElements | undefined => graph.get(elementId);
 
@@ -236,7 +236,7 @@ export const getConnections = (
  * DEBUG HELPERS
  * ================================================================== */
 
-export const debugPrintConnections = (graph: ElementGraph, kind: 'road' | 'settlement', id: string) => {
+export const debugPrintConnections = (graph: GameBoardGraph, kind: 'road' | 'settlement', id: string) => {
   const entry = graph.get(id);
   if (!entry) {
     console.log(`⛔ ${kind}:${id} NOT FOUND in graph`);

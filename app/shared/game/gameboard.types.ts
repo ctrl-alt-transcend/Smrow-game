@@ -1,3 +1,5 @@
+import { Player } from "./game.types";
+
 export const SELECTED_COLOR = '#c30000';
 export const HOVER_COLOR = '#ff0f0f';
 export const DEFAULT_COLOR = '#e4e4e4';
@@ -7,6 +9,14 @@ export const HEX_SIZE = RENDER_SIZE;
 export const SETTLEMENT_SIZE = RENDER_SIZE / 6;
 export const ROAD_SIZE = RENDER_SIZE / 8;
 export const HOVER_EFFECT = 1.4;
+
+export const RessourceType = {
+  WOOD: 'wood',
+  SHEEP: 'sheep',
+  HILL: 'brick',
+  MOUNTAIN: 'rock',
+  FIELD: 'hay'
+} as const;
 
 export const LandType = {
   FOREST: 'forest',
@@ -73,22 +83,26 @@ export interface TileData {
   q: number;
   r: number;
   value: number;
-  land: LandType | null;
+  land: LandType;
 }
 
-export interface RoadData {
+export interface BuildData {
+  faction: Faction;
+  hasOwner?: boolean;
+}
+
+export interface RoadData extends BuildData {
   id: string;
   edge: Edge;
-  faction: Faction;
-  hasOwner?: boolean;
+  //faction: Faction;
+  //hasOwner?: boolean;
 }
 
-export interface SettlementData {
+export interface SettlementData extends BuildData {
   id: string;
   vertex: Vertex;
-  faction: Faction;
-  hasOwner?: boolean;
-
+  //faction: Faction;
+  //hasOwner?: boolean;
 }
 
 /** @description sent to the front, serializable without risk */
@@ -105,16 +119,22 @@ export interface GameBoard {
 export interface ConnectedElements {
   /** @description keeps for one road every "neighbours" roads (up to 4 neighbours)*/
   connectedRoads: RoadData[];
+  /** @description keeps for one road every settlement it is touching (up to 2 settlements)*/
+  adjacentSettlements: SettlementData[];
   /** @description keeps for one settlement every "neighbours" settlement (up to 3 neighbours)*/
   connectedSettlements: SettlementData[];
   /** @description keeps for one settlement every hex tiles it is touching (up to 3 hex tiles -> lands)*/
   adjacentTiles: TileData[];
-  /** @description keeps for one road every settlement it is touching (up to 2 settlements)*/
-  adjacentSettlements: SettlementData[];
 }
 
-  /** @description retained on the back-end only, never sent to front */
-export type ElementGraph = Map<string, ConnectedElements>;
+/** @description retained on the back-end only, never sent to front */
+export type GameBoardGraph = Map<string, ConnectedElements>;
+
+/**
+ * @key settlement id
+ * @value player who built
+*/
+export type Buildings = Map<string, Player>;
 
 /** @description classic Catan gameboard layout (19 tiles) */
 export const classicLayout: TileData[] = [

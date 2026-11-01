@@ -1,11 +1,12 @@
 import { targetModulesByContainer } from '@nestjs/core/router/router-module';
-import { GameResponse } from '@shared/game/game.types';
+import { GameData, GameResponse, Player } from '@shared/game/game.types';
 import {
   type GameBoard,
   type RoadData,
   type SettlementData,
-  type ElementGraph,
+  type GameBoardGraph,
   Faction,
+  Buildings,
 } from '@shared/game/gameboard.types';
 
 export type BuildRequestPayload =
@@ -46,11 +47,11 @@ const indexRoadsByVertex = (
 export const validateRoadPlacement = (
   road: RoadData,
   ownerFaction: Faction,
-  graph: ElementGraph,
+  graph: GameBoardGraph,
 ): { valid: true } | { valid: false; reason: string } => {
  if (road.hasOwner) {
     console.log(`👀⛔buildCheck:road: already occupied`);
-    return { valid: false, reason: 'Cette route est déjà occupée' };
+    return { valid: false, reason: 'road already occupied' };
   }
 
   const settlementsByVertex = indexSettlementsByVertex([]); // à passer depuis board.settlements
@@ -58,7 +59,7 @@ export const validateRoadPlacement = (
 
   if (!graphEntry) {
     console.log(`👀⛔buildCheck:road: doesn't exists ...`);
-    return { valid: false, reason: 'Route introuvable dans le graphe' };
+    return { valid: false, reason: 'unknown road' };
   }
   const endpoints = [road.edge.p1.id, road.edge.p2.id];
   let connectedToNetwork = false;
@@ -113,7 +114,7 @@ export const validateRoadPlacement = (
 export const validateSettlementPlacement = (
   settlement: SettlementData,
   ownerFaction: Faction,
-  graph: ElementGraph,
+  graph: GameBoardGraph,
   roads: RoadData[],
   whoStartsPhase?: boolean
 ): { valid: true } | { valid: false; reason: string } => {
@@ -151,17 +152,18 @@ export const validateSettlementPlacement = (
   return { valid: true };
 };
 
+interface BuildValidation {
+  valid: boolean,
+  message: string
+}
+
 function settlementCheck(
   board: GameBoard,
   target: SettlementData,
-  graph: ElementGraph,
+  graph: GameBoardGraph,
   ownerFaction: Faction,
   whoStartsPhase: boolean | undefined
-): {
-  valid: boolean,
-  message: string,
-} {
-
+): BuildValidation {
   const settlementResult = validateSettlementPlacement(
     target,
     ownerFaction,
@@ -176,18 +178,19 @@ function settlementCheck(
       message: settlementResult.reason,
     };
   }
-  target.faction = ownerFaction;
-  target.hasOwner = true;
+  //target.faction = ownerFaction;
+  //target.hasOwner = true;
   return {
     valid: true,
     message: 'valid settlement',
   };
 }
 
-function roadCheck( board: GameBoard, target: RoadData, graph: ElementGraph, ownerFaction: Faction ): {
-  valid: boolean,
-  message: string
-} {
+function roadCheck(
+  target: RoadData,
+  graph: GameBoardGraph,
+  ownerFaction: Faction
+): BuildValidation{
   const roadResult = validateRoadPlacement(
     target,
     ownerFaction,
@@ -199,8 +202,8 @@ function roadCheck( board: GameBoard, target: RoadData, graph: ElementGraph, own
       message: roadResult.reason,
     };
   }
-  target.faction = ownerFaction;
-  target.hasOwner = true;
+  //target.faction = ownerFaction;
+  //target.hasOwner = true;
   return {
     valid: true,
     message: 'valid road'
@@ -208,12 +211,17 @@ function roadCheck( board: GameBoard, target: RoadData, graph: ElementGraph, own
 }
 
 export const buildCheck = (
+  data: GameData,
   payload: BuildRequestPayload,
+  player: Player,
   ownerFaction: Faction,
   board: GameBoard,
-  graph: ElementGraph,
+  graph: GameBoardGraph,
+  buildings: Buildings,
   whoStartsPhase?: boolean
 ): { valid: boolean, message: string } => {
+  let check: BuildValidation = { valid: false, message: ""};
+  let target: RoadData | SettlementData | undefined;
   try {
     if ((payload.data as { id?: unknown })?.id !== payload.id) {
       return {
@@ -221,16 +229,15 @@ export const buildCheck = (
         message: 'incoherent data payload id',
       };
     }
-    let target: RoadData | SettlementData | undefined;
     switch (payload.kind) {
       case 'road':
         target = board.roads.find(r => r.id === payload.id);
         if (!target) break;
-        return roadCheck(board, target, graph, ownerFaction);
+        check = roadCheck(target, graph, ownerFaction);
       case 'settlement':
         target = board.settlements.find(r => r.id === payload.id);
         if (!target) break;
-        return settlementCheck(board, target, graph, ownerFaction, whoStartsPhase);
+        check = settlementCheck(board, target, graph, ownerFaction, whoStartsPhase);
       default:
         break;
     }
@@ -239,6 +246,18 @@ export const buildCheck = (
       valid: false,
       message: error instanceof Error ? error.message : 'unknown error',
     };
+  }
+  if (check.valid) {
+    if (target) {
+      target.faction = ownerFaction;
+      target.hasOwner = true;
+    }
+    const p = data.players.get(player.playerId);
+    if (!p) {
+      throw new Error(`buildCheck: Unknown playerId: ${player.playerId}`);
+    }
+    buildings.set(payload.id, p);
+    return check;
   }
   console.log(`👀⛔buildCheck: invalid, element doesn't exist`);
   return {

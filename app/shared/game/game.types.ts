@@ -17,9 +17,10 @@ export type Player = {
   username: string;
   score: number;
   level: number;
-  ressources: Ressources | null;
+  ressources: Ressources;
   firstDice: number,
   secondDice: number,
+  totalDice: number,
   settlementsBuilt: number;
   roadsBuilt: number;
   faction: Faction;
