@@ -34,7 +34,7 @@ export function funnyLogs( id: string, value: number ): string {
 }
 
 export function printPlayer( p: Player ) {
-  console.log(`${p.playerId}:`);
+  console.log(`🖨️ printPlayer: ${p.playerId}:`);
   console.log(`- wood: ${p.ressources.wood}`);
   console.log(`- sheep: ${p.ressources.sheep}`);
   console.log(`- brick: ${p.ressources.brick}`);

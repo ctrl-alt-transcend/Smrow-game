@@ -213,22 +213,18 @@ class GameStateContext {
 
   if (p.firstDice === 0) {
     p.firstDice = value;
-    //console.log(`utils:rollDice: FIRST dice: ${p.playerId} rolled [${value}]`);
   }
   else if (p.secondDice === 0) {
     p.secondDice = value;
     p.totalDice = p.secondDice + p.firstDice;
-    //console.log(`utils:rollDice: SECOND dice: ${p.playerId} rolled [${value}]`);
   }
   else {
     value = null;
-    message = `utils:rollDice: You (${p.playerId}) already rolled both dices.`;
+    message = `rollDice: you (${p.playerId}) already rolled both dices.`;
   }
   return { value, message, data: null };
 }
 }
-
-
 
 /**
  * The base State class declares methods that all Concrete State should
@@ -274,8 +270,6 @@ class WhoStartsPhase extends State
 
   public computeTurnOrder() {
     const rolls = this.state.getStartingRolls();
-
-    // 1. Tout le monde doit avoir lancé
     const size: number = this.state.getPlayers().size;
     if (rolls.size !== size) {
       throw new Error(` Waiting for ${size - rolls.size} player(s) to roll`);
@@ -288,9 +282,6 @@ class WhoStartsPhase extends State
         ` Players who haven't rolled: ${pending.map(([id]) => id).join(', ')}`
       );
     }
-
-    // 2. Tri décroissant. sort() est stable : à valeur égale,
-    //    l'ordre d'insertion (= ordre des sièges) est conservé.
     entries.sort(([, a], [, b]) => (b as number) - (a as number));
     this.state.setTurnOrder(entries.map(([playerId]) => playerId));
   }
@@ -307,13 +298,9 @@ class WhoStartsPhase extends State
     if (p) {
       console.log(`🏁🔎WhoStartsPhase:phaseCheck: everybody is ready and ${p.playerId} is starting!`);
     }
-    this.state.getGameData().players.forEach((value: Player, key: string) => {
-      console.log(`🖨️WhoStartsPhase:phaseCheck: id: ${key}, faction: ${value.faction}`);
-    });
     this.state.transitionTo(new PlacementPhase);
   }
 }
-
 
 class PlacementPhase extends State
 {
@@ -330,13 +317,18 @@ class PlacementPhase extends State
     }
     const p = this.state.isPlayersTurn(playerId);
     if(!p) {
-      return { value: null, message: "🗺️🔨PlacementPhasee:build: It's not your turn !", data: null };
+      return { value: null, message: "🗺️🔨PlacementPhasee:build: it's not your turn !", data: null };
     }
-    const response = buildCheck(this.state.getGameData(), payload, p, p.faction, this.state.getBoard(), this.state.getGraph(), this.state.getBuildings(), true);
+    const response = buildCheck(payload, p, this.state.getBoard(), this.state.getGraph(), this.state.getBuildings(), true);
     if(response.valid === false) {
-      return { value: null, message: "🗺️🔨PlacementPhasee:build: Invalid placement", data: null };
+      return { value: null, message: "🗺️🔨PlacementPhasee:build: invalid placement", data: null };
     }
-    console.log(`🗺️🔨PlacementPhasee:build: ${playerId} built something ...`);
+    if (p.settlementsBuilt !== 1) {
+      return { value: null, message: "🗺️🔨PlacementPhasee:build: must build a settlement first ...", data: this.state.getGameData() }
+    }
+    else if (p.roadsBuilt !== 1) {
+      return { value: null, message: "🗺️🔨PlacementPhasee:build: must build a road now ...", data: this.state.getGameData() }
+    }
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
     return { value: 1, message: response.message, data: this.state.getGameData() }
@@ -409,7 +401,7 @@ class TradeAndBuildPhase extends State
     if(!p) {
       return { value: null, message: "🤝🔨TradeAndBuildPhase:build: It's not your turn !", data: null };
     }
-    const response = buildCheck(this.state.getGameData(), payload, p, p.faction, this.state.getBoard(), this.state.getGraph(), this.state.getBuildings());
+    const response = buildCheck(payload, p, this.state.getBoard(), this.state.getGraph(), this.state.getBuildings());
     if (response.valid === false) {
       return { value: null, message: "🤝🔨TradeAndBuildPhase:build: Invalid placement", data: null };
     }

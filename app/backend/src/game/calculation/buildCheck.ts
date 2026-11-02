@@ -1,5 +1,4 @@
-import { targetModulesByContainer } from '@nestjs/core/router/router-module';
-import { GameData, GameResponse, Player } from '@shared/game/game.types';
+import { GameData, Player } from '@shared/game/game.types';
 import {
   type GameBoard,
   type RoadData,
@@ -49,7 +48,7 @@ export const validateRoadPlacement = (
   ownerFaction: Faction,
   graph: GameBoardGraph,
 ): { valid: true } | { valid: false; reason: string } => {
- if (road.hasOwner) {
+  if (road.hasOwner) {
     console.log(`👀⛔buildCheck:road: already occupied`);
     return { valid: false, reason: 'road already occupied' };
   }
@@ -116,7 +115,7 @@ export const validateSettlementPlacement = (
   ownerFaction: Faction,
   graph: GameBoardGraph,
   roads: RoadData[],
-  whoStartsPhase?: boolean
+  placementPhase?: boolean
 ): { valid: true } | { valid: false; reason: string } => {
   if (settlement.hasOwner) {
     console.log(`👀⛔buildCheck:settlement: already occupied`);
@@ -144,7 +143,7 @@ export const validateSettlementPlacement = (
     (r) => r.hasOwner && r.faction === ownerFaction,
   );
 
-  if (!hasOwnAdjacentRoad && whoStartsPhase === undefined) {
+  if (!hasOwnAdjacentRoad && placementPhase === undefined) {
     console.log(`👀⛔buildCheck:settlement: must be connected`);
     return { valid: false, reason: 'La colonie doit toucher une de vos routes' };
   }
@@ -161,16 +160,24 @@ function settlementCheck(
   board: GameBoard,
   target: SettlementData,
   graph: GameBoardGraph,
-  ownerFaction: Faction,
-  whoStartsPhase: boolean | undefined
+  player: Player,
+  placementPhase?: boolean
 ): BuildValidation {
   const settlementResult = validateSettlementPlacement(
     target,
-    ownerFaction,
+    player.faction,
     graph,
     board.roads,
-    whoStartsPhase
+    placementPhase
   );
+  if (!placementPhase && player.ressources.brick < 1 && player.ressources.wood < 1
+    && player.ressources.sheep < 1 && player.ressources.hay < 1) {
+    console.log(`👀⛔buildCheck:settlement: not enough ressources`);
+    return {
+      valid: false,
+      message: 'not enough ressources',
+    };
+  }
   if (!settlementResult.valid) {
     console.log(`👀⛔buildCheck:settlement: invalid, element doesn't exist`);
     return {
@@ -178,8 +185,14 @@ function settlementCheck(
       message: settlementResult.reason,
     };
   }
-  //target.faction = ownerFaction;
-  //target.hasOwner = true;
+  target.faction = player.faction;
+  target.hasOwner = true;
+  if (!placementPhase) {
+    player.ressources.brick--;
+    player.ressources.wood--;
+    player.ressources.sheep--;
+    player.ressources.hay--;
+  }
   return {
     valid: true,
     message: 'valid settlement',
@@ -189,21 +202,33 @@ function settlementCheck(
 function roadCheck(
   target: RoadData,
   graph: GameBoardGraph,
-  ownerFaction: Faction
+  player: Player,
+  placementPhase?: boolean
 ): BuildValidation{
   const roadResult = validateRoadPlacement(
     target,
-    ownerFaction,
+    player.faction,
     graph
   );
+  if (!placementPhase && player.ressources.brick < 1 && player.ressources.wood < 1) {
+    console.log(`👀⛔buildCheck:road: not enough ressources`);
+    return {
+      valid: false,
+      message: 'not enough ressources',
+    };
+  }
   if (!roadResult.valid) {
     return {
       valid: false,
       message: roadResult.reason,
     };
   }
-  //target.faction = ownerFaction;
-  //target.hasOwner = true;
+  target.faction = player.faction;
+  target.hasOwner = true;
+  if (!placementPhase) {
+    player.ressources.brick--;
+    player.ressources.wood--;
+  }
   return {
     valid: true,
     message: 'valid road'
@@ -211,17 +236,14 @@ function roadCheck(
 }
 
 export const buildCheck = (
-  data: GameData,
   payload: BuildRequestPayload,
   player: Player,
-  ownerFaction: Faction,
   board: GameBoard,
   graph: GameBoardGraph,
   buildings: Buildings,
-  whoStartsPhase?: boolean
+  placementPhase?: boolean
 ): { valid: boolean, message: string } => {
   let check: BuildValidation = { valid: false, message: ""};
-  let target: RoadData | SettlementData | undefined;
   try {
     if ((payload.data as { id?: unknown })?.id !== payload.id) {
       return {
@@ -229,15 +251,18 @@ export const buildCheck = (
         message: 'incoherent data payload id',
       };
     }
+    let target: RoadData | SettlementData | undefined;
     switch (payload.kind) {
       case 'road':
         target = board.roads.find(r => r.id === payload.id);
         if (!target) break;
-        check = roadCheck(target, graph, ownerFaction);
+        check = roadCheck(target, graph, player, placementPhase);
+        if (check.valid) player.roadsBuilt++;
       case 'settlement':
         target = board.settlements.find(r => r.id === payload.id);
         if (!target) break;
-        check = settlementCheck(board, target, graph, ownerFaction, whoStartsPhase);
+        check = settlementCheck(board, target, graph, player, placementPhase);
+        if (check.valid) player.settlementsBuilt++;
       default:
         break;
     }
@@ -248,20 +273,11 @@ export const buildCheck = (
     };
   }
   if (check.valid) {
-    if (target) {
-      target.faction = ownerFaction;
-      target.hasOwner = true;
-    }
-    const p = data.players.get(player.playerId);
-    if (!p) {
-      throw new Error(`buildCheck: Unknown playerId: ${player.playerId}`);
-    }
-    buildings.set(payload.id, p);
+    buildings.set(payload.id, player);
     return check;
   }
-  console.log(`👀⛔buildCheck: invalid, element doesn't exist`);
   return {
     valid: false,
-    message: 'unknown element',
+    message: 'invalid element',
   };
 };
