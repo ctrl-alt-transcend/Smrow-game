@@ -1,12 +1,13 @@
 import type { Player, BuildRequestPayload } from '@shared/game/game.types';
 
-
 // TODO: move to DTO??
 export function isBuildRequestPayload(p: unknown): p is BuildRequestPayload {
   if (typeof p !== 'object' || p === null) return false;
   const o = p as Record<string, unknown>;
   if (o.kind !== 'road' && o.kind !== 'settlement') return false;
-  return typeof o.id === 'string' && typeof o.data === 'object' && o.data !== null;
+  return (
+    typeof o.id === 'string' && typeof o.data === 'object' && o.data !== null
+  );
 }
 
 export function updateValue(
@@ -25,11 +26,19 @@ export function updateValue(
   }
 }
 
-export function funnyLogs( id: string, value: number ): string {
-  if (value <= 3) { return `${id} got an almost useless ${value}...`; }
-  if (value > 3 && value <= 6) { return `${id} got a tiny little ${value}...`; }
-  if (value > 6 && value <= 9) { return `${id} got a solid ${value}.`; }
-  if (value > 9 && value <= 12) { return `${id} got a huge ${value}!`; }
+export function funnyLogs(id: string, value: number): string {
+  if (value <= 3) {
+    return `${id} got an almost useless ${value}...`;
+  }
+  if (value > 3 && value <= 6) {
+    return `${id} got a tiny little ${value}...`;
+  }
+  if (value > 6 && value <= 9) {
+    return `${id} got a solid ${value}.`;
+  }
+  if (value > 9 && value <= 12) {
+    return `${id} got a huge ${value}!`;
+  }
   return `${id} rolled a ${value}`;
 }
 

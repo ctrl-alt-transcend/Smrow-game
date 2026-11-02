@@ -32,8 +32,7 @@ export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; ma
       //updateMasterLog('Error rolling dice');
       setBusy(false);
     }
-  }, [roll, busy]);
-  //}, [roll, updateMasterLog, busy]);
+  }, [roll, busy, masterLog, diceRoll]);
 
   const handleAnimationComplete = useCallback(
     (finalValue: DiceValue) => {

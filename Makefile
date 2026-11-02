@@ -59,6 +59,7 @@ re: fclean
 initdb:
 	docker compose -f $(DOCKER_COMPOSE_FILE) exec backend npx prisma migrate deploy
 
+	// how to use: make migrate MIGRATION_NAME="Your_migration_name_between_double_quotes"
 migrate:
 	@cd app/backend && \
 	DB_HOST=localhost \

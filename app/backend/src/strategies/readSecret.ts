@@ -1,10 +1,8 @@
 import { readFileSync } from 'node:fs';
 
-export function readSecret(fileVariable: string): string {
-  const path = process.env[fileVariable];
-
+export function readSecret(path: string): string {
   if (!path) {
-    throw new Error(`Missing environement variable: ${fileVariable}`);
+    throw new Error(`Missing environement variable: ${path}`);
   }
 
   return readFileSync(path, 'utf8').trim();

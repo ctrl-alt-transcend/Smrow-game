@@ -6,7 +6,7 @@ import { TileSelection } from './components/ui/TileSelection.tsx';
 import { DiceRoller } from './components/ui/DiceRoller.tsx';
 import GameMasterLog from './components/ui/GameMasterLog.tsx';
 import { useGameState } from './hooks/useGameState.ts';
-import type { GameData } from '@shared/game/game.types.ts';
+import type { GameDataDto } from '@shared/game/game.types.ts';
 import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
 import SkipTurnButton from './components/ui/SkipTurnButton.tsx';
 
@@ -19,7 +19,7 @@ export default function Game() {
   return <GameShell game={game} />;
 }
 
-function GameShell({ game }: { game: GameData }) {
+function GameShell({ game }: { game: GameDataDto }) {
   const [opened, { toggle }] = useDisclosure();
   const GameBoardProps = useGameBoardFactory(game.board);
 
@@ -42,7 +42,7 @@ function GameShell({ game }: { game: GameData }) {
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} size="sm" />
-          Header
+          Header gameId: {game.gameId}
         </Group>
       </AppShell.Header>
 
@@ -65,7 +65,7 @@ function GameShell({ game }: { game: GameData }) {
 
       <AppShell.Aside p="md">
         Aside
-        {/* <PlayerPanel players={game.players} /> */}
+        <PlayerPanel players={game.players} />
       </AppShell.Aside>
 
       <AppShell.Footer p="xs">

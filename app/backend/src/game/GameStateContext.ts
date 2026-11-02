@@ -5,12 +5,14 @@ import {
   classicLayout,
   Faction,
   FACTION_COLORS,
+  FACTION_COLORS,
 } from '@shared/game/gameboard.types';
 import type {
   GameData,
+  GameDataDto,
   Player,
   GameResponse,
-  BuildRequestPayload
+  BuildRequestPayload,
 } from '@shared/game/game.types';
 import {
   isBuildRequestPayload,
@@ -118,9 +120,11 @@ class GameStateContext {
   }
 
   /** The Context allows changing the State object at runtime. */
-  public transitionTo( newState: State ): void {
-    console.log(`➡️ GamePhase: transition to ${(<any>newState).constructor.name}.`);
-    this.state = newState
+  public transitionTo(newState: State): void {
+    // console.log(
+    //   `➡️ GamePhase: transition to ${(<any>newState).constructor.name}.`,
+    // );
+    this.state = newState;
     this.state.setGameState(this);
   }
 
@@ -137,7 +141,7 @@ class GameStateContext {
   }
 
   public phaseCheckRequest() {
-      return this.state.phaseCheck();
+    return this.state.phaseCheck();
   }
 
   /** Getters */
@@ -165,7 +169,18 @@ class GameStateContext {
     return false;
   }
 
-  public  getFactionColor( playerId: string ): string {
+  public getGameDataDto(): GameDataDto {
+    const gameData = this.getGameData();
+    return {
+      players: Array.from(gameData.players.values()),
+      gameId: gameData.gameId,
+      diceRoll: gameData.diceRoll,
+      masterLog: gameData.masterLog,
+      board: gameData.board,
+    };
+  }
+
+  public getFactionColor(playerId: string): string {
     const player = this.getPlayerById(playerId);
     if (!player) {
       throw new Error(`getFactionColor: Unknown playerId: ${playerId}`);
@@ -197,7 +212,7 @@ class GameStateContext {
   public  resetAllDices() {
     for (let [key, value] of this.data.players) {
       this.resetDices(value);
-    }
+    });
   }
 
   public setTurnCount( count: number | undefined ) {
@@ -236,11 +251,10 @@ class GameStateContext {
  * with the State. This backreference can be used by States to transition the
  * Context to another State.
  */
-abstract class  State
-{
+abstract class State {
   protected state!: GameStateContext;
 
-  public  setGameState( newGameState: GameStateContext ) {
+  public setGameState(newGameState: GameStateContext) {
     this.state = newGameState;
   }
   public abstract dice( playerId: string | null ): GameResponse;
@@ -254,7 +268,7 @@ class WhoStartsPhase extends State
   public dice( playerId: string ): GameResponse {
     console.log(`🏁🎲WhoStartsPhase:dice: handles diceRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
-    if(p === undefined) {
+    if (p === undefined) {
       throw new Error(`Unknown playerId: ${playerId}`);
     }
     const roll: GameResponse = this.state.rollDice(p);
@@ -289,7 +303,7 @@ class WhoStartsPhase extends State
     const pending = entries.filter(([, value]) => value === null);
     if (pending.length > 0) {
       throw new Error(
-        ` Players who haven't rolled: ${pending.map(([id]) => id).join(', ')}`
+        ` Players who haven't rolled: ${pending.map(([id]) => id).join(', ')}`,
       );
     }
     entries.sort(([, a], [, b]) => (b as number) - (a as number));
@@ -395,7 +409,7 @@ class RessourcePhase extends State
   }
 
   public phaseCheck(): void {
-    if(this.state.getTurnCount() !== this.state.getPlayers().size) {
+    if (this.state.getTurnCount() !== this.state.getPlayers().size) {
       //console.log(`🪵🔎RessourcePhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
@@ -405,15 +419,16 @@ class RessourcePhase extends State
     this.state.setCurrentTurnIndex(0);
     this.state.resetAllDices();
     console.log('🪵🔎RessourcePhase:phaseCheck: everybody is ready!');
-    this.state.transitionTo(new TradeAndBuildPhase);
+    this.state.transitionTo(new TradeAndBuildPhase());
   }
 }
 
-class TradeAndBuildPhase extends State
-{
-  public build( playerId: string, payload: BuildRequestPayload ): GameResponse {
-    console.log(`🤝🔨TradeAndBuildPhase:build: handles buildRequest from ${playerId}`);
-    if(!isBuildRequestPayload(payload)) {
+class TradeAndBuildPhase extends State {
+  public build(playerId: string, payload: BuildRequestPayload): GameResponse {
+    console.log(
+      `🤝🔨TradeAndBuildPhase:build: handles buildRequest from ${playerId}`,
+    );
+    if (!isBuildRequestPayload(payload)) {
       console.log(`🤝🔨TradeAndBuildPhase:build: invalid payload !`);
       return { value: null, message: "🤝🔨TradeAndBuildPhase:build: invalid payload !", data: null };
     }
@@ -425,7 +440,9 @@ class TradeAndBuildPhase extends State
     if (response.valid === false) {
       return { value: null, message: "🤝🔨TradeAndBuildPhase:build: Invalid placement", data: null };
     }
-    console.log(`🤝🔨TradeAndBuildPhase:build: ${playerId} built something ...`);
+    console.log(
+      `🤝🔨TradeAndBuildPhase:build: ${playerId} built something ...`,
+    );
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
     return { value: 1, message: response.message, data: this.state.getGameData() }
@@ -449,14 +466,14 @@ class TradeAndBuildPhase extends State
   }
 
   public phaseCheck(): void {
-    if(this.state.getTurnCount() !== this.state.getPlayers().size) {
+    if (this.state.getTurnCount() !== this.state.getPlayers().size) {
       //console.log(`🤝🔎TradeAndBuildPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     console.log('🤝🔎TradeAndBuildPhase:phaseCheck: everybody is ready!');
-    this.state.transitionTo(new RessourcePhase);
+    this.state.transitionTo(new RessourcePhase());
   }
 }
 

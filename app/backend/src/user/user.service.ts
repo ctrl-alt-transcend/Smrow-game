@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { PlayerProfile } from '@shared/game/game.types'
+import { PlayerProfile } from '@shared/game/game.types';
 import type { UserProfile } from '@shared/types';
 
 @Injectable()
@@ -29,7 +29,7 @@ export class UserService {
   }
 
   async findById(id: string): Promise<UserProfile | null> {
-    const user = await this.databaseService.user.findUnique({
+    const user = await this.databaseService.user.findUniqueOrThrow({
       where: { id },
       select: {
         id: true,
@@ -59,29 +59,30 @@ export class UserService {
     };
   }
 
-async findPlayerProfile(id: string): Promise<PlayerProfile> {
-  const user = await this.databaseService.user.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      username: true,
-      profile: { select: { avatarURL: true } },
-    },
-  });
+  async findPlayerProfile(id: string): Promise<PlayerProfile> {
+    const user = await this.databaseService.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        username: true,
+        profile: { select: { avatarURL: true } },
+      },
+    });
 
-  if (!user) {
-    throw new NotFoundException(`User not found with id: ${id}`);
+    if (!user) {
+      throw new NotFoundException(`User not found with id: ${id}`);
+    }
+
+    return {
+      id: user.id,
+      username: user.username,
+      avatarURL: user.profile?.avatarURL ?? null,
+    };
   }
-
-  return {
-    id: user.id,
-    username: user.username,
-    avatarURL: user.profile?.avatarURL ?? null,
-  };
-}
 
   // include returns the relations data, if set to true
   async findAll() {
+    // to be deleted
     return this.databaseService.user.findMany({
       include: { profile: true, localAuth: false },
     });
@@ -95,13 +96,13 @@ async findPlayerProfile(id: string): Promise<PlayerProfile> {
     });
   }
 
-  async findOne(username: string) {
-    return this.databaseService.user.findUniqueOrThrow({
-      where: {
-        username,
-      },
-    });
-  }
+  //  async findOne(username: string) {
+  //    return this.databaseService.user.findUniqueOrThrow({
+  //      where: {
+  //        username,
+  //      },
+  //    });
+  //  }
 
   async findByMail(email: string) {
     return this.databaseService.user.findUniqueOrThrow({

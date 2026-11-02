@@ -4,6 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { JwtPayload } from '@shared/types';
 import { UserService } from '../user/user.service';
 import { readSecret } from './readSecret';
+import { AUTH } from '../config/config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -11,7 +12,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: readSecret('JWT_SECRET_FILE'), // Hacky '!'
+      secretOrKey: readSecret(AUTH.JWT_FILE),
     });
   }
 

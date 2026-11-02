@@ -48,7 +48,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
         data: selected.selectedSettlement };
     }
     return null;
-  }, [selected.selectedRoad?.edge.id, selected.selectedSettlement?.vertex.id]);
+  }, [selected.selectedRoad, selected.selectedSettlement]);
 
   /**
    * 1. Save the "build intention" and lock the component

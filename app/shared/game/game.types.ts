@@ -53,6 +53,18 @@ export interface GameResponse {
   data: GameData | null;
 }
 
+export type GameDataDto = { //INFO: data we send to the client every time the game state changes
+  players: Player[];
+  //turnCount: number;
+  //turnOrder: string[];
+  //currentTurnIndex: number;
+  gameId: string;
+  diceRoll: number | null;
+  masterLog: string | null;
+  board: GameBoard;
+}
+
 export type BuildRequestPayload =
   | { kind: 'road';       id: string; data: RoadData }
   | { kind: 'settlement'; id: string; data: SettlementData };
+

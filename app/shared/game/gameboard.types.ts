@@ -103,6 +103,7 @@ export interface SettlementData extends BuildData {
   vertex: Vertex;
   //faction: Faction;
   //hasOwner?: boolean;
+  //isCity?: boolean;
 }
 
 /** @description sent to the front, serializable without risk */

@@ -1,10 +1,10 @@
 {
   "name": "backend",
-  "version": "0.0.1",
+  "version": "0.1",
   "description": "",
-  "author": "",
+  "author": "Enrique Murillo Orosco, Hayden Dougoud, Matthieu Gillieron, Eliot Monachon, Théo Immi",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT License",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
