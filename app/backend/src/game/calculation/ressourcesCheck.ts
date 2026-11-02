@@ -5,34 +5,24 @@ import {
   LandType,
 } from '@shared/game/gameboard.types';
 
-const addRessources = (
-  land: LandType,
-  ressources: Ressources,
-  playerId: string,
-) => {
+const addRessources = (land: LandType, ressources: Ressources) => {
   switch (land) {
     case 'desert':
-      //console.log(`addRessources:${playerId}:produced nothing (desert)`);
       break;
     case 'field':
       ressources.hay++;
-      //console.log(`addRessources:${playerId}:produced some hay`);
       break;
     case 'forest':
       ressources.wood++;
-      //console.log(`addRessources:${playerId}:produced some wood`);
       break;
     case 'hill':
       ressources.brick++;
-      //console.log(`addRessources:${playerId}:produced some brick`);
       break;
     case 'mountain':
       ressources.rock++;
-      //console.log(`addRessources:${playerId}:produced some rock`);
       break;
     case 'pasture':
       ressources.sheep++;
-      //console.log(`addRessources:${playerId}:produced some sheep`);
       break;
     default:
       break;
@@ -52,7 +42,7 @@ export const ressoucesCheck = (
     }
     graphEntry.adjacentTiles.forEach((tile) => {
       if (tile.value === player.totalDice || placementPhase === true) {
-        addRessources(tile.land, player.ressources, player.playerId);
+        addRessources(tile.land, player.ressources);
       }
     });
   }

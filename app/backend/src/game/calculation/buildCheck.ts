@@ -117,7 +117,10 @@ export const validateSettlementPlacement = (
 ): { valid: true } | { valid: false; reason: string } => {
   if (settlement.hasOwner) {
     //console.log(`👀⛔buildCheck:settlement: already occupied`);
-    return { valid: false, reason: 'settlement already owned by another player' };
+    return {
+      valid: false,
+      reason: 'settlement already owned by another player',
+    };
   }
 
   const graphEntry = graph.get(settlement.id);
@@ -135,7 +138,7 @@ export const validateSettlementPlacement = (
     //console.log(`👀⛔buildCheck:settlement: too close to another one`);
     return {
       valid: false,
-      reason: "settlement too close to another one",
+      reason: 'settlement too close to another one',
     };
   }
 
