@@ -82,6 +82,25 @@ export class GameGateway implements OnGatewayInit {
     return { ...result };
   }
 
+   @SubscribeMessage('skip')
+  async skip(@ConnectedSocket() client: Socket) {
+    const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    const result = game.skipRequest(client.data.user.username);
+
+      //⚠️ FOR TESTING
+      game.phaseCheckRequest();
+      game.skipRequest('enriquest');
+      game.phaseCheckRequest();
+      game.skipRequest('spagg');
+      // -------------
+
+    game.phaseCheckRequest();
+    game.setDiceRoll(result.value);
+    game.setMasterLog(result.message);
+    this.server.to(game.getGameId()).emit('gameState', game.getGameData());
+    return { ...result };
+  }
+
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(@ConnectedSocket() client: Socket) {
     const userId = client.data.user.id;

@@ -132,6 +132,10 @@ class GameStateContext {
       return this.state.build(playerId, payload );
   }
 
+  public skipRequest( playerId: string | null ): GameResponse {
+      return this.state.skip(playerId);
+  }
+
   public phaseCheckRequest() {
       return this.state.phaseCheck();
   }
@@ -240,6 +244,7 @@ abstract class  State
     this.state = newGameState;
   }
   public abstract dice( playerId: string | null ): GameResponse;
+  public abstract skip( playerId: string | null ): GameResponse;
   public abstract build( playerId: string | null, payload: BuildRequestPayload | null ): GameResponse;
   public abstract phaseCheck(): void;
 }
@@ -266,6 +271,11 @@ class WhoStartsPhase extends State
   public build(): GameResponse {
     console.log('🏁🔨WhoStartsPhase:build: handles buildRequest.');
     return { value: null, message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`, data: null }
+  }
+
+  public skip(): GameResponse {
+    console.log('🏁⏭️WhoStartsPhase:skip: handles skipRequest.');
+    return { value: null, message: `🏁⏭️WhoStartsPhase:skip: action forbidden during this phase.`, data: null }
   }
 
   public computeTurnOrder() {
@@ -334,6 +344,11 @@ class PlacementPhase extends State
     return { value: 1, message: response.message, data: this.state.getGameData() }
   }
 
+  public skip(): GameResponse {
+    console.log('🗺️⏭️PlacementPhase:skip: handles skipRequest.');
+    return { value: null, message: `🗺️⏭️PlacementPhase:skip: action forbidden during this phase.`, data: null }
+  }
+
   public phaseCheck(): void {
     if(this.state.getTurnCount() !== this.state.getPlayers().size) {
       //console.log(`🗺️🔎PlacementPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
@@ -372,6 +387,11 @@ class RessourcePhase extends State
   public build(): GameResponse {
     console.log('🪵🔨RessourcePhase:build: handles buildRequest.');
     return { value: null, message: `🪵RessourcePhase:build: action forbidden during this phase.`, data: null }
+  }
+
+  public skip(): GameResponse {
+    console.log('🪵⏭️RessourcePhase:skip: handles skipRequest.');
+    return { value: null, message: `🪵⏭️RessourcePhase:skip: action forbidden during this phase.`, data: null }
   }
 
   public phaseCheck(): void {
@@ -414,6 +434,18 @@ class TradeAndBuildPhase extends State
   public dice(): GameResponse {
     console.log('🤝🎲TradeAndBuildPhase:dice: handles diceRequest.');
     return { value: null, message: `🤝🎲TradeAndBuildPhase:dice: action forbidden during this phase.`, data: null }
+  }
+
+   public skip( playerId: string ): GameResponse {
+  console.log('🤝⏭️TradeAndBuildPhase:skip: handles skipRequest.');
+    const p = this.state.isPlayersTurn(playerId);
+    if(!p) {
+      return { value: null, message: "It's not your turn !", data: null };
+    }
+    this.state.setTurnCount(undefined);
+    this.state.setCurrentTurnIndex(undefined);
+    console.log(`🤝⏭️TradeAndBuildPhase:skip: ${playerId} skipped his turn !`);
+    return { value: 1, message: `🤝⏭️TradeAndBuildPhase:skip: you skipped your turn`, data: null }
   }
 
   public phaseCheck(): void {

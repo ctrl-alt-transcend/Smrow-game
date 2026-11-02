@@ -8,6 +8,7 @@ import GameMasterLog from './components/ui/GameMasterLog.tsx';
 import { useGameState } from './hooks/useGameState.ts';
 import type { GameData } from '@shared/game/game.types.ts';
 import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
+import SkipTurnButton from './components/ui/SkipTurnButton.tsx';
 
 export default function Game() {
   const { game } = useGameState();
@@ -52,6 +53,7 @@ function GameShell({ game }: { game: GameData }) {
             masterLog={game.masterLog}
           />
           <DiceRoller diceRoll={game.diceRoll} masterLog={game.masterLog} />
+          <SkipTurnButton/>
         </Group>
       </AppShell.Navbar>
 

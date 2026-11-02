@@ -20,7 +20,7 @@ interface PendingBuild {
   target: BuildRequestPayload;
   logAtSend: string | null;
 }
-const BUILD_TIMEOUT_MS = 4000;
+const BUILD_TIMEOUT_MS = 500;
 
 interface BuildSelectionButtonProps {
   selected: GameBoardSelection;
