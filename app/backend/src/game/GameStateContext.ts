@@ -5,7 +5,6 @@ import {
   classicLayout,
   Faction,
   FACTION_COLORS,
-  FACTION_COLORS,
 } from '@shared/game/gameboard.types';
 import type {
   GameData,
@@ -35,13 +34,13 @@ import { ressoucesCheck } from './calculation/ressourcesCheck';
  */
 class GameStateContext {
   /** @type {State} A reference to the current state of the Context. */
-  private   state!: State;
+  private state!: State;
   protected data!: GameData;
   protected graph!: GameBoardGraph;
   protected buildings: Buildings = new Map();
-  private   factionSwitch: number = 0;
+  private factionSwitch: number = 0;
 
-  constructor( gameId: string, state: State ) {
+  constructor(gameId: string, state: State) {
     const { board, graph } = createGameBoard(classicLayout);
     this.graph = graph;
     //this.board = board;
@@ -82,32 +81,35 @@ class GameStateContext {
     }
   }
 
-  public initPlayer( playerId: string ): Player {
-  const newPlayer = {
-    playerId: playerId,
-    score: 0,
-    firstDice: 0,
-    secondDice: 0,
-    totalDice: 0,
-    settlementsBuilt: 0,
-    roadsBuilt: 0,
-    level: 1,
-    username: playerId,
-    avatarURL: null,
-    faction: this.assignFaction(),
-    ressources: {
-      wood: 0,
-      brick: 0,
-      hay: 0,
-      sheep: 0,
-      rock: 0,
-    },
-  };
-  console.log(`💾GameStateContext:initPLayer: player: ${newPlayer.playerId}, faction: ${newPlayer.faction}`);
-  return newPlayer;
-}
+  public initPlayer(playerId: string): Player {
+    const newPlayer = {
+      playerId: playerId,
+      score: 0,
+      firstDice: 0,
+      secondDice: 0,
+      totalDice: 0,
+      settlementsBuilt: 0,
+      roadsBuilt: 0,
+      level: 1,
+      username: playerId,
+      avatarURL: null,
+      faction: this.assignFaction(),
+      ressources: {
+        wood: 0,
+        brick: 0,
+        hay: 0,
+        sheep: 0,
+        rock: 0,
+      },
+    };
+    console.log(
+      `💾GameStateContext:initPLayer: player: ${newPlayer.playerId}, faction: ${newPlayer.faction}`,
+    );
+    return newPlayer;
+  }
 
-  protected initGameData() {  //⚠️ FOR TESTING //TEST: REMOVE THIS IN PROD
+  protected initGameData() {
+    //⚠️ FOR TESTING //TEST: REMOVE THIS IN PROD
     this.data.players.set('spagg', this.initPlayer('spagg'));
     this.data.players.set('enriquest', this.initPlayer('enriquest'));
   }
@@ -128,16 +130,19 @@ class GameStateContext {
     this.state.setGameState(this);
   }
 
-  public diceRequest( playerId: string | null ): GameResponse {
-      return this.state.dice(playerId);
+  public diceRequest(playerId: string | null): GameResponse {
+    return this.state.dice(playerId);
   }
 
-  public buildRequest( playerId: string | null, payload: BuildRequestPayload | null ): GameResponse {
-      return this.state.build(playerId, payload );
+  public buildRequest(
+    playerId: string | null,
+    payload: BuildRequestPayload | null,
+  ): GameResponse {
+    return this.state.build(playerId, payload);
   }
 
-  public skipRequest( playerId: string | null ): GameResponse {
-      return this.state.skip(playerId);
+  public skipRequest(playerId: string | null): GameResponse {
+    return this.state.skip(playerId);
   }
 
   public phaseCheckRequest() {
@@ -145,27 +150,49 @@ class GameStateContext {
   }
 
   /** Getters */
-  public  getGameData(): GameData { return this.data; }
+  public getGameData(): GameData {
+    return this.data;
+  }
   //public  getBoard(): GameBoard { return this.board; }
-  public  getBoard(): GameBoard { return this.data.board; }
-  public  getGraph(): GameBoardGraph { return this.graph; }
-  public  getBuildings(): Buildings { return this.buildings; }
-  public  getGameId(): string { return this.data.gameId; }
-  public  getPlayers(): Map<string, Player> { return this.data.players; }
-  public  getStartingRolls(): Map<string, number | null> { return this.data.startingRolls; }
-  public  getTurnCount(): number { return this.data.turnCount; }
-  public  getCurrentTurnIndex(): number { return this.data.currentTurnIndex; }
-
-  public  getCurrentPlayer(): Player | undefined {
-    return this.data.players.get(this.data.turnOrder[this.data.currentTurnIndex]);
+  public getBoard(): GameBoard {
+    return this.data.board;
+  }
+  public getGraph(): GameBoardGraph {
+    return this.graph;
+  }
+  public getBuildings(): Buildings {
+    return this.buildings;
+  }
+  public getGameId(): string {
+    return this.data.gameId;
+  }
+  public getPlayers(): Map<string, Player> {
+    return this.data.players;
+  }
+  public getStartingRolls(): Map<string, number | null> {
+    return this.data.startingRolls;
+  }
+  public getTurnCount(): number {
+    return this.data.turnCount;
+  }
+  public getCurrentTurnIndex(): number {
+    return this.data.currentTurnIndex;
   }
 
-  public  getPlayerById(playerId: string): Player | undefined {
+  public getCurrentPlayer(): Player | undefined {
+    return this.data.players.get(
+      this.data.turnOrder[this.data.currentTurnIndex],
+    );
+  }
+
+  public getPlayerById(playerId: string): Player | undefined {
     return this.data.players.get(playerId);
   }
 
-  public  hasRolledBothDices( p: Player ): boolean {
-    if (p.firstDice !== 0 && p.secondDice !== 0) { return true; }
+  public hasRolledBothDices(p: Player): boolean {
+    if (p.firstDice !== 0 && p.secondDice !== 0) {
+      return true;
+    }
     return false;
   }
 
@@ -204,45 +231,59 @@ class GameStateContext {
   }
 
   /** Setters */
-  public  setDiceRoll( roll: number | null ) { this.data.diceRoll = roll; }
-  public  setMasterLog( log: string | null ) { this.data.masterLog = log; }
-  public  setTurnOrder( newTurnOrder: string[] ) { this.data.turnOrder = newTurnOrder; }
-  public  resetDices( p: Player ) { p.firstDice = 0; p.secondDice = 0; p.totalDice = 0; }
+  public setDiceRoll(roll: number | null) {
+    this.data.diceRoll = roll;
+  }
+  public setMasterLog(log: string | null) {
+    this.data.masterLog = log;
+  }
+  public setTurnOrder(newTurnOrder: string[]) {
+    this.data.turnOrder = newTurnOrder;
+  }
+  public resetDices(p: Player) {
+    p.firstDice = 0;
+    p.secondDice = 0;
+    p.totalDice = 0;
+  }
 
-  public  resetAllDices() {
-    for (let [key, value] of this.data.players) {
-      this.resetDices(value);
+  public resetAllDices() {
+    this.data.players.forEach((player) => {
+      this.resetDices(player);
     });
   }
 
-  public setTurnCount( count: number | undefined ) {
+  public setTurnCount(count: number | undefined) {
     this.data.turnCount = updateValue(
-      this.data.turnCount, this.data.players.size + 1, count);
+      this.data.turnCount,
+      this.data.players.size + 1,
+      count,
+    );
   }
 
-  public setCurrentTurnIndex( index: number | undefined ) {
+  public setCurrentTurnIndex(index: number | undefined) {
     this.data.currentTurnIndex = updateValue(
-      this.data.currentTurnIndex, this.data.players.size, index);
+      this.data.currentTurnIndex,
+      this.data.players.size,
+      index,
+    );
   }
 
   /** Methods */
-  public rollDice( p: Player ): GameResponse {
-  let value: number | null = Math.floor(Math.random() * 6) + 1;
-  let message: string | null = null;
+  public rollDice(p: Player): GameResponse {
+    let value: number | null = Math.floor(Math.random() * 6) + 1;
+    let message: string | null = null;
 
-  if (p.firstDice === 0) {
-    p.firstDice = value;
+    if (p.firstDice === 0) {
+      p.firstDice = value;
+    } else if (p.secondDice === 0) {
+      p.secondDice = value;
+      p.totalDice = p.secondDice + p.firstDice;
+    } else {
+      value = null;
+      message = `rollDice: you (${p.playerId}) already rolled both dices.`;
+    }
+    return { value, message, data: null };
   }
-  else if (p.secondDice === 0) {
-    p.secondDice = value;
-    p.totalDice = p.secondDice + p.firstDice;
-  }
-  else {
-    value = null;
-    message = `rollDice: you (${p.playerId}) already rolled both dices.`;
-  }
-  return { value, message, data: null };
-}
 }
 
 /**
@@ -257,39 +298,56 @@ abstract class State {
   public setGameState(newGameState: GameStateContext) {
     this.state = newGameState;
   }
-  public abstract dice( playerId: string | null ): GameResponse;
-  public abstract skip( playerId: string | null ): GameResponse;
-  public abstract build( playerId: string | null, payload: BuildRequestPayload | null ): GameResponse;
+  public abstract dice(playerId: string | null): GameResponse;
+  public abstract skip(playerId: string | null): GameResponse;
+  public abstract build(
+    playerId: string | null,
+    payload: BuildRequestPayload | null,
+  ): GameResponse;
   public abstract phaseCheck(): void;
 }
 
-class WhoStartsPhase extends State
-{
-  public dice( playerId: string ): GameResponse {
-    console.log(`🏁🎲WhoStartsPhase:dice: handles diceRequest from ${playerId}`);
+class WhoStartsPhase extends State {
+  public dice(playerId: string): GameResponse {
+    console.log(
+      `🏁🎲WhoStartsPhase:dice: handles diceRequest from ${playerId}`,
+    );
     const p = this.state.getPlayerById(playerId);
     if (p === undefined) {
       throw new Error(`Unknown playerId: ${playerId}`);
     }
     const roll: GameResponse = this.state.rollDice(p);
-    if(this.state.hasRolledBothDices(p) && roll.value) {
-      console.log(`🏁🎲WhoStartsPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
+    if (this.state.hasRolledBothDices(p) && roll.value) {
+      console.log(
+        `🏁🎲WhoStartsPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`,
+      );
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
       this.state.setCurrentTurnIndex(undefined);
-      return { value: null,
-        message: funnyLogs(p.playerId, p.firstDice + p.secondDice), data: null }
+      return {
+        value: null,
+        message: funnyLogs(p.playerId, p.firstDice + p.secondDice),
+        data: null,
+      };
     }
-    return { value: roll.value, message: roll.message, data: null }
+    return { value: roll.value, message: roll.message, data: null };
   }
 
   public build(): GameResponse {
     console.log('🏁🔨WhoStartsPhase:build: handles buildRequest.');
-    return { value: null, message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`, data: null }
+    return {
+      value: null,
+      message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`,
+      data: null,
+    };
   }
 
   public skip(): GameResponse {
     console.log('🏁⏭️WhoStartsPhase:skip: handles skipRequest.');
-    return { value: null, message: `🏁⏭️WhoStartsPhase:skip: action forbidden during this phase.`, data: null }
+    return {
+      value: null,
+      message: `🏁⏭️WhoStartsPhase:skip: action forbidden during this phase.`,
+      data: null,
+    };
   }
 
   public computeTurnOrder() {
@@ -313,58 +371,99 @@ class WhoStartsPhase extends State
   public phaseCheck(): void {
     try {
       this.computeTurnOrder();
-    } catch(error) {
-      //console.log('🏁🔎WhoStartsPhase:phaseCheck: ' + error);
+    } catch (error) {
+      console.log('🏁🔎WhoStartsPhase:phaseCheck: ' + error);
       return;
     }
     this.state.resetAllDices();
     const p = this.state.getCurrentPlayer();
     if (p) {
-      console.log(`🏁🔎WhoStartsPhase:phaseCheck: everybody is ready and ${p.playerId} is starting!`);
+      console.log(
+        `🏁🔎WhoStartsPhase:phaseCheck: everybody is ready and ${p.playerId} is starting!`,
+      );
     }
-    this.state.transitionTo(new PlacementPhase);
+    this.state.transitionTo(new PlacementPhase());
   }
 }
 
-class PlacementPhase extends State
-{
+class PlacementPhase extends State {
   public dice(): GameResponse {
     console.log('🗺️🎲PlacementPhase:dice: handles diceRequest.');
-    return { value: null, message: `🗺️🎲PlacementPhase:dice: action forbidden during this phase.`, data: null }
+    return {
+      value: null,
+      message: `🗺️🎲PlacementPhase:dice: action forbidden during this phase.`,
+      data: null,
+    };
   }
 
-  public build( playerId: string, payload: BuildRequestPayload ): GameResponse {
-    console.log(`🗺️🔨PlacementPhasee:build: handles buildRequest from ${playerId}`);
-    if(!isBuildRequestPayload(payload)) {
+  public build(playerId: string, payload: BuildRequestPayload): GameResponse {
+    console.log(
+      `🗺️🔨PlacementPhasee:build: handles buildRequest from ${playerId}`,
+    );
+    if (!isBuildRequestPayload(payload)) {
       console.log(`🗺️🔨PlacementPhasee:build: invalid payload !`);
-      return { value: null, message: "🗺️🔨PlacementPhasee:build: invalid payload !", data: null };
+      return {
+        value: null,
+        message: '🗺️🔨PlacementPhasee:build: invalid payload !',
+        data: null,
+      };
     }
     const p = this.state.isPlayersTurn(playerId);
-    if(!p) {
-      return { value: null, message: "🗺️🔨PlacementPhasee:build: it's not your turn !", data: null };
+    if (!p) {
+      return {
+        value: null,
+        message: "🗺️🔨PlacementPhasee:build: it's not your turn !",
+        data: null,
+      };
     }
-    const response = buildCheck(payload, p, this.state.getBoard(), this.state.getGraph(), this.state.getBuildings(), true);
-    if(response.valid === false) {
-      return { value: null, message: "🗺️🔨PlacementPhasee:build: invalid placement", data: null };
+    const response = buildCheck(
+      payload,
+      p,
+      this.state.getBoard(),
+      this.state.getGraph(),
+      this.state.getBuildings(),
+      true,
+    );
+    if (response.valid === false) {
+      return {
+        value: null,
+        message: '🗺️🔨PlacementPhasee:build: invalid placement',
+        data: null,
+      };
     }
     if (p.settlementsBuilt !== 1) {
-      return { value: null, message: "🗺️🔨PlacementPhasee:build: must build a settlement first ...", data: this.state.getGameData() }
-    }
-    else if (p.roadsBuilt !== 1) {
-      return { value: null, message: "🗺️🔨PlacementPhasee:build: must build a road now ...", data: this.state.getGameData() }
+      return {
+        value: null,
+        message: '🗺️🔨PlacementPhasee:build: must build a settlement first ...',
+        data: this.state.getGameData(),
+      };
+    } else if (p.roadsBuilt !== 1) {
+      return {
+        value: null,
+        message: '🗺️🔨PlacementPhasee:build: must build a road now ...',
+        data: this.state.getGameData(),
+      };
     }
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
-    return { value: 1, message: response.message, data: this.state.getGameData() }
+    return {
+      value: 1,
+      message: response.message,
+      data: this.state.getGameData(),
+    };
   }
 
   public skip(): GameResponse {
     console.log('🗺️⏭️PlacementPhase:skip: handles skipRequest.');
-    return { value: null, message: `🗺️⏭️PlacementPhase:skip: action forbidden during this phase.`, data: null }
+    return {
+      value: null,
+      message: `🗺️⏭️PlacementPhase:skip: action forbidden during this phase.`,
+      data: null,
+    };
   }
 
   public phaseCheck(): void {
-    if(this.state.getTurnCount() !== this.state.getPlayers().size) {
+    if (this.state.getTurnCount() !== this.state.getPlayers().size) {
       //console.log(`🗺️🔎PlacementPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
@@ -373,39 +472,52 @@ class PlacementPhase extends State
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     console.log('🗺️🔎PlacementPhase:phaseCheck: everybody is ready!');
-    this.state.transitionTo(new RessourcePhase);
+    this.state.transitionTo(new RessourcePhase());
   }
 }
 
-
-class RessourcePhase extends State
-{
-  public dice( playerId: string ): GameResponse {
-    console.log(`🪵🎲RessourcePhase:dice: handles diceRequest from ${playerId}`);
+class RessourcePhase extends State {
+  public dice(playerId: string): GameResponse {
+    console.log(
+      `🪵🎲RessourcePhase:dice: handles diceRequest from ${playerId}`,
+    );
     const p = this.state.isPlayersTurn(playerId);
-    if(!p) {
+    if (!p) {
       return { value: null, message: "It's not your turn !", data: null };
     }
     const roll: GameResponse = this.state.rollDice(p);
-    if(this.state.hasRolledBothDices(p) && roll.value) {
-      console.log(`🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`);
+    if (this.state.hasRolledBothDices(p) && roll.value) {
+      console.log(
+        `🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`,
+      );
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
       this.state.setCurrentTurnIndex(undefined);
       this.state.setTurnCount(undefined);
-      return { value: null,
-        message: funnyLogs(p.playerId, p.firstDice + p.secondDice), data: null }
+      return {
+        value: null,
+        message: funnyLogs(p.playerId, p.firstDice + p.secondDice),
+        data: null,
+      };
     }
-    return { value: roll.value, message: roll.message, data: null }
+    return { value: roll.value, message: roll.message, data: null };
   }
 
   public build(): GameResponse {
     console.log('🪵🔨RessourcePhase:build: handles buildRequest.');
-    return { value: null, message: `🪵RessourcePhase:build: action forbidden during this phase.`, data: null }
+    return {
+      value: null,
+      message: `🪵RessourcePhase:build: action forbidden during this phase.`,
+      data: null,
+    };
   }
 
   public skip(): GameResponse {
     console.log('🪵⏭️RessourcePhase:skip: handles skipRequest.');
-    return { value: null, message: `🪵⏭️RessourcePhase:skip: action forbidden during this phase.`, data: null }
+    return {
+      value: null,
+      message: `🪵⏭️RessourcePhase:skip: action forbidden during this phase.`,
+      data: null,
+    };
   }
 
   public phaseCheck(): void {
@@ -430,39 +542,69 @@ class TradeAndBuildPhase extends State {
     );
     if (!isBuildRequestPayload(payload)) {
       console.log(`🤝🔨TradeAndBuildPhase:build: invalid payload !`);
-      return { value: null, message: "🤝🔨TradeAndBuildPhase:build: invalid payload !", data: null };
+      return {
+        value: null,
+        message: '🤝🔨TradeAndBuildPhase:build: invalid payload !',
+        data: null,
+      };
     }
     const p = this.state.isPlayersTurn(playerId);
-    if(!p) {
-      return { value: null, message: "🤝🔨TradeAndBuildPhase:build: It's not your turn !", data: null };
+    if (!p) {
+      return {
+        value: null,
+        message: "🤝🔨TradeAndBuildPhase:build: It's not your turn !",
+        data: null,
+      };
     }
-    const response = buildCheck(payload, p, this.state.getBoard(), this.state.getGraph(), this.state.getBuildings());
+    const response = buildCheck(
+      payload,
+      p,
+      this.state.getBoard(),
+      this.state.getGraph(),
+      this.state.getBuildings(),
+    );
     if (response.valid === false) {
-      return { value: null, message: "🤝🔨TradeAndBuildPhase:build: Invalid placement", data: null };
+      return {
+        value: null,
+        message: '🤝🔨TradeAndBuildPhase:build: Invalid placement',
+        data: null,
+      };
     }
     console.log(
       `🤝🔨TradeAndBuildPhase:build: ${playerId} built something ...`,
     );
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
-    return { value: 1, message: response.message, data: this.state.getGameData() }
+    return {
+      value: 1,
+      message: response.message,
+      data: this.state.getGameData(),
+    };
   }
 
   public dice(): GameResponse {
     console.log('🤝🎲TradeAndBuildPhase:dice: handles diceRequest.');
-    return { value: null, message: `🤝🎲TradeAndBuildPhase:dice: action forbidden during this phase.`, data: null }
+    return {
+      value: null,
+      message: `🤝🎲TradeAndBuildPhase:dice: action forbidden during this phase.`,
+      data: null,
+    };
   }
 
-   public skip( playerId: string ): GameResponse {
-  console.log('🤝⏭️TradeAndBuildPhase:skip: handles skipRequest.');
+  public skip(playerId: string): GameResponse {
+    console.log('🤝⏭️TradeAndBuildPhase:skip: handles skipRequest.');
     const p = this.state.isPlayersTurn(playerId);
-    if(!p) {
+    if (!p) {
       return { value: null, message: "It's not your turn !", data: null };
     }
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
     console.log(`🤝⏭️TradeAndBuildPhase:skip: ${playerId} skipped his turn !`);
-    return { value: 1, message: `🤝⏭️TradeAndBuildPhase:skip: you skipped your turn`, data: null }
+    return {
+      value: 1,
+      message: `🤝⏭️TradeAndBuildPhase:skip: you skipped your turn`,
+      data: null,
+    };
   }
 
   public phaseCheck(): void {
@@ -477,4 +619,4 @@ class TradeAndBuildPhase extends State {
   }
 }
 
-export { GameStateContext, WhoStartsPhase }
+export { GameStateContext, WhoStartsPhase };

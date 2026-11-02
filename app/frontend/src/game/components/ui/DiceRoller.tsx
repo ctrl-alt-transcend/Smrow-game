@@ -25,7 +25,7 @@ export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; ma
         setBusy(false);
         return;
       }
-      pendingResultRef.current = { value: diceRoll, message: masterLog, board: null };
+      pendingResultRef.current = { value: diceRoll, message: masterLog, data: null };
       setRolledValue(diceRoll);
     } catch (err) {
       console.error('Failed to roll dice:', err);

@@ -31,6 +31,8 @@ down:
 
 lint-front:
 	cd ./app/frontend && npm run lint && cd ../..
+lint-back:
+	cd ./app/backend && npm run lint && cd ../..
 
 type-front:
 	cd ./app/frontend && npm run type-check && cd ../..
@@ -45,8 +47,6 @@ secrets:
 	@if [ ! -s $(SECRETS_DIR)/jwt_secret.txt ]; then \
 		openssl rand -hex 32 | tr -dc 'A-Za-z0-9@%^*_+=-' | head -c 16 > "$(SECRETS_DIR)/jwt_secret.txt"; \
 	fi
-
-prepush: lint type
 
 fclean: down
 	docker compose -f $(DOCKER_COMPOSE_FILE) down --rmi all --volumes --remove-orphans

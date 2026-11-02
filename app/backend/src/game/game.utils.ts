@@ -13,15 +13,13 @@ export function isBuildRequestPayload(p: unknown): p is BuildRequestPayload {
 export function updateValue(
   currentValue: number,
   limit: number,
-  newValue: number | undefined
+  newValue: number | undefined,
 ): number {
   if (newValue !== undefined) {
     return newValue;
-  }
-  else if (currentValue + 1 === limit) {
+  } else if (currentValue + 1 === limit) {
     return 0;
-  }
-  else {
+  } else {
     return currentValue + 1;
   }
 }
@@ -42,7 +40,7 @@ export function funnyLogs(id: string, value: number): string {
   return `${id} rolled a ${value}`;
 }
 
-export function printPlayer( p: Player ) {
+export function printPlayer(p: Player) {
   console.log(`🖨️ printPlayer: ${p.playerId}:`);
   console.log(`- wood: ${p.ressources.wood}`);
   console.log(`- sheep: ${p.ressources.sheep}`);
@@ -51,8 +49,8 @@ export function printPlayer( p: Player ) {
   console.log(`- hay: ${p.ressources.hay}`);
 }
 
-export function printAllPlayers( p: Map<string, Player> ) {
-  p.forEach(p => {
+export function printAllPlayers(p: Map<string, Player>) {
+  p.forEach((p) => {
     printPlayer(p);
   });
 }

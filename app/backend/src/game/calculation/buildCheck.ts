@@ -1,4 +1,4 @@
-import { GameData, Player } from '@shared/game/game.types';
+import type { Player } from '@shared/game/game.types';
 import {
   type GameBoard,
   type RoadData,
@@ -25,9 +25,7 @@ const indexSettlementsByVertex = (
   return map;
 };
 
-const indexRoadsByVertex = (
-  roads: RoadData[],
-): Map<string, RoadData[]> => {
+const indexRoadsByVertex = (roads: RoadData[]): Map<string, RoadData[]> => {
   const map = new Map<string, RoadData[]>();
   for (const road of roads) {
     for (const vertexId of [road.edge.p1.id, road.edge.p2.id]) {
@@ -38,7 +36,6 @@ const indexRoadsByVertex = (
   }
   return map;
 };
-
 
 /* ================================================================== *
  * ROAD VALIDATION
@@ -91,7 +88,7 @@ export const validateRoadPlacement = (
   }
 
   const hasOwnAdjacentSettlement = graphEntry.adjacentSettlements.some(
-    s => s.hasOwner && s.faction === ownerFaction
+    (s) => s.hasOwner && s.faction === ownerFaction,
   );
   if (!hasOwnAdjacentSettlement) {
     if (connectedToNetwork) {
@@ -101,7 +98,10 @@ export const validateRoadPlacement = (
   }
   if (!connectedToNetwork && !hasOwnAdjacentSettlement) {
     console.log(`👀⛔buildCheck:road: must be connected to network`);
-    return { valid: false, reason: 'La route doit être connectée à votre réseau' };
+    return {
+      valid: false,
+      reason: 'La route doit être connectée à votre réseau',
+    };
   }
   console.log(`👀✅buildCheck:road: is valid`);
   return { valid: true };
@@ -115,7 +115,7 @@ export const validateSettlementPlacement = (
   ownerFaction: Faction,
   graph: GameBoardGraph,
   roads: RoadData[],
-  placementPhase?: boolean
+  placementPhase?: boolean,
 ): { valid: true } | { valid: false; reason: string } => {
   if (settlement.hasOwner) {
     console.log(`👀⛔buildCheck:settlement: already occupied`);
@@ -130,10 +130,15 @@ export const validateSettlementPlacement = (
   }
 
   // Règle de distance : aucun sommet adjacent occupé (lu depuis le graph)
-  const nearbyOccupied = graphEntry.connectedSettlements.some((s) => s.hasOwner);
+  const nearbyOccupied = graphEntry.connectedSettlements.some(
+    (s) => s.hasOwner,
+  );
   if (nearbyOccupied) {
     console.log(`👀⛔buildCheck:settlement: too close to another one`);
-    return { valid: false, reason: 'Colonie trop proche d\'une construction existante' };
+    return {
+      valid: false,
+      reason: "Colonie trop proche d'une construction existante",
+    };
   }
 
   // Doit toucher une de ses propres routes
@@ -145,15 +150,18 @@ export const validateSettlementPlacement = (
 
   if (!hasOwnAdjacentRoad && placementPhase === undefined) {
     console.log(`👀⛔buildCheck:settlement: must be connected`);
-    return { valid: false, reason: 'La colonie doit toucher une de vos routes' };
+    return {
+      valid: false,
+      reason: 'La colonie doit toucher une de vos routes',
+    };
   }
   console.log(`👀✅buildCheck:settlement: is valid`);
   return { valid: true };
 };
 
 interface BuildValidation {
-  valid: boolean,
-  message: string
+  valid: boolean;
+  message: string;
 }
 
 function settlementCheck(
@@ -161,17 +169,22 @@ function settlementCheck(
   target: SettlementData,
   graph: GameBoardGraph,
   player: Player,
-  placementPhase?: boolean
+  placementPhase?: boolean,
 ): BuildValidation {
   const settlementResult = validateSettlementPlacement(
     target,
     player.faction,
     graph,
     board.roads,
-    placementPhase
+    placementPhase,
   );
-  if (!placementPhase && player.ressources.brick < 1 && player.ressources.wood < 1
-    && player.ressources.sheep < 1 && player.ressources.hay < 1) {
+  if (
+    !placementPhase &&
+    player.ressources.brick < 1 &&
+    player.ressources.wood < 1 &&
+    player.ressources.sheep < 1 &&
+    player.ressources.hay < 1
+  ) {
     console.log(`👀⛔buildCheck:settlement: not enough ressources`);
     return {
       valid: false,
@@ -203,14 +216,14 @@ function roadCheck(
   target: RoadData,
   graph: GameBoardGraph,
   player: Player,
-  placementPhase?: boolean
-): BuildValidation{
-  const roadResult = validateRoadPlacement(
-    target,
-    player.faction,
-    graph
-  );
-  if (!placementPhase && player.ressources.brick < 1 && player.ressources.wood < 1) {
+  placementPhase?: boolean,
+): BuildValidation {
+  const roadResult = validateRoadPlacement(target, player.faction, graph);
+  if (
+    !placementPhase &&
+    player.ressources.brick < 1 &&
+    player.ressources.wood < 1
+  ) {
     console.log(`👀⛔buildCheck:road: not enough ressources`);
     return {
       valid: false,
@@ -231,7 +244,7 @@ function roadCheck(
   }
   return {
     valid: true,
-    message: 'valid road'
+    message: 'valid road',
   };
 }
 
@@ -241,9 +254,9 @@ export const buildCheck = (
   board: GameBoard,
   graph: GameBoardGraph,
   buildings: Buildings,
-  placementPhase?: boolean
-): { valid: boolean, message: string } => {
-  let check: BuildValidation = { valid: false, message: ""};
+  placementPhase?: boolean,
+): { valid: boolean; message: string } => {
+  let check: BuildValidation = { valid: false, message: '' };
   try {
     if ((payload.data as { id?: unknown })?.id !== payload.id) {
       return {
@@ -254,15 +267,17 @@ export const buildCheck = (
     let target: RoadData | SettlementData | undefined;
     switch (payload.kind) {
       case 'road':
-        target = board.roads.find(r => r.id === payload.id);
+        target = board.roads.find((r) => r.id === payload.id);
         if (!target) break;
         check = roadCheck(target, graph, player, placementPhase);
         if (check.valid) player.roadsBuilt++;
+        break;
       case 'settlement':
-        target = board.settlements.find(r => r.id === payload.id);
+        target = board.settlements.find((r) => r.id === payload.id);
         if (!target) break;
         check = settlementCheck(board, target, graph, player, placementPhase);
         if (check.valid) player.settlementsBuilt++;
+        break;
       default:
         break;
     }

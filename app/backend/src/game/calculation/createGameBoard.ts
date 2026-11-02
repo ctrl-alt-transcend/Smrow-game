@@ -9,10 +9,8 @@ import {
   type GameBoardGraph,
   HEX_SIZE,
   Faction,
-} from "../../../../shared/game/gameboard.types";
-import { getHexCorners, getHexEdges } from "@shared/game/hexCalculation";
-
-
+} from '../../../../shared/game/gameboard.types';
+import { getHexCorners, getHexEdges } from '@shared/game/hexCalculation';
 
 /** @description calculate and render an SVG board game based on the given layout */
 export const initGameBoard = (tiles: TileData[]): GameBoard => {
@@ -28,12 +26,15 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
     });
   });
 
-  const settlements: SettlementData[] = Array.from(allVertices.values(), (v) => ({
-    id: v.id,
-    vertex: v,
-    faction: Faction.UNOCCUPIED,
-    hasOwner: false,
-  }));
+  const settlements: SettlementData[] = Array.from(
+    allVertices.values(),
+    (v) => ({
+      id: v.id,
+      vertex: v,
+      faction: Faction.UNOCCUPIED,
+      hasOwner: false,
+    }),
+  );
 
   const roads: RoadData[] = Array.from(allEdges.values(), (e) => ({
     id: e.id,
@@ -120,9 +121,9 @@ const byId = <T extends { id: string }>(a: T, b: T): number =>
   a.id.localeCompare(b.id);
 
 /**
-* @description Builds the adjacency graph from the board.
-* CRITICAL ORDER: all indices must be ready BEFORE they are used.
-*/
+ * @description Builds the adjacency graph from the board.
+ * CRITICAL ORDER: all indices must be ready BEFORE they are used.
+ */
 export const linkGameBoard = (board: GameBoard): GameBoardGraph => {
   const graph: GameBoardGraph = new Map();
 
@@ -130,12 +131,12 @@ export const linkGameBoard = (board: GameBoard): GameBoardGraph => {
   // STEP 0: COMPLETE INDEXTATION (before any use)
   // =========================================================================
 
- // Index of settlements by vertex (required for roads↔settlements AND settlements↔settlements)
+  // Index of settlements by vertex (required for roads↔settlements AND settlements↔settlements)
   const settlementByVertex = new Map<string, SettlementData>(
     board.settlements.map((s) => [s.vertex.id, s]),
   );
 
-// Index routes by vertex (required for routes↔routes)
+  // Index routes by vertex (required for routes↔routes)
   const roadsByVertex = indexRoadsByVertex(board.roads);
 
   // Index of tiles by vertex (required for settlements↔tiles)
@@ -200,7 +201,7 @@ export const linkGameBoard = (board: GameBoard): GameBoardGraph => {
     graph.get(b.id)!.connectedSettlements.push(a);
   }
 
- // Final sorting of neighboring settlements
+  // Final sorting of neighboring settlements
   for (const settlement of board.settlements) {
     graph.get(settlement.id)!.connectedSettlements.sort(byId);
   }
@@ -236,7 +237,11 @@ export const getConnections = (
  * DEBUG HELPERS
  * ================================================================== */
 
-export const debugPrintConnections = (graph: GameBoardGraph, kind: 'road' | 'settlement', id: string) => {
+export const debugPrintConnections = (
+  graph: GameBoardGraph,
+  kind: 'road' | 'settlement',
+  id: string,
+) => {
   const entry = graph.get(id);
   if (!entry) {
     console.log(`⛔ ${kind}:${id} NOT FOUND in graph`);
@@ -245,11 +250,19 @@ export const debugPrintConnections = (graph: GameBoardGraph, kind: 'road' | 'set
 
   if (kind === 'road') {
     console.log(`🛣️ Road ${id}:`);
-    console.log(`   ├─ connectedRoads (${entry.connectedRoads.length}): ${entry.connectedRoads.map(r => r.id).join(', ')}`);
-    console.log(`   └─ adjacentSettlements (${entry.adjacentSettlements.length}): ${entry.adjacentSettlements.map(s => s.id).join(', ')}`);
+    console.log(
+      `   ├─ connectedRoads (${entry.connectedRoads.length}): ${entry.connectedRoads.map((r) => r.id).join(', ')}`,
+    );
+    console.log(
+      `   └─ adjacentSettlements (${entry.adjacentSettlements.length}): ${entry.adjacentSettlements.map((s) => s.id).join(', ')}`,
+    );
   } else {
     console.log(`🏘️ Settlement ${id}:`);
-    console.log(`   ├─ connectedSettlements (${entry.connectedSettlements.length}): ${entry.connectedSettlements.map(s => s.id).join(', ')}`);
-    console.log(`   └─ adjacentTiles (${entry.adjacentTiles.length}): ${entry.adjacentTiles.map(t => `${t.q},${t.r}`).join(', ')}`);
+    console.log(
+      `   ├─ connectedSettlements (${entry.connectedSettlements.length}): ${entry.connectedSettlements.map((s) => s.id).join(', ')}`,
+    );
+    console.log(
+      `   └─ adjacentTiles (${entry.adjacentTiles.length}): ${entry.adjacentTiles.map((t) => `${t.q},${t.r}`).join(', ')}`,
+    );
   }
 };
