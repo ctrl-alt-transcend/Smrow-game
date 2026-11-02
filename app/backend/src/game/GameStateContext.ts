@@ -18,6 +18,7 @@ import {
   updateValue,
   funnyLogs,
   printAllPlayers,
+  //printPlayer,
 } from './game.utils';
 import { buildCheck } from './calculation/buildCheck';
 import { createGameBoard } from './calculation/createGameBoard';
@@ -43,7 +44,6 @@ class GameStateContext {
   constructor(gameId: string, state: State) {
     const { board, graph } = createGameBoard(classicLayout);
     this.graph = graph;
-    //this.board = board;
     this.data = {
       players: new Map<string, Player>(),
       startingRolls: new Map<string, number | null>(),
@@ -54,7 +54,6 @@ class GameStateContext {
       masterLog: '...',
       diceRoll: 0,
       board: board,
-      //board: initGameBoard(classicLayout)
     };
     this.initGameData(); //⚠️ FOR TESTING WITH MOCKED VALUE
     this.initStartingRolls();
@@ -102,9 +101,6 @@ class GameStateContext {
         rock: 0,
       },
     };
-    console.log(
-      `💾GameStateContext:initPLayer: player: ${newPlayer.playerId}, faction: ${newPlayer.faction}`,
-    );
     return newPlayer;
   }
 
@@ -153,7 +149,6 @@ class GameStateContext {
   public getGameData(): GameData {
     return this.data;
   }
-  //public  getBoard(): GameBoard { return this.board; }
   public getBoard(): GameBoard {
     return this.data.board;
   }
@@ -309,9 +304,9 @@ abstract class State {
 
 class WhoStartsPhase extends State {
   public dice(playerId: string): GameResponse {
-    console.log(
-      `🏁🎲WhoStartsPhase:dice: handles diceRequest from ${playerId}`,
-    );
+    //console.log(
+    //  `🏁🎲WhoStartsPhase:dice: handles diceRequest from ${playerId}`,
+    //);
     const p = this.state.getPlayerById(playerId);
     if (p === undefined) {
       throw new Error(`Unknown playerId: ${playerId}`);
@@ -333,7 +328,7 @@ class WhoStartsPhase extends State {
   }
 
   public build(): GameResponse {
-    console.log('🏁🔨WhoStartsPhase:build: handles buildRequest.');
+    //console.log('🏁🔨WhoStartsPhase:build: handles buildRequest.');
     return {
       value: null,
       message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`,
@@ -342,7 +337,7 @@ class WhoStartsPhase extends State {
   }
 
   public skip(): GameResponse {
-    console.log('🏁⏭️WhoStartsPhase:skip: handles skipRequest.');
+    //console.log('🏁⏭️WhoStartsPhase:skip: handles skipRequest.');
     return {
       value: null,
       message: `🏁⏭️WhoStartsPhase:skip: action forbidden during this phase.`,
@@ -387,8 +382,10 @@ class WhoStartsPhase extends State {
 }
 
 class PlacementPhase extends State {
+  private settlementBuilt: boolean = false;
+
   public dice(): GameResponse {
-    console.log('🗺️🎲PlacementPhase:dice: handles diceRequest.');
+    //console.log('🗺️🎲PlacementPhase:dice: handles diceRequest.');
     return {
       value: null,
       message: `🗺️🎲PlacementPhase:dice: action forbidden during this phase.`,
@@ -397,9 +394,9 @@ class PlacementPhase extends State {
   }
 
   public build(playerId: string, payload: BuildRequestPayload): GameResponse {
-    console.log(
-      `🗺️🔨PlacementPhasee:build: handles buildRequest from ${playerId}`,
-    );
+    //console.log(
+    //  `🗺️🔨PlacementPhasee:build: handles buildRequest from ${playerId}`,
+    //);
     if (!isBuildRequestPayload(payload)) {
       console.log(`🗺️🔨PlacementPhasee:build: invalid payload !`);
       return {
@@ -413,6 +410,14 @@ class PlacementPhase extends State {
       return {
         value: null,
         message: "🗺️🔨PlacementPhasee:build: it's not your turn !",
+        data: null,
+      };
+    }
+    if (payload.kind == 'settlement' && this.settlementBuilt) {
+      return {
+        value: null,
+        message:
+          '🗺️🔨PlacementPhasee:build: first settlement already built... place a road now...',
         data: null,
       };
     }
@@ -431,19 +436,23 @@ class PlacementPhase extends State {
         data: null,
       };
     }
-    if (p.settlementsBuilt !== 1) {
+    if (payload.kind == 'settlement' && this.settlementBuilt == false) {
+      this.settlementBuilt = true;
       return {
         value: null,
-        message: '🗺️🔨PlacementPhasee:build: must build a settlement first ...',
-        data: this.state.getGameData(),
-      };
-    } else if (p.roadsBuilt !== 1) {
-      return {
-        value: null,
-        message: '🗺️🔨PlacementPhasee:build: must build a road now ...',
+        message:
+          '🗺️🔨PlacementPhasee:build: you built your first settlement, pick a road now.',
         data: this.state.getGameData(),
       };
     }
+    if (p.roadsBuilt !== 1) {
+      return {
+        value: null,
+        message: '🗺️🔨PlacementPhasee:build: you must build a road...',
+        data: this.state.getGameData(),
+      };
+    }
+    this.settlementBuilt = false;
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
     return {

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+//import { useCallback } from "react";
 import {
   Button,
   Text,
@@ -7,9 +7,13 @@ import { modals } from "@mantine/modals";
 import { socket } from "../../../socket.tsx";
 
 export default function SkipTurnButton() {
-  const handleConfirm = useCallback(() => {
-    socket.emit("skip");
-  }, []);
+  //const handleConfirm = useCallback(() => {
+  //  socket.emit('skip');
+  //}, []);
+
+  const handleConfirm = () => {
+    socket.emit('skip');
+  };
 
   const openModal = () => {
     modals.openConfirmModal({

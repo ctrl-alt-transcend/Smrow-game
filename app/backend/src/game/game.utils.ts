@@ -47,6 +47,8 @@ export function printPlayer(p: Player) {
   console.log(`- brick: ${p.ressources.brick}`);
   console.log(`- rock: ${p.ressources.rock}`);
   console.log(`- hay: ${p.ressources.hay}`);
+  console.log(`- roads: ${p.roadsBuilt}`);
+  console.log(`- settlements: ${p.settlementsBuilt}`);
 }
 
 export function printAllPlayers(p: Map<string, Player>) {
