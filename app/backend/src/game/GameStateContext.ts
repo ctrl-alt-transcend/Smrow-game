@@ -463,7 +463,7 @@ class PlacementPhase extends State {
   }
 
   public skip(): GameResponse {
-    console.log('🗺️⏭️PlacementPhase:skip: handles skipRequest.');
+    //console.log('🗺️⏭️PlacementPhase:skip: handles skipRequest.');
     return {
       value: null,
       message: `🗺️⏭️PlacementPhase:skip: action forbidden during this phase.`,
@@ -487,9 +487,9 @@ class PlacementPhase extends State {
 
 class RessourcePhase extends State {
   public dice(playerId: string): GameResponse {
-    console.log(
-      `🪵🎲RessourcePhase:dice: handles diceRequest from ${playerId}`,
-    );
+    //console.log(
+    //  `🪵🎲RessourcePhase:dice: handles diceRequest from ${playerId}`,
+    //);
     const p = this.state.isPlayersTurn(playerId);
     if (!p) {
       return { value: null, message: "It's not your turn !", data: null };
@@ -512,7 +512,7 @@ class RessourcePhase extends State {
   }
 
   public build(): GameResponse {
-    console.log('🪵🔨RessourcePhase:build: handles buildRequest.');
+    //console.log('🪵🔨RessourcePhase:build: handles buildRequest.');
     return {
       value: null,
       message: `🪵RessourcePhase:build: action forbidden during this phase.`,
@@ -521,7 +521,7 @@ class RessourcePhase extends State {
   }
 
   public skip(): GameResponse {
-    console.log('🪵⏭️RessourcePhase:skip: handles skipRequest.');
+    //console.log('🪵⏭️RessourcePhase:skip: handles skipRequest.');
     return {
       value: null,
       message: `🪵⏭️RessourcePhase:skip: action forbidden during this phase.`,
@@ -546,9 +546,9 @@ class RessourcePhase extends State {
 
 class TradeAndBuildPhase extends State {
   public build(playerId: string, payload: BuildRequestPayload): GameResponse {
-    console.log(
-      `🤝🔨TradeAndBuildPhase:build: handles buildRequest from ${playerId}`,
-    );
+    //console.log(
+    //  `🤝🔨TradeAndBuildPhase:build: handles buildRequest from ${playerId}`,
+    //);
     if (!isBuildRequestPayload(payload)) {
       console.log(`🤝🔨TradeAndBuildPhase:build: invalid payload !`);
       return {
@@ -592,7 +592,7 @@ class TradeAndBuildPhase extends State {
   }
 
   public dice(): GameResponse {
-    console.log('🤝🎲TradeAndBuildPhase:dice: handles diceRequest.');
+    //console.log('🤝🎲TradeAndBuildPhase:dice: handles diceRequest.');
     return {
       value: null,
       message: `🤝🎲TradeAndBuildPhase:dice: action forbidden during this phase.`,
@@ -601,7 +601,7 @@ class TradeAndBuildPhase extends State {
   }
 
   public skip(playerId: string): GameResponse {
-    console.log('🤝⏭️TradeAndBuildPhase:skip: handles skipRequest.');
+    //console.log('🤝⏭️TradeAndBuildPhase:skip: handles skipRequest.');
     const p = this.state.isPlayersTurn(playerId);
     if (!p) {
       return { value: null, message: "It's not your turn !", data: null };

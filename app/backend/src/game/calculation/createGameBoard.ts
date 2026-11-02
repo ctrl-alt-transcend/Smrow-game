@@ -9,7 +9,7 @@ import {
   type GameBoardGraph,
   HEX_SIZE,
   Faction,
-} from '../../../../shared/game/gameboard.types';
+} from '@shared/game/gameboard.types';
 import { getHexCorners, getHexEdges } from '@shared/game/hexCalculation';
 
 /** @description calculate and render an SVG board game based on the given layout */
@@ -80,7 +80,7 @@ const emptyConnections = (): ConnectedElements => ({
 /** @description reserves an entry in the graph and detects ID collisions */
 const register = (graph: GameBoardGraph, id: string): ConnectedElements => {
   if (graph.has(id)) {
-    throw new Error(`[linkGameBoard] id dupliqué dans le plateau : "${id}"`);
+    throw new Error(`[linkGameBoard] dupplicate id found: "${id}"`);
   }
   const entry = emptyConnections();
   graph.set(id, entry);
@@ -136,7 +136,7 @@ export const linkGameBoard = (board: GameBoard): GameBoardGraph => {
     board.settlements.map((s) => [s.vertex.id, s]),
   );
 
-  // Index routes by vertex (required for routes↔routes)
+  // Index roads by vertex (required for roads↔roads)
   const roadsByVertex = indexRoadsByVertex(board.roads);
 
   // Index of tiles by vertex (required for settlements↔tiles)

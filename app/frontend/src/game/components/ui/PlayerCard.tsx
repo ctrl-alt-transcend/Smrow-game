@@ -17,7 +17,7 @@ export function PlayerCard({name, level, score, avatarURL}: PlayerCardProps) {
           size={AVATAR_SIZE}
           />
 
-      </Card.Section> 
+      </Card.Section>
         <Card.Section px="xs">
           <Stack gap={0} h={AVATAR_SIZE}>
             <Text fz="lg" fw="700" lh={1.1}>{name}</Text>

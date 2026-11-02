@@ -4,7 +4,7 @@ import type {
   TileData,
   SettlementData,
   RoadData
-} from "../../../../shared/game/gameboard.types";
+} from "@shared/game/gameboard.types";
 
 const resetSelection = (): GameBoardSelection => ({
   selectedTile: null,

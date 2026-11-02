@@ -4,7 +4,7 @@ import type {
   TileData,
   RoadData,
   SettlementData
-} from "../../../../shared/game/gameboard.types";
+} from "@shared/game/gameboard.types";
 
 
 /** @description generic hook for gameboard interactive elements */

@@ -12,27 +12,27 @@ const addRessources = (
 ) => {
   switch (land) {
     case 'desert':
-      console.log(`addRessources:${playerId}:produced nothing (desert)`);
+      //console.log(`addRessources:${playerId}:produced nothing (desert)`);
       break;
     case 'field':
       ressources.hay++;
-      console.log(`addRessources:${playerId}:produced some hay`);
+      //console.log(`addRessources:${playerId}:produced some hay`);
       break;
     case 'forest':
       ressources.wood++;
-      console.log(`addRessources:${playerId}:produced some wood`);
+      //console.log(`addRessources:${playerId}:produced some wood`);
       break;
     case 'hill':
       ressources.brick++;
-      console.log(`addRessources:${playerId}:produced some brick`);
+      //console.log(`addRessources:${playerId}:produced some brick`);
       break;
     case 'mountain':
       ressources.rock++;
-      console.log(`addRessources:${playerId}:produced some rock`);
+      //console.log(`addRessources:${playerId}:produced some rock`);
       break;
     case 'pasture':
       ressources.sheep++;
-      console.log(`addRessources:${playerId}:produced some sheep`);
+      //console.log(`addRessources:${playerId}:produced some sheep`);
       break;
     default:
       break;

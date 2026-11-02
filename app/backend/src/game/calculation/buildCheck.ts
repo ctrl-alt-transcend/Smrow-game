@@ -46,15 +46,15 @@ export const validateRoadPlacement = (
   graph: GameBoardGraph,
 ): { valid: true } | { valid: false; reason: string } => {
   if (road.hasOwner) {
-    console.log(`👀⛔buildCheck:road: already occupied`);
+    //console.log(`👀⛔buildCheck:road: already occupied`);
     return { valid: false, reason: 'road already occupied' };
   }
 
-  const settlementsByVertex = indexSettlementsByVertex([]); // à passer depuis board.settlements
+  const settlementsByVertex = indexSettlementsByVertex([]);
   const graphEntry = graph.get(road.id);
 
   if (!graphEntry) {
-    console.log(`👀⛔buildCheck:road: doesn't exists ...`);
+    //console.log(`👀⛔buildCheck:road: doesn't exists ...`);
     return { valid: false, reason: 'unknown road' };
   }
   const endpoints = [road.edge.p1.id, road.edge.p2.id];
@@ -63,17 +63,15 @@ export const validateRoadPlacement = (
   for (const vertexId of endpoints) {
     const settlement = settlementsByVertex.get(vertexId);
     if (settlement?.hasOwner && settlement.faction !== ownerFaction) {
-      console.log(`👀⛔buildCheck:road: blocked by opponent`);
+      //console.log(`👀⛔buildCheck:road: blocked by opponent`);
       continue;
     }
 
-    // Connexion directe à son propre bâtiment
     if (settlement?.hasOwner && settlement.faction === ownerFaction) {
       connectedToNetwork = true;
       break;
     }
 
-    // Connexion via une de ses routes voisines (lu depuis le graph)
     const hasConnectionViaNeighbor = graphEntry.connectedRoads.some(
       (neighbor) =>
         neighbor.hasOwner &&
@@ -92,18 +90,18 @@ export const validateRoadPlacement = (
   );
   if (!hasOwnAdjacentSettlement) {
     if (connectedToNetwork) {
-      console.log(`👀✅buildCheck:road: is valid`);
+      //console.log(`👀✅buildCheck:road: is valid`);
       return { valid: true };
     }
   }
   if (!connectedToNetwork && !hasOwnAdjacentSettlement) {
-    console.log(`👀⛔buildCheck:road: must be connected to network`);
+    //console.log(`👀⛔buildCheck:road: must be connected to network`);
     return {
       valid: false,
-      reason: 'La route doit être connectée à votre réseau',
+      reason: 'road must be connected to network',
     };
   }
-  console.log(`👀✅buildCheck:road: is valid`);
+  //console.log(`👀✅buildCheck:road: is valid`);
   return { valid: true };
 };
 
@@ -118,15 +116,15 @@ export const validateSettlementPlacement = (
   placementPhase?: boolean,
 ): { valid: true } | { valid: false; reason: string } => {
   if (settlement.hasOwner) {
-    console.log(`👀⛔buildCheck:settlement: already occupied`);
-    return { valid: false, reason: 'Cette colonie est déjà occupée' };
+    //console.log(`👀⛔buildCheck:settlement: already occupied`);
+    return { valid: false, reason: 'settlement already owned by another player' };
   }
 
   const graphEntry = graph.get(settlement.id);
 
   if (!graphEntry) {
-    console.log(`👀⛔buildCheck:settlement: doesn't exists ...`);
-    return { valid: false, reason: 'Colonne introuvable dans le graphe' };
+    //console.log(`👀⛔buildCheck:settlement: doesn't exists ...`);
+    return { valid: false, reason: 'unknown settlement' };
   }
 
   // Règle de distance : aucun sommet adjacent occupé (lu depuis le graph)
@@ -134,10 +132,10 @@ export const validateSettlementPlacement = (
     (s) => s.hasOwner,
   );
   if (nearbyOccupied) {
-    console.log(`👀⛔buildCheck:settlement: too close to another one`);
+    //console.log(`👀⛔buildCheck:settlement: too close to another one`);
     return {
       valid: false,
-      reason: "Colonie trop proche d'une construction existante",
+      reason: "settlement too close to another one",
     };
   }
 
@@ -149,13 +147,13 @@ export const validateSettlementPlacement = (
   );
 
   if (!hasOwnAdjacentRoad && placementPhase === undefined) {
-    console.log(`👀⛔buildCheck:settlement: must be connected`);
+    //console.log(`👀⛔buildCheck:settlement: must be connected`);
     return {
       valid: false,
-      reason: 'La colonie doit toucher une de vos routes',
+      reason: 'settlement must be connected to a road',
     };
   }
-  console.log(`👀✅buildCheck:settlement: is valid`);
+  //console.log(`👀✅buildCheck:settlement: is valid`);
   return { valid: true };
 };
 
@@ -185,14 +183,14 @@ function settlementCheck(
     player.ressources.sheep < 1 &&
     player.ressources.hay < 1
   ) {
-    console.log(`👀⛔buildCheck:settlement: not enough ressources`);
+    //console.log(`👀⛔buildCheck:settlement: not enough ressources`);
     return {
       valid: false,
       message: 'not enough ressources',
     };
   }
   if (!settlementResult.valid) {
-    console.log(`👀⛔buildCheck:settlement: invalid, element doesn't exist`);
+    //console.log(`👀⛔buildCheck:settlement: invalid, element doesn't exist`);
     return {
       valid: false,
       message: settlementResult.reason,
@@ -224,7 +222,7 @@ function roadCheck(
     player.ressources.brick < 1 &&
     player.ressources.wood < 1
   ) {
-    console.log(`👀⛔buildCheck:road: not enough ressources`);
+    //console.log(`👀⛔buildCheck:road: not enough ressources`);
     return {
       valid: false,
       message: 'not enough ressources',
