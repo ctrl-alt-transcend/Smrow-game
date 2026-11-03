@@ -1,7 +1,7 @@
 import type { SettlementProps } from "../../types/gameboard.types";
 import { useHover } from "../../hooks/useGameBoardHover";
 import { getTileFillColor } from "../../utils/tileRendering";
-import { SETTLEMENT_SIZE, HOVER_EFFECT } from "../../../../../shared/game/gameboard.types";
+import { SETTLEMENT_SIZE, HOVER_EFFECT } from "@shared/game/gameboard.types";
 
 export const Settlement: React.FC<SettlementProps> = ({
   data,
