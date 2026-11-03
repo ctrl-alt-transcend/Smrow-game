@@ -14,8 +14,7 @@
 		"type-check": "tsc -b config/tsconfig.json --noEmit",
 		"test": "vitest run --config config/vite.config.ts",
 		"test:watch": "vitetest",
-		"preview": "vite preview",
-		"prepare": "cd ../../ && husky app/frontend/.husky"
+		"preview": "vite preview"
 	},
 	"lint-staged": {
 		"*.{ts,tsx,js,jsx}": [

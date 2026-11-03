@@ -8,15 +8,25 @@ endif
 SECRETS_DIR=app/secrets
 ENV_DIR=app
 MIGRATION_NAME ?= init
+FRONTEND_DIR=./app/frontend
+BACKEND_DIR=./app/backend
+FRONTEND_LOCK=$(FRONTEND_DIR)/package-lock.json
+BACKEND_LOCK=$(BACKEND_DIR)/package-lock.json
+
 
 all: up
 
 refresh: build up
 
+pull:
+	git pull --ff-only
+	$(MAKE) install
+	$(MAKE) check
+
 build:
 	docker compose -f $(DOCKER_COMPOSE_FILE) build
 
-up: secrets
+up: install secrets
 	docker compose -f $(DOCKER_COMPOSE_FILE) up -d
 
 watch: up
@@ -29,13 +39,36 @@ watch: up
 down:
 	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
+install: $(FRONTEND_DIR)/node_modules/.package-lock.json  $(BACKEND_DIR)/node_modules/.package-lock.json
+
+$(FRONTEND_DIR)/node_modules/.package-lock.json: $(FRONTEND_DIR)/package.json $(FRONTEND_LOCK)
+	@echo "Installing frontend packages..."
+	cd $(FRONTEND_DIR) && npm ci
+
+$(BACKEND_DIR)/node_modules/.package-lock.json: $(BACKEND_DIR)/package.json $(BACKEND_LOCK)
+	@echo "Installing frontend packages..."
+	cd $(BACKEND_DIR) && npm ci
+
+check: check-back check-front
+
+check-back: install
+	@echo "checking format"
+	cd $(BACKEND_DIR) && npx prisma generate
+	cd $(BACKEND_DIR) && npm run build
+	cd $(BACKEND_DIR) && npm run lint
+
+check-front: install
+	@echo "checking format"
+	cd $(FRONTEND_DIR) && npm run build
+	cd $(FRONTEND_DIR) && npm run lint
+
 lint-front:
-	cd ./app/frontend && npm run lint && cd ../..
+	cd $(FRONTEND_DIR) && npm run lint && cd ../..
 lint-back:
-	cd ./app/backend && npm run lint && cd ../..
+	cd $(BACKEND_DIR) && npm run lint && cd ../..
 
 type-front:
-	cd ./app/frontend && npm run type-check && cd ../..
+	cd $(FRONTEND_DIR) && npm run type-check && cd ../..
 
 secrets:
 	@mkdir -p $(SECRETS_DIR)
@@ -69,5 +102,5 @@ migrate:
 	DB_PASSWORD_FILE=../secrets/db_password.txt \
 	npx prisma migrate dev --name $(MIGRATION_NAME)
 
-.PHONY: all refresh build up down fclean re secrets migrate initdb
+.PHONY: all refresh build up down fclean re secrets migrate initdb install check
 
