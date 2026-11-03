@@ -13,7 +13,6 @@ export interface InteractiveProps<T> {
   onHoverChange?: (isHovered: boolean) => void;
   onClick: (data: T) => void;
   hasOwner?: boolean | null;
-  //owner?: PlayerId | null;
 }
 
 export interface TileProps extends InteractiveProps<TileData> { }

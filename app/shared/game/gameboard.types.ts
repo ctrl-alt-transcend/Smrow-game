@@ -88,22 +88,18 @@ export interface TileData {
 
 export interface BuildData {
   faction: Faction;
-  hasOwner?: boolean;
+  hasOwner: boolean;
 }
 
 export interface RoadData extends BuildData {
   id: string;
   edge: Edge;
-  //faction: Faction;
-  //hasOwner?: boolean;
 }
 
 export interface SettlementData extends BuildData {
   id: string;
   vertex: Vertex;
-  //faction: Faction;
-  //hasOwner?: boolean;
-  //isCity?: boolean;
+  isCity: boolean;
 }
 
 /** @description sent to the front, serializable without risk */

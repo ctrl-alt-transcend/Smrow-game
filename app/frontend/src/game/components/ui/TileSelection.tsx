@@ -12,7 +12,6 @@ import {
 import { modals } from "@mantine/modals";
 import { useSelectionDisplay } from "../../hooks/useSelectionDisplay";
 import type { GameBoardSelection } from "../../types/gameboard.types";
-import { Faction } from "../../../../../shared/game/gameboard.types.ts";
 import type { BuildRequestPayload } from "@shared/game/game.types.ts";
 import { socket } from "../../../socket.tsx";
 
@@ -24,14 +23,12 @@ const BUILD_TIMEOUT_MS = 500;
 
 interface BuildSelectionButtonProps {
   selected: GameBoardSelection;
-  faction: Faction;
   masterLog: string | null;
   onBuilt?: (target: BuildRequestPayload) => void;
 }
 
 const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   selected,
-  faction,
   masterLog,
   onBuilt,
 }) => {
@@ -60,10 +57,9 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     socket.emit("build", {
       kind: target.kind,
       id: target.id,
-      data: target.data,
-      faction: faction ?? Faction.DEFAULT,
+      data: target.data
     });
-  }, [busy, target, masterLog, faction]);
+  }, [busy, target, masterLog]);
 
   /**
    * 2. Unlock component at response reception
@@ -137,14 +133,12 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
 
 interface TileSelectionProps {
   selected: GameBoardSelection;
-  faction?: Faction;
   masterLog?: string | null;
   onBuilt?: (target: BuildRequestPayload) => void;
 }
 
 export const TileSelection: React.FC<TileSelectionProps> = ({
   selected,
-  faction = Faction.DEFAULT,
   masterLog = null,
   onBuilt,
 }) => {
@@ -168,7 +162,6 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
           </Group>
           <BuildSelectionButton
             selected={selected}
-            faction={faction}
             masterLog={masterLog}
             onBuilt={onBuilt}
           />

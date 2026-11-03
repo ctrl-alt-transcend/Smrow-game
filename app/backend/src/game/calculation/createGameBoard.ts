@@ -33,6 +33,7 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
       vertex: v,
       faction: Faction.UNOCCUPIED,
       hasOwner: false,
+      isCity: false
     }),
   );
 
