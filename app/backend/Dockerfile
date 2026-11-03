@@ -3,12 +3,22 @@
 # more explaination here: https://stackoverflow.com/questions/52499617/what-is-the-difference-between-npm-install-and-npm-ci
 
 FROM node:26-alpine AS dev
-WORKDIR /app/backend
-COPY /backend/package*.json ./
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/
+COPY frontend/package.json ./frontend/
+COPY shared/package.json ./shared/
+
 RUN npm ci
-COPY --exclude=.env backend ./
-COPY shared /app/shared
+
+COPY backend/ ./backend/
+COPY shared/ ./shared/
+
+WORKDIR /app/backend
 RUN npx prisma generate
+
 EXPOSE 3000
 ENTRYPOINT ["npm"]
 CMD ["run", "start:dev"]
@@ -27,10 +37,13 @@ RUN npm run build
 #
 FROM node:26-alpine AS pruner
 WORKDIR /app
-COPY package*.json ./
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/
+COPY frontend/package.json ./frontend/
+COPY shared/package.json ./shared/
 COPY prisma ./prisma
-RUN npm ci --omit=dev && npm cache clean --force \
-    && npx prisma generate
+RUN npm ci --omit=dev \
+    && npm cache clean --force && npx prisma generate
 
 #INFO: the image gonne be used to run the application
 #

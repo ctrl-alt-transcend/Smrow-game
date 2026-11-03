@@ -1,9 +1,16 @@
 FROM node:22-alpine AS dev
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY frontend/package.json ./frontend/
+COPY backend/package.json ./backend/
+COPY shared/package.json ./shared/
+
 RUN npm ci
+
 COPY --exclude=nginx frontend/ ./
 COPY shared/ /app/shared
+
 EXPOSE 5173
 ENTRYPOINT ["npm"]
 CMD ["run", "dev", "--", "--host", "0.0.0.0"]

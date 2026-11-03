@@ -1,10 +1,11 @@
 {
   "name": "backend",
-  "version": "0.1",
+  "version": "1.0.0",
   "description": "",
   "author": "Enrique Murillo Orosco, Hayden Dougoud, Matthieu Gillieron, Eliot Monachon, Théo Immi",
   "private": true,
   "license": "MIT License",
+  "shared": "*",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -89,13 +90,5 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  },
-  "allowScripts": {
-    "prisma@7.10.0": true,
-    "@parcel/watcher@2.6.0": true,
-    "unrs-resolver@1.12.2": true,
-    "package-lock-only": false,
-    "bcrypt@6.0.0": true,
-    "@prisma/engines@7.10.1": true
   }
 }

@@ -1,0 +1,15 @@
+{
+    "name": "shared",
+    "version": "1.0.0",
+    "type": "module",
+    "main": "./index.ts",
+    "types": "./index.ts",
+    "exports": {
+        ".": "./index.ts",
+        "./types": "./types.ts",
+        "./game-type": "./game/game.types.ts",
+        "./gamebord-type": "./game/gameboard.types.ts",
+        "./hexCalculcation": "./game/hexCalculation.ts",
+        "./ui-type": "./game/ui.types.ts"
+    }
+}

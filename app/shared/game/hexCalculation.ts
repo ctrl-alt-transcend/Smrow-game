@@ -2,7 +2,7 @@ import {
   type Edge,
   type Vertex,
   HEX_SIZE
-} from "./gameboard.types";
+} from "./gameboard.types.ts";
 
 /** @description axial coordinates (col & row) to pixels (pointy-topped) */
 export const axialToPixel = (q: number, r: number, size: number) => ({

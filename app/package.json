@@ -1,0 +1,16 @@
+{
+    "name": "Catan",
+    "private": true,
+    "workspaces": [
+        "shared",
+        "frontend",
+        "backend"
+    ],
+    "allowScripts": {
+        "bcrypt": true,
+        "@parcel/watcher": true,
+        "prisma": true,
+        "@prisma/engines": true,
+        "unrs-resolver": true
+    }
+}
