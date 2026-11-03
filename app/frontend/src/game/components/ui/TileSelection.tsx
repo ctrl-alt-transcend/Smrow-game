@@ -12,7 +12,7 @@ import {
 import { modals } from "@mantine/modals";
 import { useSelectionDisplay } from "../../hooks/useSelectionDisplay";
 import type { GameBoardSelection } from "../../types/gameboard.types";
-import { Faction } from "../../../../../shared/game/gameboard.types.ts";
+import { Faction } from "@shared/game/gameboard.types.ts";
 import type { BuildRequestPayload } from "@shared/game/game.types.ts";
 import { socket } from "../../../socket.tsx";
 
