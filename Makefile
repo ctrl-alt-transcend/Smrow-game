@@ -31,6 +31,8 @@ down:
 
 lint-front:
 	cd ./app/frontend && npm run lint && cd ../..
+lint-back:
+	cd ./app/backend && npm run lint && cd ../..
 
 type-front:
 	cd ./app/frontend && npm run type-check && cd ../..
@@ -46,8 +48,6 @@ secrets:
 		openssl rand -hex 32 | tr -dc 'A-Za-z0-9@%^*_+=-' | head -c 16 > "$(SECRETS_DIR)/jwt_secret.txt"; \
 	fi
 
-prepush: lint type
-
 fclean: down
 	docker compose -f $(DOCKER_COMPOSE_FILE) down --rmi all --volumes --remove-orphans
 
@@ -59,7 +59,7 @@ re: fclean
 initdb:
 	docker compose -f $(DOCKER_COMPOSE_FILE) exec backend npx prisma migrate deploy
 
-	// how to use: make migrate MIGRATION_NAME="Your_migration_name_between_double_quotes"
+	# how to use: make migrate MIGRATION_NAME="Your_migration_name_between_double_quotes"
 migrate:
 	@cd app/backend && \
 	DB_HOST=localhost \

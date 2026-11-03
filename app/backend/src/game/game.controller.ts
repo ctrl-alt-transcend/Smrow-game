@@ -31,25 +31,4 @@ export class GameController {
       await this.userService.findPlayerProfile(req.user.id);
     return this.gameService.joinGame(playerProfile, gameId);
   }
-
-  //TODO: check id this endpoint is needed ?
-  // @Get('/currentGame')
-  // @UseGuards(JwtAuthGuard)
-  // async findGameByJwt(@Req() req: { user: UserPublic }): Promise<GameState> {
-  //   return this.gameService.getGameStateByUserId(req.user.id);
-  // };
-
-  //TODO: Implement this with websockets
-  //@Post('build')
-  //async buildRequest(@Body() dto: BuildDto) {
-  //  const result = this.gameService.buildRequest();
-  //  return { ...result };
-  //}
-
-  //TODO: Implement this with websockets
-  //@Post('dice')
-  //async diceRequest(@Body() dto: RollDiceDto) {
-  //  const result = this.gameService.diceRequest();
-  //  return { ...result };
-  //}
 }
