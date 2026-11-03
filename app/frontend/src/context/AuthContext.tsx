@@ -1,9 +1,5 @@
 import { createContext } from "react";
-import type {
-  LoginPost,
-  RegisterPost,
-  UserPublic,
-} from "@shared/types";
+import type { LoginPost, RegisterPost, UserPublic } from "@shared/types";
 
 export interface AuthContextValue {
   user: UserPublic | null;
@@ -15,7 +11,8 @@ export interface AuthContextValue {
   logout: () => void;
 }
 
-const num= 42
+const test = 1;
+
 export const AuthContext = createContext<AuthContextValue | undefined>(
   undefined,
 );
