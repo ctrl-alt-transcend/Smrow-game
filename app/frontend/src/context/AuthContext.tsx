@@ -15,6 +15,7 @@ export interface AuthContextValue {
   logout: () => void;
 }
 
+const num= 42
 export const AuthContext = createContext<AuthContextValue | undefined>(
   undefined,
 );
