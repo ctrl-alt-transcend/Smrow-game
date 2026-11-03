@@ -15,12 +15,13 @@
 		"test": "vitest run --config config/vite.config.ts",
 		"test:watch": "vitetest",
 		"preview": "vite preview",
-		"prepare": "husky"
+		"prepare": "cd ../../ && husky app/frontend/.husky"
 	},
 	"lint-staged": {
-		"*.{ts,tsx}": [
+		"*.{ts,tsx,js,jsx}": [
 			"prettier --write",
-			"oxlint --fix"
+			"oxlint --fix",
+			"oxlint"
 		]
 	},
 	"dependencies": {

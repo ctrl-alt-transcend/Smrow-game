@@ -11,8 +11,6 @@ export interface AuthContextValue {
   logout: () => void;
 }
 
-const test = 1;
-
 export const AuthContext = createContext<AuthContextValue | undefined>(
   undefined,
 );
