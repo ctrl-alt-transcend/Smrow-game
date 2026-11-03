@@ -10,13 +10,37 @@ export const SETTLEMENT_SIZE = RENDER_SIZE / 6;
 export const ROAD_SIZE = RENDER_SIZE / 8;
 export const HOVER_EFFECT = 1.4;
 
-export const RessourceType = {
-  WOOD: 'wood',
-  SHEEP: 'sheep',
-  HILL: 'brick',
-  MOUNTAIN: 'rock',
-  FIELD: 'hay'
+export const BuildingType = {
+  ROAD: 'road',
+  SETTLEMENT: 'settlement',
+  CITY: 'city',
 } as const;
+export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
+
+export const TraderType = {
+  SPECIALIZED_PORT: 'specialized port',
+  PORT: 'port',
+  RESERVE: 'reserve',
+} as const;
+export type TraderType = (typeof TraderType)[keyof typeof TraderType];
+
+export const CostType = {
+  ROAD: BuildingType.ROAD,
+  SETTLEMENT: BuildingType.SETTLEMENT,
+  CITY: BuildingType.CITY,
+  PORT: TraderType.PORT,
+  RESERVE: TraderType.RESERVE
+} as const;
+export type CostType = (typeof CostType)[keyof typeof CostType];
+
+//export const RessourceType = {
+//  WOOD: 'wood',
+//  SHEEP: 'sheep',
+//  HILL: 'brick',
+//  MOUNTAIN: 'rock',
+//  FIELD: 'hay'
+//} as const;
+//export type RessourceType = (typeof RessourceType)[keyof typeof RessourceType];
 
 export const LandType = {
   FOREST: 'forest',
@@ -27,6 +51,17 @@ export const LandType = {
   DESERT: 'desert',
   DEFAULT: 'default'
 } as const;
+export type LandType = (typeof LandType)[keyof typeof LandType];
+
+export const LAND_RESSOURCES: Record<LandType, string> = {
+  [LandType.FOREST]: 'wood',
+  [LandType.PASTURE]: 'sheep',
+  [LandType.HILL]: 'brick',
+  [LandType.MOUNTAIN]: 'rock',
+  [LandType.FIELD]: 'hay',
+  [LandType.DESERT]: 'dust',
+  [LandType.DEFAULT]: 'none',
+};
 
 export const LAND_COLORS: Record<LandType, string> = {
   [LandType.FOREST]: '#4a7c2e',
@@ -37,7 +72,6 @@ export const LAND_COLORS: Record<LandType, string> = {
   [LandType.DESERT]: '#e8cfa0',
   [LandType.DEFAULT]: '#7e00c7d7'
 };
-export type LandType = (typeof LandType)[keyof typeof LandType];
 
 export const Faction = {
   POURPRES_CHYBRES: 'Pourpres Chybres',
@@ -47,6 +81,7 @@ export const Faction = {
   DEFAULT: 'Kikouneurs (default)',
   UNOCCUPIED: 'unoccupied ...'
 } as const;
+
 export const FACTION_COLORS: Record<Faction, string> = {
   [Faction.POURPRES_CHYBRES]: '#6b0b91',
   [Faction.BOURSES_BLEUES]: '#53cef3',
@@ -88,7 +123,7 @@ export interface TileData {
 
 export interface BuildData {
   faction: Faction;
-  hasOwner: boolean;
+  ownerId: string | null;
 }
 
 export interface RoadData extends BuildData {
@@ -131,7 +166,7 @@ export type GameBoardGraph = Map<string, ConnectedElements>;
  * @key settlement id
  * @value player who built
 */
-export type Buildings = Map<string, Player>;
+export type BuildingsInGame = Map<string, Player>;
 
 /** @description classic Catan gameboard layout (19 tiles) */
 export const classicLayout: TileData[] = [

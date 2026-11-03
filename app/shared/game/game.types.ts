@@ -21,7 +21,7 @@ export type Player = {
   firstDice: number,
   secondDice: number,
   totalDice: number,
-  settlementsBuilt: number;
+  settlementsBuilt: Map<string, SettlementData>
   roadsBuilt: number;
   faction: Faction;
   avatarURL: string | null;
@@ -42,7 +42,7 @@ export type GameData = {
   turnOrder: string[];
   currentTurnIndex: number;
   gameId: string;
-  diceRoll: number | null;
+  dicesSum: number;
   masterLog: string | null;
   board: GameBoard;
 }
@@ -59,7 +59,7 @@ export type GameDataDto = { //INFO: data we send to the client every time the ga
   //turnOrder: string[];
   //currentTurnIndex: number;
   gameId: string;
-  diceRoll: number | null;
+  dicesSum: number | null;
   masterLog: string | null;
   board: GameBoard;
 }

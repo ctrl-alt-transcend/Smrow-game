@@ -73,7 +73,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     // -------------
 
     game.phaseCheckRequest();
-    game.setDiceRoll(result.value);
     game.setMasterLog(result.message);
     this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
     return { ...result };
@@ -92,7 +91,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     // -------------
 
     game.phaseCheckRequest();
-    game.setDiceRoll(result.value);
     game.setMasterLog(result.message);
     this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
     return { ...result };
@@ -114,7 +112,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     // -------------
 
     game.phaseCheckRequest();
-    game.setDiceRoll(result.value);
     game.setMasterLog(result.message);
     this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
     return { ...result };

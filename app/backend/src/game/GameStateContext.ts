@@ -1,10 +1,11 @@
 import {
   type GameBoard,
   type GameBoardGraph,
-  Buildings,
+  BuildingsInGame,
   classicLayout,
   Faction,
   FACTION_COLORS,
+  SettlementData,
 } from '@shared/game/gameboard.types';
 import type {
   GameData,
@@ -17,12 +18,12 @@ import {
   isBuildRequestPayload,
   updateValue,
   funnyLogs,
-  printAllPlayers,
+  //printAllPlayers,
   //printPlayer,
 } from './game.utils';
-import { buildCheck } from './calculation/buildCheck';
+import { buildCheck } from './calculation/handleBuilds';
 import { createGameBoard } from './calculation/createGameBoard';
-import { ressoucesCheck } from './calculation/ressourcesCheck';
+import { ressoucesProduction } from './calculation/handleRessources';
 
 /**
  * STATE DESIGN PATTERN
@@ -38,7 +39,7 @@ class GameStateContext {
   private state!: State;
   protected data!: GameData;
   protected graph!: GameBoardGraph;
-  protected buildings: Buildings = new Map();
+  protected buildings: BuildingsInGame = new Map();
   private factionSwitch: number = 0;
 
   constructor(gameId: string, state: State) {
@@ -52,7 +53,7 @@ class GameStateContext {
       currentTurnIndex: 0,
       gameId: gameId,
       masterLog: '...',
-      diceRoll: 0,
+      dicesSum: 0,
       board: board,
     };
     this.initGameData(); //⚠️ FOR TESTING WITH MOCKED VALUE
@@ -87,7 +88,7 @@ class GameStateContext {
       firstDice: 0,
       secondDice: 0,
       totalDice: 0,
-      settlementsBuilt: 0,
+      settlementsBuilt: new Map<string, SettlementData>(),
       roadsBuilt: 0,
       level: 1,
       username: playerId,
@@ -155,7 +156,7 @@ class GameStateContext {
   public getGraph(): GameBoardGraph {
     return this.graph;
   }
-  public getBuildings(): Buildings {
+  public getBuildings(): BuildingsInGame {
     return this.buildings;
   }
   public getGameId(): string {
@@ -196,7 +197,7 @@ class GameStateContext {
     return {
       players: Array.from(gameData.players.values()),
       gameId: gameData.gameId,
-      diceRoll: gameData.diceRoll,
+      dicesSum: gameData.dicesSum,
       masterLog: gameData.masterLog,
       board: gameData.board,
     };
@@ -226,8 +227,8 @@ class GameStateContext {
   }
 
   /** Setters */
-  public setDiceRoll(roll: number | null) {
-    this.data.diceRoll = roll;
+  public setDicesSum(roll: number) {
+    this.data.dicesSum = roll;
   }
   public setMasterLog(log: string | null) {
     this.data.masterLog = log;
@@ -452,6 +453,9 @@ class PlacementPhase extends State {
         data: this.state.getGameData(),
       };
     }
+    console.log(
+      `🗺️🔨PlacementPhasee:build: ${playerId} built his/her first settlement and road!`,
+    );
     this.settlementBuilt = false;
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
@@ -476,8 +480,8 @@ class PlacementPhase extends State {
       //console.log(`🗺️🔎PlacementPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
-    ressoucesCheck(this.state.getBuildings(), this.state.getGraph(), true);
-    printAllPlayers(this.state.getGameData().players); // ⚠️DEBUG: remove in prod
+    ressoucesProduction(this.state.getBuildings(), this.state.getGraph(), this.state.getGameData().dicesSum, true);
+    //printAllPlayers(this.state.getGameData().players); // ⚠️DEBUG: remove in prod
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     console.log('🗺️🔎PlacementPhase:phaseCheck: everybody is ready!');
@@ -499,7 +503,8 @@ class RessourcePhase extends State {
       console.log(
         `🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`,
       );
-      this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
+      this.state.setDicesSum(p.firstDice + p.secondDice)
+      ressoucesProduction(this.state.getBuildings(), this.state.getGraph(), this.state.getGameData().dicesSum, false );
       this.state.setCurrentTurnIndex(undefined);
       this.state.setTurnCount(undefined);
       return {
@@ -534,8 +539,7 @@ class RessourcePhase extends State {
       //console.log(`🪵🔎RessourcePhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;
     }
-    ressoucesCheck(this.state.getBuildings(), this.state.getGraph());
-    printAllPlayers(this.state.getGameData().players); // ⚠️DEBUG: remove in prod
+    //printAllPlayers(this.state.getGameData().players); // ⚠️DEBUG: remove in prod
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     this.state.resetAllDices();

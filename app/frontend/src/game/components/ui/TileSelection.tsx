@@ -100,28 +100,53 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
       });
       return;
     }
-
-    modals.openConfirmModal({
-      title: "Confirm construction",
-      children: (
-        <Text size="sm">
-          Are you sure you want to build:{" "}
-          <Anchor
-            href="#"
-            onClick={(event) => {
-              event.preventDefault();
-              console.log(`Build ${target.kind} at:`, target.id);
-            }}
-          >
-            {target.kind === "road" ? "Road" : "Settlement"} ({target.id})
-          </Anchor>
-          ?
-        </Text>
-      ),
-      labels: { confirm: "Confirm", cancel: "Cancel" },
-      onConfirm: handleConfirm,
-      centered: true,
-    });
+    if (target.kind == 'settlement' && target.data.ownerId) {
+    //if (selected.selectedSettlement && selected.selectedSettlement?.hasOwner) {
+      modals.openConfirmModal({
+        title: "Confirm upgrade",
+        children: (
+          <Text size="sm">
+            Are you sure you want to upgrade: {" "}
+            <Anchor
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                console.log(`Upgrade ${target.kind} to city at:`, target.id);
+              }}
+            >
+              {"Settlement"} ({target.id} )
+            </Anchor>
+            to a City?
+          </Text>
+        ),
+        labels: { confirm: "Confirm", cancel: "Cancel" },
+        onConfirm: handleConfirm,
+        centered: true,
+      });
+    }
+    else {
+      modals.openConfirmModal({
+        title: "Confirm construction",
+        children: (
+          <Text size="sm">
+            Are you sure you want to build:{" "}
+            <Anchor
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                console.log(`Build ${target.kind} at:`, target.id);
+              }}
+            >
+              {target.kind === "road" ? "Road" : "Settlement"} ({target.id})
+            </Anchor>
+            ?
+          </Text>
+        ),
+        labels: { confirm: "Confirm", cancel: "Cancel" },
+        onConfirm: handleConfirm,
+        centered: true,
+      });
+    }
   };
 
   return (

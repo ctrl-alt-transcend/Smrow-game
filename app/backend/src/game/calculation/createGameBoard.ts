@@ -32,7 +32,7 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
       id: v.id,
       vertex: v,
       faction: Faction.UNOCCUPIED,
-      hasOwner: false,
+      ownerId: null,
       isCity: false
     }),
   );
@@ -41,7 +41,7 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
     id: e.id,
     edge: e,
     faction: Faction.UNOCCUPIED,
-    hasOwner: false,
+    ownerId: null
   }));
 
   // --- SVG calculation ---
