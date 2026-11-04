@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { readSecret } from 'src/strategies/readSecret';
+import { readSecret } from '../strategies/readSecret';
 import { DB } from '../config/config';
 
 @Injectable()

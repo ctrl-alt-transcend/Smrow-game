@@ -2,7 +2,7 @@ import { Faction,
   type GameBoard,
   type RoadData,
   type SettlementData
-} from "./gameboard.types.ts";
+} from "./gameboard.types.js";
 
 export type Ressources = {
   wood: number;

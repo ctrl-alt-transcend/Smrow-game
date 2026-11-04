@@ -7,9 +7,8 @@
     "exports": {
         ".": "./index.ts",
         "./types": "./types.ts",
-        "./game-type": "./game/game.types.ts",
-        "./gamebord-type": "./game/gameboard.types.ts",
-        "./hexCalculcation": "./game/hexCalculation.ts",
-        "./ui-type": "./game/ui.types.ts"
+        "./game": "./game/index.ts",
+        "./game/game.types": "./game/game.types.ts",
+        "./game/hexCalculation": "./game/hexCalculation.ts"
     }
 }

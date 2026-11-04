@@ -10,8 +10,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { instrument } from '@socket.io/admin-ui';
-import type { JwtPayload } from '@shared/types';
-import type { BuildRequestPayload } from '@shared/game/game.types';
+import type { JwtPayload } from 'shared';
+import type { BuildRequestPayload } from 'shared';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
