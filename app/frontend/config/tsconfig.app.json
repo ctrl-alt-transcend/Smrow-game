@@ -28,6 +28,6 @@
   },
   "include": [
     "../../frontend/**/*",
-    "../../shared/**/*"
-, "../../backend/src/game/calculation/ressourceCheck.types.ts"  ]
+    "../../shared/**/*",
+    "../../backend/src/game/calculation/ressourceCheck.types.ts"  ]
 }
