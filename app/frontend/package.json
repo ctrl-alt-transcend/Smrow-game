@@ -5,7 +5,6 @@
   "author": "Enrique Murillo Orosco, Hayden Dougoud, Matthieu Gillieron, Eliot Monachon, Théo Immi",
   "license": "MIT License",
   "type": "module",
-  "shared": "*",
   "scripts": {
     "dev": "vite --host '0.0.0.0' --config config/vite.config.ts",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\"",
@@ -18,6 +17,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "shared": "*",
     "@mantine/core": "^9.6.1",
     "@mantine/form": "^9.6.1",
     "@mantine/hooks": "^9.6.1",
