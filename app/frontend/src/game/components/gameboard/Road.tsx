@@ -1,10 +1,7 @@
 import type { RoadProps } from "../../types/gameboard.types";
 import { useHover } from "../../hooks/useGameBoardHover";
 import { getTileFillColor } from "../../utils/tileRendering";
-import {
-  ROAD_SIZE,
-  HOVER_EFFECT,
-} from "../../../../../shared/game/gameboard.types";
+import { ROAD_SIZE, HOVER_EFFECT } from "@shared/game/gameboard.types";
 
 export const Road: React.FC<RoadProps> = ({
   data,

@@ -4,6 +4,11 @@
   "categories": {
     "correctness": "error"
   },
+  "ignorePatterns": [
+	"node_modules/**",
+	"dist/**",
+	"coverage/**",
+  ],
   "rules": {
     "react/rules-of-hooks": "error"
   }

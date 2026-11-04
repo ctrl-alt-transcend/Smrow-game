@@ -22,6 +22,13 @@
     "test:ws": "node websocket-client/socket.io.mjs",
     "test:ws_room": "node websocket-client/create-room.io.mjs"
   },
+  "lint-staged": {
+	"*.{ts,js}": [
+		"prettier --write",
+		"eslint --fix",
+		"eslint"
+	]
+  },
   "dependencies": {
     "shared": "*",
     "@nestjs/common": "^11.0.1",

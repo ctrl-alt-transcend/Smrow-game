@@ -12,6 +12,13 @@
     "type-check": "tsc -b config/tsconfig.json --noEmit",
     "clean": "rm -rf dist node_modules/.tmp"
   },
+  "lint-staged": {
+	"*.{ts,tsx,js,jsx}": [
+		"prettier --write",
+		"oxlint --fix",
+		"oxlint"
+		]
+	},
   "dependencies": {
     "@mantine/core": "^9.6.1",
     "@mantine/form": "^9.6.1",
