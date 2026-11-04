@@ -24,7 +24,6 @@
 
     /* shared type alias */
     "paths": {
-    "@shared/*": ["../../shared/*"]
     },
   },
   "include": [

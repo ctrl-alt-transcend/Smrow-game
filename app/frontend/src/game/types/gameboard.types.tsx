@@ -3,7 +3,7 @@ import {
   type RoadData,
   type SettlementData,
   type GameBoard,
-} from "@shared/game/gameboard.types";
+} from "shared";
 
 /** @description common definition for all interactive game features */
 export interface InteractiveProps<T> {

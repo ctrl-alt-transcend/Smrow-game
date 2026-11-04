@@ -6,7 +6,7 @@ import { TileSelection } from "./components/ui/TileSelection.tsx";
 import { DiceRoller } from "./components/ui/DiceRoller.tsx";
 import GameMasterLog from "./components/ui/GameMasterLog.tsx";
 import { useGameState } from "./hooks/useGameState.ts";
-import type { GameDataDto } from "@shared/game/game.types.ts";
+import type { GameDataDto } from "shared";
 import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 

@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from "react";
 import { Card, Stack, Title, Box } from "@mantine/core";
 import { Dice3D, type DiceValue } from "../gameboard/Dice/Dice";
 import { useRollDice } from "../../hooks/useRollDice";
-import type { GameResponse } from "@shared/game/game.types";
+import type { GameResponse } from "shared";
 
 export function DiceRoller({
   diceRoll,
