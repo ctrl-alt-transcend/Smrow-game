@@ -1,7 +1,10 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
+const configDir = dirname(fileURLToPath(import.meta.url));
 
 /**
  * The Vite proxy acts as an intermediary between the client and the backend.
@@ -14,13 +17,18 @@ import react from '@vitejs/plugin-react'
  * @Warning: The Vite proxy is only used in development !
  */
 export default defineConfig({
-  plugins: [react()]
-  ,server: {
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@shared": resolve(configDir, "../../shared"),
+    },
+  },
+  server: {
     proxy: {
-      '/api': {
-        target: 'http://backend:3000',
+      "/api": {
+        target: "http://backend:3000",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
       '/ws/game': {
       target: 'http://backend:3000',
@@ -33,12 +41,12 @@ export default defineConfig({
     },
   },
   test: {
-    pool: 'threads',
+    pool: "threads",
     maxWorkers: 1,
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
-    setupFiles: './tests/setup.ts',
+    setupFiles: "./tests/setup.ts",
   },
-})
+});
 
-console.log('Vite config loaded successfully.')
+console.log("Vite config loaded successfully.");

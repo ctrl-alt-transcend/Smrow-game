@@ -63,10 +63,29 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const result = game.diceRequest(client.data.user.username);
 
     //⚠️ FOR TESTING
-    // game.phaseCheckRequest();
-    // game.diceRequest('enriquest');
-    // game.phaseCheckRequest();
-    // game.diceRequest('spagg');
+    game.phaseCheckRequest();
+    game.diceRequest('enriquest');
+    game.phaseCheckRequest();
+    game.diceRequest('spagg');
+    // -------------
+
+    game.phaseCheckRequest();
+    game.setDiceRoll(result.value);
+    game.setMasterLog(result.message);
+    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
+    return { ...result };
+  }
+
+  @SubscribeMessage('skip')
+  skip(@ConnectedSocket() client: SocketClient) {
+    const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    const result = game.skipRequest(client.data.user.username);
+
+    //⚠️ FOR TESTING
+    game.phaseCheckRequest();
+    game.skipRequest('enriquest');
+    game.phaseCheckRequest();
+    game.skipRequest('spagg');
     // -------------
 
     game.phaseCheckRequest();
@@ -85,10 +104,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const result = game.buildRequest(client.data.user.username, payload);
 
     //⚠️ FOR TESTING
-    // game.phaseCheckRequest();
-    // game.buildRequest('enriquest', payload);
-    // game.phaseCheckRequest();
-    // game.buildRequest('spagg', payload);
+    game.phaseCheckRequest();
+    game.buildRequest('enriquest', payload);
+    game.phaseCheckRequest();
+    game.buildRequest('spagg', payload);
     // -------------
 
     game.phaseCheckRequest();

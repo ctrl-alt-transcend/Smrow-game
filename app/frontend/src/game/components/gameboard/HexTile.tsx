@@ -1,6 +1,7 @@
 import type { TileProps } from "../../types/gameboard.types";
 import { useHover } from "../../hooks/useGameBoardHover";
-import { axialToPixel, HEX_SIZE } from "../../../../../shared/game/hexCalculation";
+import { axialToPixel } from "@shared/game/hexCalculation";
+import { HEX_SIZE } from "@shared/game/gameboard.types";
 import {
   getTileFillColor,
   getTileStrokeColor,

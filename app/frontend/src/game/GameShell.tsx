@@ -8,11 +8,14 @@ import GameMasterLog from './components/ui/GameMasterLog.tsx';
 import { useGameState } from './hooks/useGameState.ts';
 import type { GameDataDto } from '@shared/game/game.types.ts';
 import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
+import SkipTurnButton from './components/ui/SkipTurnButton.tsx';
 
 export default function Game() {
   const { game } = useGameState();
-  if (!game || !game.board)
+  if (!game)
     return <div>Loading game...</div>;
+  if (!game.board)
+    return <div>Loading gameboard...</div>;
   return <GameShell game={game} />;
 }
 
@@ -50,6 +53,7 @@ function GameShell({ game }: { game: GameDataDto }) {
             masterLog={game.masterLog}
           />
           <DiceRoller diceRoll={game.diceRoll} masterLog={game.masterLog} />
+          <SkipTurnButton/>
         </Group>
       </AppShell.Navbar>
 

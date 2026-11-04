@@ -1,6 +1,22 @@
-export const SELECTED_COLOR = '#e30000';
-export const HOVER_COLOR = '#fe5b5b';
+import type { Player } from "./game.types";
+
+export const SELECTED_COLOR = '#c30000';
+export const HOVER_COLOR = '#ff0f0f';
 export const DEFAULT_COLOR = '#e4e4e4';
+
+export const RENDER_SIZE = 50;
+export const HEX_SIZE = RENDER_SIZE;
+export const SETTLEMENT_SIZE = RENDER_SIZE / 6;
+export const ROAD_SIZE = RENDER_SIZE / 8;
+export const HOVER_EFFECT = 1.4;
+
+export const RessourceType = {
+  WOOD: 'wood',
+  SHEEP: 'sheep',
+  HILL: 'brick',
+  MOUNTAIN: 'rock',
+  FIELD: 'hay'
+} as const;
 
 export const LandType = {
   FOREST: 'forest',
@@ -26,17 +42,17 @@ export type LandType = (typeof LandType)[keyof typeof LandType];
 export const Faction = {
   POURPRES_CHYBRES: 'Pourpres Chybres',
   BOURSES_BLEUES: 'Bourses Bleues',
-  ROUGES_FIACS: 'Rouges Fiacs',
+  ROSES_FIACS: 'Roses Fiacs',
   UREE_JAUNE: 'Uree Jaune',
   DEFAULT: 'Kikouneurs (default)',
   UNOCCUPIED: 'unoccupied ...'
 } as const;
 export const FACTION_COLORS: Record<Faction, string> = {
   [Faction.POURPRES_CHYBRES]: '#6b0b91',
-  [Faction.BOURSES_BLEUES]: '#19aad5',
-  [Faction.ROUGES_FIACS]: '#da1111',
-  [Faction.UREE_JAUNE]: '#ffdd00',
-  [Faction.DEFAULT]: '#fd92e4',
+  [Faction.BOURSES_BLEUES]: '#53cef3',
+  [Faction.ROSES_FIACS]: '#ff9595',
+  [Faction.UREE_JAUNE]: '#ffc400',
+  [Faction.DEFAULT]: '#19af89',
   [Faction.UNOCCUPIED]: '#e4e4e4'
 };
 export type Faction = (typeof Faction)[keyof typeof Faction];
@@ -67,24 +83,30 @@ export interface TileData {
   q: number;
   r: number;
   value: number;
-  land: LandType | null;
+  land: LandType;
 }
 
-export interface RoadData {
+export interface BuildData {
+  faction: Faction;
+  hasOwner?: boolean;
+}
+
+export interface RoadData extends BuildData {
   id: string;
   edge: Edge;
-  faction: Faction;
-  hasOwner?: boolean;
+  //faction: Faction;
+  //hasOwner?: boolean;
 }
 
-export interface SettlementData {
+export interface SettlementData extends BuildData {
   id: string;
   vertex: Vertex;
-  faction: Faction;
-  hasOwner?: boolean;
-  isCity?: boolean;
+  //faction: Faction;
+  //hasOwner?: boolean;
+  //isCity?: boolean;
 }
 
+/** @description sent to the front, serializable without risk */
 export interface GameBoard {
   layout: TileData[];
   vertices: Vertex[];
@@ -93,6 +115,27 @@ export interface GameBoard {
   roads: RoadData[];
   svgBounds: SvgBounds;
 }
+
+/** @description keeps relations between each gameboard's elements*/
+export interface ConnectedElements {
+  /** @description keeps for one road every "neighbours" roads (up to 4 neighbours)*/
+  connectedRoads: RoadData[];
+  /** @description keeps for one road every settlement it is touching (up to 2 settlements)*/
+  adjacentSettlements: SettlementData[];
+  /** @description keeps for one settlement every "neighbours" settlement (up to 3 neighbours)*/
+  connectedSettlements: SettlementData[];
+  /** @description keeps for one settlement every hex tiles it is touching (up to 3 hex tiles -> lands)*/
+  adjacentTiles: TileData[];
+}
+
+/** @description retained on the back-end only, never sent to front */
+export type GameBoardGraph = Map<string, ConnectedElements>;
+
+/**
+ * @key settlement id
+ * @value player who built
+*/
+export type Buildings = Map<string, Player>;
 
 /** @description classic Catan gameboard layout (19 tiles) */
 export const classicLayout: TileData[] = [

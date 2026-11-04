@@ -1,6 +1,7 @@
 import type { SettlementProps } from "../../types/gameboard.types";
 import { useHover } from "../../hooks/useGameBoardHover";
 import { getTileFillColor } from "../../utils/tileRendering";
+import { SETTLEMENT_SIZE, HOVER_EFFECT } from "@shared/game/gameboard.types";
 
 export const Settlement: React.FC<SettlementProps> = ({
   data,
@@ -25,7 +26,7 @@ export const Settlement: React.FC<SettlementProps> = ({
     <circle
       cx={data.vertex.x}
       cy={data.vertex.y}
-      r={effectiveIsHovered ? 12 : 10}
+      r={effectiveIsHovered ? SETTLEMENT_SIZE * HOVER_EFFECT : SETTLEMENT_SIZE}
       fill={fillColor}
       strokeWidth={2}
       onMouseEnter={onMouseEnter}

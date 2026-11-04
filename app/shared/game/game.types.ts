@@ -17,9 +17,10 @@ export type Player = {
   username: string;
   score: number;
   level: number;
-  ressources: Ressources | null;
+  ressources: Ressources;
   firstDice: number,
   secondDice: number,
+  totalDice: number,
   settlementsBuilt: number;
   roadsBuilt: number;
   faction: Faction;
@@ -49,7 +50,7 @@ export type GameData = {
 export interface GameResponse {
   value: number | null;
   message: string | null;
-  board: GameData | null;
+  data: GameData | null;
 }
 
 export type GameDataDto = { //INFO: data we send to the client every time the game state changes
