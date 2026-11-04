@@ -13,7 +13,6 @@ BACKEND_DIR=./app/backend
 FRONTEND_LOCK=$(FRONTEND_DIR)/package-lock.json
 BACKEND_LOCK=$(BACKEND_DIR)/package-lock.json
 
-
 all: up
 
 refresh: build up
