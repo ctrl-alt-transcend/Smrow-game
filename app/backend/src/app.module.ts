@@ -9,7 +9,6 @@ import { GamesModule } from './games/games.module';
 import { StatsModule } from './stats/stats.module';
 import { SocialModule } from './social/social.module';
 
-
 @Module({
   imports: [
     DatabaseModule,
@@ -18,7 +17,7 @@ import { SocialModule } from './social/social.module';
     StatsModule,
     GameModule,
     GamesModule,
-    SocialModule
+    SocialModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -9,7 +9,6 @@ import {
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
-import { instrument } from '@socket.io/admin-ui';
 import type { JwtPayload } from '@shared/types';
 import type { BuildRequestPayload } from '@shared/game/game.types';
 import { GameService } from './game.service';
@@ -134,7 +133,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
 
   afterInit(server: SocketServer) {
     server.use((client: SocketClient, next) => {
-
       try {
         const token = client.handshake.auth.token as string;
         const payload = this.jwtService.verify<JwtPayload>(token, {
@@ -151,7 +149,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
         );
         next(new Error('Authentication error'));
       }
-
     });
   }
 

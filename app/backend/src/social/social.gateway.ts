@@ -1,4 +1,8 @@
-import { SubscribeMessage, WebSocketGateway, OnGatewayInit, OnGatewayConnection  } from '@nestjs/websockets';
+import {
+  WebSocketGateway,
+  OnGatewayInit,
+  OnGatewayConnection,
+} from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
@@ -27,11 +31,8 @@ export type SocketClient = Socket<
   SocketData
 >;
 
-
-@WebSocketGateway({path: '/ws/social'})
+@WebSocketGateway({ path: '/ws/social' })
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
-
-
   constructor(private readonly jwtService: JwtService) {}
 
   // @SubscribeMessage('message')
@@ -41,7 +42,6 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
 
   afterInit(server: SocketServer) {
     server.use((client: SocketClient, next) => {
-
       try {
         const token = client.handshake.auth.token as string;
         const payload = this.jwtService.verify<JwtPayload>(token, {
@@ -58,13 +58,12 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
         );
         next(new Error('Authentication error'));
       }
-
     });
   }
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     //TODO: handle multiple connections from the same user.
     console.log('Client connected:', client.id); //TEST:
-    client.join("chat");
+    await client.join('chat');
   }
 }
