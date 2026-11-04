@@ -3,8 +3,12 @@
     "private": true,
     "workspaces": [
         "shared",
-        "backend"
+        "backend",
+        "frontend"
     ],
+    "scripts": {
+        "build:shared": "npm run build -w shared"
+    },
     "allowScripts": {
         "bcrypt": true,
         "@parcel/watcher": true,

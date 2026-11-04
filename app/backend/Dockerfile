@@ -16,6 +16,9 @@ RUN npm ci
 COPY backend/ ./backend/
 COPY shared/ ./shared/
 
+# Compile shared
+RUN npm run build -w shared
+
 WORKDIR /app/backend
 RUN npx prisma generate
 
@@ -30,7 +33,9 @@ EXPOSE 3001
 FROM node:26-alpine AS builder
 WORKDIR /app
 COPY --from=dev /app ./
-WORKDIR /app/backend 
+# Compile shared
+RUN npm run build -w shared
+WORKDIR /app/backend
 #RUN npx prisma generate
 RUN npm run build
 
@@ -42,7 +47,7 @@ COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/
 COPY frontend/package.json ./frontend/
 COPY shared/package.json ./shared/
-COPY prisma ./prisma
+COPY backend/prisma ./backend/prisma
 RUN npm ci --omit=dev \
     && npm cache clean --force && npx prisma generate
 
@@ -56,7 +61,7 @@ COPY --from=pruner /app/node_modules ./node_modules
 COPY --from=pruner /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/backend/dist ./dist
 USER nestjs
-CMD ["node", "dist/backend/src/main.js"]
+CMD ["node", "dist/main.js"]
 EXPOSE 3000
 EXPOSE 3001
 

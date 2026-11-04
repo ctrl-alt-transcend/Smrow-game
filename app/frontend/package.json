@@ -1,20 +1,15 @@
+
+
 {
   "name": "frontend",
   "private": true,
   "version": "1.0.0",
-  "author": "Enrique Murillo Orosco, Hayden Dougoud, Matthieu Gillieron, Eliot Monachon, Théo Immi",
-  "license": "MIT License",
   "type": "module",
   "scripts": {
     "dev": "vite --host '0.0.0.0' --config config/vite.config.ts",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\"",
     "build": "tsc -b config/tsconfig.json && vite build",
-    "clean": "rm -rf dist node_modules/.tmp",
-    "lint": "oxlint",
-    "type-check": "tsc -b config/tsconfig.json --noEmit",
-    "test": "vitest run --config config/vite.config.ts",
-    "test:watch": "vitetest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "oxlint"
   },
   "dependencies": {
     "shared": "*",
@@ -48,7 +43,6 @@
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
     "typescript": "~6.0.2",
-    "vite": "^8.3.0",
-    "vitest": "^5.0.3"
+    "vite": "^8.3.0"
   }
 }
