@@ -12,6 +12,7 @@ FRONTEND_DIR=./app/frontend
 BACKEND_DIR=./app/backend
 FRONTEND_LOCK=$(FRONTEND_DIR)/package-lock.json
 BACKEND_LOCK=$(BACKEND_DIR)/package-lock.json
+APP_DIR=./app
 
 all: up
 
@@ -38,15 +39,20 @@ watch: up
 down:
 	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
-install: $(FRONTEND_DIR)/node_modules/.package-lock.json  $(BACKEND_DIR)/node_modules/.package-lock.json
+install: $(APP_DIR)/node_modules/.package-lock.json
 
-$(FRONTEND_DIR)/node_modules/.package-lock.json: $(FRONTEND_DIR)/package.json $(FRONTEND_LOCK)
+$(APP_DIR)/node_modules/.package-lock.json: $(APP_DIR)/package.json $(APP_DIR)/package-lock.json
 	@echo "Installing frontend packages..."
-	cd $(FRONTEND_DIR) && npm ci
+	cd $(APP_DIR) && npm ci
 
-$(BACKEND_DIR)/node_modules/.package-lock.json: $(BACKEND_DIR)/package.json $(BACKEND_LOCK)
-	@echo "Installing frontend packages..."
-	cd $(BACKEND_DIR) && npm ci
+
+# $(FRONTEND_DIR)/node_modules/.package-lock.json: $(FRONTEND_DIR)/package.json $(FRONTEND_LOCK)
+# 	@echo "Installing frontend packages..."
+# 	cd $(FRONTEND_DIR) && npm ci
+
+# $(BACKEND_DIR)/node_modules/.package-lock.json: $(BACKEND_DIR)/package.json $(BACKEND_LOCK)
+# 	@echo "Installing frontend packages..."
+# 	cd $(BACKEND_DIR) && npm ci
 
 check: check-back check-front
 
