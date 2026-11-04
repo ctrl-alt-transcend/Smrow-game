@@ -1,1 +1,2 @@
-export const test = { name: "frontend", value: 42 };
+const user = { name: "Enrique", age: 30 };
+export default user;
