@@ -21,13 +21,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const profile = await getCurrentUser();
         setUser(profile);
       } catch (error) {
-		if (error === 401) {
-			localStorage.removeItem("access_token");
-			setAuthMessage("Your session has expired.");
-		}
-		else {
-			console.error("Could not restore session:", error);
-		}
+        if (error === 401) {
+          localStorage.removeItem("access_token");
+          setAuthMessage("Your session has expired.");
+        } else {
+          console.error("Could not restore session:", error);
+        }
       } finally {
         setLoading(false);
       }

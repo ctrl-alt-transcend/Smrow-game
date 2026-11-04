@@ -2,7 +2,7 @@ import {
   type TileData,
   type RoadData,
   type SettlementData,
-  type GameBoard
+  type GameBoard,
 } from "@shared/game/gameboard.types";
 
 /** @description common definition for all interactive game features */
@@ -16,9 +16,9 @@ export interface InteractiveProps<T> {
   //owner?: PlayerId | null;
 }
 
-export interface TileProps extends InteractiveProps<TileData> { }
-export interface RoadProps extends InteractiveProps<RoadData> { }
-export interface SettlementProps extends InteractiveProps<SettlementData> { }
+export interface TileProps extends InteractiveProps<TileData> {}
+export interface RoadProps extends InteractiveProps<RoadData> {}
+export interface SettlementProps extends InteractiveProps<SettlementData> {}
 
 /** @description set selected interactive element */
 export interface GameBoardSelection {

@@ -3,7 +3,7 @@ import type { GameBoardSelection } from "../types/gameboard.types";
 import type {
   TileData,
   SettlementData,
-  RoadData
+  RoadData,
 } from "@shared/game/gameboard.types";
 
 const resetSelection = (): GameBoardSelection => ({
@@ -40,8 +40,7 @@ export const useGameBoardSelection = () => {
     [],
   );
 
-  const handleRoadClick = useCallback(
-    (road: RoadData | null) => {
+  const handleRoadClick = useCallback((road: RoadData | null) => {
     setSelected((prev) => {
       if (!road) return resetSelection();
       const isSameRoad = prev.selectedRoad?.id === road.id;
