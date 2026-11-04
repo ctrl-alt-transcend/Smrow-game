@@ -1,4 +1,3 @@
-// backend/tsconfig.json
 {
   "compilerOptions": {
     "module": "commonjs",
@@ -22,6 +21,6 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist", "prisma7.config.ts"]
 }

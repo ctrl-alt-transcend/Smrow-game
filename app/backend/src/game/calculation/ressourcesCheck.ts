@@ -1,9 +1,5 @@
 import { Ressources } from 'shared';
-import {
-  Buildings,
-  GameBoardGraph,
-  LandType,
-} from 'shared';
+import { Buildings, GameBoardGraph, LandType } from 'shared';
 
 const addRessources = (land: LandType, ressources: Ressources) => {
   switch (land) {
