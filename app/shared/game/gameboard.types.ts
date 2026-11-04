@@ -33,34 +33,33 @@ export const CostType = {
 } as const;
 export type CostType = (typeof CostType)[keyof typeof CostType];
 
-//export const RessourceType = {
-//  WOOD: 'wood',
-//  SHEEP: 'sheep',
-//  HILL: 'brick',
-//  MOUNTAIN: 'rock',
-//  FIELD: 'hay'
-//} as const;
-//export type RessourceType = (typeof RessourceType)[keyof typeof RessourceType];
-
 export const LandType = {
   FOREST: 'forest',
   PASTURE: 'pasture',
   HILL: 'hill',
   MOUNTAIN: 'mountain',
   FIELD: 'field',
-  DESERT: 'desert',
-  DEFAULT: 'default'
+  DESERT: 'desert'
 } as const;
 export type LandType = (typeof LandType)[keyof typeof LandType];
 
-export const LAND_RESSOURCES: Record<LandType, string> = {
-  [LandType.FOREST]: 'wood',
-  [LandType.PASTURE]: 'sheep',
-  [LandType.HILL]: 'brick',
-  [LandType.MOUNTAIN]: 'rock',
-  [LandType.FIELD]: 'hay',
-  [LandType.DESERT]: 'dust',
-  [LandType.DEFAULT]: 'none',
+export const RessourceType = {
+  WOOD: 'wood',
+  SHEEP: 'sheep',
+  BRICK: 'brick',
+  ROCK: 'rock',
+  HAY: 'hay',
+  DUST: 'dust'
+} as const;
+export type RessourceType = (typeof RessourceType)[keyof typeof RessourceType];
+
+export const LAND_RESSOURCE: Record<LandType, string> = {
+  [LandType.FOREST]: RessourceType.WOOD,
+  [LandType.PASTURE]: RessourceType.SHEEP,
+  [LandType.HILL]: RessourceType.BRICK,
+  [LandType.MOUNTAIN]: RessourceType.ROCK,
+  [LandType.FIELD]: RessourceType.HAY,
+  [LandType.DESERT]: RessourceType.DUST
 };
 
 export const LAND_COLORS: Record<LandType, string> = {
@@ -69,8 +68,7 @@ export const LAND_COLORS: Record<LandType, string> = {
   [LandType.HILL]: '#c49b5a',
   [LandType.MOUNTAIN]: '#8a8a8a',
   [LandType.FIELD]: '#f5e68a',
-  [LandType.DESERT]: '#e8cfa0',
-  [LandType.DEFAULT]: '#7e00c7d7'
+  [LandType.DESERT]: '#e8cfa0'
 };
 
 export const Faction = {

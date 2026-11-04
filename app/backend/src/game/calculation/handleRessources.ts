@@ -4,7 +4,7 @@ import {
   LandType,
   CostType,
   BuildingsInGame,
-  LAND_RESSOURCES,
+  LAND_RESSOURCE,
 } from '@shared/game/gameboard.types';
 
 export function hasEnoughRessources(
@@ -39,7 +39,7 @@ function addRessources(
 ): number {
   switch (land) {
     case 'desert':
-      return 0;
+      return -1;
     case 'field':
       isCity ?
       ressources.hay += 2
@@ -92,8 +92,10 @@ export function ressoucesProduction(
         if (settlement)
           prod = addRessources(tile.land, player.ressources, settlement.isCity);
       }
-      if (prod)
-        console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESSOURCES[tile.land]}`);
+      if (prod > 0)
+        console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESSOURCE[tile.land]}`);
+      if (prod == -1)
+        console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything with his ${prod} ${tile.land}`);
     });
   }
 };

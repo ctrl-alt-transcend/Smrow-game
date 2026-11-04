@@ -1,4 +1,4 @@
-import { LAND_RESSOURCES } from "../../../../shared/game/gameboard.types";
+import { LAND_RESSOURCE } from "../../../../shared/game/gameboard.types";
 import type { GameBoardSelection } from "../types/gameboard.types";
 
 export interface SelectionItem {
@@ -13,7 +13,7 @@ export const useSelectionDisplay = (
   if (selected.selectedTile) {
     items.push({label: `Tile: ${selected.selectedTile.q}, ${selected.selectedTile.r}`});
     items.push({label: `Land: ${selected.selectedTile.land}`});
-    items.push({label: `Ressource produced: ${LAND_RESSOURCES[selected.selectedTile.land]}`});
+    items.push({label: `Ressource produced: ${LAND_RESSOURCE[selected.selectedTile.land]}`});
   }
   if (selected.selectedSettlement) {
     items.push({label: `Settlement: ${selected.selectedSettlement.id}`});
