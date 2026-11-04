@@ -2,29 +2,55 @@ import type { Ressources } from '@shared/game/game.types';
 import {
   GameBoardGraph,
   LandType,
-  CostType,
+  BuildingType,
   BuildingsInGame,
   LAND_RESSOURCE,
+  BUILD_COSTS
 } from '@shared/game/gameboard.types';
+
+
+export function payRessources(
+  ressources: Ressources,
+  build: BuildingType,
+) {
+  switch (build) {
+    case 'road':
+      ressources.brick -= BUILD_COSTS.road.brick;
+      ressources.wood -= BUILD_COSTS.road.wood;
+      break;
+    case 'settlement':
+      ressources.brick -= BUILD_COSTS.settlement.brick;
+      ressources.wood -= BUILD_COSTS.settlement.wood;
+      ressources.sheep -= BUILD_COSTS.settlement.sheep;
+      ressources.hay -= BUILD_COSTS.settlement.hay;
+      break;
+    case 'city':
+      ressources.hay -= BUILD_COSTS.settlement.hay;
+      ressources.rock -= BUILD_COSTS.settlement.rock;
+      break;
+    default:
+      break;
+  }
+}
 
 export function hasEnoughRessources(
   ressources: Ressources,
-  cost: CostType
+  build: BuildingType,
 ): boolean {
-  switch (cost) {
+  switch (build) {
     case 'road':
-      if (ressources.brick >= 1
-        && ressources.wood >= 1)
+      if (ressources.brick >= BUILD_COSTS.road.brick
+        && ressources.wood >= BUILD_COSTS.road.wood)
       return true;
     case 'settlement':
-      if (ressources.brick >= 1
-        && ressources.wood >= 1
-        && ressources.sheep >= 1
-        && ressources.hay >= 1)
+      if (ressources.brick >= BUILD_COSTS.settlement.brick
+        && ressources.wood >= BUILD_COSTS.settlement.wood
+        && ressources.sheep >= BUILD_COSTS.settlement.sheep
+        && ressources.hay >= BUILD_COSTS.settlement.hay)
       return true;
     case 'city':
-      if (ressources.hay >= 2
-        && ressources.rock >= 3)
+      if (ressources.hay >= BUILD_COSTS.settlement.hay
+        && ressources.rock >= BUILD_COSTS.settlement.rock)
       return true;
     default:
       break;
@@ -95,7 +121,7 @@ export function ressoucesProduction(
       if (prod > 0)
         console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESSOURCE[tile.land]}`);
       if (prod == -1)
-        console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything with his ${prod} ${tile.land}`);
+        console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything in the ${tile.land}`);
     });
   }
 };

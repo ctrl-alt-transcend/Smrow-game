@@ -1,4 +1,4 @@
-import type { Player } from "./game.types";
+import type { Player, Ressources } from "./game.types";
 
 export const SELECTED_COLOR = '#c30000';
 export const HOVER_COLOR = '#ff0f0f';
@@ -24,14 +24,29 @@ export const TraderType = {
 } as const;
 export type TraderType = (typeof TraderType)[keyof typeof TraderType];
 
-export const CostType = {
-  ROAD: BuildingType.ROAD,
-  SETTLEMENT: BuildingType.SETTLEMENT,
-  CITY: BuildingType.CITY,
-  PORT: TraderType.PORT,
-  RESERVE: TraderType.RESERVE
-} as const;
-export type CostType = (typeof CostType)[keyof typeof CostType];
+export const BUILD_COSTS: Record<BuildingType, Ressources> = {
+  [BuildingType.ROAD]: {
+    wood: 1,
+    brick: 1,
+    hay: 0,
+    sheep: 0,
+    rock: 0
+  },
+  [BuildingType.SETTLEMENT]: {
+    wood: 1,
+    brick: 1,
+    hay: 1,
+    sheep: 1,
+    rock: 0
+  },
+  [BuildingType.CITY]: {
+    wood: 0,
+    brick: 0,
+    hay: 2,
+    sheep: 0,
+    rock: 3
+  },
+};
 
 export const LandType = {
   FOREST: 'forest',
