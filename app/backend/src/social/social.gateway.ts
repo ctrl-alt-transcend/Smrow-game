@@ -28,7 +28,7 @@ export type SocketClient = Socket<
 >;
 
 
-@WebSocketGateway({path: 'ws/social'})
+@WebSocketGateway({path: '/ws/social'})
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
 
 

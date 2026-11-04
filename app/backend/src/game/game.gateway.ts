@@ -39,6 +39,7 @@ export type SocketClient = Socket<
 >;
 
 @WebSocketGateway({
+  path: '/ws/game',
   cors: {
     origin: true,
     credentials: true,
@@ -51,10 +52,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     private readonly jwtService: JwtService,
     private readonly gameService: GameService,
   ) {}
-
-  afterInit(server: SocketServer) {
-    instrument(server, { auth: false, mode: 'development' });
-  }
 
   /**
    * @brief Handle the 'dice' event from the client.
@@ -116,24 +113,30 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     }
   }
 
+  afterInit(server: SocketServer) {
+    server.use((client: SocketClient, next) => {
+
+      try {
+        const token = client.handshake.auth.token as string;
+        const payload = this.jwtService.verify<JwtPayload>(token, {
+          secret: readSecret(AUTH.JWT_FILE),
+        });
+        client.data.user = { id: payload.sub, username: payload.username };
+        next();
+      } catch (error) {
+        console.log(
+          'Client connection rejected:',
+          client.id,
+          ' - ',
+          (error as Error).message,
+        );
+        next(new Error('Authentication error'));
+      }
+
+    });
+  }
+
   handleConnection(client: SocketClient) {
-    //TODO: Use middleware to check the token before the connection is established "next()"
-    try {
-      console.log('Client connected:', client.id); //TEST:
-      const token = client.handshake.auth.token as string;
-      const payload = this.jwtService.verify<JwtPayload>(token, {
-        secret: readSecret(AUTH.JWT_FILE),
-      });
-      client.data.user = { id: payload.sub, username: payload.username };
-    } catch (error) {
-      console.log(
-        'Client connection rejected:',
-        client.id,
-        ' - ',
-        (error as Error).message,
-      );
-      client.disconnect(true); //WARN: what happens in the frontend ?
-      //TODO: remove player of the GameStat
-    }
+    console.log('Client connected:', client.id); //TEST:
   }
 }
