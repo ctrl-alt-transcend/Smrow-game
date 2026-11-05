@@ -6,6 +6,16 @@ import { fileURLToPath } from "node:url";
 
 const configDir = dirname(fileURLToPath(import.meta.url));
 
+/**
+ * The Vite proxy acts as an intermediary between the client and the backend.
+ * In production, Nginx fulfils this role.
+ *
+ * Using the Vite proxy allows us to replicate production behaviour more closely and also avoids the need to enable CORS.
+ *
+ * @remarks: We use `backend` instead of `localhost` in the address because communication takes place between containers.
+ *
+ * @Warning: The Vite proxy is only used in development !
+ */
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -20,9 +30,13 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
-      "/socket.io": {
-        target: "http://backend:3000", // OK ici : le proxy tourne dans le conteneur
-        ws: true,
+      '/ws/game': {
+      target: 'http://backend:3000',
+      ws: true,
+      },
+      '/ws/social': {
+      target: 'http://backend:3000',
+      ws: true,
       },
     },
   },
