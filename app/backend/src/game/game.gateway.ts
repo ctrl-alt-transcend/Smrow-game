@@ -14,7 +14,7 @@ import type { BuildRequestPayload } from '@shared/game/game.types';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
-import {instrument} from '@socket.io/admin-ui'; //WARN: dev only
+import { instrument } from '@socket.io/admin-ui'; //WARN: dev only
 
 export interface SocketUser {
   id: string;
@@ -45,7 +45,6 @@ export type SocketClient = Socket<
     credentials: true,
   }, //WARN: dev only
 })
-
 export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @WebSocketServer() server: SocketServer;
 
@@ -62,7 +61,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   dice(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     const result = game.diceRequest(client.data.user.username);
-
 
     //⚠️ FOR TESTING
     game.phaseCheckRequest();
@@ -135,13 +133,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   }
 
   afterInit(server: SocketServer) {
-
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
       instrument(this.server, {
-          auth: false,
-          mode: "development",
-        });
+        auth: false,
+        mode: 'development',
+      });
     }
 
     server.use((client: SocketClient, next) => {

@@ -39,7 +39,6 @@ export type SocketClient = Socket<
     credentials: true,
   }, //WARN: dev only
 })
-
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   constructor(private readonly jwtService: JwtService) {}
 
@@ -49,13 +48,12 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   // }
 
   afterInit(server: SocketServer) {
-
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
       instrument(server, {
-          auth: false,
-          mode: "development",
-        });
+        auth: false,
+        mode: 'development',
+      });
     }
     server.use((client: SocketClient, next) => {
       try {
