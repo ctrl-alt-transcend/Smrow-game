@@ -10,7 +10,9 @@
     "lint": "oxlint",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\"",
     "type-check": "tsc -b config/tsconfig.json --noEmit",
-    "clean": "rm -rf dist node_modules/.tmp"
+    "clean": "rm -rf dist node_modules/.tmp",
+	"test": "vitest run --config config/vite.config.ts",
+	"test:watch": "vitetest"
   },
   "lint-staged": {
 	"*.{ts,tsx,js,jsx}": [
