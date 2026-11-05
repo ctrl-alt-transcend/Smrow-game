@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { socket } from "../../socket.tsx";
+import { gameSocket as socket } from "../../sockets/gameSocket.tsx";
 import type { GameDataDto } from "shared";
 
 export function useGameState(): { game: GameDataDto | null } {
@@ -28,10 +28,10 @@ export function useGameState(): { game: GameDataDto | null } {
     const onConnectError = (err: Error) =>
       console.error("[socket] connect_error:", err);
 
-    socket.auth = { token: localStorage.getItem("access_token") ?? "" };
     socket.on("connect", onConnect);
     socket.on("connect_error", onConnectError);
     socket.on("gameState", setGame);
+    socket.on("connect_error", onConnectError);
 
     if (socket.connected) void onConnect();
     else socket.connect();

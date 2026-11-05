@@ -14,7 +14,7 @@ import { useSelectionDisplay } from "../../hooks/useSelectionDisplay";
 import type { GameBoardSelection } from "../../types/gameboard.types";
 import { Faction } from "shared";
 import type { BuildRequestPayload } from "shared";
-import { socket } from "../../../socket.tsx";
+import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 
 interface PendingBuild {
   target: BuildRequestPayload;

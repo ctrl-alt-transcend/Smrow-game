@@ -1,7 +1,7 @@
 //import { useCallback } from "react";
 import { Button, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { socket } from "../../../socket.tsx";
+import { gameSocket as socket } from "../../../sockets/gameSocket";
 
 export default function SkipTurnButton() {
   //const handleConfirm = useCallback(() => {

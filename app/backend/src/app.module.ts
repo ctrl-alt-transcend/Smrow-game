@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { GameModule } from './game/game.module';
 import { GamesModule } from './games/games.module';
 import { StatsModule } from './stats/stats.module';
+import { SocialModule } from './social/social.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { StatsModule } from './stats/stats.module';
     StatsModule,
     GameModule,
     GamesModule,
+    SocialModule,
   ],
   controllers: [AppController],
   providers: [AppService],

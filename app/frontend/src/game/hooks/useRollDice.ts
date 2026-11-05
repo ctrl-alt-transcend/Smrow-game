@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
-import { socket } from "../../socket";
+import { gameSocket as socket } from "../../sockets/gameSocket";
+//import type { GameResponse } from '@shared/game/game.types.ts';
 
 export function useRollDice() {
   const abortRef = useRef<AbortController | null>(null);
