@@ -2,6 +2,7 @@ import {
   type TileData,
   type RoadData,
   type SettlementData,
+  type CoastData,
   type GameBoard
 } from "@shared/game/gameboard.types";
 
@@ -18,12 +19,14 @@ export interface InteractiveProps<T> {
 export interface TileProps extends InteractiveProps<TileData> { }
 export interface RoadProps extends InteractiveProps<RoadData> { }
 export interface SettlementProps extends InteractiveProps<SettlementData> { }
+export interface CoastProps extends InteractiveProps<CoastData> { }
 
 /** @description set selected interactive element */
 export interface GameBoardSelection {
   selectedTile: TileData | null;
   selectedSettlement: SettlementData | null;
   selectedRoad: RoadData | null;
+  selectedCoast: CoastData | null;
 }
 
 // Hover effects
@@ -43,7 +46,12 @@ export interface SettlementHover {
   id: string;
 }
 
-export type HoverEntity = TileHover | RoadHover | SettlementHover | null;
+export interface CoastHover {
+  type: "coast";
+  id: string;
+}
+
+export type HoverEntity = TileHover | RoadHover | SettlementHover | CoastHover | null;
 
 export interface GameBoardProps {
   board: GameBoard;
@@ -53,17 +61,21 @@ export interface GameBoardProps {
   handleTileClick: (tile: TileData | null) => void;
   handleSettlementClick: (settlement: SettlementData | null) => void;
   handleRoadClick: (road: RoadData | null) => void;
+  handleCoastClick: (road: CoastData | null) => void;
   clearSelection: () => void;
 
   //useGameBoardHover
   hovered: HoverEntity;
   handleTileHover: (isHovered: boolean, tile: TileData) => void;
   handleRoadHover: (isHovered: boolean, road: RoadData) => void;
+  handleCoastHover: (isHovered: boolean, coast: CoastData) => void;
   handleSettlementHover: (
     isHovered: boolean,
     settlement: SettlementData,
   ) => void;
+
   isTileHovered: (tile: TileData) => boolean;
   isRoadHovered: (road: RoadData) => boolean;
+  isCoastHovered: (coast: CoastData) => boolean;
   isSettlementHovered: (settlement: SettlementData) => boolean;
 }

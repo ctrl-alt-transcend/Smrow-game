@@ -6,9 +6,19 @@ export const DEFAULT_COLOR = '#e4e4e4';
 
 export const RENDER_SIZE = 50;
 export const HEX_SIZE = RENDER_SIZE;
-export const SETTLEMENT_SIZE = RENDER_SIZE / 6;
+export const VERTEX_SIZE = RENDER_SIZE / 6;
+export const SETTLEMENT_SIZE = RENDER_SIZE / 4;
+export const ICON_SCALE_BASE = 9;
 export const ROAD_SIZE = RENDER_SIZE / 8;
-export const HOVER_EFFECT = 1.4;
+export const HOVER_EFFECT = 1.2;
+
+export const SAND_WIDTH = 25;
+export const SAND_COLOR = "#e8c998";
+
+export const WATER_WIDTH = 48;
+export const WATER_COLOR = "#4a9ecf";
+export const WATER_OPACITY = 1;
+
 
 export const BuildingType = {
   ROAD: 'road',
@@ -96,10 +106,10 @@ export const Faction = {
 } as const;
 
 export const FACTION_COLORS: Record<Faction, string> = {
-  [Faction.POURPRES_CHYBRES]: '#6b0b91',
-  [Faction.BOURSES_BLEUES]: '#53cef3',
-  [Faction.ROSES_FIACS]: '#ff9595',
-  [Faction.UREE_JAUNE]: '#ffc400',
+  [Faction.POURPRES_CHYBRES]: '#cf69f8',
+  [Faction.BOURSES_BLEUES]: '#58b6d3',
+  [Faction.ROSES_FIACS]: '#f0a1a1',
+  [Faction.UREE_JAUNE]: '#f6e823',
   [Faction.DEFAULT]: '#19af89',
   [Faction.UNOCCUPIED]: '#e4e4e4'
 };
@@ -150,6 +160,20 @@ export interface SettlementData extends BuildData {
   isCity: boolean;
 }
 
+export interface CoastData {
+  id: string;              // "coast:<edgeId>"
+  tile: { q: number; r: number };  // tile land that bears the coast
+  edge: Edge;              // the outer edge p1→p2
+  normal: Vertex;          // unit vector pointing toward the sea
+  port: PortData | null;
+}
+
+export interface PortData {
+  id: string;
+  type: RessourceType;
+  coastId: string;
+}
+
 /** @description sent to the front, serializable without risk */
 export interface GameBoard {
   layout: TileData[];
@@ -157,6 +181,7 @@ export interface GameBoard {
   edges: Edge[];
   settlements: SettlementData[];
   roads: RoadData[];
+  coasts: CoastData[];
   svgBounds: SvgBounds;
 }
 

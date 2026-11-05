@@ -27,6 +27,10 @@ export const useSelectionDisplay = (
     if (selected.selectedRoad.ownerId)
       items.push({label: `Landlord: ${selected.selectedRoad.ownerId}`});
   }
-
+  if (selected.selectedCoast) {
+    items.push({label: `Coast: ${selected.selectedCoast.id}` });
+    if (selected.selectedCoast.port)
+      items.push({label: `Port: ${selected.selectedCoast.port?.type}`});
+  }
   return items;
 };

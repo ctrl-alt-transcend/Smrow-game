@@ -54,6 +54,7 @@ class GameStateContext {
       gameId: gameId,
       masterLog: '...',
       dicesSum: 0,
+      currentRoll: 0,
       board: board,
     };
     this.initGameData(); //⚠️ FOR TESTING WITH MOCKED VALUE
@@ -94,20 +95,28 @@ class GameStateContext {
       username: playerId,
       avatarURL: null,
       faction: this.assignFaction(),
+      // BONUS RESSOURCES FOR DEV
       ressources: {
-        wood: 0,
-        brick: 0,
-        hay: 0,
-        sheep: 0,
-        rock: 0,
+        wood: 10,
+        brick: 10,
+        hay: 10,
+        sheep: 10,
+        rock: 10,
       },
+      //ressources: {
+      //  wood: 0,
+      //  brick: 0,
+      //  hay: 0,
+      //  sheep: 0,
+      //  rock: 0,
+      //},
     };
     return newPlayer;
   }
 
   protected initGameData() {
     //⚠️ FOR TESTING //TEST: REMOVE THIS IN PROD
-    this.data.players.set('spagg', this.initPlayer('spagg'));
+    //this.data.players.set('spagg', this.initPlayer('spagg'));
     this.data.players.set('enriquest', this.initPlayer('enriquest'));
   }
 
@@ -198,6 +207,7 @@ class GameStateContext {
       players: Array.from(gameData.players.values()),
       gameId: gameData.gameId,
       dicesSum: gameData.dicesSum,
+      currentRoll: gameData.currentRoll,
       masterLog: gameData.masterLog,
       board: gameData.board,
     };
@@ -229,6 +239,9 @@ class GameStateContext {
   /** Setters */
   public setDicesSum(roll: number) {
     this.data.dicesSum = roll;
+  }
+  public setCurrentRoll(roll: number | null) {
+    this.data.currentRoll = roll;
   }
   public setMasterLog(log: string | null) {
     this.data.masterLog = log;
@@ -499,6 +512,7 @@ class RessourcePhase extends State {
       return { value: null, message: "It's not your turn !", data: null };
     }
     const roll: GameResponse = this.state.rollDice(p);
+    this.state.setCurrentRoll(roll.value);
     if (this.state.hasRolledBothDices(p) && roll.value) {
       console.log(
         `🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`,

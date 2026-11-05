@@ -3,7 +3,7 @@ import { useHover } from "../../hooks/useGameBoardHover";
 import { axialToPixel } from "../../../../../shared/game/hexCalculation";
 import { HEX_SIZE } from "../../../../../shared/game/gameboard.types";
 import {
-  getTileFillColor,
+  getFillColor,
   getTileStrokeColor,
   getTileStrokeWidth
 } from '../../utils/tileRendering';
@@ -23,7 +23,7 @@ export const HexTile: React.FC<TileProps> = ({
     onMouseEnter,
     onMouseLeave,
   } = useHover(isHovered, onHoverChange);
-  const fillColor = getTileFillColor(
+  const fillColor = getFillColor(
     data.land,
     null,
     isSelected,

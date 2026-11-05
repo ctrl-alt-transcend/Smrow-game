@@ -158,7 +158,13 @@ function cityUpgradeCheck(
   target: SettlementData,
   player: Player
 ): BuildValidation {
-  if (
+  if (target.isCity) {
+    console.log(`👀⛔buildCheck: ${player.playerId} try to upgrade settlement but it's already a city !`);
+    return {
+      valid: false,
+      message: 'already a city !',
+    };
+  } else if (
     !hasEnoughRessources(player.ressources, 'city')
   ) {
     console.log(`👀⛔buildCheck: ${player.playerId} has not enough ressources to build a city`);
@@ -168,6 +174,7 @@ function cityUpgradeCheck(
     };
   }
   target.isCity = true;
+  console.log(`👀✅buildCheck: ${player.playerId} upgraded a settlement to a city`);
   payRessources(player.ressources, 'city')
   return {
     valid: true,
@@ -209,8 +216,9 @@ function settlementCheck(
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-      payRessources(player.ressources, 'settlement');
+    payRessources(player.ressources, 'settlement');
   }
+  console.log(`👀✅buildCheck: ${player.playerId} built a settlement`);
   return {
     valid: true,
     message: 'settlement built !',
@@ -244,8 +252,9 @@ function roadCheck(
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-      payRessources(player.ressources, 'road')
+    payRessources(player.ressources, 'road')
   }
+  console.log(`👀✅buildCheck: ${player.playerId} built a road`);
   return {
     valid: true,
     message: 'road built !',
@@ -297,10 +306,6 @@ export const buildCheck = (
   }
   if (check.valid && !buildings.has(payload.id)) {
     buildings.set(payload.id, player);
-    return check;
   }
-  return {
-    valid: false,
-    message: 'invalid element',
-  };
+  return check;
 };

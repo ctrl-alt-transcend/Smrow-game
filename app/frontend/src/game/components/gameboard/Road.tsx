@@ -1,6 +1,6 @@
 import type { RoadProps } from "../../types/gameboard.types";
 import { useHover } from "../../hooks/useGameBoardHover";
-import { getTileFillColor } from "../../utils/tileRendering";
+import { getFillColor } from "../../utils/tileRendering";
 import { ROAD_SIZE, HOVER_EFFECT } from "../../../../../shared/game/gameboard.types";
 
 export const Road: React.FC<RoadProps> = ({
@@ -15,7 +15,7 @@ export const Road: React.FC<RoadProps> = ({
     onMouseEnter,
     onMouseLeave,
   } = useHover(isHovered, onHoverChange);
-  const fillColor = getTileFillColor(
+  const fillColor = getFillColor(
     null,
     data.faction,
     isSelected,

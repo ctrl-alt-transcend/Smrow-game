@@ -3,7 +3,8 @@ import type { HoverEntity } from "../types/gameboard.types";
 import type {
   TileData,
   RoadData,
-  SettlementData
+  SettlementData,
+  CoastData
 } from "@shared/game/gameboard.types";
 
 
@@ -60,6 +61,13 @@ export const useGameBoardHover = () => {
     [],
   );
 
+   const handleCoastHover = useCallback(
+    (isHovered: boolean, coast: CoastData) => {
+      setHovered(isHovered ? { type: "coast", id: coast.id } : null);
+    },
+    [],
+  );
+
   const isTileHovered = useCallback(
     (tile: TileData) =>
       hovered?.type === "tile" && hovered.q === tile.q && hovered.r === tile.r,
@@ -68,6 +76,11 @@ export const useGameBoardHover = () => {
 
   const isRoadHovered = useCallback(
     (road: RoadData) => hovered?.type === "road" && hovered.id === road.id,
+    [hovered],
+  );
+
+  const isCoastHovered = useCallback(
+    (coast: CoastData) => hovered?.type === "coast" && hovered.id === coast.id,
     [hovered],
   );
 
@@ -81,9 +94,11 @@ export const useGameBoardHover = () => {
     hovered,
     handleTileHover,
     handleRoadHover,
+    handleCoastHover,
     handleSettlementHover,
     isTileHovered,
     isRoadHovered,
     isSettlementHovered,
+    isCoastHovered
   };
 };

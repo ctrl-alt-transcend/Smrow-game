@@ -52,7 +52,7 @@ function GameShell({ game }: { game: GameDataDto }) {
             selected={GameBoardProps.selected}
             masterLog={game.masterLog}
           />
-          <DiceRoller diceRoll={game.diceRoll} masterLog={game.masterLog} />
+          <DiceRoller diceRoll={game.currentRoll} masterLog={game.masterLog} />
           <SkipTurnButton/>
         </Group>
       </AppShell.Navbar>

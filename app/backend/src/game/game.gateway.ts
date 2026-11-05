@@ -68,8 +68,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     //⚠️ FOR TESTING
     game.phaseCheckRequest();
     game.diceRequest('enriquest');
-    game.phaseCheckRequest();
-    game.diceRequest('spagg');
+    //game.phaseCheckRequest();
+    //game.diceRequest('spagg');
     // -------------
 
     game.phaseCheckRequest();
@@ -86,8 +86,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     //⚠️ FOR TESTING
     game.phaseCheckRequest();
     game.skipRequest('enriquest');
-    game.phaseCheckRequest();
-    game.skipRequest('spagg');
+    //game.phaseCheckRequest();
+    //game.skipRequest('spagg');
     // -------------
 
     game.phaseCheckRequest();
@@ -107,11 +107,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     //⚠️ FOR TESTING
     game.phaseCheckRequest();
     game.buildRequest('enriquest', payload);
-    game.phaseCheckRequest();
-    game.buildRequest('spagg', payload);
+    //game.phaseCheckRequest();
+    //game.buildRequest('spagg', payload);
     // -------------
 
     game.phaseCheckRequest();
+    //game.setCurrentRoll(result.value);
     game.setMasterLog(result.message);
     this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
     return { ...result };

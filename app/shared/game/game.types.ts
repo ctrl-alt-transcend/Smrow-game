@@ -42,6 +42,7 @@ export type GameData = {
   turnOrder: string[];
   currentTurnIndex: number;
   gameId: string;
+  currentRoll: number | null;
   dicesSum: number;
   masterLog: string | null;
   board: GameBoard;
@@ -60,6 +61,7 @@ export type GameDataDto = { //INFO: data we send to the client every time the ga
   //currentTurnIndex: number;
   gameId: string;
   dicesSum: number | null;
+  currentRoll: number | null;
   masterLog: string | null;
   board: GameBoard;
 }
