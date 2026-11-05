@@ -8,6 +8,7 @@ import { GameModule } from './game/game.module';
 import { GamesModule } from './games/games.module';
 import { StatsModule } from './stats/stats.module';
 import { SocialModule } from './social/social.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SocialModule } from './social/social.module';
     GameModule,
     GamesModule,
     SocialModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
