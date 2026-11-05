@@ -96,3 +96,11 @@ model GamesPlayer {
 
 	@@unique([gameId, turnOrder])
 }
+
+model Chat {
+  id        Int   @default(autoincrement()) @id
+  userId    String 
+  message   String
+  writedAt  DateTime @default(now())
+}
+
