@@ -9,10 +9,11 @@ export function ProtectedRoute() {
   const userId = user?.id;
 
   useEffect(() => {
-    if (!userId)
-      return;
+    if (!userId) return;
     socialSocket.connect();
-    return () => { socialSocket.disconnect(); };
+    return () => {
+      socialSocket.disconnect();
+    };
   }, [userId]);
 
   if (loading) return <Loader />;
