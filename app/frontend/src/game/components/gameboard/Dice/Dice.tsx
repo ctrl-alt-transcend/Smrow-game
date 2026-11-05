@@ -7,8 +7,8 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import type { ButtonHTMLAttributes, CSSProperties } from 'react';
+} from "react";
+import type { ButtonHTMLAttributes, CSSProperties } from "react";
 
 /* ================================================================
  * Types publics
@@ -24,14 +24,14 @@ export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6 | number;
  * n'importe quelle chaîne est acceptée (voir `placementStyle`).
  */
 export type DicePlacement =
-  | 'top'
-  | 'bottom'
-  | 'left'
-  | 'right'
-  | 'top-left'
-  | 'top-right'
-  | 'bottom-left'
-  | 'bottom-right'
+  | "top"
+  | "bottom"
+  | "left"
+  | "right"
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right"
   // eslint-disable-next-line @typescript-eslint/ban-types
   | (string & {});
 
@@ -48,8 +48,7 @@ interface Dice3DHandle {
  * valide sur le `<button>` (id, aria-*, data-*, title…), en retirant
  * ceux qu'on redéfinit avec un sens différent.
  */
-interface Dice3DProps
-  extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface Dice3DProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Durée de l'animation de lancer, en ms. @default 1000 */
   rollingTime?: number;
   /** Appelé quand le dé se stabilise, avec la face obtenue. */
@@ -64,7 +63,7 @@ interface Dice3DProps
   faces?: string[];
   disabled?: boolean;
   /** Force la face obtenue au prochain lancer (triche / tests). */
-  cheatValue?: DiceValue;  // Valeur fournie par le parent pour forcer l'animation
+  cheatValue?: DiceValue; // Valeur fournie par le parent pour forcer l'animation
   /** Ancrage du dé, ex. `"top-left"`. */
   placement?: DicePlacement;
   /** URL d'un son joué pendant le lancer. */
@@ -184,9 +183,9 @@ const DICE_CSS = `
 let cssInjected = false;
 
 function injectDiceCSS(): void {
-  if (cssInjected || typeof document === 'undefined') return;
-  const tag = document.createElement('style');
-  tag.setAttribute('type', 'text/css');
+  if (cssInjected || typeof document === "undefined") return;
+  const tag = document.createElement("style");
+  tag.setAttribute("type", "text/css");
   tag.textContent = DICE_CSS;
   document.head.appendChild(tag);
   cssInjected = true;
@@ -197,12 +196,12 @@ function injectDiceCSS(): void {
  * ================================================================ */
 
 const VALUE_TO_CLASS: Record<DiceValue, string> = {
-  1: 'one',
-  2: 'two',
-  3: 'three',
-  4: 'four',
-  5: 'five',
-  6: 'six',
+  1: "one",
+  2: "two",
+  3: "three",
+  4: "four",
+  5: "five",
+  6: "six",
 };
 
 const FACE_TRANSFORM: Record<DiceValue, (half: number) => CSSProperties> = {
@@ -210,12 +209,12 @@ const FACE_TRANSFORM: Record<DiceValue, (half: number) => CSSProperties> = {
   2: (half) => ({ transform: `translate3d(0, 0, ${half}px)` }),
   3: (half) => ({ transform: `rotateY(180deg) translate3d(0, 0, ${half}px)` }),
   4: (half) => ({
-    left: '50%',
+    left: "50%",
     marginLeft: `-${half}px`,
     transform: `rotateY(-90deg) translate3d(0, 0, ${half}px)`,
   }),
   5: (half) => ({
-    left: '50%',
+    left: "50%",
     marginLeft: `-${half}px`,
     transform: `rotateY(90deg) translate3d(0, 0, ${half}px)`,
   }),
@@ -233,12 +232,12 @@ const PIPS: Record<DiceValue, readonly number[]> = {
 };
 
 const FACE_CLASSNAMES: readonly string[] = [
-  '_3dface _3dface--one',
-  '_3dface _3dface--two',
-  '_3dface _3dface--three',
-  '_3dface _3dface--four',
-  '_3dface _3dface--five',
-  '_3dface _3dface--six',
+  "_3dface _3dface--one",
+  "_3dface _3dface--two",
+  "_3dface _3dface--three",
+  "_3dface _3dface--four",
+  "_3dface _3dface--five",
+  "_3dface _3dface--six",
 ];
 
 const GRID_CELLS: readonly number[] = Array.from({ length: 25 }, (_, i) => i);
@@ -257,7 +256,9 @@ interface DefaultFaceProps {
   faceNumber: DiceValue;
 }
 
-const DefaultFace = memo(function DefaultFace({ faceNumber }: DefaultFaceProps) {
+const DefaultFace = memo(function DefaultFace({
+  faceNumber,
+}: DefaultFaceProps) {
   const activePips = PIPS[faceNumber];
 
   return (
@@ -273,8 +274,6 @@ const DefaultFace = memo(function DefaultFace({ faceNumber }: DefaultFaceProps) 
  * Composant principal
  * ================================================================ */
 
-
-
 const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
   const {
     rollingTime = 1000,
@@ -288,7 +287,7 @@ const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
     cheatValue,
     placement,
     sound,
-    triggers = ['click'],
+    triggers = ["click"],
     className,
     style,
     ...rest
@@ -297,8 +296,10 @@ const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
   const [value, setValue] = useState<DiceValue>(defaultValue);
   const [rolling, setRolling] = useState(false);
   const isControlled = value !== undefined;
-const [internalValue, /*setInternalValue*/] = useState<DiceValue>(defaultValue);
-const displayedValue: DiceValue = isControlled && value !== undefined ? value : internalValue;
+  const [internalValue /*setInternalValue*/] =
+    useState<DiceValue>(defaultValue);
+  const displayedValue: DiceValue =
+    isControlled && value !== undefined ? value : internalValue;
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -315,39 +316,38 @@ const displayedValue: DiceValue = isControlled && value !== undefined ? value : 
 
   useEffect(
     () => () => {
-      if (timeoutRef.current !== null)
-        clearTimeout(timeoutRef.current);
+      if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
       audioRef.current?.pause();
       audioRef.current = null;
     },
-    []
+    [],
   );
 
-const animateCheat = useCallback(
-  (forcedValue: DiceValue) => {
-    if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
+  const animateCheat = useCallback(
+    (forcedValue: DiceValue) => {
+      if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
 
-    if (sound) {
-      audioRef.current = new Audio(sound);
-      void audioRef.current.play().catch(() => undefined);
-    }
-
-    setRolling(true);
-
-    timeoutRef.current = setTimeout(() => {
-      setRolling(false);
-      setValue(forcedValue);
-
-      if (onRollRef.current) {
-        onRollRef.current(forcedValue);
+      if (sound) {
+        audioRef.current = new Audio(sound);
+        void audioRef.current.play().catch(() => undefined);
       }
 
-      audioRef.current?.pause();
-      audioRef.current = null;
-    }, rollingTime);
-  },
-  [rollingTime, sound]
-);
+      setRolling(true);
+
+      timeoutRef.current = setTimeout(() => {
+        setRolling(false);
+        setValue(forcedValue);
+
+        if (onRollRef.current) {
+          onRollRef.current(forcedValue);
+        }
+
+        audioRef.current?.pause();
+        audioRef.current = null;
+      }, rollingTime);
+    },
+    [rollingTime, sound],
+  );
 
   // Si cheatValue change, on déclenche automatiquement l'animation
   useEffect(() => {
@@ -355,7 +355,6 @@ const animateCheat = useCallback(
       animateCheat(cheatValue); //WARN: Hook error here
     }
   }, [cheatValue, rolling, disabled, animateCheat]);
-
 
   const rollDice = useCallback(
     (forcedValue?: DiceValue) => {
@@ -367,117 +366,116 @@ const animateCheat = useCallback(
         animateCheat(random);
       }
     },
-    [animateCheat]
+    [animateCheat],
   );
 
   useImperativeHandle(ref, () => ({ rollDice }), [rollDice]);
 
-    /* --- Triggers : clé primitive pour éviter les réabonnements --- */
-    const triggersKey = Array.isArray(triggers) ? triggers.join('|') : '';
+  /* --- Triggers : clé primitive pour éviter les réabonnements --- */
+  const triggersKey = Array.isArray(triggers) ? triggers.join("|") : "";
 
-    const triggersList = useMemo<string[]>(
-      () => (Array.isArray(triggers) ? triggers : []),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [triggersKey]
-    );
+  const triggersList = useMemo<string[]>(
+    () => (Array.isArray(triggers) ? triggers : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [triggersKey],
+  );
 
-    useEffect(() => {
-      if (typeof window === 'undefined' || triggersList.length === 0) {
-        return undefined;
-      }
+  useEffect(() => {
+    if (typeof window === "undefined" || triggersList.length === 0) {
+      return undefined;
+    }
 
-      const handleKeyPress = (event: KeyboardEvent): void => {
-        if (triggersList.includes(event.key)) rollDice();
-      };
+    const handleKeyPress = (event: KeyboardEvent): void => {
+      if (triggersList.includes(event.key)) rollDice();
+    };
 
-      window.addEventListener('keypress', handleKeyPress);
-      return () => window.removeEventListener('keypress', handleKeyPress);
-    }, [triggersList, rollDice]);
+    window.addEventListener("keypress", handleKeyPress);
+    return () => window.removeEventListener("keypress", handleKeyPress);
+  }, [triggersList, rollDice]);
 
-    /* --- Faces : clé primitive, immunise contre les nouvelles
+  /* --- Faces : clé primitive, immunise contre les nouvelles
            identités de tableau passées par le parent. --- */
-    const facesKey = Array.isArray(faces) ? faces.join('|') : '';
+  const facesKey = Array.isArray(faces) ? faces.join("|") : "";
 
-    const facesList = useMemo<string[]>(
-      () => (Array.isArray(faces) ? faces : []),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [facesKey]
-    );
+  const facesList = useMemo<string[]>(
+    () => (Array.isArray(faces) ? faces : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [facesKey],
+  );
 
-    const faceElements = useMemo(() => {
-      const half = size / 2;
+  const faceElements = useMemo(() => {
+    const half = size / 2;
 
-      return FACE_CLASSNAMES.map((faceClassName, index) => {
-        const imageUrl = facesList[index];
-        const faceNumber = (index + 1) as DiceValue;
+    return FACE_CLASSNAMES.map((faceClassName, index) => {
+      const imageUrl = facesList[index];
+      const faceNumber = (index + 1) as DiceValue;
 
-        return (
-          <div
-            key={faceClassName}
-            className={faceClassName}
-            style={{
-              ...FACE_TRANSFORM[faceNumber](half),
-              width: `${size}px`,
-              height: `${size}px`,
-              ...(faceBg ? { backgroundColor: faceBg } : {}),
-              ...(imageUrl ? { backgroundImage: `url(${imageUrl})` } : {}),
-            }}
-          >
-            {imageUrl ? null : <DefaultFace faceNumber={faceNumber} />}
-          </div>
-        );
-      });
-    }, [size, faceBg, facesList]);
+      return (
+        <div
+          key={faceClassName}
+          className={faceClassName}
+          style={{
+            ...FACE_TRANSFORM[faceNumber](half),
+            width: `${size}px`,
+            height: `${size}px`,
+            ...(faceBg ? { backgroundColor: faceBg } : {}),
+            ...(imageUrl ? { backgroundImage: `url(${imageUrl})` } : {}),
+          }}
+        >
+          {imageUrl ? null : <DefaultFace faceNumber={faceNumber} />}
+        </div>
+      );
+    });
+  }, [size, faceBg, facesList]);
 
-    /* --- Styles dérivés --- */
-    const placementStyle = useMemo<CSSProperties>(() => {
-      if (!placement) return {};
+  /* --- Styles dérivés --- */
+  const placementStyle = useMemo<CSSProperties>(() => {
+    if (!placement) return {};
 
-      const result: Record<string, string | number> = {};
-      for (const token of placement.split('-')) {
-        result[token] = token === 'left' || token === 'right' ? 0 : `-${size}px`;
-      }
-      return result as CSSProperties;
-    }, [placement, size]);
+    const result: Record<string, string | number> = {};
+    for (const token of placement.split("-")) {
+      result[token] = token === "left" || token === "right" ? 0 : `-${size}px`;
+    }
+    return result as CSSProperties;
+  }, [placement, size]);
 
-    const buttonStyle = useMemo<CSSProperties>(
-      () => ({
-        ...placementStyle,
-        ...style,
-        width: `${size}px`,
-        height: `${size}px`,
-        filter: disabled ? 'grayscale(100%)' : 'unset',
-      }),
-      [placementStyle, style, size, disabled]
-    );
+  const buttonStyle = useMemo<CSSProperties>(
+    () => ({
+      ...placementStyle,
+      ...style,
+      width: `${size}px`,
+      height: `${size}px`,
+      filter: disabled ? "grayscale(100%)" : "unset",
+    }),
+    [placementStyle, style, size, disabled],
+  );
 
-    const isClickTrigger = triggersList.includes('click');
+  const isClickTrigger = triggersList.includes("click");
 
-    const rootClassName = [
-      '_space3d',
-       VALUE_TO_CLASS[displayedValue] ?? VALUE_TO_CLASS[6],
-      rolling ? 'rolling' : '',
-      className ?? '',
-    ]
-      .filter(Boolean)
-      .join(' ');
+  const rootClassName = [
+    "_space3d",
+    VALUE_TO_CLASS[displayedValue] ?? VALUE_TO_CLASS[6],
+    rolling ? "rolling" : "",
+    className ?? "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-    return (
-      <button
-        type="button"
-        {...rest}
-        disabled={disabled || rolling}
-        onClick={(event) => {
-          onClick?.(event);
-          if (isClickTrigger) rollDice();
-        }}
-        style={buttonStyle}
-        className={rootClassName}
-      >
-        <div className="_3dbox">{faceElements}</div>
-      </button>
-    );
-  }
-);
+  return (
+    <button
+      type="button"
+      {...rest}
+      disabled={disabled || rolling}
+      onClick={(event) => {
+        onClick?.(event);
+        if (isClickTrigger) rollDice();
+      }}
+      style={buttonStyle}
+      className={rootClassName}
+    >
+      <div className="_3dbox">{faceElements}</div>
+    </button>
+  );
+});
 
 export { Dice3D, type Dice3DHandle };

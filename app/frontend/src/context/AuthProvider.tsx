@@ -3,7 +3,7 @@ import { AuthContext } from "./AuthContext";
 import { getCurrentUser } from "../services/user.service";
 import { registerUser, loginUser } from "../services/auth.service";
 import { authEvents } from "./AuthEvents";
-import type { LoginPost, RegisterPost, UserPublic } from "@shared/types";
+import type { LoginPost, RegisterPost, UserPublic } from "shared";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserPublic | null>(null);
@@ -21,13 +21,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const profile = await getCurrentUser();
         setUser(profile);
       } catch (error) {
-		if (error === 401) {
-			localStorage.removeItem("access_token");
-			setAuthMessage("Your session has expired.");
-		}
-		else {
-			console.error("Could not restore session:", error);
-		}
+        if (error === 401) {
+          localStorage.removeItem("access_token");
+          setAuthMessage("Your session has expired.");
+        } else {
+          console.error("Could not restore session:", error);
+        }
       } finally {
         setLoading(false);
       }

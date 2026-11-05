@@ -1,4 +1,4 @@
-import type { Player } from "./game.types";
+import type { Player } from "./game.types.js";
 
 export const SELECTED_COLOR = '#c30000';
 export const HOVER_COLOR = '#ff0f0f';

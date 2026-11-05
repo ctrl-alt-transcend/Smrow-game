@@ -1,10 +1,6 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const configDir = dirname(fileURLToPath(import.meta.url));
 
 /**
  * The Vite proxy acts as an intermediary between the client and the backend.
@@ -18,11 +14,7 @@ const configDir = dirname(fileURLToPath(import.meta.url));
  */
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      "@shared": resolve(configDir, "../../shared"),
-    },
-  },
+  resolve: {},
   server: {
     proxy: {
       "/api": {
@@ -30,13 +22,13 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
-      '/ws/game': {
-      target: 'http://backend:3000',
-      ws: true,
+      "/ws/game": {
+        target: "http://backend:3000",
+        ws: true,
       },
-      '/ws/social': {
-      target: 'http://backend:3000',
-      ws: true,
+      "/ws/social": {
+        target: "http://backend:3000",
+        ws: true,
       },
     },
   },

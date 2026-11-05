@@ -1,4 +1,4 @@
-import type { Player } from '@shared/game/game.types';
+import type { Player } from 'shared';
 import {
   type GameBoard,
   type RoadData,
@@ -6,7 +6,7 @@ import {
   type GameBoardGraph,
   Faction,
   Buildings,
-} from '@shared/game/gameboard.types';
+} from 'shared';
 
 export type BuildRequestPayload =
   | { kind: 'road'; id: string; data: RoadData }

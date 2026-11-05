@@ -1,4 +1,4 @@
-import type { Player, BuildRequestPayload } from '@shared/game/game.types';
+import type { Player, BuildRequestPayload } from 'shared';
 
 // TODO: move to DTO??
 export function isBuildRequestPayload(p: unknown): p is BuildRequestPayload {
