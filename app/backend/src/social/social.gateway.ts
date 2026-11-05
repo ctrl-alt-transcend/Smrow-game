@@ -8,6 +8,7 @@ import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
 import type { JwtPayload } from '@shared/types';
+import { instrument } from '@socket.io/admin-ui'; //WARN: dev only
 
 export interface SocketUser {
   id: string;
@@ -31,7 +32,14 @@ export type SocketClient = Socket<
   SocketData
 >;
 
-@WebSocketGateway({ path: '/ws/social' })
+@WebSocketGateway({
+  path: '/ws/social',
+  cors: {
+    origin: true,
+    credentials: true,
+  }, //WARN: dev only
+})
+
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   constructor(private readonly jwtService: JwtService) {}
 
@@ -41,6 +49,14 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   // }
 
   afterInit(server: SocketServer) {
+
+    /** @warning development only */
+    if (process.env.NODE_ENV === 'development') {
+      instrument(server, {
+          auth: false,
+          mode: "development",
+        });
+    }
     server.use((client: SocketClient, next) => {
       try {
         const token = client.handshake.auth.token as string;

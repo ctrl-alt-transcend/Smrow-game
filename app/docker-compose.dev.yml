@@ -36,6 +36,7 @@ services:
     environment:
       DB_PASSWORD_FILE: /run/secrets/db_password
       JWT_SECRET_FILE: /run/secrets/jwt_secret
+      NODE_ENV: development
     depends_on:
       postgres:
         condition: service_healthy
@@ -111,6 +112,8 @@ services:
         condition: service_healthy
       backend:
         condition: service_started
+    environment:
+      NODE_ENV: development
     develop:
       watch:
         - action: sync
