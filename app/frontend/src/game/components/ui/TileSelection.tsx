@@ -198,6 +198,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   onBuilt,
 }) => {
   const [busy, setBusy] = useState(false);
+  const [buttonName, setButtonName] = useState("");
   const pendingRef = useRef<PendingBuild | null>(null);
 
   const target = useMemo<BuildRequestPayload | null>(() => {
@@ -266,6 +267,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
       return;
     }
     if (target.kind === "settlement" && target.data.ownerId) {
+      setButtonName("Upgrade");
       modals.openConfirmModal({
         title: "Confirm upgrade",
         children: (
@@ -288,6 +290,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
         centered: true,
       });
     } else {
+      setButtonName("Build");
       modals.openConfirmModal({
         title: "Confirm construction",
         children: (
@@ -312,9 +315,10 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     }
   };
 
+
   return (
     <Button onClick={openModal} loading={busy} disabled={busy}>
-      Build selection
+      Build
     </Button>
   );
 };
@@ -450,25 +454,25 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
 
     // 4. SETTLEMENT: current behavior + player-to-player trade
     if (selected.selectedSettlement) {
-      const { ownerId } = selected.selectedSettlement;
+      //const { ownerId } = selected.selectedSettlement;
 
       // TODO: if ownerId matches the current player → keep the build button
       // (upgrade settlement/city). For now: foreign owner → free trade.
-      if (ownerId && ownerId !== currentPlayerId) {
-        return (
-          <Stack gap="xs" w="100%">
-            <Text size="xs" c="dimmed">
-              Trade with player <b>{ownerId}</b> (free rate)
-            </Text>
-            <TradeOfferPanel
-              ratio={null}
-              sourceId={selected.selectedSettlement.id}
-              sourceKind="player"
-              targetOwnerId={ownerId}
-            />
-          </Stack>
-        );
-      }
+      //if (ownerId && ownerId !== currentPlayerId) {
+      //  return (
+      //    <Stack gap="xs" w="100%">
+      //      <Text size="xs" c="dimmed">
+      //        Trade with player <b>{ownerId}</b> (free rate)
+      //      </Text>
+      //      <TradeOfferPanel
+      //        ratio={null}
+      //        sourceId={selected.selectedSettlement.id}
+      //        sourceKind="player"
+      //        targetOwnerId={ownerId}
+      //      />
+      //    </Stack>
+      //  );
+      //}
 
       return (
         <BuildSelectionButton

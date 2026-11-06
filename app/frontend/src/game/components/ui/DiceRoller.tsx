@@ -7,7 +7,7 @@ import { socket } from '../../../socket';
 
 
 export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; masterLog: string | null }) {
-  const [rolledValue, setRolledValue] = useState<DiceValue | null>(null);
+  const [rolledValue, setRolledValue] = useState<DiceValue | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const pendingResultRef = useRef<GameResponse | null>(null);
   //const { roll } = useRollDice();
@@ -38,7 +38,7 @@ export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; ma
       const value = pendingResultRef.current?.value ?? finalValue;
       setRolledValue(value);
       pendingResultRef.current = null;
-      setRolledValue(null);
+      setRolledValue(undefined);
       setBusy(false);
     }, []
   );
@@ -50,7 +50,7 @@ export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; ma
           <Title order={4}>Dice box</Title>
           <Dice3D
             size={80}
-            cheatValue={rolledValue ?? undefined}
+            cheatValue={rolledValue}
             onRoll={handleAnimationComplete}
             triggers={[]}
             style={{ pointerEvents: 'none' }}
