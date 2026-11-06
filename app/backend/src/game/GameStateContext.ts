@@ -13,6 +13,7 @@ import type {
   Player,
   GameResponse,
   BuildRequestPayload,
+  TradeRequestPayload
 } from '@shared/game/game.types';
 import {
   isBuildRequestPayload,
@@ -145,6 +146,13 @@ class GameStateContext {
     payload: BuildRequestPayload | null,
   ): GameResponse {
     return this.state.build(playerId, payload);
+  }
+
+  public tradeRequest(
+    playerId: string | null,
+    payload: TradeRequestPayload | null,
+  ): GameResponse {
+    return this.state.trade(playerId, payload);
   }
 
   public skipRequest(playerId: string | null): GameResponse {
@@ -313,6 +321,10 @@ abstract class State {
     playerId: string | null,
     payload: BuildRequestPayload | null,
   ): GameResponse;
+  public abstract trade(
+    playerId: string | null,
+    payload: TradeRequestPayload | null,
+  ): GameResponse;
   public abstract phaseCheck(): void;
 }
 
@@ -346,6 +358,15 @@ class WhoStartsPhase extends State {
     return {
       value: null,
       message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`,
+      data: null,
+    };
+  }
+
+  public trade(): GameResponse {
+    //console.log('🏁⚖️WhoStartsPhase:trade: handles tradeRequest.');
+    return {
+      value: null,
+      message: `🏁⚖️WhoStartsPhase:trade: action forbidden during this phase.`,
       data: null,
     };
   }
@@ -479,6 +500,15 @@ class PlacementPhase extends State {
     };
   }
 
+  public trade(): GameResponse {
+    //console.log('🗺️⚖️PlacementPhase:trade: handles tradeRequest.');
+    return {
+      value: null,
+      message: `🗺️⚖️PlacementPhase:trade: action forbidden during this phase.`,
+      data: null,
+    };
+  }
+
   public skip(): GameResponse {
     //console.log('🗺️⏭️PlacementPhase:skip: handles skipRequest.');
     return {
@@ -535,6 +565,15 @@ class RessourcePhase extends State {
     return {
       value: null,
       message: `🪵RessourcePhase:build: action forbidden during this phase.`,
+      data: null,
+    };
+  }
+
+   public trade(): GameResponse {
+    //console.log('🪵⚖️RessourcePhase:trade: handles tradeRequest.');
+    return {
+      value: null,
+      message: `🪵⚖️RessourcePhase:trade: action forbidden during this phase.`,
       data: null,
     };
   }
@@ -606,6 +645,15 @@ class TradeAndBuildPhase extends State {
       value: 1,
       message: response.message,
       data: this.state.getGameData(),
+    };
+  }
+
+  public trade(): GameResponse {
+    //console.log('🤝⚖️TradeAndBuildPhase:trade: handles tradeRequest.');
+    return {
+      value: null,
+      message: `🤝⚖️TradeAndBuildPhase:trade: action forbidden during this phase.`,
+      data: null,
     };
   }
 

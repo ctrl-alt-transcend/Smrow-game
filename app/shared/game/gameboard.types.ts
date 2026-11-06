@@ -33,6 +33,7 @@ export const TraderType = {
   SPECIALIZED_PORT: 'specialized port',
   PORT: 'port',
   RESERVE: 'reserve',
+  PLAYER: 'player'
 } as const;
 export type TraderType = (typeof TraderType)[keyof typeof TraderType];
 

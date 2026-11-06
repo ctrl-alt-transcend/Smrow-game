@@ -1,4 +1,6 @@
 import { Faction,
+  RessourceType,
+  TraderType,
   type GameBoard,
   type RoadData,
   type SettlementData
@@ -69,4 +71,11 @@ export type GameDataDto = { //INFO: data we send to the client every time the ga
 export type BuildRequestPayload =
   | { kind: 'road';       id: string; data: RoadData }
   | { kind: 'settlement'; id: string; data: SettlementData };
+
+export type TradeRequestPayload = {
+  trader: TraderType;
+  tradePlayerId: string | null;
+  offer: { ressource: RessourceType, amount: number | null };
+  target: { ressource: RessourceType, amount: number | null };
+}
 
