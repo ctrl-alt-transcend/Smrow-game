@@ -45,8 +45,8 @@ export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; ma
 
   return (
     <Box style={{ flex: 1, minWidth: 220, position: 'relative' }}>
-      <Card withBorder radius="md" shadow="sm" h={220}>
-        <Stack gap="xl" align="center" justify="center">
+      <Card withBorder radius="md" shadow="sm" h={150}>
+        <Stack gap="xs" align="center" justify="center">
           <Title order={4}>Dice box</Title>
           <Dice3D
             size={80}
