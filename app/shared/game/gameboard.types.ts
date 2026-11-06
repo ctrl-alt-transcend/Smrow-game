@@ -19,6 +19,8 @@ export const WATER_WIDTH = 48;
 export const WATER_COLOR = "#4a9ecf";
 export const WATER_OPACITY = 1;
 
+export const SPECIALIZED_PORT_COLOR = "#ffffff";
+export const NORMAL_PORT_COLOR = "#000000";
 
 export const BuildingType = {
   ROAD: 'road',
@@ -38,23 +40,23 @@ export const BUILD_COSTS: Record<BuildingType, Ressources> = {
   [BuildingType.ROAD]: {
     wood: 1,
     brick: 1,
-    hay: 0,
+    wheat: 0,
     sheep: 0,
-    rock: 0
+    ore: 0
   },
   [BuildingType.SETTLEMENT]: {
     wood: 1,
     brick: 1,
-    hay: 1,
+    wheat: 1,
     sheep: 1,
-    rock: 0
+    ore: 0
   },
   [BuildingType.CITY]: {
     wood: 0,
     brick: 0,
-    hay: 2,
+    wheat: 2,
     sheep: 0,
-    rock: 3
+    ore: 3
   },
 };
 
@@ -72,8 +74,8 @@ export const RessourceType = {
   WOOD: 'wood',
   SHEEP: 'sheep',
   BRICK: 'brick',
-  ROCK: 'rock',
-  HAY: 'hay',
+  ORE: 'ore',
+  WHEAT: 'wheat',
   DUST: 'dust'
 } as const;
 export type RessourceType = (typeof RessourceType)[keyof typeof RessourceType];
@@ -82,8 +84,8 @@ export const LAND_RESSOURCE: Record<LandType, string> = {
   [LandType.FOREST]: RessourceType.WOOD,
   [LandType.PASTURE]: RessourceType.SHEEP,
   [LandType.HILL]: RessourceType.BRICK,
-  [LandType.MOUNTAIN]: RessourceType.ROCK,
-  [LandType.FIELD]: RessourceType.HAY,
+  [LandType.MOUNTAIN]: RessourceType.ORE,
+  [LandType.FIELD]: RessourceType.WHEAT,
   [LandType.DESERT]: RessourceType.DUST
 };
 
@@ -168,9 +170,11 @@ export interface CoastData {
   port: PortData | null;
 }
 
+export type PortType = RessourceType | 'generic';
+
 export interface PortData {
   id: string;
-  type: RessourceType;
+  type: PortType;
   coastId: string;
 }
 

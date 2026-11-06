@@ -7,9 +7,9 @@ import { Faction,
 export type Ressources = {
   wood: number;
   brick: number;
-  hay: number;
+  wheat: number;
   sheep: number;
-  rock: number;
+  ore: number;
 }
 
 export type Player = {

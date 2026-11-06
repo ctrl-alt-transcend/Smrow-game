@@ -45,8 +45,8 @@ export function printPlayer(p: Player) {
   console.log(`- wood: ${p.ressources.wood}`);
   console.log(`- sheep: ${p.ressources.sheep}`);
   console.log(`- brick: ${p.ressources.brick}`);
-  console.log(`- rock: ${p.ressources.rock}`);
-  console.log(`- hay: ${p.ressources.hay}`);
+  console.log(`- ore: ${p.ressources.ore}`);
+  console.log(`- wheat: ${p.ressources.wheat}`);
   console.log(`- roads: ${p.roadsBuilt}`);
   console.log(`- settlements: ${p.settlementsBuilt}`);
 }

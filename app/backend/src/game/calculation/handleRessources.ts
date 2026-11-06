@@ -22,11 +22,11 @@ export function payRessources(
       ressources.brick -= BUILD_COSTS.settlement.brick;
       ressources.wood -= BUILD_COSTS.settlement.wood;
       ressources.sheep -= BUILD_COSTS.settlement.sheep;
-      ressources.hay -= BUILD_COSTS.settlement.hay;
+      ressources.wheat -= BUILD_COSTS.settlement.wheat;
       break;
     case 'city':
-      ressources.hay -= BUILD_COSTS.settlement.hay;
-      ressources.rock -= BUILD_COSTS.settlement.rock;
+      ressources.wheat -= BUILD_COSTS.settlement.wheat;
+      ressources.ore -= BUILD_COSTS.settlement.ore;
       break;
     default:
       break;
@@ -46,11 +46,11 @@ export function hasEnoughRessources(
       if (ressources.brick >= BUILD_COSTS.settlement.brick
         && ressources.wood >= BUILD_COSTS.settlement.wood
         && ressources.sheep >= BUILD_COSTS.settlement.sheep
-        && ressources.hay >= BUILD_COSTS.settlement.hay)
+        && ressources.wheat >= BUILD_COSTS.settlement.wheat)
       return true;
     case 'city':
-      if (ressources.hay >= BUILD_COSTS.settlement.hay
-        && ressources.rock >= BUILD_COSTS.settlement.rock)
+      if (ressources.wheat >= BUILD_COSTS.settlement.wheat
+        && ressources.ore >= BUILD_COSTS.settlement.ore)
       return true;
     default:
       break;
@@ -68,8 +68,8 @@ function addRessources(
       return -1;
     case 'field':
       isCity ?
-      ressources.hay += 2
-      : ressources.hay += 1;
+      ressources.wheat += 2
+      : ressources.wheat += 1;
       break;
     case 'forest':
       isCity ?
@@ -83,8 +83,8 @@ function addRessources(
       break;
     case 'mountain':
       isCity ?
-      ressources.rock += 2
-      : ressources.rock += 1;
+      ressources.ore += 2
+      : ressources.ore += 1;
       break;
     case 'pasture':
       isCity ?

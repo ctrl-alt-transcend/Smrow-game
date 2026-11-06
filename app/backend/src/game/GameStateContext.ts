@@ -99,16 +99,16 @@ class GameStateContext {
       ressources: {
         wood: 10,
         brick: 10,
-        hay: 10,
+        wheat: 10,
         sheep: 10,
-        rock: 10,
+        ore: 10,
       },
       //ressources: {
       //  wood: 0,
       //  brick: 0,
-      //  hay: 0,
+      //  wheat: 0,
       //  sheep: 0,
-      //  rock: 0,
+      //  ore: 0,
       //},
     };
     return newPlayer;

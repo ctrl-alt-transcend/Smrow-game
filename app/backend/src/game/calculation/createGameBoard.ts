@@ -12,6 +12,7 @@ import {
   HEX_SIZE,
   WATER_WIDTH,
   Faction,
+  RessourceType,
 } from '@shared/game/gameboard.types';
 import { getHexCorners, getHexEdges } from '@shared/game/hexCalculation';
 
@@ -52,6 +53,7 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
   }));
 
   const coasts = generateCoasts(tiles);
+
   const margin = 50;
   const allPoints: Array<{ x: number; y: number }> = [
     ...Array.from(allVertices.values()),
@@ -106,21 +108,23 @@ const AXIAL_DIRECTIONS: ReadonlyArray<readonly [number, number]> = [
 
 const axialKey = (q: number, r: number): string => `${q},${r}`;
 
-/**deterministic hash (the board must remain reproducible; no Math.random)*/
+/** deterministic hash (the board must remain reproducible; no Math.random) */
 const deterministicHash = (q: number, r: number, salt = 0): number => {
   const n = Math.sin((q + salt) * 127.1 + (r + salt * 7) * 311.7) * 43758.5453;
   return n - Math.floor(n);
 };
 
-/**canonical key of an edge, independent of the p1/p2 order*/
+/** canonical key of an edge, independent of the p1/p2 order */
 const edgeKey = (a: Vertex, b: Vertex): string =>
   a.id < b.id ? `${a.id}|${b.id}` : `${b.id}|${a.id}`;
 
 /**
-* @description Generates a CoastData object for each outer edge (bordering the ocean).
-* Detection: an edge is considered coastal if it is not shared by any OTHER
-* land tile. The normals point away from the tile (toward the sea).
-*/
+ * @description Generates a CoastData object for each outer edge (bordering the ocean).
+ * Detection: an edge is considered coastal if it is not shared by any OTHER
+ * land tile. The normals point away from the tile (toward the sea).
+ * Ports are then assigned: some coasts stay empty, some get a generic port
+ * (3:1), some get a specialized port (2:1).
+ */
 const generateCoasts = (tiles: TileData[]): CoastData[] => {
   const sharedEdgeKeys = new Set<string>();
   const edgeKeyCount = new Map<string, number>();
@@ -144,7 +148,7 @@ const generateCoasts = (tiles: TileData[]): CoastData[] => {
     );
 
     for (const e of getHexEdges(tile.q, tile.r, HEX_SIZE)) {
-      if (sharedEdgeKeys.has(edgeKey(e.p1, e.p2))) continue; // arête intérieure
+      if (sharedEdgeKeys.has(edgeKey(e.p1, e.p2))) continue; // inner edge
 
       const midX = (e.p1.x + e.p2.x) / 2;
       const midY = (e.p1.y + e.p2.y) / 2;
@@ -156,7 +160,7 @@ const generateCoasts = (tiles: TileData[]): CoastData[] => {
         id: `coast:${e.id}`,
         tile: { q: tile.q, r: tile.r },
         edge: e,
-        normal: { x: dx / len, y: dy / len, id: ''},
+        normal: { x: dx / len, y: dy / len, id: '' },
         port: null,
       });
     }
@@ -169,11 +173,70 @@ const generateCoasts = (tiles: TileData[]): CoastData[] => {
 
 const SPECIALIZED_PORT_COUNT = 5;
 const GENERIC_PORT_COUNT = 4;
+const TOTAL_PORTS = SPECIALIZED_PORT_COUNT + GENERIC_PORT_COUNT;
 
-const placePorts = (
-  coasts: CoastData[],
-  tiles: TileData[]
+const SPECIALTIES: readonly RessourceType[] = [
+  'wood',
+  'brick',
+  'sheep',
+  'wheat',
+  'ore',
+];
+
+/**
+ * Deterministic Fisher-Yates shuffle of the specialties: prevents the tile
+ * hash from always associating 'wood' with the 'first' port chosen.
+ */
+const shuffledSpecialties = (): RessourceType[] => {
+  const arr = [...SPECIALTIES];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const seed = deterministicHash(i, arr.length);
+    const j = Math.floor(seed * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+/**
+ * Deterministically ordered port types: the 5 first picks receive the
+ * shuffled specialties (2:1), the 4 last ones a generic type (3:1).
+ * Shuffling the whole sequence would blur the specialized/generic split.
+ */
+const buildPortTypeOrder = (): (RessourceType | 'generic')[] => [
+  ...shuffledSpecialties(),
+  ...Array(GENERIC_PORT_COUNT).fill('generic' as const),
+];
+
+/** attach a port to a deterministic coastal edge of the given tile */
+const attachPortToTile = (
+  coastsByTile: Map<string, CoastData[]>,
+  tile: TileData,
+  type: RessourceType | 'generic',
 ) => {
+  const tileCoasts = coastsByTile.get(axialKey(tile.q, tile.r)) ?? [];
+  if (tileCoasts.length === 0) return;
+
+  // deterministic choice of the edge that carries the port
+  const seed = deterministicHash(tile.q + 13, tile.r + 7);
+  const coast = tileCoasts[Math.floor(seed * tileCoasts.length) % tileCoasts.length];
+
+  coast.port = {
+    id: `port:${tile.q},${tile.r}`,
+    type,
+    coastId: coast.id,
+  };
+};
+
+/**
+ * @description Assigns ports to coastal tiles:
+ * 1. Candidate tiles are sorted deterministically (by hash, not by position).
+ * 2. A tile is skipped if adjacent to an already-chosen tile (avoids port clusters).
+ * 3. If fewer than TOTAL_PORTS tiles can be picked without adjacency,
+ *    a second pass completes the count by relaxing the adjacency rule.
+ * Result: empty coasts (no port), generic ports (3:1) and specialized ports (2:1).
+ */
+const placePorts = (coasts: CoastData[], tiles: TileData[]) => {
+  // group coastal edges by tile
   const coastsByTile = new Map<string, CoastData[]>();
   for (const c of coasts) {
     const key = axialKey(c.tile.q, c.tile.r);
@@ -182,21 +245,18 @@ const placePorts = (
     else coastsByTile.set(key, [c]);
   }
 
-  // Candidate tiles: possess at least one edge, deterministic sorting
+  // candidate tiles: possess at least one coastal edge, deterministic sorting
   const candidates = tiles
     .filter((t) => coastsByTile.has(axialKey(t.q, t.r)))
-    .sort(
-      (a, b) =>
-        deterministicHash(a.q, a.r) - deterministicHash(b.q, b.r),
-    );
+    .sort((a, b) => deterministicHash(a.q, a.r) - deterministicHash(b.q, b.r));
 
-  const chosenTiles: TileData[] = [];
   const chosenKeys = new Set<string>();
+  const chosenTiles: TileData[] = [];
 
+  // PASS 1: pick tiles, never adjacent to an already-chosen one
   for (const tile of candidates) {
-    if (chosenTiles.length >= SPECIALIZED_PORT_COUNT + GENERIC_PORT_COUNT) break;
+    if (chosenTiles.length >= TOTAL_PORTS) break;
 
-    // No two ports on adjacent tiles (avoids "port clusters")
     const tooClose = AXIAL_DIRECTIONS.some(([dq, dr]) =>
       chosenKeys.has(axialKey(tile.q + dq, tile.r + dr)),
     );
@@ -206,30 +266,25 @@ const placePorts = (
     chosenKeys.add(axialKey(tile.q, tile.r));
   }
 
+  // PASS 2: fallback — relax adjacency to guarantee the exact port count
+  if (chosenTiles.length < TOTAL_PORTS) {
+    for (const tile of candidates) {
+      if (chosenTiles.length >= TOTAL_PORTS) break;
+      if (chosenKeys.has(axialKey(tile.q, tile.r))) continue;
+      chosenTiles.push(tile);
+      chosenKeys.add(axialKey(tile.q, tile.r));
+    }
+  }
+
+  const typeOrder = buildPortTypeOrder();
+
   chosenTiles.forEach((tile, index) => {
-    const tileCoasts =
-      coastsByTile.get(axialKey(tile.q, tile.r)) ?? [];
-    if (tileCoasts.length === 0) return;
-
-   // Deterministic choice of the edge that carries the port
-    const seed = deterministicHash(tile.q + 13, tile.r + 7);
-    const coast = tileCoasts[Math.floor(seed * tileCoasts.length) % tileCoasts.length];
-
-    const port: PortData = {
-      id: `port:${tile.q},${tile.r}`,
-      // TODO ASSIGN PORT TYPE
-      type: 'wood',
-        //type: index < SPECIALIZED_PORT_COUNT
-        //  ? SPECIALTIES[index % SPECIALTIES.length]
-        //  : 'generic',
-      coastId: coast.id,
-    };
-    coast.port = port;
+    attachPortToTile(coastsByTile, tile, typeOrder[index % typeOrder.length]);
   });
 };
 
 /* ------------------------------------------------------------------ *
- * Graph (inchangé)
+ * Graph (unchanged)
  * ------------------------------------------------------------------ */
 const emptyConnections = (): ConnectedElements => ({
   connectedRoads: [],
@@ -393,7 +448,7 @@ export const debugPrintConnections = (
   } else {
     console.log(`🏘️ Settlement ${id}:`);
     console.log(
-      `   ├─ connectedSettlements (${entry.connectedSettlements.length}): ${entry.connectedSettlements.map((s) => s.id).join(', ')}`,
+      `   ├─ connectedSettlements (${entry.connectedSettlements.length}): ${entry.connectedSettlements.map((t) => t.id).join(', ')}`,
     );
     console.log(
       `   └─ adjacentTiles (${entry.adjacentTiles.length}): ${entry.adjacentTiles.map((t) => `${t.q},${t.r}`).join(', ')}`,
@@ -403,7 +458,11 @@ export const debugPrintConnections = (
 
 export const debugPrintCoasts = (board: GameBoard) => {
   const withPorts = board.coasts.filter((c) => c.port);
-  console.log(`🏖️ Coastal edges: ${board.coasts.length}, ports: ${withPorts.length}`);
+  const generic = withPorts.filter((c) => c.port!.type === 'generic');
+  const specialized = withPorts.filter((c) => c.port!.type !== 'generic');
+  console.log(
+    `🏖️ Coastal edges: ${board.coasts.length} | empty: ${board.coasts.length - withPorts.length} | generic: ${generic.length} | specialized: ${specialized.length}`,
+  );
   for (const coast of withPorts) {
     console.log(`   ⚓ ${coast.port!.id} [${coast.port!.type}] on ${coast.id}`);
   }

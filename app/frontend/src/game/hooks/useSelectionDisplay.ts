@@ -29,8 +29,10 @@ export const useSelectionDisplay = (
   }
   if (selected.selectedCoast) {
     items.push({label: `Coast: ${selected.selectedCoast.id}` });
-    if (selected.selectedCoast.port)
-      items.push({label: `Port: ${selected.selectedCoast.port?.type}`});
+    if (selected.selectedCoast.port && selected.selectedCoast.port.type === 'generic')
+      items.push({label: 'Port: 3:1'});
+    else if (selected.selectedCoast.port)
+      items.push({label: `Specialized Port: 2:1 ${selected.selectedCoast.port.type}`});
   }
   return items;
 };

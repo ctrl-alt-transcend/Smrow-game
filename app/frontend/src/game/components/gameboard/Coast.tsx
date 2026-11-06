@@ -1,8 +1,11 @@
 import type { CoastProps } from "../../types/gameboard.types";
 import { useHover } from "../../hooks/useGameBoardHover";
+import { PortIcon } from "./GameIcon";
 import {
   SAND_WIDTH,
-  SAND_COLOR
+  SAND_COLOR,
+  SPECIALIZED_PORT_COLOR,
+  NORMAL_PORT_COLOR
 } from "../../../../../shared/game/gameboard.types";
 
 export const Coast: React.FC<CoastProps> = ({
@@ -33,6 +36,12 @@ export const Coast: React.FC<CoastProps> = ({
     y: (p1.y + p2.y) / 2 + normal.y * (SAND_WIDTH / 2),
   };
   const highlightColor = isSelected ? "#ffd700" : "#ffffff";
+  let color: string;
+  if (data.port && data.port.type === 'generic') {
+    color = NORMAL_PORT_COLOR;
+  } else {
+    color = SPECIALIZED_PORT_COLOR;
+  }
 
   return (
     <g
@@ -68,51 +77,8 @@ export const Coast: React.FC<CoastProps> = ({
           className="coast-highlight"
         />
       )}
-      {port && <PortIcon p1={p1} p2={p2} normal={normal} type={port.type} />}
-    </g>
-  );
-};
 
-interface PortIconProps {
-  p1: { x: number; y: number };
-  p2: { x: number; y: number };
-  normal: { x: number; y: number };
-  type: string;
-}
-
-const DOCK_COLOR = "#8b6e4b";
-const DOCK_SHADOW = "#5a4630";
-
-const PortIcon: React.FC<PortIconProps> = ({ p1, p2, normal }) => {
-  const midX = (p1.x + p2.x) / 2;
-  const midY = (p1.y + p2.y) / 2;
-
-  return (
-    <g
-      transform={`translate(${midX + normal.x * (SAND_WIDTH / 2)}, ${
-        midY + normal.y * (SAND_WIDTH / 2)
-      }) rotate(${(Math.atan2(normal.y, normal.x) * 180) / Math.PI})`}
-      pointerEvents="none"
-    >
-      {/* platform in the sand */}
-      <rect
-        x={-2}
-        y={-4}
-        width={20}
-        height={8}
-        rx={1}
-        fill={DOCK_COLOR}
-        stroke={DOCK_SHADOW}
-        strokeWidth={0.7}
-      />
-      {/* boards */}
-      <line x1={0} y1={-4} x2={0} y2={4} stroke={DOCK_SHADOW} strokeWidth={0.5} opacity={0.6} />
-      <line x1={5} y1={-4} x2={5} y2={4} stroke={DOCK_SHADOW} strokeWidth={0.5} opacity={0.6} />
-       <line x1={10} y1={-4} x2={10} y2={4} stroke={DOCK_SHADOW} strokeWidth={0.5} opacity={0.6} />
-      <line x1={15} y1={-4} x2={15} y2={4} stroke={DOCK_SHADOW} strokeWidth={0.5} opacity={0.6} />
-      {/* stilts on the seaside */}
-      <line x1={21} y1={-2.5} x2={17.5} y2={-2.5} stroke={DOCK_SHADOW} strokeWidth={1.2} />
-      <line x1={21} y1={2.5} x2={17.5} y2={2.5} stroke={DOCK_SHADOW} strokeWidth={1.2} />
+      {port && <PortIcon p1={p1} p2={p2} normal={normal} flagColor={color} />}
     </g>
   );
 };
