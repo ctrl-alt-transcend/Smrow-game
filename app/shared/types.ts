@@ -1,44 +1,31 @@
-export type RegisterPost = {
-    username: string;
-    name: string;
-    email: string;
-    password: string;
-};
+import * as z from "zod";
 
-export type LoginPost = {
-    email: string;
-    password: string;
-}
+// Definition of basic type that can either be used standalone or
+// inside an object. see -> ./user.ts for example.
 
-export type UserPublic = {
-    id: string;
-    name: string;
-    email: string;
-};
+export const Id = z.uuid();
+export type t_id = z.infer<typeof Id>;
 
-export type UserProfile = {
-    id: string;
-    name: string;
-    email: string;
-    username: string;
-    createdAt: string;
-    bio: string | null;
-    avatarURL: string | null;
-};
+export const Email = z.email("Invalid email !");
+export type t_mail = z.infer<typeof Email>;
 
-export type RegisterResponse = {
-    message: string;
-    user: UserPublic;
-    access_token: string;
-};
+export const Username = z.string().min(4, "Too short !").max(20, "Too long !");
+export type t_username = z.infer<typeof Username>;
 
-export type LoginResponse = {
-    access_token: string;
-}
+export const Name = z.string().min(4, "Too short !").max(20, "Too long !");
+export type t_name = z.infer<typeof Name>;
 
-// Payload
+export const Password = z.string().min(8, "Too short !").max(128, "Too long !");
+export type t_password = z.infer<typeof Password>;
 
-export interface JwtPayload {
-    sub: string;
-    username: string;
-}
+export const Datetime = z.iso.datetime();
+export type t_datetime = z.infer<typeof Datetime>;
+
+export const Bio = z.string().max(1024);
+export type t_bio = z.infer<typeof Bio>;
+
+export const Message = z.string().nonempty().max(1024);
+export type t_message = z.infer<typeof Message>;
+
+export const JwtToken = z.jwt();
+export type t_jwt = z.infer<typeof JwtToken>;

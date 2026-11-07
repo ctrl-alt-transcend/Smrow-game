@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { LoginPost, RegisterPost, UserPublic } from "shared";
+import type { LoginPost, Register, UserPublic } from "shared";
 
 export interface AuthContextValue {
   user: UserPublic | null;
@@ -7,7 +7,7 @@ export interface AuthContextValue {
   authMessage: string | null;
   clearAuthMessage: () => void;
   login: (data: LoginPost) => Promise<void>;
-  register: (data: RegisterPost) => Promise<void>;
+  register: (data: Register) => Promise<void>;
   logout: () => void;
 }
 

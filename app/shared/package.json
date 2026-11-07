@@ -5,13 +5,21 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./game": { "types": "./dist/game/index.d.ts", "default": "./dist/game/index.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./game": {
+      "types": "./dist/game/index.d.ts",
+      "default": "./dist/game/index.js"
+    }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "format": "prettier --write \"./**/*.ts\" \"game/**/*.ts \"game/**/*.tsx"
   },
   "dependencies": {
-  "zod": "^3.25.0"
-}
+    "prettier": "^3.9.10",
+    "zod": "^4.0.0"
+  }
 }
