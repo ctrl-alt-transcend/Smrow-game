@@ -200,7 +200,6 @@ export const PortIcon: React.FC<PortIconProps> = ({
   const midX = (p1.x + p2.x) / 2;
   const midY = (p1.y + p2.y) / 2;
 
-  console.log(`flagColor: ${flagColor}`);
   return (
     <g
       transform={`translate(${midX + normal.x * (SAND_WIDTH / 2)}, ${

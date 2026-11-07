@@ -1,4 +1,4 @@
-import { LAND_RESSOURCE } from "../../../../shared/game/gameboard.types";
+import { BUILD_COSTS, LAND_RESSOURCE } from "../../../../shared/game/gameboard.types";
 import type { GameBoardSelection } from "../types/gameboard.types";
 
 export interface SelectionItem {
@@ -18,14 +18,33 @@ export const useSelectionDisplay = (
   if (selected.selectedSettlement) {
     //items.push({label: `Settlement: ${selected.selectedSettlement.id}`});
     //items.push({label: `Faction: ${selected.selectedSettlement.faction}`});
-    if (selected.selectedSettlement.ownerId)
+    if (selected.selectedSettlement.ownerId) {
       items.push({label: `Landlord: ${selected.selectedSettlement.ownerId}`});
+      if (!selected.selectedSettlement.isCity) {
+        items.push({label: `Cost to upgrade:`});
+        items.push({label: `Wheat: ${BUILD_COSTS.city.wheat}`});
+        items.push({label: `Ore: ${BUILD_COSTS.city.ore}`});
+      }
+    }
+    else {
+      items.push({label: `Cost to build:`});
+      items.push({label: `Wood: ${BUILD_COSTS.settlement.wood}`});
+      items.push({label: `Brick: ${BUILD_COSTS.settlement.brick}`});
+      items.push({label: `Wheat: ${BUILD_COSTS.settlement.wheat}`});
+      items.push({label: `Sheep: ${BUILD_COSTS.settlement.sheep}`});
+    }
   }
   if (selected.selectedRoad) {
     //items.push({label: `Road: ${selected.selectedRoad.id}` });
     //items.push({label: `Faction: ${selected.selectedRoad.faction}`});
-    if (selected.selectedRoad.ownerId)
+    if (selected.selectedRoad.ownerId) {
       items.push({label: `Landlord: ${selected.selectedRoad.ownerId}`});
+    }
+    else {
+      items.push({label: `Cost to build:`});
+      items.push({label: `Wood: ${BUILD_COSTS.road.wood}`});
+      items.push({label: `Brick: ${BUILD_COSTS.road.brick}`});
+    }
   }
   if (selected.selectedCoast) {
     //items.push({label: `${selected.selectedCoast.id}` });
