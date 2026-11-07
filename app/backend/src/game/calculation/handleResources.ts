@@ -123,16 +123,19 @@ export function hasEnoughResourcesToBuild(
       if (resources.brick >= BUILD_COSTS.road.brick
         && resources.wood >= BUILD_COSTS.road.wood)
         return true;
+      break;
     case 'settlement':
       if (resources.brick >= BUILD_COSTS.settlement.brick
         && resources.wood >= BUILD_COSTS.settlement.wood
         && resources.sheep >= BUILD_COSTS.settlement.sheep
         && resources.wheat >= BUILD_COSTS.settlement.wheat)
         return true;
+      break;
     case 'city':
       if (resources.wheat >= BUILD_COSTS.city.wheat
         && resources.ore >= BUILD_COSTS.city.ore)
         return true;
+      break;
     default:
       break;
   }
