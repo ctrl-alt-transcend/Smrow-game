@@ -4,7 +4,7 @@ import {
   UsernameSchema,
   NameSchema,
   PasswordSchema,
-  IdShema,
+  IdSchema,
   DatetimeSchema,
   BioSchema,
   MessageSchema,
@@ -27,14 +27,15 @@ export const LoginPostSchema = z.object({
 export type LoginPost = z.infer<typeof LoginPostSchema>;
 
 export const UserPublicSchema = z.object({
-  id: IdShema,
+  id: IdSchema,
   name: NameSchema,
+  username: UsernameSchema,
   email: EmailSchema,
 });
 export type UserPublic = z.infer<typeof UserPublicSchema>;
 
 export const UserProfileSchema = z.object({
-  id: IdShema,
+  id: IdSchema,
   name: NameSchema,
   email: EmailSchema,
   username: UsernameSchema,
