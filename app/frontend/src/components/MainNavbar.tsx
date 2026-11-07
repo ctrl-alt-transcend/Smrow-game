@@ -10,12 +10,14 @@ export default function MainNavbar() {
       mb={20}
       gap="md"
       align="center"
-      justify="center" >
+      justify="center"
+    >
       {/* <RegisterDrawer/> */}
       <Box>
         <Image
           src="https://pleated-jeans.com/wp-content/uploads/2025/02/funniest-dungeons-and-dragons-memes-1-1.webp"
-          radius='xs'/>
+          radius="xs"
+        />
       </Box>
       <Skeleton animate={true} height={250} />
     </Stack>

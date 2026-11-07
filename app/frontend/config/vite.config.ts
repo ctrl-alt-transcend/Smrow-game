@@ -1,25 +1,44 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
+/**
+ * The Vite proxy acts as an intermediary between the client and the backend.
+ * In production, Nginx fulfils this role.
+ *
+ * Using the Vite proxy allows us to replicate production behaviour more closely and also avoids the need to enable CORS.
+ *
+ * @remarks: We use `backend` instead of `localhost` in the address because communication takes place between containers.
+ *
+ * @Warning: The Vite proxy is only used in development !
+ */
 export default defineConfig({
-  plugins: [react()]
-  ,server: {
+  plugins: [react()],
+  resolve: {},
+  server: {
     proxy: {
-      '/api': {
-        target: 'http://nestjs:3000',
+      "/api": {
+        target: "http://backend:3000",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+      "/ws/game": {
+        target: "http://backend:3000",
+        ws: true,
+      },
+      "/ws/social": {
+        target: "http://backend:3000",
+        ws: true,
       },
     },
   },
   test: {
-    pool: 'threads',
+    pool: "threads",
     maxWorkers: 1,
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
-    setupFiles: './tests/setup.ts',
+    setupFiles: "./tests/setup.ts",
   },
-})
+});
 
-console.log('Vite config loaded successfully.')
+console.log("Vite config loaded successfully.");

@@ -1,6 +1,6 @@
-import { Container, Grid, SimpleGrid, Skeleton } from '@mantine/core';
+import { Container, Grid, SimpleGrid, Skeleton } from "@mantine/core";
 
-const PRIMARY_COL_HEIGHT = '500px';
+const PRIMARY_COL_HEIGHT = "500px";
 
 export default function MainGrid() {
   const SECONDARY_COL_HEIGHT = `calc(${PRIMARY_COL_HEIGHT} / 2 - var(--mantine-spacing-md) / 2)`;
@@ -11,13 +11,25 @@ export default function MainGrid() {
         <Skeleton height={PRIMARY_COL_HEIGHT} radius="md" animate={true} />
         <Grid gap="md">
           <Grid.Col>
-            <Skeleton height={SECONDARY_COL_HEIGHT} radius="md" animate={true} />
+            <Skeleton
+              height={SECONDARY_COL_HEIGHT}
+              radius="md"
+              animate={true}
+            />
           </Grid.Col>
           <Grid.Col span={6}>
-            <Skeleton height={SECONDARY_COL_HEIGHT} radius="md" animate={true} />
+            <Skeleton
+              height={SECONDARY_COL_HEIGHT}
+              radius="md"
+              animate={true}
+            />
           </Grid.Col>
           <Grid.Col span={6}>
-            <Skeleton height={SECONDARY_COL_HEIGHT} radius="md" animate={true} />
+            <Skeleton
+              height={SECONDARY_COL_HEIGHT}
+              radius="md"
+              animate={true}
+            />
           </Grid.Col>
         </Grid>
       </SimpleGrid>

@@ -1,10 +1,12 @@
 name: ft-catan
 services:
 
-  nestjs:
+  backend:
     build:
-      context: ./backend
-    container_name: nestjs
+      context: .
+      dockerfile: backend/dockerfile
+      target: runner
+    container_name: backend
     restart: unless-stopped
     networks:
       - ft-network

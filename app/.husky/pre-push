@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -e
+
+echo "running pre-push checks..."
+echo "pre-pushing... oh yeah.."
+
+make check

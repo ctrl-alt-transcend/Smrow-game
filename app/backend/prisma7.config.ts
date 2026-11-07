@@ -2,6 +2,33 @@
 // npm install --save-dev prisma dotenv
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
+import { readSecret } from "./src/strategies/readSecret";
+import { DB } from './src/config/config'
+
+  let dbPassword = process.env.DB_PASSWORD || "";
+
+  try {
+    if (process.env.DB_PASSWORD_FILE) { // redondant
+      dbPassword = readSecret(DB.DB_PASS_FILE);
+    }
+  }
+  catch (error) {
+    dbPassword = 'dummy-pass-for-build';
+  }
+
+
+  const config = {
+   dbHost: DB.DB_HOST,
+   dbUser: DB.DB_USER,
+   dbPassword: dbPassword, // readSecret('DB_PASSWORD_FILE'),  'run/secrets/db_password'
+   dbPort: DB.DB_PORT,
+   dbName: DB.DB_NAME,
+}
+
+const DATABASE_URL =
+    `postgres://${encodeURIComponent(config.dbUser)}:` +
+    `${encodeURIComponent(config.dbPassword)}@${(config.dbHost)}:${config.dbPort}/` +
+    `${config.dbName}?schema=public`
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -9,6 +36,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: DATABASE_URL,
   },
 });
