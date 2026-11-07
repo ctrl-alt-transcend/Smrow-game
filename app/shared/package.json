@@ -16,7 +16,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "format": "prettier --write \"./**/*.ts\" \"game/**/*.ts \"game/**/*.tsx"
+    "format": "prettier --write \"./**/*.ts\" \"./**/*.js\""
   },
   "dependencies": {
     "prettier": "^3.9.10",
