@@ -12,13 +12,13 @@ export type Id = z.infer<typeof IdSchema>;
 export const EmailSchema = z.email("Invalid email !");
 export type Email = z.infer<typeof EmailSchema>;
 
-export const UsernameSchema = z.string().min(4, "Too short !").max(20, "Too long !");
+export const UsernameSchema = z.string().min(4, "Username too short !").max(20, "Username too long !");
 export type Username = z.infer<typeof UsernameSchema>;
 
-export const NameSchema = z.string().min(4, "Too short !").max(20, "Too long !");
+export const NameSchema = z.string().nonempty("Can't be empty").max(20, "Name too long !");
 export type Name = z.infer<typeof NameSchema>;
 
-export const PasswordSchema = z.string().min(8, "Too short !").max(128, "Too long !");
+export const PasswordSchema = z.string().min(8, "Password too short !").max(128, "Password too long !");
 export type Password = z.infer<typeof PasswordSchema>;
 
 export const DatetimeSchema = z.iso.datetime();
