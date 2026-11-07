@@ -3,29 +3,32 @@ import * as z from "zod";
 // Definition of basic type that can either be used standalone or
 // inside an object. see -> ./user.ts for example.
 
-export const Id = z.uuid();
-export type t_id = z.infer<typeof Id>;
+export const IdShema = z.uuid();
+export type Id = z.infer<typeof IdShema>;
 
-export const Email = z.email("Invalid email !");
-export type t_mail = z.infer<typeof Email>;
+export const EmailSchema = z.email("Invalid email !");
+export type Email = z.infer<typeof EmailSchema>;
 
-export const Username = z.string().min(4, "Too short !").max(20, "Too long !");
-export type t_username = z.infer<typeof Username>;
+export const UsernameSchema = z.string().min(4, "Too short !").max(20, "Too long !");
+export type Username = z.infer<typeof UsernameSchema>;
 
-export const Name = z.string().min(4, "Too short !").max(20, "Too long !");
-export type t_name = z.infer<typeof Name>;
+export const NameSchema = z.string().min(4, "Too short !").max(20, "Too long !");
+export type Name = z.infer<typeof NameSchema>;
 
-export const Password = z.string().min(8, "Too short !").max(128, "Too long !");
-export type t_password = z.infer<typeof Password>;
+export const PasswordSchema = z.string().min(8, "Too short !").max(128, "Too long !");
+export type Password = z.infer<typeof PasswordSchema>;
 
-export const Datetime = z.iso.datetime();
-export type t_datetime = z.infer<typeof Datetime>;
+export const DatetimeSchema = z.iso.datetime();
+export type Datetime = z.infer<typeof DatetimeSchema>;
 
-export const Bio = z.string().max(1024);
-export type t_bio = z.infer<typeof Bio>;
+export const BioSchema = z.string().max(1024).nullable();
+export type Bio = z.infer<typeof BioSchema>;
 
-export const Message = z.string().nonempty().max(1024);
-export type t_message = z.infer<typeof Message>;
+export const MessageSchema = z.string().nonempty().max(1024);
+export type Message = z.infer<typeof MessageSchema>;
 
-export const JwtToken = z.jwt();
-export type t_jwt = z.infer<typeof JwtToken>;
+export const JwtTokenSchema = z.jwt();
+export type JwtToken = z.infer<typeof JwtTokenSchema>;
+
+export const AvatarUrlSchema = z.url().nullable();
+export type avatarURL = z.infer<typeof AvatarUrlSchema>;

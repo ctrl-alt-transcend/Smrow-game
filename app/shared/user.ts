@@ -1,62 +1,63 @@
 import { z } from "zod";
 import {
-  Email,
-  Username,
-  Name,
-  Password,
-  Id,
-  Datetime,
-  Bio,
-  Message,
-  JwtToken,
+  EmailSchema,
+  UsernameSchema,
+  NameSchema,
+  PasswordSchema,
+  IdShema,
+  DatetimeSchema,
+  BioSchema,
+  MessageSchema,
+  JwtTokenSchema,
+  AvatarUrlSchema,
 } from "./types.js";
 
-export const RegisterPost = z.object({
-  username: Username,
-  name: Name,
-  email: Email,
-  password: Password,
+export const RegisterPostSchema = z.object({
+  username: UsernameSchema,
+  name: NameSchema,
+  email: EmailSchema,
+  password: PasswordSchema,
 });
-export type t_registerPost = z.infer<typeof RegisterPost>;
+export type RegisterPost = z.infer<typeof RegisterPostSchema>;
 
-export const LoginPost = z.object({
-  email: Email,
-  password: Password,
+export const LoginPostSchema = z.object({
+  email: EmailSchema,
+  password: PasswordSchema,
 });
-export type t_loginPost = z.infer<typeof LoginPost>;
+export type LoginPost = z.infer<typeof LoginPostSchema>;
 
-export const UserPublic = z.object({
-  id: Id,
-  name: Name,
-  email: Email,
+export const UserPublicSchema = z.object({
+  id: IdShema,
+  name: NameSchema,
+  email: EmailSchema,
 });
-export type t_userPublic = z.infer<typeof UserPublic>;
+export type UserPublic = z.infer<typeof UserPublicSchema>;
 
-export const UserProfile = z.object({
-  id: Id,
-  name: Name,
-  email: Email,
-  username: Username,
-  createdAt: Datetime,
-  bio: Bio,
-  avatarURL: z.httpUrl(),
+export const UserProfileSchema = z.object({
+  id: IdShema,
+  name: NameSchema,
+  email: EmailSchema,
+  username: UsernameSchema,
+  createdAt: DatetimeSchema,
+  bio: BioSchema,
+  avatarURL: AvatarUrlSchema,
 });
-export type t_userProfile = z.infer<typeof UserProfile>;
+export type UserProfile = z.infer<typeof UserProfileSchema>;
 
-export const RegisterResponse = z.object({
-  message: Message,
-  user: UserPublic,
-  access_token: JwtToken,
+export const RegisterResponseSchema = z.object({
+  message: MessageSchema,
+  user: UserPublicSchema,
+  access_token: JwtTokenSchema,
 });
-export type t_registerResponse = z.infer<typeof RegisterResponse>;
+export type RegisterResponse = z.infer<typeof RegisterResponseSchema>;
 
-export const LoginResponse = z.object({
-  access_token: JwtToken,
+export const LoginResponseSchema = z.object({
+  access_token: JwtTokenSchema,
 });
-export type t_loginResponse = z.infer<typeof LoginResponse>;
+export type LoginResponse = z.infer<typeof LoginResponseSchema>;
 
-export const JwtPayload = z.object({
+export const JwtPayloadSchema = z.object({
   sub: z.string(),
-  username: Username,
+  username: UsernameSchema,
 });
-export type t_jwtPayload = z.infer<typeof JwtPayload>;
+export type JwtPayload = z.infer<typeof JwtPayloadSchema>;
