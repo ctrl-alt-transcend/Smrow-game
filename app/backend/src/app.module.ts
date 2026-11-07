@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_PIPE, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
@@ -8,6 +9,7 @@ import { GameModule } from './game/game.module';
 import { GamesModule } from './games/games.module';
 import { StatsModule } from './stats/stats.module';
 import { SocialModule } from './social/social.module';
+import { ZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
 
 @Module({
   imports: [
@@ -20,6 +22,10 @@ import { SocialModule } from './social/social.module';
     SocialModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    { provide: APP_PIPE, useClass: ZodValidationPipe },
+    { provide: APP_INTERCEPTOR, useClass: ZodSerializerInterceptor },
+    AppService,
+  ],
 })
 export class AppModule {}

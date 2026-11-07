@@ -2,8 +2,12 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bycrypt from 'bcrypt';
-import type { UserPublic, RegisterResponse } from 'shared';
-import { CreateUserDto } from '../user/dto/create-user.dto';
+import type {
+  UserPublic,
+  LoginPost,
+  RegisterResponse,
+  RegisterPost,
+} from 'shared';
 
 @Injectable()
 export class AuthService {
@@ -12,9 +16,12 @@ export class AuthService {
     private readonly JwtService: JwtService,
   ) {}
 
-  async signUp(recvData: CreateUserDto): Promise<RegisterResponse> {
-    recvData.password = await this.hashPassword(recvData.password);
-    const user = await this.userService.create(recvData);
+  async signUp(recvData: RegisterPost): Promise<RegisterResponse> {
+    const passwdHash = await this.hashPassword(recvData.password);
+    const user = await this.userService.create({
+      ...recvData,
+      password: passwdHash,
+    });
 
     const { access_token } = await this.createJWTToken({
       id: user.id,
@@ -42,15 +49,12 @@ export class AuthService {
     return user;
   }
 
-  async signIn(
-    email: string,
-    password: string,
-  ): Promise<{ access_token: string }> {
-    const user = await this.userService.findByMail(email);
+  async signIn(recvData: LoginPost): Promise<{ access_token: string }> {
+    const user = await this.userService.findByMail(recvData.email);
     if (
       user == null ||
       user.localAuth == null ||
-      !(await bycrypt.compare(password, user.localAuth.passwordHash))
+      !(await bycrypt.compare(recvData.password, user.localAuth.passwordHash))
     )
       throw new UnauthorizedException('Invalid credentials');
 
