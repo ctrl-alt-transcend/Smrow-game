@@ -1,8 +1,8 @@
 import { createContext } from "react";
-import type { LoginPost, RegisterPost, UserPublic } from "shared";
+import type { LoginPost, RegisterPost, UserProfile } from "shared";
 
 export interface AuthContextValue {
-  user: UserPublic | null;
+  user: UserProfile | null;
   loading: boolean;
   authMessage: string | null;
   clearAuthMessage: () => void;
