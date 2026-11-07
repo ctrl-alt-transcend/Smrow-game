@@ -4,12 +4,14 @@ import { UserService } from '../user/user.service';
 import * as bycrypt from 'bcrypt';
 import type { UserPublic, RegisterResponse } from '@shared/types';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly JwtService: JwtService,
+    private readonly databaseService: DatabaseService,
   ) {}
 
   async signUp(recvData: CreateUserDto): Promise<RegisterResponse> {
@@ -68,7 +70,7 @@ export class AuthService {
    * @brief:   Create a JWT token for the given user
    * @details: the payload is the visible part of the token, it contains the userId and username
    */
-  private async createJWTToken(user: {
+  async createJWTToken(user: {
     id: string;
     username: string;
   }): Promise<{ access_token: string }> {
@@ -76,5 +78,74 @@ export class AuthService {
     return {
       access_token: await this.JwtService.signAsync(payload),
     };
+  }
+
+  async validateGoogleUser(googleUser: {
+    googleId: string;
+    email: string;
+    name: string;
+    emailVerified: boolean;
+  }) {
+    {
+      const account = await this.databaseService.account.findUnique({
+        where: {
+          provider_providerAccountId: {
+            provider: 'google',
+            providerAccountId: googleUser.googleId,
+          },
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      // check google register exists
+
+      if (account) {
+        return account.user;
+      }
+
+      const existingUser = await this.databaseService.user.findUnique({
+        where: {
+          email: googleUser.email,
+        },
+      });
+
+      // check if user mail was already registered and link to google account
+      if (existingUser) {
+        await this.databaseService.account.create({
+          data: {
+            provider: 'google',
+            providerAccountId: googleUser.googleId,
+            userId: existingUser.id,
+          },
+        });
+        return existingUser;
+      }
+
+      // when no registers exist, create the account and user with an Interactive Transaction
+      // this executes the user and account creation safely, if one fails it rolls back all.
+      // $transaction( async (tx) => {...} )
+
+      await this.databaseService.$transaction(async (tx) => {
+        const user = tx.user.create({
+          data: {
+            email: googleUser.email,
+            username: `google_${googleUser.googleId}`,
+            name: googleUser.name,
+          },
+        });
+
+        await tx.account.create({
+          data: {
+            provider: 'google',
+            providerAccountId: googleUser.googleId,
+            userId: (await user).id,
+          },
+        });
+
+        return user;
+      });
+    }
   }
 }
