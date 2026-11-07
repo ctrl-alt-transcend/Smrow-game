@@ -73,10 +73,15 @@ export type BuildRequestPayload =
   | { kind: 'road';       id: string; data: RoadData }
   | { kind: 'settlement'; id: string; data: SettlementData };
 
+export type TradeForm = {
+  resource: RessourceType;
+  amount: number;
+}
+
 export type TradeRequestPayload = {
   trader: TraderType;
   sourceId: string;
-  offer: { resource: RessourceType, amount: number | null };
-  target: { resource: RessourceType, amount: number | null };
+  offer: TradeForm;
+  target: TradeForm;
 }
 

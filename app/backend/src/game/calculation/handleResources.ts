@@ -1,4 +1,4 @@
-import type { Resources } from '@shared/game/game.types';
+import type { Resources, TradeForm } from '@shared/game/game.types';
 import {
   GameBoardGraph,
   LandType,
@@ -9,58 +9,124 @@ import {
 } from '@shared/game/gameboard.types';
 
 
-export function payResources(
-  Resources: Resources,
-  build: BuildingType,
+export function earnTradeResources(
+  resources: Resources,
+  target: TradeForm,
 ) {
-  switch (build) {
-    case 'road':
-      Resources.brick -= BUILD_COSTS.road.brick;
-      Resources.wood -= BUILD_COSTS.road.wood;
-      break;
-    case 'settlement':
-      Resources.brick -= BUILD_COSTS.settlement.brick;
-      Resources.wood -= BUILD_COSTS.settlement.wood;
-      Resources.sheep -= BUILD_COSTS.settlement.sheep;
-      Resources.wheat -= BUILD_COSTS.settlement.wheat;
-      break;
-    case 'city':
-      Resources.wheat -= BUILD_COSTS.settlement.wheat;
-      Resources.ore -= BUILD_COSTS.settlement.ore;
-      break;
+  switch (target.resource) {
+    case 'wood':
+      resources.wood += target.amount;
+    case 'sheep':
+      resources.sheep += target.amount;
+    case 'brick':
+      resources.brick += target.amount;
+    case 'ore':
+      resources.ore += target.amount;
+    case 'wheat':
+      resources.wheat += target.amount;
     default:
       break;
   }
 }
 
-export function hasEnoughResources(
-  Resources: Resources,
-  build: BuildingType,
+export function payTradeResources(
+  resources: Resources,
+  offer: TradeForm,
+) {
+  switch (offer.resource) {
+    case 'wood':
+      resources.wood -= offer.amount;
+    case 'sheep':
+      resources.sheep -= offer.amount;
+    case 'brick':
+      resources.brick -= offer.amount;
+    case 'ore':
+      resources.ore -= offer.amount;
+    case 'wheat':
+      resources.wheat -= offer.amount;
+    default:
+      break;
+  }
+}
+
+export function hasEnoughResourcesToTrade(
+  resources: Resources,
+  offer: TradeForm,
 ): boolean {
-  switch (build) {
-    case 'road':
-      if (Resources.brick >= BUILD_COSTS.road.brick
-        && Resources.wood >= BUILD_COSTS.road.wood)
-      return true;
-    case 'settlement':
-      if (Resources.brick >= BUILD_COSTS.settlement.brick
-        && Resources.wood >= BUILD_COSTS.settlement.wood
-        && Resources.sheep >= BUILD_COSTS.settlement.sheep
-        && Resources.wheat >= BUILD_COSTS.settlement.wheat)
-      return true;
-    case 'city':
-      if (Resources.wheat >= BUILD_COSTS.settlement.wheat
-        && Resources.ore >= BUILD_COSTS.settlement.ore)
-      return true;
+  switch (offer.resource) {
+    case 'wood':
+      if (resources.wood >= offer.amount)
+        return true;
+    case 'sheep':
+      if (resources.sheep >= offer.amount)
+        return true;
+    case 'brick':
+      if (resources.brick >= offer.amount)
+        return true;
+    case 'ore':
+      if (resources.ore >= offer.amount)
+        return true;
+    case 'wheat':
+      if (resources.wheat >= offer.amount)
+        return true;
     default:
       break;
   }
   return false;
 }
 
-function addResources(
+export function payBuildResources(
+  resources: Resources,
+  build: BuildingType,
+) {
+  switch (build) {
+    case 'road':
+      resources.brick -= BUILD_COSTS.road.brick;
+      resources.wood -= BUILD_COSTS.road.wood;
+      break;
+    case 'settlement':
+      resources.brick -= BUILD_COSTS.settlement.brick;
+      resources.wood -= BUILD_COSTS.settlement.wood;
+      resources.sheep -= BUILD_COSTS.settlement.sheep;
+      resources.wheat -= BUILD_COSTS.settlement.wheat;
+      break;
+    case 'city':
+      resources.wheat -= BUILD_COSTS.city.wheat;
+      resources.ore -= BUILD_COSTS.city.ore;
+      break;
+    default:
+      break;
+  }
+}
+
+export function hasEnoughResourcesToBuild(
+  resources: Resources,
+  build: BuildingType,
+): boolean {
+  switch (build) {
+    case 'road':
+      if (resources.brick >= BUILD_COSTS.road.brick
+        && resources.wood >= BUILD_COSTS.road.wood)
+        return true;
+    case 'settlement':
+      if (resources.brick >= BUILD_COSTS.settlement.brick
+        && resources.wood >= BUILD_COSTS.settlement.wood
+        && resources.sheep >= BUILD_COSTS.settlement.sheep
+        && resources.wheat >= BUILD_COSTS.settlement.wheat)
+        return true;
+    case 'city':
+      if (resources.wheat >= BUILD_COSTS.city.wheat
+        && resources.ore >= BUILD_COSTS.city.ore)
+        return true;
+    default:
+      break;
+  }
+  return false;
+}
+
+function produceResources(
   land: LandType,
-  Resources: Resources,
+  resources: Resources,
   isCity?: boolean
 ): number {
   switch (land) {
@@ -68,28 +134,28 @@ function addResources(
       return -1;
     case 'field':
       isCity ?
-      Resources.wheat += 2
-      : Resources.wheat += 1;
+      resources.wheat += 2
+      : resources.wheat += 1;
       break;
     case 'forest':
       isCity ?
-      Resources.wood += 2
-      : Resources.wood += 1;
+      resources.wood += 2
+      : resources.wood += 1;
       break;
     case 'hill':
       isCity ?
-      Resources.brick += 2
-      : Resources.brick += 1;
+      resources.brick += 2
+      : resources.brick += 1;
       break;
     case 'mountain':
       isCity ?
-      Resources.ore += 2
-      : Resources.ore += 1;
+      resources.ore += 2
+      : resources.ore += 1;
       break;
     case 'pasture':
       isCity ?
-      Resources.sheep += 2
-      : Resources.sheep += 1;
+      resources.sheep += 2
+      : resources.sheep += 1;
       break;
     default:
       return 0;
@@ -112,11 +178,11 @@ export function resourcesProduction(
     graphEntry.adjacentTiles.forEach((tile) => {
       let prod: number = 0;
       if (placementPhase === true)
-        prod = addResources(tile.land, player.resources);
+        prod = produceResources(tile.land, player.resources);
       else if (tile.value === dicesSum) {
         const settlement = player.settlementsBuilt.get(settlementId);
         if (settlement)
-          prod = addResources(tile.land, player.resources, settlement.isCity);
+          prod = produceResources(tile.land, player.resources, settlement.isCity);
       }
       if (prod > 0)
         console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESSOURCE[tile.land]}`);

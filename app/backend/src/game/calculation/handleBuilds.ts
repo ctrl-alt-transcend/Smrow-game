@@ -7,7 +7,7 @@ import {
   Faction,
   BuildingsInGame,
 } from '@shared/game/gameboard.types';
-import { hasEnoughResources, payResources } from './handleResources';
+import { hasEnoughResourcesToBuild, payBuildResources } from './handleResources';
 
 export type BuildRequestPayload =
   | { kind: 'road'; id: string; data: RoadData }
@@ -164,7 +164,7 @@ function cityUpgradeCheck(
       message: 'already a city !',
     };
   } else if (
-    !hasEnoughResources(player.resources, 'city')
+    !hasEnoughResourcesToBuild(player.resources, 'city')
   ) {
     console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a city`);
     return {
@@ -174,7 +174,7 @@ function cityUpgradeCheck(
   }
   target.isCity = true;
   console.log(`👀✅buildCheck: ${player.playerId} upgraded a settlement to a city`);
-  payResources(player.resources, 'city')
+  payBuildResources(player.resources, 'city')
   return {
     valid: true,
     message: 'settlement upgraded to a city !',
@@ -189,7 +189,7 @@ function settlementCheck(
   placementPhase?: boolean,
 ): BuildValidation {
   if (
-    !placementPhase && !hasEnoughResources(player.resources, 'settlement')
+    !placementPhase && !hasEnoughResourcesToBuild(player.resources, 'settlement')
   ) {
     console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a settlement`);
     return {
@@ -215,7 +215,7 @@ function settlementCheck(
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-    payResources(player.resources, 'settlement');
+    payBuildResources(player.resources, 'settlement');
   }
   console.log(`👀✅buildCheck: ${player.playerId} built a settlement`);
   return {
@@ -231,7 +231,7 @@ function roadCheck(
   placementPhase?: boolean,
 ): BuildValidation {
   if (
-    !placementPhase && !hasEnoughResources(player.resources, 'road')
+    !placementPhase && !hasEnoughResourcesToBuild(player.resources, 'road')
   ) {
     console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a road`);
     return {
@@ -251,7 +251,7 @@ function roadCheck(
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-    payResources(player.resources, 'road')
+    payBuildResources(player.resources, 'road')
   }
   console.log(`👀✅buildCheck: ${player.playerId} built a road`);
   return {
