@@ -74,7 +74,7 @@ export type BuildRequestPayload =
 
 export type TradeRequestPayload = {
   trader: TraderType;
-  sourceId: string | null;
+  sourceId: string;
   offer: { resource: RessourceType, amount: number | null };
   target: { resource: RessourceType, amount: number | null };
 }

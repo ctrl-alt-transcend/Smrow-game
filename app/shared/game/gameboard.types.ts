@@ -174,7 +174,7 @@ export interface CoastData {
 export type PortType = RessourceType | 'generic';
 
 export interface PortData {
-  id: string;
+  tileId: string;
   type: PortType;
   coastId: string;
 }
@@ -195,9 +195,9 @@ export interface ConnectedElements {
   /** @description keeps for one road every "neighbours" roads (up to 4 neighbours)*/
   connectedRoads: RoadData[];
   /** @description keeps for one road every settlement it is touching (up to 2 settlements)*/
-  adjacentSettlements: SettlementData[];
-  /** @description keeps for one settlement every "neighbours" settlement (up to 3 neighbours)*/
   connectedSettlements: SettlementData[];
+  /** @description keeps for one settlement every "neighbours" settlement (up to 3 neighbours)*/
+  neighboursSettlements: SettlementData[];
   /** @description keeps for one settlement every hex tiles it is touching (up to 3 hex tiles -> lands)*/
   adjacentTiles: TileData[];
 }

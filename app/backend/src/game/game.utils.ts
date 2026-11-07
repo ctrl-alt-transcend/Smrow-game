@@ -1,10 +1,20 @@
-import type { Player, BuildRequestPayload } from '@shared/game/game.types';
+import type { Player, BuildRequestPayload, TradeRequestPayload } from '@shared/game/game.types';
+import { TraderType } from '@shared/game/gameboard.types';
 
 // TODO: move to DTO??
 export function isBuildRequestPayload(p: unknown): p is BuildRequestPayload {
   if (typeof p !== 'object' || p === null) return false;
   const o = p as Record<string, unknown>;
   if (o.kind !== 'road' && o.kind !== 'settlement') return false;
+  return (
+    typeof o.id === 'string' && typeof o.data === 'object' && o.data !== null
+  );
+}
+
+export function isTradeRequestPayload(p: unknown): p is TradeRequestPayload {
+  if (typeof p !== 'object' || p === null) return false;
+  const o = p as Record<string, unknown>;
+  if (o.trader !== TraderType) return false;
   return (
     typeof o.id === 'string' && typeof o.data === 'object' && o.data !== null
   );

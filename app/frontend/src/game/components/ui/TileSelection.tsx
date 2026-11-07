@@ -396,7 +396,7 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
   selected,
   masterLog = null,
   onBuilt,
-  currentPlayerId = null,
+  //currentPlayerId = null,
 }) => {
   const items = useSelectionDisplay(selected);
 
@@ -415,12 +415,12 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
           </Text>
         );
       }
-      if (port.type === "generic") {
+      if (port && port.type === "generic") {
         // Generic port: 3 offer : 1 target — offer resource freely chosen
         return (
           <TradeOfferPanel
             ratio={3}
-            sourceId={selected.selectedCoast.id}
+            sourceId={port.coastId}
             sourceKind="port"
           />
         );
@@ -430,7 +430,7 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
         <TradeOfferPanel
           ratio={2}
           offerLockedResource={port.type as RessourceType}
-          sourceId={selected.selectedCoast.id}
+          sourceId={port.coastId}
           sourceKind="port"
         />
       );

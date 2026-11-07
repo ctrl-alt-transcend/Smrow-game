@@ -221,7 +221,7 @@ const attachPortToTile = (
   const coast = tileCoasts[Math.floor(seed * tileCoasts.length) % tileCoasts.length];
 
   coast.port = {
-    id: `port:${tile.q},${tile.r}`,
+    tileId: `port:${tile.q},${tile.r}`,
     type,
     coastId: coast.id,
   };
@@ -288,9 +288,9 @@ const placePorts = (coasts: CoastData[], tiles: TileData[]) => {
  * ------------------------------------------------------------------ */
 const emptyConnections = (): ConnectedElements => ({
   connectedRoads: [],
-  connectedSettlements: [],
+  neighboursSettlements: [],
   adjacentTiles: [],
-  adjacentSettlements: [],
+  connectedSettlements: [],
 });
 
 /** @description reserves an entry in the graph and detects ID collisions */
@@ -353,6 +353,11 @@ export const linkGameBoard = (board: GameBoard): GameBoardGraph => {
   // STEP 1: Creating empty entries
   for (const road of board.roads) register(graph, road.id);
   for (const settlement of board.settlements) register(graph, settlement.id);
+  for (const coast of board.coasts) {
+    if(coast.port) {
+      register(graph, coast.port.coastId);
+    }
+  }
 
   // STEP 2: Roads ↔ Roads
   for (const road of board.roads) {
@@ -380,7 +385,7 @@ export const linkGameBoard = (board: GameBoard): GameBoardGraph => {
     const s2 = settlementByVertex.get(road.edge.p2.id);
     if (s2 && s2.id !== s1?.id) adjacent.push(s2);
 
-    entry.adjacentSettlements = adjacent;
+    entry.connectedSettlements = adjacent;
   }
 
   // STEP 4: Settlements ↔ Settlements
@@ -390,18 +395,34 @@ export const linkGameBoard = (board: GameBoard): GameBoardGraph => {
 
     if (!a || !b || a.id === b.id) continue;
 
-    graph.get(a.id)!.connectedSettlements.push(b);
-    graph.get(b.id)!.connectedSettlements.push(a);
+    graph.get(a.id)!.neighboursSettlements.push(b);
+    graph.get(b.id)!.neighboursSettlements.push(a);
   }
 
   for (const settlement of board.settlements) {
-    graph.get(settlement.id)!.connectedSettlements.sort(byId);
+    graph.get(settlement.id)!.neighboursSettlements.sort(byId);
   }
 
   // STEP 5: Settlements ↔ Tiles
   for (const settlement of board.settlements) {
     graph.get(settlement.id)!.adjacentTiles =
       tilesByVertex.get(settlement.vertex.id) ?? [];
+  }
+
+  // STEP 6: Ports ↔ Settlements
+  for (const coast of board.coasts) {
+    const entry = graph.get(coast.id);
+    if (!entry) continue;
+
+    const adjacent: SettlementData[] = [];
+
+    const s1 = settlementByVertex.get(coast.edge.p1.id);
+    if (s1) adjacent.push(s1);
+
+    const s2 = settlementByVertex.get(coast.edge.p2.id);
+    if (s2 && s2.id !== s1?.id) adjacent.push(s2);
+
+    entry.connectedSettlements = adjacent;
   }
 
   return graph;
@@ -443,12 +464,12 @@ export const debugPrintConnections = (
       `   ├─ connectedRoads (${entry.connectedRoads.length}): ${entry.connectedRoads.map((r) => r.id).join(', ')}`,
     );
     console.log(
-      `   └─ adjacentSettlements (${entry.adjacentSettlements.length}): ${entry.adjacentSettlements.map((s) => s.id).join(', ')}`,
+      `   └─ connectedSettlements (${entry.connectedSettlements.length}): ${entry.connectedSettlements.map((s) => s.id).join(', ')}`,
     );
   } else {
     console.log(`🏘️ Settlement ${id}:`);
     console.log(
-      `   ├─ connectedSettlements (${entry.connectedSettlements.length}): ${entry.connectedSettlements.map((t) => t.id).join(', ')}`,
+      `   ├─ neighboursSettlements (${entry.neighboursSettlements.length}): ${entry.neighboursSettlements.map((t) => t.id).join(', ')}`,
     );
     console.log(
       `   └─ adjacentTiles (${entry.adjacentTiles.length}): ${entry.adjacentTiles.map((t) => `${t.q},${t.r}`).join(', ')}`,
@@ -464,6 +485,6 @@ export const debugPrintCoasts = (board: GameBoard) => {
     `🏖️ Coastal edges: ${board.coasts.length} | empty: ${board.coasts.length - withPorts.length} | generic: ${generic.length} | specialized: ${specialized.length}`,
   );
   for (const coast of withPorts) {
-    console.log(`   ⚓ ${coast.port!.id} [${coast.port!.type}] on ${coast.id}`);
+    console.log(`   ⚓ ${coast.port!.tileId} [${coast.port!.type}] on ${coast.id}`);
   }
 };

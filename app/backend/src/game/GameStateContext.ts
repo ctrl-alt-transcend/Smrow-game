@@ -17,6 +17,7 @@ import type {
 } from '@shared/game/game.types';
 import {
   isBuildRequestPayload,
+  isTradeRequestPayload,
   updateValue,
   funnyLogs,
   //printAllPlayers,
@@ -25,6 +26,7 @@ import {
 import { buildCheck } from './calculation/handleBuilds';
 import { createGameBoard } from './calculation/createGameBoard';
 import { resourcesProduction } from './calculation/handleResources';
+import { tradeCheck } from './calculation/handleTrade';
 
 /**
  * STATE DESIGN PATTERN
@@ -648,12 +650,45 @@ class TradeAndBuildPhase extends State {
     };
   }
 
-  public trade(): GameResponse {
+  public trade(playerId: string, payload: TradeRequestPayload): GameResponse {
     console.log('🤝⚖️TradeAndBuildPhase:trade: handles tradeRequest.');
+    //if (!isTradeRequestPayload(payload)) {
+    //  console.log(`🤝🔨TradeAndBuildPhase:trade: invalid payload !`);
+    //  return {
+    //    value: null,
+    //    message: '🤝🔨TradeAndBuildPhase:trade: invalid payload !',
+    //    data: null,
+    //  };
+    //}
+    const p = this.state.isPlayersTurn(playerId);
+    if (!p) {
+      return {
+        value: null,
+        message: "🤝🔨TradeAndBuildPhase:trade: It's not your turn !",
+        data: null,
+      };
+    }
+    const response = tradeCheck(
+      payload,
+      p,
+      this.state.getGraph()
+    );
+    if (response.valid === false) {
+      return {
+        value: null,
+        message: '🤝🔨TradeAndBuildPhase:build: invalid trade',
+        data: null,
+      };
+    }
+    console.log(
+      `🤝🔨TradeAndBuildPhase:build: ${playerId} traded something ...`,
+    );
+    this.state.setTurnCount(undefined);
+    this.state.setCurrentTurnIndex(undefined);
     return {
       value: null,
-      message: `🤝⚖️TradeAndBuildPhase:trade: action forbidden during this phase.`,
-      data: null,
+      message: response.message,
+      data: this.state.getGameData(),
     };
   }
 

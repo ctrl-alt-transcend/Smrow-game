@@ -83,7 +83,7 @@ export const validateRoadPlacement = (
     }
   }
 
-  const hasOwnAdjacentSettlement = graphEntry.adjacentSettlements.some(
+  const hasOwnAdjacentSettlement = graphEntry.connectedSettlements.some(
     (s) => s.ownerId && s.faction === ownerFaction,
   );
   if (!hasOwnAdjacentSettlement) {
@@ -123,7 +123,7 @@ export const validateSettlementPlacement = (
     return { valid: false, reason: 'unknown settlement ...' };
   }
 
-  const nearbyOccupied = graphEntry.connectedSettlements.some(
+  const nearbyOccupied = graphEntry.neighboursSettlements.some(
     (s) => s.ownerId,
   );
   if (nearbyOccupied) {
@@ -152,7 +152,6 @@ interface BuildValidation {
   valid: boolean;
   message: string;
 }
-
 
 function cityUpgradeCheck(
   target: SettlementData,
