@@ -100,7 +100,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
     //  - "port"  : validate ratio + resource ownership, credit target
     //  - "player": notify targetOwnerId, wait for their acceptance
 
-    //socket.emit("trade", { ...payload, targetOwnerId });
+    socket.emit("trade", { ...payload, targetOwnerId });
     console.log("Trade offer sent:", payload, "→ owner:", targetOwnerId);
   }, [
     isValid,

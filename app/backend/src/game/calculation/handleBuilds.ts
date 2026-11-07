@@ -7,7 +7,7 @@ import {
   Faction,
   BuildingsInGame,
 } from '@shared/game/gameboard.types';
-import { hasEnoughRessources, payRessources } from './handleRessources';
+import { hasEnoughResources, payResources } from './handleResources';
 
 export type BuildRequestPayload =
   | { kind: 'road'; id: string; data: RoadData }
@@ -165,17 +165,17 @@ function cityUpgradeCheck(
       message: 'already a city !',
     };
   } else if (
-    !hasEnoughRessources(player.ressources, 'city')
+    !hasEnoughResources(player.resources, 'city')
   ) {
-    console.log(`👀⛔buildCheck: ${player.playerId} has not enough ressources to build a city`);
+    console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a city`);
     return {
       valid: false,
-      message: 'not enough ressources for a city upgrade ...',
+      message: 'not enough Resources for a city upgrade ...',
     };
   }
   target.isCity = true;
   console.log(`👀✅buildCheck: ${player.playerId} upgraded a settlement to a city`);
-  payRessources(player.ressources, 'city')
+  payResources(player.resources, 'city')
   return {
     valid: true,
     message: 'settlement upgraded to a city !',
@@ -190,12 +190,12 @@ function settlementCheck(
   placementPhase?: boolean,
 ): BuildValidation {
   if (
-    !placementPhase && !hasEnoughRessources(player.ressources, 'settlement')
+    !placementPhase && !hasEnoughResources(player.resources, 'settlement')
   ) {
-    console.log(`👀⛔buildCheck: ${player.playerId} has not enough ressources to build a settlement`);
+    console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a settlement`);
     return {
       valid: false,
-      message: 'not enough ressources to build a settlement ...',
+      message: 'not enough Resources to build a settlement ...',
     };
   }
 
@@ -216,7 +216,7 @@ function settlementCheck(
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-    payRessources(player.ressources, 'settlement');
+    payResources(player.resources, 'settlement');
   }
   console.log(`👀✅buildCheck: ${player.playerId} built a settlement`);
   return {
@@ -232,12 +232,12 @@ function roadCheck(
   placementPhase?: boolean,
 ): BuildValidation {
   if (
-    !placementPhase && !hasEnoughRessources(player.ressources, 'road')
+    !placementPhase && !hasEnoughResources(player.resources, 'road')
   ) {
-    console.log(`👀⛔buildCheck: ${player.playerId} has not enough ressources to build a road`);
+    console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a road`);
     return {
       valid: false,
-      message: 'not enough ressources to build a road ...',
+      message: 'not enough Resources to build a road ...',
     };
   }
 
@@ -252,7 +252,7 @@ function roadCheck(
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-    payRessources(player.ressources, 'road')
+    payResources(player.resources, 'road')
   }
   console.log(`👀✅buildCheck: ${player.playerId} built a road`);
   return {

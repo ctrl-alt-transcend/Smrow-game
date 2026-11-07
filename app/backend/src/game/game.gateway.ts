@@ -11,7 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { instrument } from '@socket.io/admin-ui';
 import type { JwtPayload } from '@shared/types';
-import type { BuildRequestPayload } from '@shared/game/game.types';
+import type { BuildRequestPayload, TradeRequestPayload } from '@shared/game/game.types';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
@@ -78,6 +78,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     return { ...result };
   }
 
+
   @SubscribeMessage('skip')
   skip(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
@@ -109,6 +110,28 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     game.buildRequest('enriquest', payload);
     //game.phaseCheckRequest();
     //game.buildRequest('spagg', payload);
+    // -------------
+
+    game.phaseCheckRequest();
+    //game.setCurrentRoll(result.value);
+    game.setMasterLog(result.message);
+    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
+    return { ...result };
+  }
+
+   @SubscribeMessage('trade')
+  trade(
+    @ConnectedSocket() client: SocketClient,
+    @MessageBody() payload: TradeRequestPayload,
+  ) {
+    const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    const result = game.tradeRequest(client.data.user.username, payload);
+
+    //⚠️ FOR TESTING
+    game.phaseCheckRequest();
+    game.tradeRequest('enriquest', payload);
+    //game.phaseCheckRequest();
+    //game.tradeRequest('spagg', payload);
     // -------------
 
     game.phaseCheckRequest();

@@ -6,7 +6,7 @@ import { Faction,
   type SettlementData
 } from "./gameboard.types";
 
-export type Ressources = {
+export type Resources = {
   wood: number;
   brick: number;
   wheat: number;
@@ -19,7 +19,7 @@ export type Player = {
   username: string;
   score: number;
   level: number;
-  ressources: Ressources;
+  resources: Resources;
   firstDice: number,
   secondDice: number,
   totalDice: number,

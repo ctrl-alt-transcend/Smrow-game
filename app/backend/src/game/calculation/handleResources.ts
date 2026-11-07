@@ -1,4 +1,4 @@
-import type { Ressources } from '@shared/game/game.types';
+import type { Resources } from '@shared/game/game.types';
 import {
   GameBoardGraph,
   LandType,
@@ -9,48 +9,48 @@ import {
 } from '@shared/game/gameboard.types';
 
 
-export function payRessources(
-  ressources: Ressources,
+export function payResources(
+  Resources: Resources,
   build: BuildingType,
 ) {
   switch (build) {
     case 'road':
-      ressources.brick -= BUILD_COSTS.road.brick;
-      ressources.wood -= BUILD_COSTS.road.wood;
+      Resources.brick -= BUILD_COSTS.road.brick;
+      Resources.wood -= BUILD_COSTS.road.wood;
       break;
     case 'settlement':
-      ressources.brick -= BUILD_COSTS.settlement.brick;
-      ressources.wood -= BUILD_COSTS.settlement.wood;
-      ressources.sheep -= BUILD_COSTS.settlement.sheep;
-      ressources.wheat -= BUILD_COSTS.settlement.wheat;
+      Resources.brick -= BUILD_COSTS.settlement.brick;
+      Resources.wood -= BUILD_COSTS.settlement.wood;
+      Resources.sheep -= BUILD_COSTS.settlement.sheep;
+      Resources.wheat -= BUILD_COSTS.settlement.wheat;
       break;
     case 'city':
-      ressources.wheat -= BUILD_COSTS.settlement.wheat;
-      ressources.ore -= BUILD_COSTS.settlement.ore;
+      Resources.wheat -= BUILD_COSTS.settlement.wheat;
+      Resources.ore -= BUILD_COSTS.settlement.ore;
       break;
     default:
       break;
   }
 }
 
-export function hasEnoughRessources(
-  ressources: Ressources,
+export function hasEnoughResources(
+  Resources: Resources,
   build: BuildingType,
 ): boolean {
   switch (build) {
     case 'road':
-      if (ressources.brick >= BUILD_COSTS.road.brick
-        && ressources.wood >= BUILD_COSTS.road.wood)
+      if (Resources.brick >= BUILD_COSTS.road.brick
+        && Resources.wood >= BUILD_COSTS.road.wood)
       return true;
     case 'settlement':
-      if (ressources.brick >= BUILD_COSTS.settlement.brick
-        && ressources.wood >= BUILD_COSTS.settlement.wood
-        && ressources.sheep >= BUILD_COSTS.settlement.sheep
-        && ressources.wheat >= BUILD_COSTS.settlement.wheat)
+      if (Resources.brick >= BUILD_COSTS.settlement.brick
+        && Resources.wood >= BUILD_COSTS.settlement.wood
+        && Resources.sheep >= BUILD_COSTS.settlement.sheep
+        && Resources.wheat >= BUILD_COSTS.settlement.wheat)
       return true;
     case 'city':
-      if (ressources.wheat >= BUILD_COSTS.settlement.wheat
-        && ressources.ore >= BUILD_COSTS.settlement.ore)
+      if (Resources.wheat >= BUILD_COSTS.settlement.wheat
+        && Resources.ore >= BUILD_COSTS.settlement.ore)
       return true;
     default:
       break;
@@ -58,9 +58,9 @@ export function hasEnoughRessources(
   return false;
 }
 
-function addRessources(
+function addResources(
   land: LandType,
-  ressources: Ressources,
+  Resources: Resources,
   isCity?: boolean
 ): number {
   switch (land) {
@@ -68,28 +68,28 @@ function addRessources(
       return -1;
     case 'field':
       isCity ?
-      ressources.wheat += 2
-      : ressources.wheat += 1;
+      Resources.wheat += 2
+      : Resources.wheat += 1;
       break;
     case 'forest':
       isCity ?
-      ressources.wood += 2
-      : ressources.wood += 1;
+      Resources.wood += 2
+      : Resources.wood += 1;
       break;
     case 'hill':
       isCity ?
-      ressources.brick += 2
-      : ressources.brick += 1;
+      Resources.brick += 2
+      : Resources.brick += 1;
       break;
     case 'mountain':
       isCity ?
-      ressources.ore += 2
-      : ressources.ore += 1;
+      Resources.ore += 2
+      : Resources.ore += 1;
       break;
     case 'pasture':
       isCity ?
-      ressources.sheep += 2
-      : ressources.sheep += 1;
+      Resources.sheep += 2
+      : Resources.sheep += 1;
       break;
     default:
       return 0;
@@ -97,7 +97,7 @@ function addRessources(
   return isCity ? 2 : 1;
 };
 
-export function ressoucesProduction(
+export function resourcesProduction(
   buildings: BuildingsInGame,
   graph: GameBoardGraph,
   dicesSum: number,
@@ -106,17 +106,17 @@ export function ressoucesProduction(
   for (const [settlementId, player] of buildings) {
     const graphEntry = graph.get(settlementId);
     if (!graphEntry) {
-      console.log(`👀⛔ressourcesCheck:building: doesn't exists ...`);
+      console.log(`👀⛔ResourcesCheck:building: doesn't exists ...`);
       return { valid: false, reason: 'unknown building' };
     }
     graphEntry.adjacentTiles.forEach((tile) => {
       let prod: number = 0;
       if (placementPhase === true)
-        prod = addRessources(tile.land, player.ressources);
+        prod = addResources(tile.land, player.resources);
       else if (tile.value === dicesSum) {
         const settlement = player.settlementsBuilt.get(settlementId);
         if (settlement)
-          prod = addRessources(tile.land, player.ressources, settlement.isCity);
+          prod = addResources(tile.land, player.resources, settlement.isCity);
       }
       if (prod > 0)
         console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESSOURCE[tile.land]}`);

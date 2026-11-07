@@ -1,4 +1,4 @@
-import type { Player, Ressources } from "./game.types";
+import type { Player, Resources } from "./game.types";
 
 export const SELECTED_COLOR = '#c30000';
 export const HOVER_COLOR = '#ff0f0f';
@@ -37,7 +37,7 @@ export const TraderType = {
 } as const;
 export type TraderType = (typeof TraderType)[keyof typeof TraderType];
 
-export const BUILD_COSTS: Record<BuildingType, Ressources> = {
+export const BUILD_COSTS: Record<BuildingType, Resources> = {
   [BuildingType.ROAD]: {
     wood: 1,
     brick: 1,

@@ -6,9 +6,10 @@ import { TileSelection } from './components/ui/TileSelection.tsx';
 import { DiceRoller } from './components/ui/DiceRoller.tsx';
 import GameMasterLog from './components/ui/GameMasterLog.tsx';
 import { useGameState } from './hooks/useGameState.ts';
-import type { GameDataDto } from '@shared/game/game.types.ts';
+import type { GameDataDto, Resources } from '@shared/game/game.types.ts';
 import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
 import SkipTurnButton from './components/ui/SkipTurnButton.tsx';
+import { ResourcesPanel } from './components/ui/ResourcesPanel.tsx';
 
 export default function Game() {
   const { game } = useGameState();
@@ -23,6 +24,20 @@ function GameShell({ game }: { game: GameDataDto }) {
   const [opened, { toggle }] = useDisclosure();
   const GameBoardProps = useGameBoardFactory(game.board);
 
+  let resources: Resources;
+  const p = game.players?.at(0);
+  if(p) {
+    resources = p.resources;
+  } else {
+    resources = {
+      wheat: -1,
+      wood: -1,
+      brick: -1,
+      sheep: -1,
+      ore: -1
+    }
+  }
+
   return (
     <AppShell
       header={{ height: 60 }}
@@ -34,7 +49,7 @@ function GameShell({ game }: { game: GameDataDto }) {
       }}
       aside={{
         width: 300,
-        breakpoint: 'xl',
+        breakpoint: 'md',
         collapsed: { desktop: false, mobile: true },
       }}
       padding="xs"
@@ -66,6 +81,7 @@ function GameShell({ game }: { game: GameDataDto }) {
       <AppShell.Aside p="md">
         Aside
         <PlayerPanel players={game.players} />
+        <ResourcesPanel resources={resources}/>
       </AppShell.Aside>
 
       <AppShell.Footer p="xs">

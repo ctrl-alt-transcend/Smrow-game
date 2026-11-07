@@ -42,11 +42,11 @@ export function funnyLogs(id: string, value: number): string {
 
 export function printPlayer(p: Player) {
   console.log(`🖨️ printPlayer: ${p.playerId}:`);
-  console.log(`- wood: ${p.ressources.wood}`);
-  console.log(`- sheep: ${p.ressources.sheep}`);
-  console.log(`- brick: ${p.ressources.brick}`);
-  console.log(`- ore: ${p.ressources.ore}`);
-  console.log(`- wheat: ${p.ressources.wheat}`);
+  console.log(`- wood: ${p.resources.wood}`);
+  console.log(`- sheep: ${p.resources.sheep}`);
+  console.log(`- brick: ${p.resources.brick}`);
+  console.log(`- ore: ${p.resources.ore}`);
+  console.log(`- wheat: ${p.resources.wheat}`);
   console.log(`- roads: ${p.roadsBuilt}`);
   console.log(`- settlements: ${p.settlementsBuilt}`);
 }
