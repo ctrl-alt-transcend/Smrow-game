@@ -7,17 +7,6 @@ import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-cl
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  /** @brief: A Pipe operates on a handler’s arguments (route parameters, body, query).
-   *           Its role is to validate or transform data before it reaches a controller.
-   */
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     whitelist: true,
-  //     forbidNonWhitelisted: true,
-  //     transform: true,
-  //   }),
-  // );
-
   const { httpAdapter } = app.get(HttpAdapterHost);
 
   /** @brief: includes the global exception filter for the Prisma Exception events.

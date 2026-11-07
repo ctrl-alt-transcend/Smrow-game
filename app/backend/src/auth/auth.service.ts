@@ -16,6 +16,7 @@ import {
   UserProfileSchema,
   Password,
   PasswordSchema,
+  LoginResponse,
 } from 'shared';
 
 @Injectable()
@@ -44,7 +45,7 @@ export class AuthService {
     });
   }
 
-  async signIn(recvData: LoginPost): Promise<JwtToken> {
+  async signIn(recvData: LoginPost): Promise<LoginResponse> {
     const user = await this.userService.findByMail(recvData.email);
     if (
       user == null ||
@@ -58,7 +59,7 @@ export class AuthService {
       username: user.username,
     });
 
-    return access_token;
+    return { access_token };
   }
 
   async getProfile(userId: string): Promise<UserProfile> {
