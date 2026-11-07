@@ -27,6 +27,7 @@ import { buildCheck } from './calculation/handleBuilds';
 import { createGameBoard } from './calculation/createGameBoard';
 import { resourcesProduction } from './calculation/handleResources';
 import { tradeCheck } from './calculation/handleTrade';
+import { NotFoundException } from '@nestjs/common';
 
 /**
  * STATE DESIGN PATTERN
@@ -211,9 +212,15 @@ class GameStateContext {
     return false;
   }
 
-  public getGameDataDto(): GameDataDto {
+  public getGameDataDto(playerId: string): GameDataDto {
     const gameData = this.getGameData();
+
+    const p = this.getPlayerById(playerId);
+    if (!p) {
+      throw new NotFoundException (`Unknown playerId: ${playerId}`);
+    }
     return {
+      currentPlayer: p,
       players: Array.from(gameData.players.values()),
       gameId: gameData.gameId,
       dicesSum: gameData.dicesSum,

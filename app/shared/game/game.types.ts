@@ -57,6 +57,7 @@ export interface GameResponse {
 }
 
 export type GameDataDto = { //INFO: data we send to the client every time the game state changes
+  currentPlayer: Player;
   players: Player[];
   //turnCount: number;
   //turnOrder: string[];

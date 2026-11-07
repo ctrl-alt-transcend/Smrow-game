@@ -81,7 +81,7 @@ function GameShell({ game }: { game: GameDataDto }) {
       <AppShell.Aside p="md">
         Aside
         <PlayerPanel players={game.players} />
-        <ResourcesPanel resources={resources}/>
+        <ResourcesPanel currentPlayer={game.currentPlayer}/>
       </AppShell.Aside>
 
       <AppShell.Footer p="xs">

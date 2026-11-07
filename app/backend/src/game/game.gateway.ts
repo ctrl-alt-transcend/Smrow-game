@@ -11,10 +11,11 @@ import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { instrument } from '@socket.io/admin-ui';
 import type { JwtPayload } from '@shared/types';
-import type { BuildRequestPayload, TradeRequestPayload } from '@shared/game/game.types';
+import type { BuildRequestPayload, GameDataDto, TradeRequestPayload } from '@shared/game/game.types';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
+import { GameStateContext } from './GameStateContext';
 
 export interface SocketUser {
   id: string;
@@ -56,6 +57,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     instrument(server, { auth: false, mode: 'development' });
   }
 
+  private emitGameDataDto(game: GameStateContext, user: string) {
+    let gameData: GameDataDto;
+    try {
+      gameData = game.getGameDataDto(user);
+    } catch (e) {
+      console.log(`Error: ${e}`);
+      return;
+    }
+    this.server.to(game.getGameId()).emit('gameState', gameData);
+  }
+
   /**
    * @brief Handle the 'dice' event from the client.
    * @details Always broadcasts the new gameState to all clients in the room.
@@ -74,7 +86,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
 
     game.phaseCheckRequest();
     game.setMasterLog(result.message);
-    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
+    this.emitGameDataDto(game, client.data.user.username);
+    //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
     return { ...result };
   }
 
@@ -93,7 +106,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
 
     game.phaseCheckRequest();
     game.setMasterLog(result.message);
-    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
+    this.emitGameDataDto(game, client.data.user.username);
+    //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
     return { ...result };
   }
 
@@ -115,7 +129,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     game.phaseCheckRequest();
     //game.setCurrentRoll(result.value);
     game.setMasterLog(result.message);
-    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
+    this.emitGameDataDto(game, client.data.user.username);
+    //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
     return { ...result };
   }
 
@@ -137,7 +152,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     game.phaseCheckRequest();
     //game.setCurrentRoll(result.value);
     game.setMasterLog(result.message);
-    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
+    this.emitGameDataDto(game, client.data.user.username);
+    //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
     return { ...result };
   }
 
@@ -148,8 +164,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       const game = this.gameService.getGameInstanceByUserId(userId);
       await client.join(game.getGameId());
       game.setMasterLog(`${client.data.user.username} joined the room`);
-      this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
-      return { ok: true, data: game.getGameDataDto() };
+      this.emitGameDataDto(game, client.data.user.username);
+      //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
+      return { ok: true, data: game.getGameDataDto(client.data.user.username) };
     } catch (e) {
       console.log('joinRoom failed', e);
       return { ok: false, error: 'not in game' };
