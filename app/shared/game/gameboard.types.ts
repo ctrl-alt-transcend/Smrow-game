@@ -1,5 +1,9 @@
 import type { Player, Resources } from "./game.types";
 
+export const SPECIAL_PORT_RATE = 2;
+export const GENERIC_PORT_RATE = 3;
+export const RESERVE_RATE = 4;
+
 export const SELECTED_COLOR = '#c30000';
 export const HOVER_COLOR = '#ff0f0f';
 export const DEFAULT_COLOR = '#e4e4e4';
@@ -31,7 +35,7 @@ export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
 
 export const TraderType = {
   SPECIALIZED_PORT: 'specialized port',
-  PORT: 'port',
+  GENERIC_PORT: 'generic port',
   RESERVE: 'reserve',
   PLAYER: 'player'
 } as const;

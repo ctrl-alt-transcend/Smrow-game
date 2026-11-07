@@ -1,8 +1,12 @@
 import {
   type TradeRequestPayload,
-  type Player
+  type Player,
 } from "@shared/game/game.types";
 import {
+  SPECIAL_PORT_RATE,
+  GENERIC_PORT_RATE,
+  RESERVE_RATE,
+  TraderType,
   type GameBoardGraph
 } from "@shared/game/gameboard.types"
 import { earnTradeResources, hasEnoughResourcesToTrade, payTradeResources } from "./handleResources";
@@ -10,6 +14,31 @@ import { earnTradeResources, hasEnoughResourcesToTrade, payTradeResources } from
 interface TradeValidation {
   valid: boolean;
   message: string;
+}
+
+const rateCheck = (
+  offerAmount: number,
+  targetAmount: number,
+  trader: TraderType,
+): boolean => {
+  switch(trader) {
+    case "specialized port":
+      if (offerAmount / targetAmount === SPECIAL_PORT_RATE)
+        return true;
+      break;
+    case "generic port":
+      if (offerAmount / targetAmount === GENERIC_PORT_RATE)
+        return true;
+      break;
+    case "reserve":
+      if (offerAmount / targetAmount === RESERVE_RATE)
+        return true;
+      break;
+    case "player":
+      break;
+  }
+
+  return false;
 }
 
 export const tradeCheck = (
@@ -31,10 +60,14 @@ export const tradeCheck = (
     console.log(`👀❌tradeCheck: ${player.playerId} can't trade ${payload.offer.resource} for ${payload.target.resource} !`);
     return { valid: false, message: `can't trade ${payload.offer.resource} for ${payload.target.resource} !`}
   }
-
+  if (!rateCheck(payload.offer.amount, payload.target.amount, payload.trader)) {
+    console.log(`👀❌tradeCheck: error in ratio, ${player.playerId} can't trade ${payload.offer.resource} for ${payload.target.resource} !`);
+    return { valid: false, message: `invalid ratio, can't trade ${payload.offer.resource} for ${payload.target.resource} in ${payload.trader}`}
+  }
   let validation: TradeValidation = { valid: false, message: 'unsuccessfull trade'};
   switch(payload.trader) {
-    case 'port':
+    case 'generic port':
+    case 'specialized port':
       const target = graph.get(payload.sourceId);
       if(!target) {
         console.log(`👀❌tradeCheck: ${player.playerId} unknown ${payload.trader}`);
@@ -44,8 +77,8 @@ export const tradeCheck = (
         (s) => s.ownerId === player.playerId,
         );
         if (!hasOwnConnectedSettlement) {
-          console.log(`👀❌tradeCheck: ${player.playerId} is not connected to ${payload.trader} via settlement/city`);
-          return { ...validation, message: `can't trade because you are not connected to ${payload.trader} via a settlement/city`}
+          console.log(`👀❌tradeCheck: ${player.playerId} is not connected to this ${payload.trader} via a settlement/city`);
+          return { valid:false, message: `can't trade because you are not connected to this ${payload.trader} via a settlement/city`}
         } else {
           if(hasEnoughResourcesToTrade(player.resources, payload.offer)) {
             payTradeResources(player.resources, payload.offer);

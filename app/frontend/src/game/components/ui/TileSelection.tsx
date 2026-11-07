@@ -14,16 +14,22 @@ import {
 import { modals } from "@mantine/modals";
 import { useSelectionDisplay } from "../../hooks/useSelectionDisplay";
 import type { GameBoardSelection } from "../../types/gameboard.types";
-import type { BuildRequestPayload, TradeRequestPayload } from "@shared/game/game.types.ts";
-import type { RessourceType } from "@shared/game/gameboard.types";
+import {
+  type BuildRequestPayload,
+  type TradeRequestPayload
+} from "../../../../../shared/game/game.types";
+import {
+  GENERIC_PORT_RATE,
+  RessourceType,
+  SPECIAL_PORT_RATE,
+  type TraderType
+} from "../../../../../shared/game/gameboard.types";
 import { socket } from "../../../socket.tsx";
 
-/* ================================================================== *
- * Trade payload types
- * ================================================================== */
 
 /** Resource options (keep in sync with your RessourceType union) */
-const RESSOURCE_OPTIONS = ["wood", "brick", "sheep", "wheat", "ore"].map(
+const RESSOURCE_OPTIONS = [RessourceType.WOOD, RessourceType.BRICK,
+  RessourceType.SHEEP, RessourceType.WHEAT, RessourceType.ORE].map(
   (r) => ({ value: r, label: r }),
 );
 
@@ -46,7 +52,7 @@ interface TradeOfferPanelProps {
   offerLockedResource?: RessourceType;
   /** identifies the trade in the payload sent to the server */
   sourceId: string;
-  sourceKind: "port" | "player";
+  sourceKind: TraderType;
   /** recipient player (player-to-player trades only) */
   targetOwnerId?: string | null;
 }
@@ -419,19 +425,19 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
         // Generic port: 3 offer : 1 target — offer resource freely chosen
         return (
           <TradeOfferPanel
-            ratio={3}
+            ratio={GENERIC_PORT_RATE}
             sourceId={port.coastId}
-            sourceKind="port"
+            sourceKind="generic port"
           />
         );
       }
       // Specialized port: 2 (locked resource) : 1 target
       return (
         <TradeOfferPanel
-          ratio={2}
+          ratio={SPECIAL_PORT_RATE}
           offerLockedResource={port.type as RessourceType}
           sourceId={port.coastId}
-          sourceKind="port"
+          sourceKind="specialized port"
         />
       );
     }
@@ -487,7 +493,7 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
     // if (selected.selectedReserve) {
     //   return (
     //     <TradeOfferPanel
-    //       ratio={null}
+    //       ratio={RESERVE_RATE}
     //       sourceId={selected.selectedReserve.id}
     //       sourceKind="player"
     //       targetOwnerId={selected.selectedReserve.ownerId ?? null}
