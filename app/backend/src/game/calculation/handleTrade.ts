@@ -5,6 +5,7 @@ import {
 import {
   type GameBoardGraph
 } from "@shared/game/gameboard.types"
+import { earnTradeResources, hasEnoughResourcesToTrade, payTradeResources } from "./handleResources";
 
 interface TradeValidation {
   valid: boolean;
@@ -17,7 +18,7 @@ export const tradeCheck = (
   graph: GameBoardGraph,
 ): TradeValidation => {
 
-  // Same as `buildCheck` but really usefull?
+  // Same as in `buildCheck` but really usefull?
   //if ((payload.data as { id?: unknown })?.id !== payload.id) {
   //  return {
   //    valid: false,
@@ -26,23 +27,34 @@ export const tradeCheck = (
   //}
   // ---------------------
 
-  let validation: TradeValidation = { valid: false, message: 'invalid trade'};
+  if (payload.offer.resource === payload.target.resource) {
+    console.log(`👀❌tradeCheck: ${player.playerId} can't trade ${payload.offer.resource} for ${payload.target.resource} !`);
+    return { valid: false, message: `can't trade ${payload.offer.resource} for ${payload.target.resource} !`}
+  }
+
+  let validation: TradeValidation = { valid: false, message: 'unsuccessfull trade'};
   switch(payload.trader) {
     case 'port':
       const target = graph.get(payload.sourceId);
       if(!target) {
-        console.log(`👀❌tradeCheck: ${player.playerId} unknown port`);
-        validation.message = "unknown port"
+        console.log(`👀❌tradeCheck: ${player.playerId} unknown ${payload.trader}`);
+        validation.message = `unknown ${payload.trader}`
       } else {
-        const hasOwnAdjacentSettlement = target.connectedSettlements.some(
+        const hasOwnConnectedSettlement = target.connectedSettlements.some(
         (s) => s.ownerId === player.playerId,
         );
-        if (!hasOwnAdjacentSettlement) {
-          console.log(`👀❌tradeCheck: ${player.playerId} is not connected to port via settlement`);
-          return { ...validation, message: "can't trade because it's not connected"}
+        if (!hasOwnConnectedSettlement) {
+          console.log(`👀❌tradeCheck: ${player.playerId} is not connected to ${payload.trader} via settlement/city`);
+          return { ...validation, message: `can't trade because you are not connected to ${payload.trader} via a settlement/city`}
         } else {
-          console.log(`👀✅tradeCheck: ${player.playerId} is connected to port via settlement`);
-          return { valid: true, message: "can trade because it's connected" }
+          if(hasEnoughResourcesToTrade(player.resources, payload.offer)) {
+            payTradeResources(player.resources, payload.offer);
+            earnTradeResources(player.resources, payload.target);
+            console.log(`👀✅tradeCheck: ${player.playerId} traded with ${payload.trader}: ${payload.offer.amount}x ${payload.offer.resource} for ${payload.target.amount}x ${payload.target.resource}`);
+            return { valid: true, message: `successfully traded with ${payload.trader}: ${payload.offer.amount}x ${payload.offer.resource} for ${payload.target.amount}x ${payload.target.resource}`}
+          }
+          console.log(`👀❌tradeCheck: ${player.playerId} has not enough ${payload.offer.resource} to trade ${payload.target.amount}x ${payload.target.resource} with ${payload.trader}`);
+          return { valid: false, message: `not enough ${payload.offer.resource} to trade ${payload.target.amount}x ${payload.target.resource} with ${payload.trader}`}
         }
       }
       break;

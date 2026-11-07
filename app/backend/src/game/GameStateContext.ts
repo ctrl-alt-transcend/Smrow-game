@@ -683,7 +683,7 @@ class TradeAndBuildPhase extends State {
     if (response.valid === false) {
       return {
         value: null,
-        message: '🤝🔨TradeAndBuildPhase:build: invalid trade',
+        message: `🤝🔨TradeAndBuildPhase:build: ${response.message}`,
         data: null,
       };
     }

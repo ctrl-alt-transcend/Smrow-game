@@ -16,14 +16,19 @@ export function earnTradeResources(
   switch (target.resource) {
     case 'wood':
       resources.wood += target.amount;
+      break;
     case 'sheep':
       resources.sheep += target.amount;
+      break;
     case 'brick':
       resources.brick += target.amount;
+      break;
     case 'ore':
       resources.ore += target.amount;
+      break;
     case 'wheat':
       resources.wheat += target.amount;
+      break;
     default:
       break;
   }
@@ -36,14 +41,19 @@ export function payTradeResources(
   switch (offer.resource) {
     case 'wood':
       resources.wood -= offer.amount;
+      break;
     case 'sheep':
       resources.sheep -= offer.amount;
+      break;
     case 'brick':
       resources.brick -= offer.amount;
+      break;
     case 'ore':
       resources.ore -= offer.amount;
+      break;
     case 'wheat':
       resources.wheat -= offer.amount;
+      break;
     default:
       break;
   }
@@ -57,18 +67,23 @@ export function hasEnoughResourcesToTrade(
     case 'wood':
       if (resources.wood >= offer.amount)
         return true;
+      break;
     case 'sheep':
       if (resources.sheep >= offer.amount)
         return true;
+      break;
     case 'brick':
       if (resources.brick >= offer.amount)
         return true;
+      break;
     case 'ore':
       if (resources.ore >= offer.amount)
         return true;
+      break;
     case 'wheat':
       if (resources.wheat >= offer.amount)
         return true;
+      break;
     default:
       break;
   }
