@@ -183,6 +183,12 @@ export interface PortData {
   coastId: string;
 }
 
+export interface ReserveData {
+  id: string;
+  position: Vertex;
+}
+
+
 /** @description sent to the front, serializable without risk */
 export interface GameBoard {
   layout: TileData[];
@@ -191,6 +197,7 @@ export interface GameBoard {
   settlements: SettlementData[];
   roads: RoadData[];
   coasts: CoastData[];
+  reserve: ReserveData;
   svgBounds: SvgBounds;
 }
 

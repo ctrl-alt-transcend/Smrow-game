@@ -5,6 +5,7 @@ import { Coast } from "./Coast";
 import { WaterLayer } from "./Water";
 
 import type { GameBoardProps } from "../../types/gameboard.types";
+import { ReserveIcon } from "./GameIcon";
 
 export const GameBoard: React.FC<GameBoardProps> = ({
   board,
@@ -13,14 +14,17 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   handleRoadClick,
   handleCoastClick,
   handleSettlementClick,
+  handleReserveClick,
   isTileHovered,
   isRoadHovered,
   isSettlementHovered,
   isCoastHovered,
+  isReserveHovered,
   handleTileHover,
   handleRoadHover,
   handleSettlementHover,
   handleCoastHover,
+  handleReserveHover
 }) => {
   const { layout, roads, settlements, coasts, svgBounds } = board;
 
@@ -33,6 +37,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         height={svgBounds.svgHeight}
         viewBox={`${svgBounds.offsetX} ${svgBounds.offsetY} ${svgBounds.svgWidth} ${svgBounds.svgHeight}`}
       >
+        <ReserveIcon
+          data={board.reserve}
+          isSelected={selected.selectedReserve?.id === board.reserve.id}
+          isHovered={isReserveHovered(board.reserve)}
+          onHoverChange={(h) => handleReserveHover(h, board.reserve)}
+          onClick={handleReserveClick}
+        />
         <WaterLayer data={coasts}/>
         {coasts.map((coast) => (
           <Coast

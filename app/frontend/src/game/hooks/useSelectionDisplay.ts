@@ -16,7 +16,7 @@ export const useSelectionDisplay = (
     items.push({label: `Ressource: ${LAND_RESSOURCE[selected.selectedTile.land]}`});
   }
   if (selected.selectedSettlement) {
-    items.push({label: `Settlement: ${selected.selectedSettlement.id}`});
+    //items.push({label: `Settlement: ${selected.selectedSettlement.id}`});
     //items.push({label: `Faction: ${selected.selectedSettlement.faction}`});
     if (selected.selectedSettlement.ownerId)
       items.push({label: `Landlord: ${selected.selectedSettlement.ownerId}`});
@@ -28,11 +28,14 @@ export const useSelectionDisplay = (
       items.push({label: `Landlord: ${selected.selectedRoad.ownerId}`});
   }
   if (selected.selectedCoast) {
-    items.push({label: `Coast: ${selected.selectedCoast.id}` });
+    //items.push({label: `${selected.selectedCoast.id}` });
     if (selected.selectedCoast.port && selected.selectedCoast.port.type === 'generic')
       items.push({label: 'Generic Port'});
     else if (selected.selectedCoast.port)
       items.push({label: 'Specialized Port'});
+  }
+  if(selected.selectedReserve) {
+    items.push({label: `Schnek the Goblin`});
   }
   return items;
 };

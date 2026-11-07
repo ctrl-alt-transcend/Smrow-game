@@ -13,6 +13,7 @@ import {
   WATER_WIDTH,
   Faction,
   RessourceType,
+  ReserveData,
 } from '@shared/game/gameboard.types';
 import { getHexCorners, getHexEdges } from '@shared/game/hexCalculation';
 
@@ -83,6 +84,16 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
   const offsetX = bounds.minX - margin;
   const offsetY = bounds.minY - margin;
 
+  const reserveRadius = 40;
+  const reserve: ReserveData = {
+    id: "reserve",
+    position: {
+      id: "reserve-pos",
+      x: bounds.minX - reserveRadius * 0.6 + 50,
+      y: bounds.minY - reserveRadius * 0.6 + 50,
+    },
+  };
+
   return {
     layout: tiles,
     vertices: Array.from(allVertices.values()),
@@ -90,6 +101,7 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
     settlements,
     roads,
     coasts,
+    reserve,
     svgBounds: { svgWidth, svgHeight, offsetX, offsetY },
   };
 };

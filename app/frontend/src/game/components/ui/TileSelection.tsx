@@ -20,8 +20,9 @@ import {
 } from "../../../../../shared/game/game.types";
 import {
   GENERIC_PORT_RATE,
-  RessourceType,
   SPECIAL_PORT_RATE,
+  RESERVE_RATE,
+  RessourceType,
   type TraderType
 } from "../../../../../shared/game/gameboard.types";
 import { socket } from "../../../socket.tsx";
@@ -489,17 +490,16 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
       );
     }
 
-    // 5. RESERVE: player-to-player trade (enable when selectedReserve exists)
-    // if (selected.selectedReserve) {
-    //   return (
-    //     <TradeOfferPanel
-    //       ratio={RESERVE_RATE}
-    //       sourceId={selected.selectedReserve.id}
-    //       sourceKind="player"
-    //       targetOwnerId={selected.selectedReserve.ownerId ?? null}
-    //     />
-    //   );
-    // }
+    // 5. RESERVE: 4:1
+    if (selected.selectedReserve) {
+      return (
+        <TradeOfferPanel
+          ratio={RESERVE_RATE}
+          sourceId={selected.selectedReserve.id}
+          sourceKind="reserve"
+        />
+      );
+    }
 
     return (
       <Text size="sm" c="dimmed">

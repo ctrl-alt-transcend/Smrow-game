@@ -4,7 +4,8 @@ import type {
   TileData,
   RoadData,
   SettlementData,
-  CoastData
+  CoastData,
+  ReserveData
 } from "@shared/game/gameboard.types";
 
 
@@ -61,9 +62,16 @@ export const useGameBoardHover = () => {
     [],
   );
 
-   const handleCoastHover = useCallback(
+  const handleCoastHover = useCallback(
     (isHovered: boolean, coast: CoastData) => {
       setHovered(isHovered ? { type: "coast", id: coast.id } : null);
+    },
+    [],
+  );
+
+  const handleReserveHover = useCallback(
+    (isHovered: boolean, reserve: ReserveData) => {
+      setHovered(isHovered ? { type: "reserve", id: reserve.id } : null);
     },
     [],
   );
@@ -90,15 +98,23 @@ export const useGameBoardHover = () => {
     [hovered],
   );
 
+  const isReserveHovered = useCallback(
+    (reserve: ReserveData) =>
+      hovered?.type === "reserve" && hovered.id === reserve.id,
+    [hovered],
+  );
+
   return {
     hovered,
     handleTileHover,
     handleRoadHover,
     handleCoastHover,
     handleSettlementHover,
+    handleReserveHover,
     isTileHovered,
     isRoadHovered,
     isSettlementHovered,
-    isCoastHovered
+    isCoastHovered,
+    isReserveHovered,
   };
 };

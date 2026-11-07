@@ -10,6 +10,7 @@ import type { GameDataDto, Resources } from '@shared/game/game.types.ts';
 import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
 import SkipTurnButton from './components/ui/SkipTurnButton.tsx';
 import { ResourcesPanel } from './components/ui/ResourcesPanel.tsx';
+import { ReserveIcon } from './components/gameboard/GameIcon.tsx';
 
 export default function Game() {
   const { game } = useGameState();

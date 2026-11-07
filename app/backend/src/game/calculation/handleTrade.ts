@@ -34,7 +34,7 @@ const rateCheck = (
       if (offerAmount / targetAmount === RESERVE_RATE)
         return true;
       break;
-    case "player":
+    default:
       break;
   }
 
@@ -91,6 +91,15 @@ export const tradeCheck = (
         }
       }
       break;
+    case 'reserve':
+      if(hasEnoughResourcesToTrade(player.resources, payload.offer)) {
+        payTradeResources(player.resources, payload.offer);
+        earnTradeResources(player.resources, payload.target);
+        console.log(`👀✅tradeCheck: ${player.playerId} traded with Schnek: ${payload.offer.amount}x ${payload.offer.resource} for ${payload.target.amount}x ${payload.target.resource}`);
+        return { valid: true, message: `successfully traded with Schnek: ${payload.offer.amount}x ${payload.offer.resource} for ${payload.target.amount}x ${payload.target.resource}`}
+      }
+      console.log(`👀❌tradeCheck: ${player.playerId} has not enough ${payload.offer.resource} to trade ${payload.target.amount}x ${payload.target.resource} with Schnek`);
+      return { valid: false, message: `not enough ${payload.offer.resource} to trade ${payload.target.amount}x ${payload.target.resource} with Schnek`}
     default:
       break;
   }
