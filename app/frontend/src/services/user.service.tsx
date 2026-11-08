@@ -1,6 +1,7 @@
 import { http } from "./http";
+import { UserProfileSchema } from "shared";
 import type { AxiosResponse } from "axios";
-import type { UserProfile } from "shared";
+import type { UserProfile, UpdateProfile } from "shared";
 
 export const getCurrentUser = async (): Promise<UserProfile> => {
   try {
@@ -16,4 +17,9 @@ export function getUserToken(): string {
   const token = localStorage.getItem("access_token");
   if (!token) throw new Error("Not authenticated");
   return token;
+}
+
+export async function updateProfile(data: UpdateProfile): Promise<UserProfile> {
+  const res = await http.patch("/auth/me", data);
+  return UserProfileSchema.parse(res.data);
 }

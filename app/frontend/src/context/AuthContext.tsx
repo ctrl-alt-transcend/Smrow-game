@@ -8,6 +8,7 @@ export interface AuthContextValue {
   clearAuthMessage: () => void;
   login: (data: LoginPost) => Promise<void>;
   register: (data: RegisterPost) => Promise<void>;
+  refreshUser: () => Promise<void>;
   logout: () => void;
 }
 

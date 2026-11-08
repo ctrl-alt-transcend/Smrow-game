@@ -75,6 +75,10 @@ export class AuthService {
     return PasswordSchema.parse(hash);
   }
 
+  async updateProfile(userId: string, data: UserProfile): Promise<UserProfile> {
+    await this.userService.update(userId, data);
+    return this.getProfile(userId);
+  }
   /*
    * @brief:   Create a JWT token for the given user
    * @details: the payload is the visible part of the token, it contains the userId and username

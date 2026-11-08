@@ -62,3 +62,10 @@ export const JwtPayloadSchema = z.object({
   username: UsernameSchema,
 });
 export type JwtPayload = z.infer<typeof JwtPayloadSchema>;
+
+export const UpdateProfileSchema = UserProfileSchema
+  .omit({ id: true, createdAt: true })
+  .partial()
+  .refine((d) => Object.keys(d).length > 0, "Nothing to update");
+
+export type UpdateProfile = z.infer<typeof UpdateProfileSchema>;

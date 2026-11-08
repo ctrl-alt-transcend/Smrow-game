@@ -6,9 +6,9 @@ import {
   Stack,
   Text,
   Title,
-  Image,
 } from "@mantine/core";
 import { useAuth } from "../hooks/useAuth";
+import { ProfileForm } from "../components/form/ProfileForm";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -23,57 +23,17 @@ export default function ProfilePage() {
         <Grid.Col span={{ base: 12, md: 4 }}>
           <Paper withBorder p="md" h="100%">
             <Stack align="center" gap="xs">
-              <Avatar size={120} radius="md" color="Red">
-                <Image
-                  radius="md"
-                  h={200}
-                  w="auto"
-                  fit="contain"
-                  src={user?.avatarURL}
-                  fallbackSrc="/missing.png"
-                />
-              </Avatar>
+              <Avatar
+                src={user?.avatarURL}
+                size={"200"}
+                radius="md"
+                color="Red"
+              />
               <Title order={3}>{user?.username}</Title>
             </Stack>
-
             <Divider my="md" />
 
-            <Stack gap="sm" style={{ overflowWrap: "anywhere" }}>
-              <Paper withBorder radius="sm" p="xs">
-                <Text size="xs" c="dimmed">
-                  Username
-                </Text>
-                <Text>{user?.username}</Text>
-              </Paper>
-
-              <Paper withBorder radius="sm" p="xs">
-                <Text size="xs" c="dimmed">
-                  Email
-                </Text>
-                <Text>{user?.email}</Text>
-              </Paper>
-
-              <Paper withBorder radius="sm" p="xs">
-                <Text size="xs" c="dimmed">
-                  image url
-                </Text>
-                <Text>{user?.avatarURL}</Text>
-              </Paper>
-
-              <Paper withBorder radius="sm" p="xs">
-                <Text size="xs" c="dimmed">
-                  Member since
-                </Text>
-                <Text>{user?.createdAt}</Text>
-              </Paper>
-
-              <Paper withBorder radius="sm" p="xs">
-                <Text size="xs" c="dimmed">
-                  Bio
-                </Text>
-                <Text>{user?.bio}</Text>
-              </Paper>
-            </Stack>
+            <ProfileForm />
           </Paper>
         </Grid.Col>
 

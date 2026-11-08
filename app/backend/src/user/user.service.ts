@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
 // import { CreateUserDto } from './dto/create-user.dto';
 import { PlayerProfile } from 'shared';
-import type { UserProfile, RegisterPost } from 'shared';
+import type { UserProfile, RegisterPost, UpdateProfile } from 'shared';
 
 @Injectable()
 export class UserService {
@@ -119,12 +119,18 @@ export class UserService {
     });
   }
 
-  async update(id: string, updateUserDto: Prisma.UserUpdateInput) {
+  async update(id: string, data: UpdateProfile) {
+    const { name, username, email, ...profileFields } = data;
     return this.databaseService.user.update({
-      where: {
-        id,
+      where: { id },
+      data: {
+        name,
+        username,
+        email,
+        profile: Object.keys(profileFields).length
+          ? { upsert: { create: profileFields, update: profileFields } }
+          : undefined,
       },
-      data: updateUserDto,
     });
   }
 

@@ -1,6 +1,6 @@
 import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Prisma } from '@prisma/client';
+import { UpdateProfile } from 'shared';
 
 @Controller('user')
 export class UserController {
@@ -29,7 +29,7 @@ export class UserController {
   @Patch('update/:id')
   async update(
     @Param('id') username: string,
-    @Body() updateUserDto: Prisma.UserUpdateInput,
+    @Body() updateUserDto: UpdateProfile,
   ) {
     const updatedUser = await this.userService.update(username, updateUserDto);
 

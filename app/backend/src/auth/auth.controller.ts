@@ -1,4 +1,4 @@
-import { Controller, Body, Post, Get, UseGuards } from '@nestjs/common';
+import { Controller, Body, Post, Get, UseGuards, Patch } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Req } from '@nestjs/common';
@@ -33,5 +33,15 @@ export class AuthController {
   @ZodSerializerDto(UserProfileDto)
   async me(@Req() req: { user: UserPublic }) {
     return this.AuthService.getProfile(req.user.id);
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @ZodSerializerDto(UserProfileDto)
+  async updateMe(
+    @Req() req: { user: UserPublic },
+    @Body() body: UserProfileDto,
+  ) {
+    return this.AuthService.updateProfile(req.user.id, body);
   }
 }

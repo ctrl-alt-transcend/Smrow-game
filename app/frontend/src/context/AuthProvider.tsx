@@ -54,6 +54,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (reason) setAuthMessage(reason);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    setUser(await getCurrentUser());
+  }, []);
+
   const clearAuthMessage = useCallback(() => setAuthMessage(null), []);
 
   useEffect(() => {
@@ -73,6 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login,
         register,
         logout,
+        refreshUser,
         authMessage,
         clearAuthMessage,
       }}
