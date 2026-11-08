@@ -3,10 +3,10 @@ import { AuthContext } from "./AuthContext";
 import { getCurrentUser } from "../services/user.service";
 import { registerUser, loginUser } from "../services/auth.service";
 import { authEvents } from "./AuthEvents";
-import type { LoginPost, RegisterPost, UserPublic } from "shared";
+import type { LoginPost, RegisterPost, UserProfile } from "shared";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<UserPublic | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
 

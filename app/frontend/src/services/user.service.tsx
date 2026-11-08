@@ -1,10 +1,10 @@
 import { http } from "./http";
 import type { AxiosResponse } from "axios";
-import type { UserPublic } from "shared";
+import type { UserProfile } from "shared";
 
-export const getCurrentUser = async (): Promise<UserPublic> => {
+export const getCurrentUser = async (): Promise<UserProfile> => {
   try {
-    const res: AxiosResponse = await http.get<UserPublic>("/auth/me");
+    const res: AxiosResponse = await http.get<UserProfile>("/auth/me");
     return res.data;
   } catch (error: any) {
     const err_msg = error.repsones?.data?.message;
