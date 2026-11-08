@@ -1,9 +1,15 @@
 import type { Player, Resources } from "./game.types";
 
+/** Rules value */
 export const SPECIAL_PORT_RATE = 2;
 export const GENERIC_PORT_RATE = 3;
 export const RESERVE_RATE = 4;
+export const SETTLEMENT_POINT = 1;
 
+export const CITY_POINT = 1;
+export const POINTS_TO_WIN = 10;
+
+/** Rendering */
 export const SELECTED_COLOR = '#c30000';
 export const HOVER_COLOR = '#ff0f0f';
 export const DEFAULT_COLOR = '#e4e4e4';

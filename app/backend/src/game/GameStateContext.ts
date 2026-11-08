@@ -5,6 +5,7 @@ import {
   classicLayout,
   Faction,
   FACTION_COLORS,
+  POINTS_TO_WIN,
   SettlementData,
 } from '@shared/game/gameboard.types';
 import type {
@@ -13,7 +14,7 @@ import type {
   Player,
   GameResponse,
   BuildRequestPayload,
-  TradeRequestPayload
+  TradeRequestPayload,
 } from '@shared/game/game.types';
 import {
   isBuildRequestPayload,
@@ -52,6 +53,8 @@ class GameStateContext {
     this.data = {
       players: new Map<string, Player>(),
       startingRolls: new Map<string, number | null>(),
+      winner: null,
+      winCondition: null,
       turnCount: 0,
       turnOrder: [],
       currentTurnIndex: 0,
@@ -87,25 +90,26 @@ class GameStateContext {
   }
 
   public initPlayer(playerId: string): Player {
-    const newPlayer = {
+    const newPlayer: Player = {
       playerId: playerId,
-      score: 0,
+      //victoryPoints: 0,
+      victoryPoints: 6, //⚠️ For testing only
       firstDice: 0,
       secondDice: 0,
       totalDice: 0,
       settlementsBuilt: new Map<string, SettlementData>(),
       roadsBuilt: 0,
-      level: 1,
+      level: 1, //⚠️ For testing only
       username: playerId,
       avatarURL: null,
       faction: this.assignFaction(),
       // BONUS Resources FOR DEV
-      resources: {
-        wood: 10,
-        brick: 10,
-        wheat: 10,
-        sheep: 10,
-        ore: 10,
+      resources: { //⚠️ For testing only
+        wood: 10, //⚠️ For testing only
+        brick: 10, //⚠️ For testing only
+        wheat: 10, //⚠️ For testing only
+        sheep: 10, //⚠️ For testing only
+        ore: 10, //⚠️ For testing only
       },
       //Resources: {
       //  wood: 0,
@@ -162,7 +166,7 @@ class GameStateContext {
     return this.state.skip(playerId);
   }
 
-  public phaseCheckRequest() {
+  public phaseCheckRequest(): void {
     return this.state.phaseCheck();
   }
 
@@ -221,6 +225,8 @@ class GameStateContext {
     }
     return {
       currentPlayer: p,
+      winner: gameData.winner,
+      winCondition: gameData.winCondition,
       players: Array.from(gameData.players.values()),
       gameId: gameData.gameId,
       dicesSum: gameData.dicesSum,
@@ -294,6 +300,12 @@ class GameStateContext {
     );
   }
 
+  /** @argument winCondition: explain why the player won  */
+  public setVictory(winner: string, winCondition: string) {
+    this.data.winner = winner;
+    this.data.winCondition = winCondition;
+  }
+
   /** Methods */
   public rollDice(p: Player): GameResponse {
     let value: number | null = Math.floor(Math.random() * 6) + 1;
@@ -309,6 +321,24 @@ class GameStateContext {
       message = `rollDice: you (${p.playerId}) already rolled both dices.`;
     }
     return { value, message, data: null };
+  }
+
+  public isVictory(): boolean {
+    let endGame: boolean = false;
+
+    this.data.players.forEach(player => {
+      if (this.data.players.size === 1) {
+        this.setVictory(player.playerId, `is the only player left in game ! You won congrats !`)
+        endGame = true;
+        return;
+      }
+      if (player.victoryPoints === POINTS_TO_WIN) {
+        this.setVictory(player.playerId, `won by earning ${player.victoryPoints} victory points !`)
+        endGame = true;
+        return;
+      }
+    });
+    return endGame;
   }
 }
 
@@ -725,6 +755,10 @@ class TradeAndBuildPhase extends State {
   }
 
   public phaseCheck(): void {
+    if (this.state.isVictory()) {
+      console.log(`🤝🔎TradeAndBuildPhase:phaseCheck: ${this.state.getGameData().winner} won the game !`);
+      return;
+    }
     if (this.state.getTurnCount() !== this.state.getPlayers().size) {
       //console.log(`🤝🔎TradeAndBuildPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
       return;

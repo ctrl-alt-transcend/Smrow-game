@@ -1,4 +1,4 @@
-import { AppShell, Burger, Group } from '@mantine/core';
+import { AppShell, Burger, Group, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import GameBoard from './components/gameboard/GameBoard.tsx';
 import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
@@ -75,7 +75,8 @@ function GameShell({ game }: { game: GameDataDto }) {
 
       <AppShell.Main>
         <Group justify="center" align="center">
-          <GameBoard {...GameBoardProps} />
+          {!game.winner && <GameBoard {...GameBoardProps} />}
+          {game.winner && <Title> {game.winner} {game.winCondition} </Title>}
         </Group>
       </AppShell.Main>
 

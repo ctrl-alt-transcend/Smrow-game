@@ -17,7 +17,7 @@ export type Resources = {
 export type Player = {
   playerId: string;
   username: string;
-  score: number;
+  victoryPoints: number;
   level: number;
   resources: Resources;
   firstDice: number,
@@ -40,6 +40,8 @@ export type PlayerProfile = {
 export type GameData = {
   players: Map<string, Player>;
   startingRolls: Map<string, number | null>;
+  winner: string | null;
+  winCondition: string | null;
   turnCount: number;
   turnOrder: string[];
   currentTurnIndex: number;
@@ -59,6 +61,8 @@ export interface GameResponse {
 export type GameDataDto = { //INFO: data we send to the client every time the game state changes
   currentPlayer: Player;
   players: Player[];
+  winner: string | null;
+  winCondition: string | null;
   //turnCount: number;
   //turnOrder: string[];
   //currentTurnIndex: number;

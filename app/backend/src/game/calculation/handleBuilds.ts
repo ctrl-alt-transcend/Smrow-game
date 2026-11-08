@@ -6,6 +6,8 @@ import {
   type GameBoardGraph,
   Faction,
   BuildingsInGame,
+  SETTLEMENT_POINT,
+  CITY_POINT,
 } from '@shared/game/gameboard.types';
 import { hasEnoughResourcesToBuild, payBuildResources } from './handleResources';
 
@@ -172,8 +174,9 @@ function cityUpgradeCheck(
       message: 'not enough Resources for a city upgrade ...',
     };
   }
-  target.isCity = true;
   console.log(`👀✅buildCheck: ${player.playerId} upgraded a settlement to a city`);
+  player.victoryPoints += CITY_POINT;
+  target.isCity = true;
   payBuildResources(player.resources, 'city')
   return {
     valid: true,
@@ -212,12 +215,13 @@ function settlementCheck(
       message: settlementResult.reason,
     };
   }
+  console.log(`👀✅buildCheck: ${player.playerId} built a settlement`);
+  player.victoryPoints += SETTLEMENT_POINT;
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
     payBuildResources(player.resources, 'settlement');
   }
-  console.log(`👀✅buildCheck: ${player.playerId} built a settlement`);
   return {
     valid: true,
     message: 'settlement built !',
