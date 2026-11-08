@@ -6,6 +6,7 @@ import {
   Faction,
   FACTION_COLORS,
   POINTS_TO_WIN,
+  ROBBER_ROLL,
   SettlementData,
 } from '@shared/game/gameboard.types';
 import type {
@@ -29,6 +30,7 @@ import { createGameBoard } from './calculation/createGameBoard';
 import { resourcesProduction } from './calculation/handleResources';
 import { tradeCheck } from './calculation/handleTrade';
 import { NotFoundException } from '@nestjs/common';
+import { robberRule } from './calculation/gameRules';
 
 /**
  * STATE DESIGN PATTERN
@@ -583,11 +585,21 @@ class RessourcePhase extends State {
     const roll: GameResponse = this.state.rollDice(p);
     this.state.setCurrentRoll(roll.value);
     if (this.state.hasRolledBothDices(p) && roll.value) {
+      this.state.setDicesSum(p.firstDice + p.secondDice);
+      //this.state.setDicesSum(7); //⚠️ For testing 'robberRule' only
+      //this.state.setDicesSum(5); //⚠️ For testing 'robberRule' only
       console.log(
-        `🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`,
+        `🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${this.state.getGameData().dicesSum}`,
       );
-      this.state.setDicesSum(p.firstDice + p.secondDice)
-      resourcesProduction(this.state.getBuildings(), this.state.getGraph(), this.state.getGameData().dicesSum, false );
+      if (this.state.getGameData().dicesSum == ROBBER_ROLL) {
+        console.log(
+        `🪵🎲RessourcePhase:dice: OH NO! THE ROBBER IS COMING!`,
+        );
+        robberRule(this.state.getGameData().players, this.state.getGameData().board.layout);
+      } else {
+        resourcesProduction(this.state.getBuildings(),
+          this.state.getGraph(), this.state.getGameData().dicesSum, false );
+      }
       this.state.setCurrentTurnIndex(undefined);
       this.state.setTurnCount(undefined);
       return {

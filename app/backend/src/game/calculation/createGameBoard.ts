@@ -16,6 +16,7 @@ import {
   ReserveData,
 } from '@shared/game/gameboard.types';
 import { getHexCorners, getHexEdges } from '@shared/game/hexCalculation';
+import { randomizeRobber } from './randomizeGameBoard';
 
 /* ================================================================== *
  * initGameBoard
@@ -25,6 +26,9 @@ import { getHexCorners, getHexEdges } from '@shared/game/hexCalculation';
 export const initGameBoard = (tiles: TileData[]): GameBoard => {
   const allVertices = new Map<string, Vertex>();
   const allEdges = new Map<string, Edge>();
+
+  /** Randomize tiles */
+  randomizeRobber(tiles);
 
   tiles.forEach((tile) => {
     getHexCorners(tile.q, tile.r, HEX_SIZE).forEach((v) => {

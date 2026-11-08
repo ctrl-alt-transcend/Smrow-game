@@ -149,7 +149,7 @@ function produceResources(
 ): number {
   switch (land) {
     case 'desert':
-      return -1;
+      return 0;
     case 'field':
       isCity ?
       resources.wheat += 2
@@ -197,15 +197,17 @@ export function resourcesProduction(
       let prod: number = 0;
       if (placementPhase === true)
         prod = produceResources(tile.land, player.resources);
-      else if (tile.value === dicesSum) {
+      else if (tile.value === dicesSum && !tile.hasRobber) {
         const settlement = player.settlementsBuilt.get(settlementId);
         if (settlement)
           prod = produceResources(tile.land, player.resources, settlement.isCity);
       }
       if (prod > 0)
         console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESSOURCE[tile.land]}`);
-      if (prod == -1)
-        console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything in the ${tile.land}`);
+      else if (tile.hasRobber)
+        console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by Robert the Robber !`);
+      else if (tile.land == LandType.DESERT)
+        console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything in the ${LandType.DESERT}`);
     });
   }
 };
