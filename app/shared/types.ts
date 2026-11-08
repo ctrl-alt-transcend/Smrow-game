@@ -33,5 +33,5 @@ export type Message = z.infer<typeof MessageSchema>;
 export const JwtTokenSchema = z.jwt();
 export type JwtToken = z.infer<typeof JwtTokenSchema>;
 
-export const AvatarUrlSchema = z.url().optional();
+export const AvatarUrlSchema = z.string().optional();
 export type avatarURL = z.infer<typeof AvatarUrlSchema>;

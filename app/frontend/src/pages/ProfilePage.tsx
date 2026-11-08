@@ -6,11 +6,13 @@ import {
   Stack,
   Text,
   Title,
+  Image,
 } from "@mantine/core";
 import { useAuth } from "../hooks/useAuth";
 
 export default function ProfilePage() {
   const { user } = useAuth();
+  console.log("url: ", user?.avatarURL);
   return (
     <>
       <Title mb="xl" ta="center">
@@ -22,7 +24,14 @@ export default function ProfilePage() {
           <Paper withBorder p="md" h="100%">
             <Stack align="center" gap="xs">
               <Avatar size={120} radius="md" color="Red">
-                MG
+                <Image
+                  radius="md"
+                  h={200}
+                  w="auto"
+                  fit="contain"
+                  src={user?.avatarURL}
+                  fallbackSrc="/missing.png"
+                />
               </Avatar>
               <Title order={3}>{user?.username}</Title>
             </Stack>
@@ -42,6 +51,13 @@ export default function ProfilePage() {
                   Email
                 </Text>
                 <Text>{user?.email}</Text>
+              </Paper>
+
+              <Paper withBorder radius="sm" p="xs">
+                <Text size="xs" c="dimmed">
+                  image url
+                </Text>
+                <Text>{user?.avatarURL}</Text>
               </Paper>
 
               <Paper withBorder radius="sm" p="xs">

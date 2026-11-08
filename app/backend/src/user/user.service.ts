@@ -1,9 +1,9 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
-import { CreateUserDto } from './dto/create-user.dto';
+// import { CreateUserDto } from './dto/create-user.dto';
 import { PlayerProfile } from 'shared';
-import type { UserProfile } from 'shared';
+import type { UserProfile, RegisterPost } from 'shared';
 
 @Injectable()
 export class UserService {
@@ -11,20 +11,24 @@ export class UserService {
 
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async create(usr: RegisterPost) {
     const prismaDtoUser: Prisma.UserCreateInput = {
-      username: createUserDto.username,
-      name: createUserDto.name,
-      email: createUserDto.email,
+      username: usr.username,
+      name: usr.name,
+      email: usr.email,
       localAuth: {
         create: {
-          passwordHash: createUserDto.password,
+          passwordHash: usr.password,
         },
+      },
+      profile: {
+        create: {},
       },
     };
 
     return await this.databaseService.user.create({
       data: prismaDtoUser,
+      include: { profile: true },
     });
   }
 
