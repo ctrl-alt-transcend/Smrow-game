@@ -14,6 +14,8 @@ export const useSelectionDisplay = (
     //items.push({label: `Tile: ${selected.selectedTile.q}, ${selected.selectedTile.r}`});
     items.push({label: `Land: ${selected.selectedTile.land}`});
     items.push({label: `Ressource: ${LAND_RESSOURCE[selected.selectedTile.land]}`});
+    if (selected.selectedTile.hasRobber)
+      items.push({label: `Robert the Robber`});
   }
   if (selected.selectedSettlement) {
     //items.push({label: `Settlement: ${selected.selectedSettlement.id}`});

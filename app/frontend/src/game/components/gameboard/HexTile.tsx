@@ -5,11 +5,15 @@ import { HEX_SIZE } from "../../../../../shared/game/gameboard.types";
 import {
   getFillColor,
   getTileStrokeColor,
-  getTileStrokeWidth
-} from '../../utils/tileRendering';
+  getTileStrokeWidth,
+} from "../../utils/tileRendering";
+import robberUrl from "../../assets/RobertTheRobber.svg";
 
 const TOKEN_RADIUS = HEX_SIZE * 0.34;
 const TOKEN_FONT_SIZE = HEX_SIZE * 0.46;
+
+const THIEF_WIDTH = TOKEN_RADIUS * 2;
+const THIEF_HEIGHT = THIEF_WIDTH;
 
 export const HexTile: React.FC<TileProps> = ({
   data,
@@ -23,12 +27,7 @@ export const HexTile: React.FC<TileProps> = ({
     onMouseEnter,
     onMouseLeave,
   } = useHover(isHovered, onHoverChange);
-  const fillColor = getFillColor(
-    data.land,
-    null,
-    isSelected,
-    effectiveIsHovered,
-  );
+  const fillColor = getFillColor(data.land, null, isSelected, effectiveIsHovered);
   const strokeColor = getTileStrokeColor(effectiveIsHovered);
   const strokeWidth = getTileStrokeWidth(effectiveIsHovered);
   const { x: centerX, y: centerY } = axialToPixel(data.q, data.r, HEX_SIZE);
@@ -45,8 +44,11 @@ export const HexTile: React.FC<TileProps> = ({
     <g
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onClick={(e) => { e.stopPropagation(); onClick(data); }}
-      style={{ cursor: 'pointer' }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(data);
+      }}
+      style={{ cursor: "pointer" }}
     >
       <polygon
         points={points}
@@ -77,6 +79,19 @@ export const HexTile: React.FC<TileProps> = ({
             {tokenValue}
           </text>
         </g>
+      )}
+
+      {data.hasRobber && (
+      <g>
+        <image
+          href={robberUrl}
+          x={centerX - 2}
+          y={centerY - 10}
+          width={THIEF_WIDTH}
+          height={THIEF_HEIGHT}
+          style={{ filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.4))" }}
+        />
+      </g>
       )}
     </g>
   );

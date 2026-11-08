@@ -155,6 +155,7 @@ export interface TileData {
   r: number;
   value: number;
   land: LandType;
+  hasRobber: boolean;
 }
 
 export interface BuildData {
@@ -230,9 +231,9 @@ export type BuildingsInGame = Map<string, Player>;
 
 /** @description classic Catan gameboard layout (19 tiles) */
 export const classicLayout: TileData[] = [
-    { q: 0, r: -2, land: LandType.FOREST, value: 2 }, { q: 1, r: -2, land: LandType.PASTURE, value: 9 }, { q: 2, r: -2, land: LandType.MOUNTAIN, value: 8 },
-    { q: -1, r: -1, land: LandType.PASTURE, value: 11 }, { q: 0, r: -1, land: LandType.HILL, value: 6 }, { q: 1, r: -1, land: LandType.FIELD, value: 5 }, { q: 2, r: -1, land: LandType.MOUNTAIN, value: 4 },
-    { q: -2, r: 0, land: LandType.FIELD, value: 12 }, { q: -1, r: 0, land: LandType.FIELD, value: 5 }, { q: 0, r: 0, land: LandType.MOUNTAIN, value: 10 }, { q: 1, r: 0, land: LandType.FOREST, value: 3 }, { q: 2, r: 0, land: LandType.PASTURE, value: 9 },
-    { q: -2, r: 1, land: LandType.PASTURE, value:6 },{ q: -1, r: 1, land: LandType.FOREST, value: 4 }, { q: 0, r: 1, land: LandType.FOREST, value: 11 }, { q: 1, r: 1, land: LandType.HILL, value: 8 },
-    { q: -2, r: 2, land: LandType.HILL, value: 8 },{ q: -1, r: 2, land: LandType.DESERT, value: 10 }, { q: 0, r: 2, land: LandType.FIELD, value: 12 }
+    { q: 0, r: -2, land: LandType.FOREST, value: 2, hasRobber: false }, { q: 1, r: -2, land: LandType.PASTURE, value: 9, hasRobber: false }, { q: 2, r: -2, land: LandType.MOUNTAIN, value: 8, hasRobber: false },
+    { q: -1, r: -1, land: LandType.PASTURE, value: 11, hasRobber: false }, { q: 0, r: -1, land: LandType.HILL, value: 6, hasRobber: false }, { q: 1, r: -1, land: LandType.FIELD, value: 5, hasRobber: false }, { q: 2, r: -1, land: LandType.MOUNTAIN, value: 4, hasRobber: false },
+    { q: -2, r: 0, land: LandType.FIELD, value: 12, hasRobber: false }, { q: -1, r: 0, land: LandType.FIELD, value: 5, hasRobber: true }, { q: 0, r: 0, land: LandType.MOUNTAIN, value: 10, hasRobber: false }, { q: 1, r: 0, land: LandType.FOREST, value: 3, hasRobber: false }, { q: 2, r: 0, land: LandType.PASTURE, value: 9, hasRobber: false },
+    { q: -2, r: 1, land: LandType.PASTURE, value:6, hasRobber: false },{ q: -1, r: 1, land: LandType.FOREST, value: 4, hasRobber: false }, { q: 0, r: 1, land: LandType.FOREST, value: 11, hasRobber: false }, { q: 1, r: 1, land: LandType.HILL, value: 8, hasRobber: false },
+    { q: -2, r: 2, land: LandType.HILL, value: 8, hasRobber: false },{ q: -1, r: 2, land: LandType.DESERT, value: 10, hasRobber: false }, { q: 0, r: 2, land: LandType.FIELD, value: 12, hasRobber: false }
 ];
