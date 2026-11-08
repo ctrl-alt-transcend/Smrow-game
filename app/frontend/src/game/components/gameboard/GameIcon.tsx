@@ -1,6 +1,7 @@
 import { useHover } from "../../hooks/useGameBoardHover";
 import { SAND_WIDTH } from "../../../../../shared/game/gameboard.types";
 import type { ReserveProps } from "../../types/gameboard.types";
+import traderUrl from "../../assets/ShnekTheTrader.svg"
 
 /**
  * Reserve icon: goblin elder head with a green hood, drawn in the same flat
@@ -23,80 +24,92 @@ const OUTLINE = "#3d2a15";
 interface ReserveIconArtProps {
   /** true → subtle glow outline (selection feedback) */
   highlighted: boolean;
+  x: number;
+  y: number;
 }
 
 /** Pure SVG art of the goblin head, drawn in a ~[-34..34] × [-34..34] box */
-const ReserveIconArt: React.FC<ReserveIconArtProps> = ({ highlighted }) => (
+const ReserveIconArt: React.FC<ReserveIconArtProps> = ({ highlighted, x, y}) => (
   <g stroke={OUTLINE} strokeWidth={1.6} strokeLinejoin="round">
-    {/* pointed ears (behind the face) */}
-    <path d="M-26,-2 L-36,6 L-24,10 Z" fill={SKIN} />
-    <path d="M26,-2 L36,6 L24,10 Z" fill={SKIN} />
+    {/*pointed ears (behind the face)*/}
+    {/*<path d="M-26,-2 L-36,6 L-24,10 Z" fill={SKIN} />
+    <path d="M26,-2 L36,6 L24,10 Z" fill={SKIN} />*/}
 
     {/* face (big rounded shape under the hood) */}
-    <path
+    {/*<path
       d="M-24,-6 C-26,10 -18,24 0,26 C18,24 26,10 24,-6 Z"
       fill={SKIN}
-    />
+    />*/}
     {/* cheek shading */}
-    <path
+    {/*<path
       d="M-22,4 C-20,16 -12,22 -2,24 C-14,22 -20,14 -22,4 Z"
       fill={SKIN_SHADE}
       stroke="none"
       opacity={0.7}
-    />
+    />*/}
 
     {/* beard stubble around the jaw */}
-    <path
+    {/*<path
       d="M-20,14 C-16,26 -8,28 0,28 C8,28 16,26 20,14 C14,22 6,24 0,24 C-6,24 -14,22 -20,14 Z"
       fill={STUBBLE}
       strokeWidth={1}
-    />
+    />*/}
 
     {/* hood: big drooping shape covering the top and sides */}
-    <path
+    {/*<path
       d="M-30,4 C-32,-14 -22,-32 0,-32 C22,-32 32,-14 30,4 C28,10 22,10 20,4 C18,-10 12,-18 0,-18 C-12,-18 -18,-10 -20,4 C-22,10 -28,10 -30,4 Z"
       fill={HOOD_MAIN}
-    />
+    />*/}
     {/* hood inner rim (between hood and forehead) */}
-    <path
+    {/*<path
       d="M-20,4 C-18,-10 -12,-18 0,-18 C12,-18 18,-10 20,4 C16,-4 10,-9 0,-9 C-10,-9 -16,-4 -20,4 Z"
       fill={HOOD_DARK}
       strokeWidth={1.2}
-    />
+    />*/}
     {/* hood seam stitches */}
-    <path d="M-8,-30 C-4,-26 4,-26 8,-30" fill="none" stroke={HOOD_SEAM} strokeWidth={1.4} />
+    {/*<path d="M-8,-30 C-4,-26 4,-26 8,-30" fill="none" stroke={HOOD_SEAM} strokeWidth={1.4} />
     <line x1={0} y1={-30} x2={0} y2={-26} stroke={HOOD_SEAM} strokeWidth={1.4} />
     <line x1={-22} y1={-20} x2={-18} y2={-17} stroke={HOOD_SEAM} strokeWidth={1.4} />
-    <line x1={22} y1={-20} x2={18} y2={-17} stroke={HOOD_SEAM} strokeWidth={1.4} />
+    <line x1={22} y1={-20} x2={18} y2={-17} stroke={HOOD_SEAM} strokeWidth={1.4} />*/}
 
     {/* heavy eyelids + eyes (wide apart, sly look) */}
-    <path d="M-16,-1 C-14,-4 -6,-4 -5,-1" fill="none" strokeWidth={1.8} />
+    {/*<path d="M-16,-1 C-14,-4 -6,-4 -5,-1" fill="none" strokeWidth={1.8} />
     <path d="M16,-1 C14,-4 6,-4 5,-1" fill="none" strokeWidth={1.8} />
     <ellipse cx={-10.5} cy={-1} rx={3.4} ry={2.4} fill="#ffffff" strokeWidth={1} />
     <ellipse cx={10.5} cy={-1} rx={3.4} ry={2.4} fill="#ffffff" strokeWidth={1} />
     <circle cx={-9.8} cy={-0.6} r={1.3} fill={OUTLINE} stroke="none" />
-    <circle cx={11.2} cy={-0.6} r={1.3} fill={OUTLINE} stroke="none" />
+    <circle cx={11.2} cy={-0.6} r={1.3} fill={OUTLINE} stroke="none" />*/}
 
     {/* eyebrows lost under the hood rim */}
-    <line x1={-15} y1={-5} x2={-6} y2={-5.5} stroke={HOOD_SEAM} strokeWidth={1.2} />
-    <line x1={15} y1={-5} x2={6} y2={-5.5} stroke={HOOD_SEAM} strokeWidth={1.2} />
+    {/*<line x1={-15} y1={-5} x2={-6} y2={-5.5} stroke={HOOD_SEAM} strokeWidth={1.2} />
+    <line x1={15} y1={-5} x2={6} y2={-5.5} stroke={HOOD_SEAM} strokeWidth={1.2} />*/}
 
     {/* big nose */}
-    <path d="M-4,2 C-6,8 -5,12 0,13 C5,12 6,8 4,2 C2,0 -2,0 -4,2 Z" fill={SKIN_SHADE} />
+    {/*<path d="M-4,2 C-6,8 -5,12 0,13 C5,12 6,8 4,2 C2,0 -2,0 -4,2 Z" fill={SKIN_SHADE} />*/}
 
     {/* smug smile */}
-    <path d="M-8,17 C-4,21 4,21 8,17" fill="none" strokeWidth={1.8} />
-    <path d="M-8,17 C-6,18 -4,18 -3,17" fill="none" strokeWidth={1.2} />
+    {/*<path d="M-8,17 C-4,21 4,21 8,17" fill="none" strokeWidth={1.8} />
+    <path d="M-8,17 C-6,18 -4,18 -3,17" fill="none" strokeWidth={1.2} />*/}
 
     {/* cheek wrinkles */}
-    <line x1={-16} y1={8} x2={-12} y2={9} stroke={SKIN_SHADE} strokeWidth={1.2} />
-    <line x1={16} y1={8} x2={12} y2={9} stroke={SKIN_SHADE} strokeWidth={1.2} />
+    {/*<line x1={-16} y1={8} x2={-12} y2={9} stroke={SKIN_SHADE} strokeWidth={1.2} />
+    <line x1={16} y1={8} x2={12} y2={9} stroke={SKIN_SHADE} strokeWidth={1.2} />*/}
+
+
+    <image
+      href={traderUrl}
+      x={x}
+      y={y}
+      width={90}
+      height={60}
+      style={{ filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.4))" }}
+    />
 
     {/* selection glow (outside the shapes, traced roughly around the head) */}
     {highlighted && (
       <circle
-        cx={0}
-        cy={-2}
+        cx={x + 43}
+        cy={y + 29}
         r={36}
         fill="none"
         stroke="#ffd700"
@@ -134,8 +147,8 @@ export const ReserveIcon: React.FC<ReserveProps> = ({
       style={{ cursor: "pointer" }}
     >
       {/* invisible generous hit area */}
-      <circle r={38} fill="transparent" />
-      <ReserveIconArt highlighted={isSelected || effectiveIsHovered} />
+      <circle r={38} fill="transparent" x={-30} y={20}/>
+      <ReserveIconArt highlighted={isSelected || effectiveIsHovered} x={-30} y={10} />
     </g>
   );
 };

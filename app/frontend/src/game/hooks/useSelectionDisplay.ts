@@ -56,7 +56,7 @@ export const useSelectionDisplay = (
       items.push({label: 'Specialized Port'});
   }
   if(selected.selectedReserve) {
-    items.push({label: `Schnek the Goblin`});
+    items.push({label: `Shnek the Trader`});
   }
   return items;
 };
