@@ -10,6 +10,7 @@ import {
   CITY_POINT,
 } from '@shared/game/gameboard.types';
 import { hasEnoughResourcesToBuild, payBuildResources } from './handleResources';
+import { crossroadRule } from './handleGameRules';
 
 export type BuildRequestPayload =
   | { kind: 'road'; id: string; data: RoadData }
@@ -286,7 +287,17 @@ export const buildCheck = (
         target = board.roads.find((r) => r.id === payload.id);
         if (!target) break;
         check = roadCheck(target, graph, player, placementPhase);
-        if (check.valid) player.roadsBuilt++;
+        if (check.valid) {
+          player.roadsBuilt++;
+          if (crossroadRule(target, graph)) {
+            player.victoryPoints++;
+            console.log(`👀✅buildCheck: ${player.playerId} built a crossroad`);
+            return {
+              valid: true,
+              message: "road built and 'Crossroad' objective achieved !",
+            };
+          }
+        }
         break;
       case 'settlement':
         target = board.settlements.find((r) => r.id === payload.id);

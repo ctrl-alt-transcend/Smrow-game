@@ -1,5 +1,5 @@
 import { useHover } from "../../hooks/useGameBoardHover";
-import { SAND_WIDTH } from "../../../../../shared/game/gameboard.types";
+import { HOVER_COLOR, SAND_WIDTH } from "../../../../../shared/game/gameboard.types";
 import type { ReserveProps } from "../../types/gameboard.types";
 import traderUrl from "../../assets/ShnekTheTrader.svg"
 
@@ -105,14 +105,13 @@ const ReserveIconArt: React.FC<ReserveIconArtProps> = ({ highlighted, x, y}) => 
       style={{ filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.4))" }}
     />
 
-    {/* selection glow (outside the shapes, traced roughly around the head) */}
     {highlighted && (
       <circle
         cx={x + 43}
         cy={y + 29}
         r={36}
         fill="none"
-        stroke="#ffd700"
+        stroke={HOVER_COLOR}
         strokeWidth={2.5}
         strokeDasharray="6,4"
         opacity={0.8}

@@ -30,7 +30,7 @@ import { createGameBoard } from './calculation/createGameBoard';
 import { resourcesProduction } from './calculation/handleResources';
 import { tradeCheck } from './calculation/handleTrade';
 import { NotFoundException } from '@nestjs/common';
-import { robberRule } from './calculation/gameRules';
+import { robberRule } from './calculation/handleGameRules';
 
 /**
  * STATE DESIGN PATTERN

@@ -9,6 +9,7 @@ export const SETTLEMENT_POINT = 1;
 export const CITY_POINT = 1;
 export const POINTS_TO_WIN = 10;
 export const ROBBER_ROLL = 7;
+export const CROSSROADS_RULE = 3;
 
 /** Rendering */
 export const SELECTED_COLOR = '#c30000';
@@ -173,6 +174,7 @@ export interface SettlementData extends BuildData {
   id: string;
   vertex: Vertex;
   isCity: boolean;
+  isCrossroad?: boolean;
 }
 
 export interface CoastData {
@@ -186,7 +188,7 @@ export interface CoastData {
 export type PortType = RessourceType | 'generic';
 
 export interface PortData {
-  tileId: string;
+  id: string;
   type: PortType;
   coastId: string;
 }
@@ -195,7 +197,6 @@ export interface ReserveData {
   id: string;
   position: Vertex;
 }
-
 
 /** @description sent to the front, serializable without risk */
 export interface GameBoard {
@@ -209,8 +210,15 @@ export interface GameBoard {
   svgBounds: SvgBounds;
 }
 
+export type CoreElement =
+{ type: 'road'; data: RoadData} |
+{ type: 'settlement'; data: SettlementData} |
+{ type: 'port'; data: PortData} |
+{ type: 'none'; data: null};
+
 /** @description keeps relations between each gameboard's elements*/
 export interface ConnectedElements {
+  core: CoreElement;
   /** @description keeps for one road every "neighbours" roads (up to 4 neighbours)*/
   connectedRoads: RoadData[];
   /** @description keeps for one road every settlement it is touching (up to 2 settlements)*/
@@ -220,7 +228,6 @@ export interface ConnectedElements {
   /** @description keeps for one settlement every hex tiles it is touching (up to 3 hex tiles -> lands)*/
   adjacentTiles: TileData[];
 }
-
 /** @description retained on the back-end only, never sent to front */
 export type GameBoardGraph = Map<string, ConnectedElements>;
 
