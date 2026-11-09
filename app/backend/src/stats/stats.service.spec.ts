@@ -33,6 +33,7 @@ describe('StatsService', () => {
   const db = {
     user: { findMany: jest.fn() },
     games: { create: jest.fn() },
+    gamesPlayer: { groupBy: jest.fn() },
   };
 
   beforeEach(async () => {
@@ -97,6 +98,50 @@ describe('StatsService', () => {
       result.players[1].playerRank = 3;
 
       await expect(service.recordGameResult(result)).resolves.not.toThrow();
+    });
+  });
+
+  describe('getLeaderboard', () => {
+    it('orders by wins then win rate and shares ranks on ties', async () => {
+      const count = (userId: string, n: number) => ({
+        userId,
+        _count: { _all: n },
+      });
+      db.gamesPlayer.groupBy
+        .mockResolvedValueOnce([
+          count('a', 5),
+          count('b', 3),
+          count('c', 3),
+          count('d', 3),
+        ])
+        .mockResolvedValueOnce([
+          count('a', 10),
+          count('b', 6),
+          count('c', 4),
+          count('d', 4),
+        ]);
+      db.user.findMany.mockResolvedValue(
+        ['a', 'b', 'c', 'd'].map((id) => ({
+          id,
+          username: id,
+          profile: null,
+        })),
+      );
+
+      const board = await service.getLeaderboard(10);
+
+      expect(board.map((e) => [e.userId, e.rank])).toEqual([
+        ['a', 1],
+        ['c', 2],
+        ['d', 2],
+        ['b', 4],
+      ]);
+    });
+
+    it('returns an empty board when nobody won yet', async () => {
+      db.gamesPlayer.groupBy.mockResolvedValue([]);
+
+      await expect(service.getLeaderboard(10)).resolves.toEqual([]);
     });
   });
 });
