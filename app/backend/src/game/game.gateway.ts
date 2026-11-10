@@ -14,24 +14,23 @@ import type { BuildRequestPayload } from '@shared/game/game.types';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
-import { instrument } from '@socket.io/admin-ui'; //WARN: dev only
 
-export interface SocketUser {
+interface SocketUser {
   id: string;
   username: string;
 }
 
-export interface SocketData {
+interface SocketData {
   user: SocketUser;
 }
 
-export type SocketServer = Server<
+type SocketServer = Server<
   DefaultEventsMap,
   DefaultEventsMap,
   DefaultEventsMap,
   SocketData
 >;
-export type SocketClient = Socket<
+type SocketClient = Socket<
   DefaultEventsMap,
   DefaultEventsMap,
   DefaultEventsMap,
@@ -135,6 +134,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   afterInit(server: SocketServer) {
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
+      const { instrument } = require('@socket.io/admin-ui'); //WARN: dev only
       instrument(this.server, {
         auth: false,
         mode: 'development',

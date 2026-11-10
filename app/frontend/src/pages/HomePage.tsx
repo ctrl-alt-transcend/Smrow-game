@@ -3,8 +3,12 @@ import { useAuth } from "../hooks/useAuth";
 import GameActions from "../components/home/GameActions";
 import GameList from "../components/home/GameList";
 import Chat from "../components/home/Chat";
+import { fetchChatHistory } from "../services/chat.service";
+import type { ChatMessage } from "@shared/types";
 
-export default function HomePage() {
+const chatHistory: ChatMessage[] | null = await fetchChatHistory()
+
+export default function HomePage()   {
   const { user } = useAuth();
 
   return (
@@ -22,7 +26,7 @@ export default function HomePage() {
           <GameList />
         </Grid.Col>
         <Grid.Col span={{ base: 12, md: 7 }}>
-          <Chat />
+          <Chat chatHistory={chatHistory}/>
         </Grid.Col>
       </Grid>
     </>

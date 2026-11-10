@@ -2,30 +2,33 @@ import {
   WebSocketGateway,
   OnGatewayInit,
   OnGatewayConnection,
+  SubscribeMessage,
+  WebSocketServer
 } from '@nestjs/websockets';
+import { Prisma } from '@prisma/client';
+import { ChatService } from '../chat/chat.service';
 import { JwtService } from '@nestjs/jwt';
-import type { Server, Socket, DefaultEventsMap } from 'socket.io';
+import type {Server, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
-import type { JwtPayload } from '@shared/types';
-import { instrument } from '@socket.io/admin-ui'; //WARN: dev only
+import type { JwtPayload, ChatMessage } from '@shared/types';
 
-export interface SocketUser {
+interface SocketUser {
   id: string;
   username: string;
 }
 
-export interface SocketData {
+interface SocketData {
   user: SocketUser;
 }
 
-export type SocketServer = Server<
+type SocketServer = Server<
   DefaultEventsMap,
   DefaultEventsMap,
   DefaultEventsMap,
   SocketData
 >;
-export type SocketClient = Socket<
+type SocketClient = Socket<
   DefaultEventsMap,
   DefaultEventsMap,
   DefaultEventsMap,
@@ -39,17 +42,33 @@ export type SocketClient = Socket<
     credentials: true,
   }, //WARN: dev only
 })
+
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly chatService: ChatService,
+  ) {}
+
+  @WebSocketServer() server: SocketServer;
 
   // @SubscribeMessage('message')
   // handleMessage(client: any, payload: any): string {
   //   return 'Hello world!';
   // }
 
+  @SubscribeMessage('chatMessage')
+  async handleChatMessage(client: SocketClient, payload: { draft: string }) {
+    console.log(client.data.user.username, 'sent a chat message:', payload.draft); //TEST: DEV_ONLY
+
+    const chatMessage = await this.chatService.addChatMessage(client.data.user.id, payload.draft);
+    this.server.to('chat').emit('new chat message', chatMessage);
+  }
+
   afterInit(server: SocketServer) {
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
+
+      const { instrument } = require('@socket.io/admin-ui'); //WARN: dev only
       instrument(server, {
         auth: false,
         mode: 'development',

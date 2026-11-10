@@ -11,24 +11,36 @@ import {
 } from "@mantine/core";
 import { messages as initialMessages } from "../../mocks/chat.mock";
 import MessageItem from "./MessageItem";
+import type { ChatMessage } from "@shared/types";
+import { socialSocket } from "../../sockets/socialSocket";
 
-export default function Chat() {
-  const { user } = useAuth();
+export default function Chat({chatHistory}: {chatHistory: ChatMessage[] | null}) {
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState(initialMessages);
+  let chat: ChatMessage[] = [];
+
+  if (chatHistory === null) {
+
+    return (
+      <Paper withBorder p="md" h="100%">
+        <Title order={3} ta="center" mb="md">
+          Toxic chat
+        </Title>
+          loading chat...
+      </Paper>
+    );
+  }
+  else if (chatHistory.length > 0) {
+    chat = chatHistory;
+  }
+
 
   function handleSend() {
     if (draft.trim() === "") return;
 
-    const newMessage = {
-      id: Date.now().toString(),
-      author: user?.name,
-      content: draft,
-    };
-
-    setMessages([...messages, newMessage]);
+    socialSocket.emit("chatMessage", {draft})
     setDraft("");
   }
+
 
   return (
     <Paper withBorder p="md" h="100%">
@@ -37,8 +49,8 @@ export default function Chat() {
       </Title>
       <ScrollArea h={480}>
         <Stack gap="xs" align="flex-start">
-          {messages.map((message) => (
-            <MessageItem key={message.id} message={message} />
+          {chat.map((messages) => (
+            <MessageItem key={messages.date.toString()} content={messages.content} author={messages.username}/>
           ))}
         </Stack>
       </ScrollArea>

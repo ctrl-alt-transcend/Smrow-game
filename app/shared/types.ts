@@ -36,9 +36,14 @@ export type LoginResponse = {
     access_token: string;
 }
 
-// Payload
-
 export interface JwtPayload {
     sub: string;
     username: string;
+}
+
+export type ChatMessage = {
+  id: number;
+  date: number;
+  content: string;
+  username: string;
 }

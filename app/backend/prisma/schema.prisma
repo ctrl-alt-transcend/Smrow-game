@@ -12,18 +12,19 @@ datasource db {
 }
 
 model User {
-	id			String @default(cuid()) @id
-	username	String @unique
-	name		String
-	email		String @unique
-	createdAt	DateTime @default(now())
-	updatedAt	DateTime @updatedAt
+	id			      String @default(cuid()) @id
+	username	    String @unique
+	name		      String
+	email		      String @unique
+	createdAt	    DateTime @default(now())
+	updatedAt	    DateTime @updatedAt
 
-		// relations
-	profile			Profile?
-	localAuth		UserAuth?
-	accounts		Account[]
+	// relations
+	profile			  Profile?
+	localAuth		  UserAuth?
+	accounts		  Account[]
 	gamesHistory	GamesPlayer[]
+  chat          Chat[]
 }
 
 model Profile {
@@ -99,8 +100,10 @@ model GamesPlayer {
 
 model Chat {
   id        Int   @default(autoincrement()) @id
-  userId    String 
-  message   String
+  content   String
   writedAt  DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

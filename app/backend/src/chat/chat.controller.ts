@@ -1,4 +1,15 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { ChatService } from './chat.service';
+import { ChatMessage } from '@shared/types';
 
 @Controller('chat')
-export class ChatController {}
+export class ChatController {
+
+constructor(readonly chatService: ChatService) {}
+
+  @Get()
+  async getChatHistory(): Promise<ChatMessage[]> {
+    return await this.chatService.getChatHistory();
+  }
+
+}
