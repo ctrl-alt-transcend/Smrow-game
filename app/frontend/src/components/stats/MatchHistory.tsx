@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge, Table, Text } from "@mantine/core";
+import { Badge, Table, Text, ThemeIcon } from "@mantine/core";
 import { IconTrophy } from "@tabler/icons-react";
 import type { MatchHistoryEntry } from "shared";
 import ShowMoreButton, { VISIBLE_ROWS } from "./ShowMoreButton";
@@ -17,9 +17,9 @@ function MatchRow({ match }: { match: MatchHistoryEntry }) {
       <Table.Td>{formatDate(match.playedAt)}</Table.Td>
       <Table.Td>
         {match.isWinner ? (
-          <Badge color="green" leftSection={<IconTrophy size={12} />}>
-            Victory
-          </Badge>
+          <ThemeIcon color="green" radius="xl" size="sm" aria-label="Victory">
+            <IconTrophy size={14} />
+          </ThemeIcon>
         ) : (
           <Badge color="gray" variant="light">
             #{match.playerRank}

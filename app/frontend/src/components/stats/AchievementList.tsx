@@ -1,4 +1,11 @@
-import { Badge, Group, Paper, Progress, SimpleGrid, Text } from "@mantine/core";
+import {
+  Group,
+  Paper,
+  Progress,
+  SimpleGrid,
+  Text,
+  ThemeIcon,
+} from "@mantine/core";
 import { IconLock, IconLockOpen } from "@tabler/icons-react";
 import type { Achievement } from "shared";
 
@@ -9,23 +16,15 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
     <Paper withBorder radius="sm" p="sm" opacity={unlocked ? 1 : 0.6}>
       <Group justify="space-between" wrap="nowrap" gap="xs">
         <Text fw={600}>{label}</Text>
-        {unlocked ? (
-          <Badge
-            color="green"
-            variant="light"
-            leftSection={<IconLockOpen size={12} />}
-          >
-            Unlocked
-          </Badge>
-        ) : (
-          <Badge
-            color="gray"
-            variant="light"
-            leftSection={<IconLock size={12} />}
-          >
-            Locked
-          </Badge>
-        )}
+        <ThemeIcon
+          color={unlocked ? "green" : "gray"}
+          variant="light"
+          radius="xl"
+          size="sm"
+          aria-label={unlocked ? "Unlocked" : "Locked"}
+        >
+          {unlocked ? <IconLockOpen size={14} /> : <IconLock size={14} />}
+        </ThemeIcon>
       </Group>
       <Text size="sm" c="dimmed">
         {description}
