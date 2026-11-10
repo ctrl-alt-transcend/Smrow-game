@@ -29,7 +29,7 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
   const allEdges = new Map<string, Edge>();
 
   /** Randomize tiles */
-  randomizeRobber(tiles);
+  //randomizeRobber(tiles); // Robber must start on the desert
 
   tiles.forEach((tile) => {
     getHexCorners(tile.q, tile.r, HEX_SIZE).forEach((v) => {

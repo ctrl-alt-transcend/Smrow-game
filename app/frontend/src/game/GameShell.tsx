@@ -11,6 +11,7 @@ import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
 import SkipTurnButton from './components/ui/SkipTurnButton.tsx';
 import { ResourcesPanel } from './components/ui/ResourcesPanel.tsx';
 import { ReserveIcon } from './components/gameboard/GameIcon.tsx';
+import { usePersonalNotification } from './hooks/usePersonalNotification.ts';
 
 export default function Game() {
   const { game } = useGameState();
@@ -24,6 +25,7 @@ export default function Game() {
 function GameShell({ game }: { game: GameDataDto }) {
   const [opened, { toggle }] = useDisclosure();
   const GameBoardProps = useGameBoardFactory(game.board);
+  usePersonalNotification(game.currentPlayer.personalLog);
 
   let resources: Resources;
   const p = game.players?.at(0);

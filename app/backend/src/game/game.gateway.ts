@@ -85,7 +85,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     // -------------
 
     game.phaseCheckRequest();
-    game.setMasterLog(result.message);
     this.emitGameDataDto(game, client.data.user.username);
     //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
     return { ...result };
@@ -105,7 +104,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     // -------------
 
     game.phaseCheckRequest();
-    game.setMasterLog(result.message);
     this.emitGameDataDto(game, client.data.user.username);
     //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
     return { ...result };
@@ -128,7 +126,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
 
     game.phaseCheckRequest();
     //game.setCurrentRoll(result.value);
-    game.setMasterLog(result.message);
     this.emitGameDataDto(game, client.data.user.username);
     //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
     return { ...result };
@@ -151,7 +148,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
 
     game.phaseCheckRequest();
     //game.setCurrentRoll(result.value);
-    game.setMasterLog(result.message);
     this.emitGameDataDto(game, client.data.user.username);
     //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
     return { ...result };

@@ -48,6 +48,7 @@ class GameStateContext {
   protected data!: GameData;
   protected graph!: GameBoardGraph;
   protected buildings: BuildingsInGame = new Map();
+  private logId: number = 0;
   private factionSwitch: number = 0;
 
   constructor(gameId: string, state: State) {
@@ -106,8 +107,7 @@ class GameStateContext {
       username: playerId,
       avatarURL: null,
       faction: this.assignFaction(),
-      personalLog: {kind: "personal", message:
-        `Welcome to the game ${playerId}`},
+      personalLog: {id: this.logId++, message: `Welcome to the game ${playerId}`},
       // BONUS Resources FOR DEV
       resources: { //⚠️ For testing only
         wood: 10, //⚠️ For testing only
@@ -203,7 +203,9 @@ class GameStateContext {
   public getCurrentTurnIndex(): number {
     return this.data.currentTurnIndex;
   }
-
+  public getMasterLog(): string {
+    return this.data.masterLog;
+  }
   public getCurrentPlayer(): Player | undefined {
     return this.data.players.get(
       this.data.turnOrder[this.data.currentTurnIndex],
@@ -288,8 +290,14 @@ class GameStateContext {
   public setCurrentRoll(roll: number | null) {
     this.data.currentRoll = roll;
   }
-  public setMasterLog(log: string | null) {
+  public setMasterLog(log: string) {
     this.data.masterLog = log;
+  }
+  public setPersonalLog(p: Player, message: string, action?: boolean ) {
+    p.personalLog = {
+      id: this.logId++,
+      message: message,
+    }
   }
   public setTurnOrder(newTurnOrder: string[]) {
     this.data.turnOrder = newTurnOrder;

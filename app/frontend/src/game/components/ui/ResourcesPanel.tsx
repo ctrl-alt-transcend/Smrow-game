@@ -1,5 +1,5 @@
 import { Box, Card, Group, Stack, Table, Text, ThemeIcon, Title } from "@mantine/core";
-import type { Player } from "@shared/game/game.types";
+import type { Player, PlayerDto } from "@shared/game/game.types";
 
 export type Resources = {
   wood: number;
@@ -24,7 +24,7 @@ const RESOURCE_META: ResourceMeta[] = [
 ];
 
 type ResourcesPanelProps = {
-  currentPlayer: Player;
+  currentPlayer: PlayerDto;
   title?: string;
   /** Affiche ou non la ligne de total */
   withTotal?: boolean;

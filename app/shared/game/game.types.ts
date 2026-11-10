@@ -55,7 +55,7 @@ export type GameDataBase = {
   gameId: string;
   currentRoll: number | null;
   dicesSum: number;
-  masterLog: string | null;
+  masterLog: string;
   board: GameBoard;
 }
 
@@ -72,9 +72,12 @@ export type GameDataDto  = GameDataBase & {
   currentPlayer: PlayerDto;
 }
 
-export type GameLog =
-{ kind: 'master', message: string } |
-{ kind: 'personal', message: string, actionValid?: boolean }
+
+export type GameLog = {
+  id: number,
+  message: string,
+  actionValid?: boolean
+}
 
 export type TradeForm = {
   resource: RessourceType;
