@@ -4,6 +4,7 @@ import { authEvents } from "../context/AuthEvents";
 
 export const http = axios.create({
   baseURL: "/api",
+  withCredentials: true,
 });
 
 http.interceptors.request.use((config) => {

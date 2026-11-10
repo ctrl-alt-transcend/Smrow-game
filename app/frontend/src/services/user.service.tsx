@@ -7,7 +7,7 @@ export const getCurrentUser = async (): Promise<UserPublic> => {
     const res: AxiosResponse = await http.get<UserPublic>("/auth/me");
     return res.data;
   } catch (error: any) {
-    const err_msg = error.repsones?.data?.message;
+    const err_msg = error.respones?.data?.message;
     throw err_msg;
   }
 };
