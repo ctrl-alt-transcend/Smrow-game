@@ -10,9 +10,6 @@ const formatDate = (isoDate: string) =>
     year: "numeric",
   });
 
-const formatDuration = (seconds: number | null) =>
-  seconds === null ? "-" : `${Math.round(seconds / 60)} min`;
-
 function MatchRow({ match }: { match: MatchHistoryEntry }) {
   return (
     <Table.Tr>
@@ -38,7 +35,6 @@ function MatchRow({ match }: { match: MatchHistoryEntry }) {
           ))
         )}
       </Table.Td>
-      <Table.Td>{formatDuration(match.duration)}</Table.Td>
     </Table.Tr>
   );
 }
@@ -61,7 +57,6 @@ export default function MatchHistory({
               <Table.Th>Result</Table.Th>
               <Table.Th>Points</Table.Th>
               <Table.Th>Opponents</Table.Th>
-              <Table.Th>Duration</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
