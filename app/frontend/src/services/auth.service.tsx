@@ -34,3 +34,13 @@ export const loginUser = async (data: LoginPost): Promise<LoginResponse> => {
     throw err_msg;
   }
 };
+
+export const logoutUser = async (): Promise<void> => {
+  try {
+    const res = await http.post("auth/logout");
+    return res.data;
+  } catch (error: any) {
+    const err_msg = error.response?.data?.message;
+    throw err_msg;
+  }
+};

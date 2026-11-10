@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { AuthContext } from "./AuthContext";
 import { getCurrentUser } from "../services/user.service";
-import { registerUser, loginUser } from "../services/auth.service";
+import { registerUser, loginUser, logoutUser } from "../services/auth.service";
 import { authEvents } from "./AuthEvents";
 import type { LoginPost, RegisterPost, UserPublic } from "@shared/types";
+import { isAxiosError } from "axios";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserPublic | null>(null);
@@ -12,22 +13,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const bootstrap = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
+      //  const token = localStorage.getItem("access_token");
+      //  if (!token) {
+      //    setLoading(false);
+      //    return;
+      //  }
       try {
         const profile = await getCurrentUser();
         setUser(profile);
       } catch (error) {
-		if (error === 401) {
-			localStorage.removeItem("access_token");
-			setAuthMessage("Your session has expired.");
-		}
-		else {
-			console.error("Could not restore session:", error);
-		}
+        if (isAxiosError(error) && error.response?.status === 401) {
+          localStorage.removeItem("access_token");
+          setAuthMessage("Your session has expired.");
+        } else {
+          console.error("Could not restore session:", error);
+        }
       } finally {
         setLoading(false);
       }
@@ -49,10 +49,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(profile);
   }, []);
 
-  const logout = useCallback((reason?: string) => {
-    localStorage.removeItem("access_token");
-    setUser(null);
-    if (reason) setAuthMessage(reason);
+  const logout = useCallback(async (reason?: string) => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("could not logout from server: ", error);
+    } finally {
+      localStorage.removeItem("access_token");
+      setUser(null);
+      if (reason) setAuthMessage(reason);
+    }
   }, []);
 
   const clearAuthMessage = useCallback(() => setAuthMessage(null), []);

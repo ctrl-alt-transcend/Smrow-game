@@ -63,6 +63,12 @@ export function LoginPanel(props: PaperProps) {
     }
   });
 
+  // for OAuth integration
+
+  function handleGoogleLogin() {
+    window.location.assign("http://localhost:3000/auth/google/login");
+  }
+
   return (
     <Paper p="xs" withBorder {...props}>
       <Text p="xs" size="lg" fw="500" c="Red">
@@ -142,7 +148,6 @@ export function LoginPanel(props: PaperProps) {
               }
             />
           </Stack>
-
           <Group justify="space-between" mt="xl">
             <Button type="submit">{upperFirst(type)}</Button>
           </Group>
@@ -163,6 +168,10 @@ export function LoginPanel(props: PaperProps) {
           ? "Already have an account? Login"
           : "Don't have an account? Register"}
       </Anchor>
+
+      <Group>
+        <Button onClick={handleGoogleLogin}>Continue with google</Button>
+      </Group>
     </Paper>
   );
 }
