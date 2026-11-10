@@ -160,7 +160,7 @@ class GameStateContext {
   public tradeRequest(
     playerId: string,
     payload: TradeRequestPayload | null,
-  ): GameResponse {
+  ) {
     return this.state.trade(playerId, payload);
   }
 
@@ -391,6 +391,9 @@ abstract class State {
   public setGameState(newGameState: GameStateContext) {
     this.state = newGameState;
   }
+  public abstract dice(
+    playerId: string
+  ): GameResponse;
   public abstract skip(
     playerId: string
   ): void;
@@ -398,13 +401,10 @@ abstract class State {
     playerId: string,
     payload: BuildRequestPayload | null,
   ): void;
-  public abstract dice(
-    playerId: string
-  ): GameResponse;
   public abstract trade(
     playerId: string,
     payload: TradeRequestPayload | null,
-  ): GameResponse;
+  ): void;
   public abstract phaseCheck(): void;
 }
 
@@ -419,9 +419,6 @@ class WhoStartsPhase extends State {
     }
     const roll: GameResponse = this.state.rollDice(p);
     if (this.state.hasRolledBothDices(p) && roll.value) {
-      console.log(
-        `🏁🎲WhoStartsPhase:dice: ${p.playerId} rolled both dices and got a total of ${p.firstDice + p.secondDice}`,
-      );
       this.state.setPersonalLog(p,
         `You rolled both dices and got a total of ${p.firstDice + p.secondDice}`)
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
@@ -435,32 +432,22 @@ class WhoStartsPhase extends State {
     return { value: roll.value, message: roll.message, data: null };
   }
 
-  public build( playerId: string ): GameResponse {
+  public build( playerId: string ) {
     console.log(`🏁🔨WhoStartsPhase:build: handles buildRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
     if (p) {
        this.state.setPersonalLog(p,
         `You can't ${Action.BUILD} during ${Phase.START}`)
     }
-    return {
-      value: null,
-      message: `🏁🔨WhoStartsPhase:build: action forbidden during this phase.`,
-      data: null,
-    };
   }
 
-  public trade( playerId: string ): GameResponse {
+  public trade( playerId: string ) {
     console.log(`🏁⚖️WhoStartsPhase:trade: handles tradeRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
     if (p) {
        this.state.setPersonalLog(p,
         `You can't ${Action.TRADE} during ${Phase.START}`)
     }
-    return {
-      value: null,
-      message: `🏁⚖️WhoStartsPhase:trade: action forbidden during this phase.`,
-      data: null,
-    };
   }
 
   public skip( playerId: string ) {
@@ -494,16 +481,11 @@ class WhoStartsPhase extends State {
     try {
       this.computeTurnOrder();
     } catch (error) {
-      console.log('🏁🔎WhoStartsPhase:phaseCheck: ' + error);
       return;
     }
     this.state.resetAllDices();
-    const p = this.state.getCurrentPlayer();
-    if (p) {
-      console.log(
-        `🏁🔎WhoStartsPhase:phaseCheck: everybody is ready and ${p.playerId} is starting!`,
-      );
-    }
+    this.state.setMasterLog(
+      `It's the ${Phase.PLACEMENT} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
     this.state.transitionTo(new PlacementPhase());
   }
 }
@@ -565,27 +547,22 @@ class PlacementPhase extends State {
     console.log(
       `🗺️🔨PlacementPhasee:build: ${playerId} built his/her first settlement and road !`,
     );
-
     this.settlementBuilt = false;
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
+    this.state.setMasterLog(
+      `It's the ${Phase.PLACEMENT} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
     this.state.setPersonalLog(p,
       'You finshied your placement, wait for the other players to play ...');
-    return;
   }
 
-  public trade( playerId: string ): GameResponse {
+  public trade( playerId: string ) {
     console.log(`🗺️⚖️PlacementPhase:trade: handles tradeRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
     if (p) {
        this.state.setPersonalLog(p,
         `You can't ${Action.TRADE} during ${Phase.PLACEMENT}`)
     }
-    return {
-      value: null,
-      message: `🗺️⚖️PlacementPhase:trade: action forbidden during this phase.`,
-      data: null,
-    };
   }
 
   public skip( playerId: string ) {
@@ -611,8 +588,10 @@ class PlacementPhase extends State {
     //printAllPlayers(this.state.getGameData().players); // ⚠️DEBUG: remove in prod
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
-    console.log('🗺️🔎PlacementPhase:phaseCheck: everybody is ready!');
+    //this.state.setMasterLog(`The ${Phase.PLACEMENT} is done, let's move to the ${Phase.RESOURCES} !`)
+    this.state.setMasterLog(`It's the ${Phase.RESOURCES} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
     this.state.transitionTo(new RessourcePhase());
+    console.log('🗺️🔎PlacementPhase:phaseCheck: everybody is ready!');
   }
 }
 
@@ -635,16 +614,19 @@ class RessourcePhase extends State {
         `🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${this.state.getGameData().dicesSum}`,
       );
       if (this.state.getGameData().dicesSum == ROBBER_ROLL) {
-        console.log(
-        `🪵🎲RessourcePhase:dice: OH NO! THE ROBBER IS COMING!`,
-        );
         robberRule(this.state.getGameData().players, this.state.getGameData().board.layout);
+        this.state.setPersonalLog(p,
+          "You'll earn nothing this turn because you've just got robbed by Robert !");
       } else {
         resourcesProduction(this.state.getBuildings(),
           this.state.getGraph(), this.state.getGameData().dicesSum, false );
+        this.state.setPersonalLog(p,
+          `You rolled both dices and got a total of ${this.state.getGameData().dicesSum}`);
       }
       this.state.setCurrentTurnIndex(undefined);
       this.state.setTurnCount(undefined);
+      this.state.setMasterLog(
+        `It's the ${Phase.RESOURCES} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
       return {
         value: null,
         message: funnyLogs(p.playerId, p.firstDice + p.secondDice),
@@ -661,25 +643,15 @@ class RessourcePhase extends State {
       this.state.setPersonalLog(p,
         `You can't ${Action.BUILD} during ${Phase.RESOURCES}`)
     }
-    return {
-      value: null,
-      message: `🪵🔨RessourcePhase:build: action forbidden during this phase.`,
-      data: null,
-    };
   }
 
-   public trade( playerId: string ): GameResponse {
+   public trade( playerId: string ) {
     console.log(`🪵⚖️RessourcePhase:trade: handles tradeRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
     if (p) {
       this.state.setPersonalLog(p,
         `You can't ${Action.TRADE} during ${Phase.RESOURCES}`)
     }
-    return {
-      value: null,
-      message: `🪵⚖️RessourcePhase:trade: action forbidden during this phase.`,
-      data: null,
-    };
   }
 
   public skip( playerId: string ) {
@@ -689,11 +661,6 @@ class RessourcePhase extends State {
       this.state.setPersonalLog(p,
         `You can't ${Action.SKIP} during ${Phase.RESOURCES}`)
     }
-    return {
-      value: null,
-      message: `🪵⏭️RessourcePhase:skip: action forbidden during this phase.`,
-      data: null,
-    };
   }
 
   public phaseCheck(): void {
@@ -705,8 +672,10 @@ class RessourcePhase extends State {
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     this.state.resetAllDices();
-    console.log('🪵🔎RessourcePhase:phaseCheck: everybody is ready!');
+    this.state.setMasterLog(
+      `It's the ${Phase.RESOURCES} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
     this.state.transitionTo(new TradeAndBuildPhase());
+    console.log('🪵🔎RessourcePhase:phaseCheck: everybody is ready!');
   }
 }
 
@@ -717,20 +686,10 @@ class TradeAndBuildPhase extends State {
     );
     if (!isBuildRequestPayload(payload)) {
       console.log(`🤝🔨TradeAndBuildPhase:build: invalid payload !`);
-      return {
-        value: null,
-        message: '🤝🔨TradeAndBuildPhase:build: invalid payload !',
-        data: null,
-      };
+      return;
     }
     const p = this.state.isPlayersTurn(playerId);
-    if (!p) {
-      return {
-        value: null,
-        message: "🤝🔨TradeAndBuildPhase:build: It's not your turn !",
-        data: null,
-      };
-    }
+    if (!p) return;
     const response = buildCheck(
       payload,
       p,
@@ -738,28 +697,17 @@ class TradeAndBuildPhase extends State {
       this.state.getGraph(),
       this.state.getBuildings(),
     );
-    this.state.setPersonalLog(p,
-      `🤝🔨TradeAndBuildPhase:build: ${response.message}`)
-    if (response.valid === false) {
-      return {
-        value: null,
-        message: `🤝🔨TradeAndBuildPhase:build: ${response.message}`,
-        data: null,
-      };
-    }
+    this.state.setPersonalLog(p, `${response.message}`);
+    if (response.valid === false) return;
     console.log(
       `🤝🔨TradeAndBuildPhase:build: ${playerId} built something ...`,
     );
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
-    return {
-      value: 1,
-      message: response.message,
-      data: this.state.getGameData(),
-    };
+    this.state.setMasterLog(`${playerId} built something ..`)
   }
 
-  public trade( playerId: string, payload: TradeRequestPayload ): GameResponse {
+  public trade( playerId: string, payload: TradeRequestPayload ) {
     console.log(`🤝⚖️TradeAndBuildPhase:trade: handles tradeRequest from ${playerId}`);
     //if (!isTradeRequestPayload(payload)) {
     //  console.log(`🤝🔨TradeAndBuildPhase:trade: invalid payload !`);
@@ -770,37 +718,16 @@ class TradeAndBuildPhase extends State {
     //  };
     //}
     const p = this.state.isPlayersTurn(playerId);
-    if (!p) {
-      return {
-        value: null,
-        message: "🤝⚖️TradeAndBuildPhase:trade: It's not your turn !",
-        data: null,
-      };
-    }
-    const response = tradeCheck(
-      payload,
-      p,
-      this.state.getGraph()
-    );
-    this.state.setPersonalLog(p,
-      `🤝⚖️TradeAndBuildPhase:trade: ${response.message}`)
-    if (response.valid === false) {
-      return {
-        value: null,
-        message: `🤝⚖️TradeAndBuildPhase:trade: ${response.message}`,
-        data: null,
-      };
-    }
+    if (!p) return;
+    const response = tradeCheck(payload, p, this.state.getGraph());
+    this.state.setPersonalLog(p,`${response.message}`)
+    if (response.valid === false) return;
     console.log(
       `🤝⚖️TradeAndBuildPhase:trade: ${playerId} traded something ...`,
     );
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
-    return {
-      value: null,
-      message: response.message,
-      data: this.state.getGameData(),
-    };
+    this.state.setMasterLog(`${playerId} traded something with a ${payload.trader} ...`)
   }
 
   public dice( playerId: string ): GameResponse {
@@ -820,17 +747,12 @@ class TradeAndBuildPhase extends State {
   public skip( playerId: string ) {
     console.log(`🤝⏭️TradeAndBuildPhase:skip: handles skipRequest from ${playerId}`);
     const p = this.state.isPlayersTurn(playerId);
-    if (!p) {
-      return { value: null, message: "It's not your turn !", data: null };
-    }
+    if (!p) return;
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
+    this.state.setPersonalLog(p, `You skipped your turn !`)
+    this.state.setMasterLog(`${playerId} skipped his/her turn !`)
     console.log(`🤝⏭️TradeAndBuildPhase:skip: ${playerId} skipped his turn !`);
-    return {
-      value: 1,
-      message: `🤝⏭️TradeAndBuildPhase:skip: you skipped your turn`,
-      data: null,
-    };
   }
 
   public phaseCheck(): void {
@@ -845,6 +767,7 @@ class TradeAndBuildPhase extends State {
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     console.log('🤝🔎TradeAndBuildPhase:phaseCheck: everybody is ready!');
+    this.state.setMasterLog(`It's the ${Phase.RESOURCES} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
     this.state.transitionTo(new RessourcePhase());
   }
 }

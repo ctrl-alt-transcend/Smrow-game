@@ -148,7 +148,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     //game.setCurrentRoll(result.value);
     this.emitGameDataDto(game, client.data.user.username);
     //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
-    return { ...result };
   }
 
   @SubscribeMessage('joinRoom')

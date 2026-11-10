@@ -36,18 +36,18 @@ export function updateValue(
 
 export function funnyLogs(id: string, value: number): string {
   if (value <= 3) {
-    return `${id} got an almost useless ${value}...`;
+    return `${id} got an almost useless ${value} ...`;
   }
   if (value > 3 && value <= 6) {
-    return `${id} got a tiny little ${value}...`;
+    return `${id} got a tiny little ${value} ...`;
   }
   if (value > 6 && value <= 9) {
-    return `${id} got a solid ${value}.`;
+    return `${id} got a solid ${value} .`;
   }
   if (value > 9 && value <= 12) {
-    return `${id} got a huge ${value}!`;
+    return `${id} got a huge ${value} !`;
   }
-  return `${id} rolled a ${value}`;
+  return `${id} rolled a ${value}` ;
 }
 
 export function printPlayer(p: Player) {
