@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Badge, Table, Text } from "@mantine/core";
 import type { MatchHistoryEntry } from "shared";
+import ShowMoreButton, { VISIBLE_ROWS } from "./ShowMoreButton";
 
 const formatDate = (isoDate: string) =>
   new Date(isoDate).toLocaleDateString("en-GB", {
@@ -46,24 +48,34 @@ export default function MatchHistory({
 }: {
   matches: MatchHistoryEntry[];
 }) {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? matches : matches.slice(0, VISIBLE_ROWS);
+
   return (
-    <Table.ScrollContainer minWidth={500}>
-      <Table striped highlightOnHover>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Date</Table.Th>
-            <Table.Th>Result</Table.Th>
-            <Table.Th>Points</Table.Th>
-            <Table.Th>Opponents</Table.Th>
-            <Table.Th>Duration</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {matches.map((match) => (
-            <MatchRow key={match.gameId} match={match} />
-          ))}
-        </Table.Tbody>
-      </Table>
-    </Table.ScrollContainer>
+    <>
+      <Table.ScrollContainer minWidth={500}>
+        <Table striped highlightOnHover>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Date</Table.Th>
+              <Table.Th>Result</Table.Th>
+              <Table.Th>Points</Table.Th>
+              <Table.Th>Opponents</Table.Th>
+              <Table.Th>Duration</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {visible.map((match) => (
+              <MatchRow key={match.gameId} match={match} />
+            ))}
+          </Table.Tbody>
+        </Table>
+      </Table.ScrollContainer>
+      <ShowMoreButton
+        total={matches.length}
+        expanded={expanded}
+        onToggle={() => setExpanded((e) => !e)}
+      />
+    </>
   );
 }
