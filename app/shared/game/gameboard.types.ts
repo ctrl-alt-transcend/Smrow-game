@@ -132,10 +132,10 @@ export const FACTION_COLORS: Record<Faction, string> = {
 };
 
 export const Phase = {
-  START: 'start',
-  PLACEMENT: 'placement',
-  RESOURCES: 'resources',
-  TRADE_BUILD: 'trade and build'
+  START: 'start phase',
+  PLACEMENT: 'placement phase',
+  RESOURCES: 'resources phase',
+  TRADE_BUILD: 'trade and build phase'
 } as const;
 export type Phase = (typeof Phase)[keyof typeof Phase];
 

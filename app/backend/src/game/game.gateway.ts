@@ -94,7 +94,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('skip')
   skip(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
-    const result = game.skipRequest(client.data.user.username);
+    game.skipRequest(client.data.user.username);
 
     //⚠️ FOR TESTING
     game.phaseCheckRequest();
@@ -106,7 +106,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     game.phaseCheckRequest();
     this.emitGameDataDto(game, client.data.user.username);
     //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
-    return { ...result };
   }
 
   @SubscribeMessage('build')
@@ -115,7 +114,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     @MessageBody() payload: BuildRequestPayload,
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
-    const result = game.buildRequest(client.data.user.username, payload);
+    game.buildRequest(client.data.user.username, payload);
 
     //⚠️ FOR TESTING
     game.phaseCheckRequest();
@@ -128,7 +127,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     //game.setCurrentRoll(result.value);
     this.emitGameDataDto(game, client.data.user.username);
     //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
-    return { ...result };
   }
 
    @SubscribeMessage('trade')

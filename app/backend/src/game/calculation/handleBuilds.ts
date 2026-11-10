@@ -50,14 +50,14 @@ export const validateRoadPlacement = (
   graph: GameBoardGraph,
 ): { valid: true } | { valid: false; reason: string } => {
   if (road.ownerId) {
-    return { valid: false, reason: 'road already occupied !' };
+    return { valid: false, reason: 'Road already owned by a player !' };
   }
 
   const settlementsByVertex = indexSettlementsByVertex([]);
   const graphEntry = graph.get(road.id);
 
   if (!graphEntry) {
-    return { valid: false, reason: 'unknown road ...' };
+    return { valid: false, reason: 'Unknown road ...' };
   }
   const endpoints = [road.edge.p1.id, road.edge.p2.id];
   let connectedToNetwork = false;
@@ -97,7 +97,7 @@ export const validateRoadPlacement = (
   if (!connectedToNetwork && !hasOwnAdjacentSettlement) {
     return {
       valid: false,
-      reason: 'road must be connected to network ...',
+      reason: 'A road must be connected to your network ...',
     };
   }
   return { valid: true };
@@ -116,14 +116,14 @@ export const validateSettlementPlacement = (
   if (settlement.ownerId) {
     return {
       valid: false,
-      reason: 'settlement already owned by a player !',
+      reason: 'This settlement is already owned by a player !',
     };
   }
 
   const graphEntry = graph.get(settlement.id);
 
   if (!graphEntry) {
-    return { valid: false, reason: 'unknown settlement ...' };
+    return { valid: false, reason: 'Unknown settlement ...' };
   }
 
   const nearbyOccupied = graphEntry.neighboursSettlements.some(
@@ -132,7 +132,7 @@ export const validateSettlementPlacement = (
   if (nearbyOccupied) {
     return {
       valid: false,
-      reason: 'settlement too close to another one !',
+      reason: 'Another settlement is too close !',
     };
   }
 
@@ -145,7 +145,7 @@ export const validateSettlementPlacement = (
   if (!hasOwnAdjacentRoad && placementPhase === undefined) {
     return {
       valid: false,
-      reason: 'settlement must be connected to a road !',
+      reason: 'A settlement must be connected to a road !',
     };
   }
   return { valid: true };
@@ -164,7 +164,7 @@ function cityUpgradeCheck(
     console.log(`👀⛔buildCheck: ${player.playerId} try to upgrade settlement but it's already a city !`);
     return {
       valid: false,
-      message: 'already a city !',
+      message: "Can't upgrade more, it's already a city !",
     };
   } else if (
     !hasEnoughResourcesToBuild(player.resources, 'city')
@@ -172,7 +172,7 @@ function cityUpgradeCheck(
     console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a city`);
     return {
       valid: false,
-      message: 'not enough Resources for a city upgrade ...',
+      message: "You don't have enough resources to upgrade your settlement to a city ...",
     };
   }
   console.log(`👀✅buildCheck: ${player.playerId} upgraded a settlement to a city`);
@@ -181,7 +181,7 @@ function cityUpgradeCheck(
   payBuildResources(player.resources, 'city')
   return {
     valid: true,
-    message: 'settlement upgraded to a city !',
+    message: 'Settlement upgraded to a city !',
   };
 }
 
@@ -198,7 +198,7 @@ function settlementCheck(
     console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a settlement`);
     return {
       valid: false,
-      message: 'not enough Resources to build a settlement ...',
+      message: "You don't have enough resources to build a settlement ...",
     };
   }
 
@@ -225,7 +225,7 @@ function settlementCheck(
   }
   return {
     valid: true,
-    message: 'settlement built !',
+    message: 'Settlement built !',
   };
 }
 
@@ -241,7 +241,7 @@ function roadCheck(
     console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a road`);
     return {
       valid: false,
-      message: 'not enough Resources to build a road ...',
+      message: "You don't have enough resources to build a road ...",
     };
   }
 
@@ -261,7 +261,7 @@ function roadCheck(
   console.log(`👀✅buildCheck: ${player.playerId} built a road`);
   return {
     valid: true,
-    message: 'road built !',
+    message: 'Road built !',
   };
 }
 
@@ -278,7 +278,7 @@ export const buildCheck = (
     if ((payload.data as { id?: unknown })?.id !== payload.id) {
       return {
         valid: false,
-        message: 'incoherent data payload id',
+        message: 'Incoherent data payload id ...',
       };
     }
     let target: RoadData | SettlementData | undefined;
@@ -294,7 +294,7 @@ export const buildCheck = (
             console.log(`👀✅buildCheck: ${player.playerId} built a crossroad`);
             return {
               valid: true,
-              message: "road built and 'Crossroad' objective achieved !",
+              message: "Road built and 'Crossroad' objective achieved, you earn one bonus victory point!",
             };
           }
         }
