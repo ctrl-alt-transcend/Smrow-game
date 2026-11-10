@@ -14,21 +14,6 @@ export type Resources = {
   ore: number;
 }
 
-export type Player = {
-  playerId: string;
-  username: string;
-  victoryPoints: number;
-  level: number;
-  resources: Resources;
-  firstDice: number,
-  secondDice: number,
-  totalDice: number,
-  settlementsBuilt: Map<string, SettlementData>
-  roadsBuilt: number;
-  faction: Faction;
-  avatarURL: string | null;
-}
-
 //INFO: data we need to colect from the database when a client join a game
 export type PlayerProfile = {
   id: string;
@@ -37,14 +22,36 @@ export type PlayerProfile = {
   avatarURL: string | null;
 }
 
-export type GameData = {
-  players: Map<string, Player>;
-  startingRolls: Map<string, number | null>;
+export interface GameResponse {
+  value: number | null;
+  message: string | null;
+  data: GameData | null;
+}
+
+export type PlayerBase = {
+  playerId: string;
+  username: string;
+  victoryPoints: number;
+  level: number;
+  resources: Resources;
+  firstDice: number,
+  secondDice: number,
+  totalDice: number,
+  roadsBuilt: number;
+  faction: Faction;
+  avatarURL: string | null;
+  personalLog: GameLog;
+}
+
+export type Player = PlayerBase & {
+  settlementsBuilt: Map<string, SettlementData>
+}
+
+export type PlayerDto = PlayerBase
+
+export type GameDataBase = {
   winner: string | null;
   winCondition: string | null;
-  turnCount: number;
-  turnOrder: string[];
-  currentTurnIndex: number;
   gameId: string;
   currentRoll: number | null;
   dicesSum: number;
@@ -52,30 +59,22 @@ export type GameData = {
   board: GameBoard;
 }
 
-export interface GameResponse {
-  value: number | null;
-  message: string | null;
-  data: GameData | null;
+export type GameData = GameDataBase & {
+  players: Map<string, Player>;
+  startingRolls: Map<string, number | null>;
+  turnCount: number;
+  turnOrder: string[];
+  currentTurnIndex: number;
 }
 
-export type GameDataDto = { //INFO: data we send to the client every time the game state changes
-  currentPlayer: Player;
+export type GameDataDto  = GameDataBase & {
   players: Player[];
-  winner: string | null;
-  winCondition: string | null;
-  //turnCount: number;
-  //turnOrder: string[];
-  //currentTurnIndex: number;
-  gameId: string;
-  dicesSum: number | null;
-  currentRoll: number | null;
-  masterLog: string | null;
-  board: GameBoard;
+  currentPlayer: PlayerDto;
 }
 
-export type BuildRequestPayload =
-  | { kind: 'road';       id: string; data: RoadData }
-  | { kind: 'settlement'; id: string; data: SettlementData };
+export type GameLog =
+{ kind: 'master', message: string } |
+{ kind: 'personal', message: string, actionValid?: boolean }
 
 export type TradeForm = {
   resource: RessourceType;
@@ -89,3 +88,6 @@ export type TradeRequestPayload = {
   target: TradeForm;
 }
 
+export type BuildRequestPayload =
+  | { kind: 'road';       id: string; data: RoadData }
+  | { kind: 'settlement'; id: string; data: SettlementData };

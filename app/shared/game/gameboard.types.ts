@@ -119,6 +119,8 @@ export const Faction = {
   DEFAULT: 'Kikouneurs (default)',
   UNOCCUPIED: 'unoccupied ...'
 } as const;
+export type Faction = (typeof Faction)[keyof typeof Faction];
+
 
 export const FACTION_COLORS: Record<Faction, string> = {
   [Faction.POURPRES_CHYBRES]: '#cf69f8',
@@ -128,7 +130,29 @@ export const FACTION_COLORS: Record<Faction, string> = {
   [Faction.DEFAULT]: '#19af89',
   [Faction.UNOCCUPIED]: '#e4e4e4'
 };
-export type Faction = (typeof Faction)[keyof typeof Faction];
+
+export const Phase = {
+  START: 'start',
+  PLACEMENT: 'placement',
+  RESOURCES: 'resources',
+  TRADE_BUILD: 'trade and build'
+} as const;
+export type Phase = (typeof Phase)[keyof typeof Phase];
+
+export const Action = {
+  DICE: 'roll the dice',
+  BUILD: 'build',
+  TRADE: 'trade',
+  SKIP: 'skip the turn',
+} as const;
+export type Action = (typeof Action)[keyof typeof Action];
+
+export const MASTER_LOGS: Record<Phase, string> = {
+  [Phase.START]: `Let's start! Everybody roll the dices!`,
+  [Phase.PLACEMENT]: `Now build your first settlement and road.`,
+  [Phase.RESOURCES]: `Roll the dices to produce resources.`,
+  [Phase.TRADE_BUILD]: `Build, trade or skip you turn!`,
+} as const;
 
 /** @description x, y → corner's axial coordinates */
 export interface Vertex {

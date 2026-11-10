@@ -16,6 +16,7 @@ import type {
   GameResponse,
   BuildRequestPayload,
   TradeRequestPayload,
+  PlayerDto,
 } from '@shared/game/game.types';
 import {
   isBuildRequestPayload,
@@ -105,6 +106,8 @@ class GameStateContext {
       username: playerId,
       avatarURL: null,
       faction: this.assignFaction(),
+      personalLog: {kind: "personal", message:
+        `Welcome to the game ${playerId}`},
       // BONUS Resources FOR DEV
       resources: { //⚠️ For testing only
         wood: 10, //⚠️ For testing only
@@ -218,6 +221,23 @@ class GameStateContext {
     return false;
   }
 
+  public getPlayerDto(p: Player): PlayerDto {
+    return {
+      playerId: p.playerId,
+      victoryPoints: p.victoryPoints,
+      firstDice: p.firstDice,
+      secondDice: p.secondDice,
+      totalDice: p.totalDice,
+      roadsBuilt: p.roadsBuilt,
+      level: p.level,
+      username: p.username,
+      avatarURL: p.avatarURL,
+      faction: p.faction,
+      personalLog: p.personalLog,
+      resources: p.resources,
+    };
+  }
+
   public getGameDataDto(playerId: string): GameDataDto {
     const gameData = this.getGameData();
 
@@ -226,7 +246,7 @@ class GameStateContext {
       throw new NotFoundException (`Unknown playerId: ${playerId}`);
     }
     return {
-      currentPlayer: p,
+      currentPlayer: this.getPlayerDto(p),
       winner: gameData.winner,
       winCondition: gameData.winCondition,
       players: Array.from(gameData.players.values()),
