@@ -30,7 +30,9 @@ export class AuthController {
 
   @UseGuards(GoogleAuthGuard)
   @Get('google/login')
-  googleLogin() {}
+  googleLogin() {
+    console.log('starting google login');
+  }
 
   @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
@@ -40,6 +42,27 @@ export class AuthController {
   ) {
     const response = await this.AuthService.createJWTToken(req.user);
 
-    return res.redirect(`http://localhost:5173?token=${response.access_token}`);
+    res.cookie('access_token', response.access_token, {
+      httpOnly: true,
+      secure: false, // for dev
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return res.redirect('http://localhost:5173');
+  }
+
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    console.log('Logout request received');
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: false, // for dev,
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    return { message: 'User logged out successfully' };
   }
 }
