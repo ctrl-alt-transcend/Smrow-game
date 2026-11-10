@@ -41,6 +41,7 @@ export type PlayerBase = {
   faction: Faction;
   avatarURL: string | null;
   personalLog: GameLog;
+  guideLog: string;
 }
 
 export type Player = PlayerBase & {
@@ -57,6 +58,7 @@ export type GameDataBase = {
   dicesSum: number;
   masterLog: string;
   board: GameBoard;
+  whosTurn: string;
 }
 
 export type GameData = GameDataBase & {

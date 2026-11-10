@@ -156,7 +156,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     try {
       const game = this.gameService.getGameInstanceByUserId(userId);
       await client.join(game.getGameId());
-      game.setMasterLog(`${client.data.user.username} joined the room`);
       this.emitGameDataDto(game, client.data.user.username);
       //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
       return { ok: true, data: game.getGameDataDto(client.data.user.username) };

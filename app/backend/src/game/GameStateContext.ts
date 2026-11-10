@@ -65,10 +65,11 @@ class GameStateContext {
       turnOrder: [],
       currentTurnIndex: 0,
       gameId: gameId,
-      masterLog: '...',
+      masterLog: `${Phase.START}: roll the dices`,
       dicesSum: 0,
       currentRoll: 0,
       board: board,
+      whosTurn: ''
     };
     this.initGameData(); //⚠️ FOR TESTING WITH MOCKED VALUE
     this.initStartingRolls();
@@ -110,6 +111,7 @@ class GameStateContext {
       avatarURL: null,
       faction: this.assignFaction(),
       personalLog: {id: this.logId++, message: `Welcome to the game ${playerId}`},
+      guideLog: '',
       // BONUS Resources FOR DEV
       resources: { //⚠️ For testing only
         wood: 10, //⚠️ For testing only
@@ -242,6 +244,7 @@ class GameStateContext {
       avatarURL: p.avatarURL,
       faction: p.faction,
       personalLog: p.personalLog,
+      guideLog: p.guideLog,
       resources: p.resources,
     };
   }
@@ -253,6 +256,7 @@ class GameStateContext {
     if (!p) {
       throw new NotFoundException (`Unknown playerId: ${playerId}`);
     }
+    console.log(`getGameDataDto:whosTurn:${gameData.whosTurn}`)
     return {
       currentPlayer: this.getPlayerDto(p),
       winner: gameData.winner,
@@ -263,6 +267,7 @@ class GameStateContext {
       currentRoll: gameData.currentRoll,
       masterLog: gameData.masterLog,
       board: gameData.board,
+      whosTurn: gameData.whosTurn,
     };
   }
 
@@ -306,6 +311,14 @@ class GameStateContext {
       message: message,
     }
   }
+  public setGuideLog(p: Player, message: string ) {
+    p.guideLog = message;
+  }
+  public setAllGuideLogs( message: string ) {
+    this.getGameData().players.forEach(player => {
+      this.setGuideLog(player, message);
+    });
+  }
   public setTurnOrder(newTurnOrder: string[]) {
     this.data.turnOrder = newTurnOrder;
   }
@@ -335,6 +348,8 @@ class GameStateContext {
       this.data.players.size,
       index,
     );
+    this.data.whosTurn =
+      this.data.turnOrder.at(this.data.currentTurnIndex) ?? '';
   }
 
   /** @argument winCondition: explain why the player won  */
@@ -484,8 +499,11 @@ class WhoStartsPhase extends State {
       return;
     }
     this.state.resetAllDices();
+    this.state.setTurnCount(0);
+    this.state.setCurrentTurnIndex(0);
     this.state.setMasterLog(
-      `It's the ${Phase.PLACEMENT} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
+      `${Phase.PLACEMENT}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
+    this.state.setAllGuideLogs(`${Phase.PLACEMENT}: place a settlement first and then a road`);
     this.state.transitionTo(new PlacementPhase());
   }
 }
@@ -551,7 +569,7 @@ class PlacementPhase extends State {
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
     this.state.setMasterLog(
-      `It's the ${Phase.PLACEMENT} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
+      `${Phase.PLACEMENT}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
     this.state.setPersonalLog(p,
       'You finshied your placement, wait for the other players to play ...');
   }
@@ -589,7 +607,8 @@ class PlacementPhase extends State {
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     //this.state.setMasterLog(`The ${Phase.PLACEMENT} is done, let's move to the ${Phase.RESOURCES} !`)
-    this.state.setMasterLog(`It's the ${Phase.RESOURCES} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
+    this.state.setMasterLog(`${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
+    this.state.setAllGuideLogs(`${Phase.RESOURCES}: roll the dices to produce resources`);
     this.state.transitionTo(new RessourcePhase());
     console.log('🗺️🔎PlacementPhase:phaseCheck: everybody is ready!');
   }
@@ -673,7 +692,8 @@ class RessourcePhase extends State {
     this.state.setCurrentTurnIndex(0);
     this.state.resetAllDices();
     this.state.setMasterLog(
-      `It's the ${Phase.RESOURCES} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
+      `${Phase.TRADE_BUILD}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
+    this.state.setAllGuideLogs(`${Phase.TRADE_BUILD}: trade, build, upgrade or skip your turn`);
     this.state.transitionTo(new TradeAndBuildPhase());
     console.log('🪵🔎RessourcePhase:phaseCheck: everybody is ready!');
   }
@@ -750,8 +770,8 @@ class TradeAndBuildPhase extends State {
     if (!p) return;
     this.state.setTurnCount(undefined);
     this.state.setCurrentTurnIndex(undefined);
-    this.state.setPersonalLog(p, `You skipped your turn !`)
-    this.state.setMasterLog(`${playerId} skipped his/her turn !`)
+    this.state.setPersonalLog(p, `You skipped your turn !`);
+    this.state.setMasterLog(`${playerId} skipped his/her turn !`);
     console.log(`🤝⏭️TradeAndBuildPhase:skip: ${playerId} skipped his turn !`);
   }
 
@@ -767,7 +787,8 @@ class TradeAndBuildPhase extends State {
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     console.log('🤝🔎TradeAndBuildPhase:phaseCheck: everybody is ready!');
-    this.state.setMasterLog(`It's the ${Phase.RESOURCES} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
+    this.state.setMasterLog(`${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
+    this.state.setAllGuideLogs(`${Phase.RESOURCES}: roll the dices to produce resources`);
     this.state.transitionTo(new RessourcePhase());
   }
 }
