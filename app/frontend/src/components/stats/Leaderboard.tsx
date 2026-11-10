@@ -47,13 +47,7 @@ export default function Leaderboard({
                     </Group>
                   </Table.Td>
                   <Table.Td>{entry.wins}</Table.Td>
-                  <Table.Td>
-                    {entry.winRate}%
-                    <Text span size="xs" c="dimmed">
-                      {" "}
-                      ({entry.gamesPlayed} games)
-                    </Text>
-                  </Table.Td>
+                  <Table.Td>{entry.winRate}%</Table.Td>
                 </Table.Tr>
               );
             })}
