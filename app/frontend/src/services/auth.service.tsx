@@ -35,6 +35,7 @@ export const loginUser = async (data: LoginPost): Promise<LoginResponse> => {
   }
 };
 
+// to logout using the cookie for the google login OAuth
 export const logoutUser = async (): Promise<void> => {
   try {
     const res = await http.post("auth/logout");

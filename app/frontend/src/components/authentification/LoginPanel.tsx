@@ -63,7 +63,8 @@ export function LoginPanel(props: PaperProps) {
     }
   });
 
-  // for OAuth integration
+  // For OAuth integration we can move this to other file, not sure where was rthe best location
+  // the use of hardcoded api, was just for the implementation, we can change it as well
 
   function handleGoogleLogin() {
     window.location.assign("http://localhost:3000/auth/google/login");

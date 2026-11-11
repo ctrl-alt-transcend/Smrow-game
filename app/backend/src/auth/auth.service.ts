@@ -66,9 +66,9 @@ export class AuthService {
     return hash;
   }
 
-  /*
-   * @brief:   Create a JWT token for the given user
-   * @details: the payload is the visible part of the token, it contains the userId and username
+  /**
+   * @brief :   Create a JWT token for the given user
+   * @details : the payload is the visible part of the token, it contains the userId and username
    */
   async createJWTToken(user: {
     id: string;
@@ -80,6 +80,15 @@ export class AuthService {
     };
   }
 
+  /**
+   * @brief  Service used by the google Strategy, will validate, if the user exists in the db and create it if not
+   * If the user info returned by google OAuth
+   * is or not registered in the platform and it will create a new user if not.
+   * If the user has already a local account with the same email, it will create a google-account
+   * and link both profiles
+   * @param googleUser as data we will receive from the strategy.
+   * @returns the user information
+   */
   async validateGoogleUser(googleUser: {
     googleId: string;
     email: string;

@@ -5,6 +5,12 @@ import googleOauthConfig from 'src/config/google-oauth.config';
 import type { ConfigType } from '@nestjs/config';
 import { AuthService } from 'src/auth/auth.service';
 
+/**
+ * validates the response from googleOauth takes the response message with the profile and uses
+ * the validate function to create the user and create it if necessary.
+ * @returns the created user by authservice
+ */
+
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy) {
   constructor(

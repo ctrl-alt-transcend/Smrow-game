@@ -13,11 +13,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const bootstrap = async () => {
+      // As we use cookies, we cannot check for localStorage to verify a user, this check becomes useless, we will check with the back constantly
+
       //  const token = localStorage.getItem("access_token");
       //  if (!token) {
       //    setLoading(false);
       //    return;
       //  }
+
       try {
         const profile = await getCurrentUser();
         setUser(profile);
@@ -50,8 +53,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const logout = useCallback(async (reason?: string) => {
+    // Added the 'logoutUser' for google before checking the local user
+    // this will remove the cookie from the front without accesing it directly, by calling the back
+
     try {
       await logoutUser();
+      setUser(null);
     } catch (error) {
       console.error("could not logout from server: ", error);
     } finally {
