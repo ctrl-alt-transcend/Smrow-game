@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
+import { useEffect, useState } from 'react';
+import { socialSocket as socket } from "../../sockets/socialSocket";
+import { http } from "../../services/http";
 import {
   Title,
   Paper,
@@ -9,16 +10,50 @@ import {
   TextInput,
   Button,
 } from "@mantine/core";
-import { messages as initialMessages } from "../../mocks/chat.mock";
 import MessageItem from "./MessageItem";
 import type { ChatMessage } from "@shared/types";
-import { socialSocket } from "../../sockets/socialSocket";
 
-export default function Chat({chatHistory}: {chatHistory: ChatMessage[] | null}) {
+export default function Chat() {
   const [draft, setDraft] = useState("");
-  let chat: ChatMessage[] = [];
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
-  if (chatHistory === null) {
+  useEffect(() => {
+    let cancelled = false;
+
+    const onMessage = (message: ChatMessage) => {
+      setMessages((prevMessages) => {
+        return prevMessages.concat(message);
+      });
+    }
+
+    const loadOldMessages = async () => {
+      try {
+        const response = await http.get<ChatMessage[]>("/chat");
+        if (cancelled) return;
+        
+        const history = response.data;
+        setMessages(history);
+        setLoaded(true);
+      }
+      catch (error) {
+        console.error("Failed to fetch chat history with error - ", error);
+      }
+    }
+
+    socket.emit("joinChat");
+    socket.on("new chat message", onMessage);
+    loadOldMessages();
+
+    return () => {
+      cancelled = true;
+      socket.off("new chat message", onMessage);
+      socket.emit("leaveChat");
+    };
+
+  }, []);
+
+  if (!loaded) {
 
     return (
       <Paper withBorder p="md" h="100%">
@@ -29,15 +64,12 @@ export default function Chat({chatHistory}: {chatHistory: ChatMessage[] | null})
       </Paper>
     );
   }
-  else if (chatHistory.length > 0) {
-    chat = chatHistory;
-  }
 
 
   function handleSend() {
     if (draft.trim() === "") return;
 
-    socialSocket.emit("chatMessage", {draft})
+    socket.emit("chatMessage", {draft})
     setDraft("");
   }
 
@@ -49,8 +81,8 @@ export default function Chat({chatHistory}: {chatHistory: ChatMessage[] | null})
       </Title>
       <ScrollArea h={480}>
         <Stack gap="xs" align="flex-start">
-          {chat.map((messages) => (
-            <MessageItem key={messages.date.toString()} content={messages.content} author={messages.username}/>
+          {messages.map((message) => (
+            <MessageItem key={message.id} content={message.content} author={message.username}/>
           ))}
         </Stack>
       </ScrollArea>

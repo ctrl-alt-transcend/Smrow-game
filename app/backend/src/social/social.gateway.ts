@@ -58,11 +58,25 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
 
   @SubscribeMessage('chatMessage')
   async handleChatMessage(client: SocketClient, payload: { draft: string }) {
-    console.log(client.data.user.username, 'sent a chat message:', payload.draft); //TEST: DEV_ONLY
+    if (typeof payload.draft !== "string") { return; }
+    const content = payload.draft.trim();
+    if (content.length === 0 || content.length > 500)  { return; }
+    console.log(client.data.user.username, 'sent a chat message:', content); //TEST: DEV_ONLY
 
-    const chatMessage = await this.chatService.addChatMessage(client.data.user.id, payload.draft);
+    const chatMessage = await this.chatService.addChatMessage(client.data.user.id, content);
     this.server.to('chat').emit('new chat message', chatMessage);
   }
+
+  @SubscribeMessage('joinChat')
+  handleJoinChat(client: SocketClient) {
+    client.join("chat");
+  }
+
+  @SubscribeMessage('leaveChat')
+  handleLeaveChat(client: SocketClient) {
+    client.leave("chat");
+  }
+
 
   afterInit(server: SocketServer) {
     /** @warning development only */
@@ -97,6 +111,5 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   async handleConnection(client: Socket) {
     //TODO: handle multiple connections from the same user.
     console.log('Client connected:', client.id); //TEST:
-    await client.join('chat');
   }
 }
