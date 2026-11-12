@@ -1,4 +1,5 @@
 import { Faction,
+  Phase,
   RessourceType,
   TraderType,
   type GameBoard,
@@ -54,6 +55,7 @@ export type GameDataBase = {
   masterLog: string;
   board: GameBoard;
   whosTurn: string;
+  currentPhase: Phase;
 }
 
 export type GameData = GameDataBase & {

@@ -70,7 +70,8 @@ class GameStateContext {
       masterLog: `${Phase.START}: roll the dices`,
       dicesSum: 0,
       board: board,
-      whosTurn: ''
+      whosTurn: '',
+      currentPhase: Phase.START,
     };
     this.initGameData(); //⚠️ FOR TESTING WITH MOCKED VALUE
     this.initStartingRolls();
@@ -264,6 +265,7 @@ class GameStateContext {
       masterLog: gameData.masterLog,
       board: gameData.board,
       whosTurn: gameData.whosTurn,
+      currentPhase: gameData.currentPhase,
     };
   }
 
@@ -298,35 +300,37 @@ class GameStateContext {
   public setMasterLog(log: string) {
     this.data.masterLog = log;
   }
+  public setGuideLog(p: Player, message: string ) {
+    p.guideLog = message;
+  }
+  public setCurrentPhase( phase: Phase ) {
+    this.data.currentPhase = phase;
+  }
+  public setTurnOrder(newTurnOrder: string[]) {
+    this.data.turnOrder = newTurnOrder;
+  }
+
   public setPersonalLog(p: Player, message: string) {
     p.personalLog = {
       id: this.logId++,
       message: message,
     }
   }
-  public setGuideLog(p: Player, message: string ) {
-    p.guideLog = message;
-  }
   public setAllGuideLogs( message: string ) {
     this.getGameData().players.forEach(player => {
       this.setGuideLog(player, message);
     });
-  }
-  public setTurnOrder(newTurnOrder: string[]) {
-    this.data.turnOrder = newTurnOrder;
   }
   public resetDices(p: Player) {
     p.firstDice = 0;
     p.secondDice = 0;
     p.totalDice = 0;
   }
-
   public resetAllDices() {
     this.data.players.forEach((player) => {
       this.resetDices(player);
     });
   }
-
   public setTurnCount(count?: number) {
     this.data.turnCount = updateValue(
       this.data.turnCount,
@@ -334,7 +338,6 @@ class GameStateContext {
       count,
     );
   }
-
   public setCurrentTurnIndex(index?: number) {
     this.data.currentTurnIndex = updateValue(
       this.data.currentTurnIndex,
@@ -370,6 +373,15 @@ class GameStateContext {
       value = null;
     }
     return value;
+  }
+
+  public setupNextPhase( nextPhase: Phase ) {
+    this.setTurnCount(0);
+    this.setCurrentTurnIndex(0);
+    this.setMasterLog(
+      `${nextPhase}: ${this.getCurrentPlayer()?.playerId} is playing ...`)
+    this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
+    this.setCurrentPhase(nextPhase);
   }
 
   public isVictory(): boolean {
@@ -542,11 +554,7 @@ class WhoStartsPhase extends State {
       return;
     }
     this.state.resetAllDices();
-    //this.state.setTurnCount(0);
-    this.state.setCurrentTurnIndex(0);
-    this.state.setMasterLog(
-      `${Phase.PLACEMENT}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
-    this.state.setAllGuideLogs(`${GUIDE_LOG[Phase.PLACEMENT]}`);
+    this.state.setupNextPhase(Phase.PLACEMENT);
     this.state.transitionTo(new PlacementPhase());
   }
 }
@@ -636,10 +644,7 @@ class PlacementPhase extends State {
   public phaseCheck(): void {
     if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
     this.state.resourcesProduction(true);
-    this.state.setTurnCount(0);
-    this.state.setCurrentTurnIndex(0);
-    this.state.setMasterLog(`${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
-    this.state.setAllGuideLogs(`${GUIDE_LOG[Phase.RESOURCES]}`);
+    this.state.setupNextPhase(Phase.RESOURCES);
     this.state.transitionTo(new RessourcePhase());
     console.log('🗺️🔎PlacementPhase:phaseCheck: everybody is ready!');
   }
@@ -700,12 +705,7 @@ class RessourcePhase extends State {
   public phaseCheck(): void {
     if (this.state.getTurnCount() !==
       this.state.getPlayers().size) return;
-    this.state.setTurnCount(0);
-    this.state.setCurrentTurnIndex(0);
-    this.state.resetAllDices();
-    this.state.setMasterLog(
-      `${Phase.TRADE_BUILD}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
-    this.state.setAllGuideLogs(`${GUIDE_LOG[Phase.TRADE_BUILD]}`);
+    this.state.setupNextPhase(Phase.TRADE_BUILD);
     this.state.transitionTo(new TradeAndBuildPhase());
     //console.log('🪵🔎RessourcePhase:phaseCheck: everybody is ready!');
   }
@@ -783,11 +783,7 @@ class TradeAndBuildPhase extends State {
     if (this.state.isVictory()) return;
     if (this.state.getTurnCount() !==
       this.state.getPlayers().size) return;
-    this.state.setTurnCount(0);
-    this.state.setCurrentTurnIndex(0);
-    this.state.setMasterLog(`
-      ${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
-    this.state.setAllGuideLogs(`${GUIDE_LOG[Phase.RESOURCES]}`);
+    this.state.setupNextPhase(Phase.RESOURCES);
     this.state.transitionTo(new RessourcePhase());
     //console.log('🤝🔎TradeAndBuildPhase:phaseCheck: everybody is ready!');
   }

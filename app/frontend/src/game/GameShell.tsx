@@ -11,6 +11,7 @@ import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
 import SkipTurnButton from './components/ui/SkipTurnButton.tsx';
 import { ResourcesPanel } from './components/ui/ResourcesPanel.tsx';
 import { usePersonalNotification } from './hooks/usePersonalNotification.ts';
+import { Phase } from '../../../shared/game/gameboard.types.ts';
 
 export default function Game() {
   const { game } = useGameState();
@@ -27,7 +28,7 @@ function GameShell({ game }: { game: GameDataDto }) {
   usePersonalNotification(game.currentPlayer.personalLog);
 
   let isMyTurn = game.currentPlayer.playerId === game.whosTurn;
-  if (game.currentPlayer.DEVMOD) isMyTurn = true;
+  if (game.currentPlayer.DEVMOD || game.currentPhase === Phase.START) isMyTurn = true;
   const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
 
   return (
@@ -77,7 +78,6 @@ function GameShell({ game }: { game: GameDataDto }) {
         <PlayerPanel players={game.players} />
         <ResourcesPanel currentPlayer={game.currentPlayer}/>
       </AppShell.Aside>
-
       <AppShell.Footer p="xs">
         <GameMasterLog log={masterLog} />
       </AppShell.Footer>
