@@ -54,8 +54,8 @@ export class UserService {
       email: user.email,
       username: user.username,
       createdAt: user.createdAt.toISOString(),
-      bio: user.profile?.bio ?? null,
-      avatarURL: user.profile?.avatarURL ?? null,
+      bio: user.profile?.bio ?? undefined,
+      avatarURL: user.profile?.avatarURL ?? undefined,
     };
   }
 

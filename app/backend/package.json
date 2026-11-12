@@ -23,14 +23,13 @@
     "test:ws_room": "node websocket-client/create-room.io.mjs"
   },
   "lint-staged": {
-	"*.{ts,js}": [
-		"prettier --write",
-		"eslint --fix",
-		"eslint"
-	]
+    "*.{ts,js}": [
+      "prettier --write",
+      "eslint --fix",
+      "eslint"
+    ]
   },
   "dependencies": {
-    "shared": "*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^12.0.3",
@@ -45,12 +44,15 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "nest": "^0.1.6",
+    "nestjs-zod": "^5.5.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "socket.io-client": "^4.8.4"
+    "shared": "*",
+    "socket.io-client": "^4.8.4",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
