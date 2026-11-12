@@ -46,63 +46,104 @@ type InnerProps = {
 };
 
 function ProfileFormInner({ user, refreshUser }: InnerProps) {
-  const [saving, setSaving] = useState<Field | null>(null);
+  const [saving, setSaving] = useState(false);
   const form = useForm<Record<Field, string>>({ initialValues: toForm(user) });
 
-  // valeurs actuellement sauvegardées (source de vérité : le user du contexte)
   const saved = toForm(user);
 
-  const saveField = async (f: FieldConfig) => {
-    const value = form.values[f.name];
-    const raw = f.nullable && value === "" ? null : value;
+  const changedFields = FIELDS.filter(
+    (f) => form.values[f.name] !== saved[f.name],
+  );
+  const hasChanges = changedFields.length > 0;
 
-    // validation du seul champ modifié, le résultat est déjà bien typé
-    const result = UpdateProfileSchema.safeParse({ [f.name]: raw });
+  const handleSave = async () => {
+    form.clearErrors();
+
+    // on n'envoie que les champs modifiés
+    const raw: Partial<Record<Field, string | null>> = {};
+    for (const f of changedFields) {
+      const value = form.values[f.name];
+      raw[f.name] = f.nullable && value === "" ? null : value;
+    }
+
+    // validation de tous les champs modifiés d'un coup
+    const result = UpdateProfileSchema.safeParse(raw);
     if (!result.success) {
-      form.setFieldError(f.name, result.error.issues[0].message);
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as Field | undefined;
+        if (field && FIELDS.some((f) => f.name === field)) {
+          // on garde le premier message d'erreur par champ
+          if (!form.errors[field]) form.setFieldError(field, issue.message);
+        }
+      }
       return;
     }
 
     try {
-      setSaving(f.name);
+      setSaving(true);
       await updateProfile(result.data);
       await refreshUser();
-      notifications.show({ message: `${f.label} updated` });
+      form.resetDirty();
+      notifications.show({ message: "Profile updated" });
     } catch (e) {
       if (e === 409) {
-        form.setFieldError(f.name, `${f.label} already taken`);
+        // adapte si ton API indique quel champ est en conflit
+        const conflict = changedFields.filter(
+          (f) => f.name === "username" || f.name === "email",
+        );
+        if (conflict.length > 0) {
+          for (const f of conflict) {
+            form.setFieldError(f.name, `${f.label} already taken`);
+          }
+        } else {
+          notifications.show({ color: "red", message: "Conflict detected" });
+        }
       } else {
         notifications.show({
           color: "red",
-          message: `Could not update ${f.label}`,
+          message: "Could not update profile",
         });
       }
     } finally {
-      setSaving(null);
+      setSaving(false);
     }
   };
 
   return (
-    <Stack>
-      {FIELDS.map((f) => {
-        const Input = f.multiline ? Textarea : TextInput;
-        return (
-          <Group key={f.name} align="flex-end">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void handleSave();
+      }}
+    >
+      <Stack>
+        {FIELDS.map((f) => {
+          const Input = f.multiline ? Textarea : TextInput;
+          return (
             <Input
+              key={f.name}
               label={f.label}
-              style={{ flex: 1 }}
               {...form.getInputProps(f.name)}
             />
-            <Button
-              disabled={form.values[f.name] === saved[f.name]}
-              loading={saving === f.name}
-              onClick={() => saveField(f)}
-            >
-              Save
-            </Button>
-          </Group>
-        );
-      })}
-    </Stack>
+          );
+        })}
+
+        <Group justify="flex-end">
+          <Button
+            variant="default"
+            disabled={!hasChanges || saving}
+            onClick={() => {
+              form.setValues(saved);
+              form.clearErrors();
+            }}
+          >
+            Reset
+          </Button>
+          <Button type="submit" disabled={!hasChanges} loading={saving}>
+            Save
+          </Button>
+        </Group>
+      </Stack>
+    </form>
   );
 }

@@ -9,6 +9,7 @@ import {
   LoginResponseDto,
   RegisterDto,
   RegisterResponseDto,
+  UpdateProfileDto,
   UserProfileDto,
 } from './dto/auth.dto';
 
@@ -40,7 +41,7 @@ export class AuthController {
   @ZodSerializerDto(UserProfileDto)
   async updateMe(
     @Req() req: { user: UserPublic },
-    @Body() body: UserProfileDto,
+    @Body() body: UpdateProfileDto,
   ) {
     return this.AuthService.updateProfile(req.user.id, body);
   }

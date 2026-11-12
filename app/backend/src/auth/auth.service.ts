@@ -17,6 +17,7 @@ import {
   Password,
   PasswordSchema,
   LoginResponse,
+  UpdateProfile,
 } from 'shared';
 
 @Injectable()
@@ -75,7 +76,10 @@ export class AuthService {
     return PasswordSchema.parse(hash);
   }
 
-  async updateProfile(userId: string, data: UserProfile): Promise<UserProfile> {
+  async updateProfile(
+    userId: string,
+    data: UpdateProfile,
+  ): Promise<UserProfile> {
     await this.userService.update(userId, data);
     return this.getProfile(userId);
   }
