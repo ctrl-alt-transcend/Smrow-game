@@ -1,56 +1,116 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, Stack, Title, Box } from '@mantine/core';
-import { Dice3D, type DiceValue } from '../gameboard/Dice/Dice';
-//import { useRollDice } from '../../hooks/useRollDice';
-import type { GameResponse } from '@shared/game/game.types';
+import { Dice3D, type Dice3DHandle, type DiceValue } from '../gameboard/Dice/Dice';
 import { socket } from '../../../socket';
 
+const SERVER_TIMEOUT_MS = 2000;
 
-export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; masterLog: string | null }) {
-  const [rolledValue, setRolledValue] = useState<DiceValue | undefined>(undefined);
+function isDiceValue(n: unknown): n is DiceValue {
+  return typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 6;
+}
+
+/**
+* Measures the container width to adjust the size of the die (responsive).
+*/
+function useElementWidth<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      setWidth(entries[0].contentRect.width);
+    });
+    observer.observe(el);
+    setWidth(el.getBoundingClientRect().width);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, width };
+}
+
+export function DiceRoller({ currentRoll, isMyTurn}: { currentRoll: number | null, isMyTurn: boolean }) {
   const [busy, setBusy] = useState(false);
-  const pendingResultRef = useRef<GameResponse | null>(null);
-  //const { roll } = useRollDice();
 
-  const handleRollRequest = useCallback(async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      socket.emit('dice');
+/**
+* `waiting`: 'dice' has been emitted, and we are awaiting the server's decision
+* (or the animation is in progress).
+*/
+  const waitingRef = useRef(false);
+  const timeoutRef = useRef<number | null>(null);
+  const diceRef = useRef<Dice3DHandle>(null);
 
-      //await roll();
-      setBusy(false);
-      if(diceRoll === null) {
-        setBusy(false);
-        return;
-      }
-      pendingResultRef.current = { value: diceRoll, message: masterLog, data: null };
-      setRolledValue(diceRoll);
-    } catch (err) {
-      console.error('Failed to roll dice:', err);
-      setBusy(false);
+  const { ref: containerRef, width } = useElementWidth<HTMLDivElement>();
+
+/**
+* Dice size: constrained between 48 and 96 px, depending on the available width.
+* const diceSize = Math.round(Math.max(48, Math.min(96, (width - 64) / 2)));
+*/
+  const diceSize = Math.round(Math.max(48, Math.min(96, (width - 64) / 2)));
+  const clearServerTimeout = useCallback(() => {
+    if (timeoutRef.current !== null) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
-  }, [busy, masterLog, diceRoll]);
-  //}, [roll, busy, masterLog, diceRoll]);
+  }, []);
 
-  const handleAnimationComplete = useCallback(
-    (finalValue: DiceValue) => {
-      const value = pendingResultRef.current?.value ?? finalValue;
-      setRolledValue(value);
-      pendingResultRef.current = null;
-      setRolledValue(undefined);
-      setBusy(false);
-    }, []
-  );
+  const unlock = useCallback(() => {
+    waitingRef.current = false;
+    setBusy(false);
+  }, []);
+
+/** 1. Click → the request is sent to the server. */
+  const handleDiceRequest = useCallback(() => {
+    if (busy || !isMyTurn) return;
+    waitingRef.current = true;
+    setBusy(true);
+    socket.emit('dice');
+    timeoutRef.current = window.setTimeout(unlock, SERVER_TIMEOUT_MS);
+  }, [busy, unlock]);
+
+/**
+* 2. Server response → arrives via the `currentRoll` prop.
+* 1..6: trigger the animation via the Dice3D reference (forced value).
+* null: invalid move → nothing changes; we unblock.
+*/
+  useEffect(() => {
+    if (!waitingRef.current) return;
+
+    if (isDiceValue(currentRoll)) {
+      diceRef.current?.rollDice(currentRoll);
+    } else {
+      clearServerTimeout();
+      unlock();
+    }
+  }, [currentRoll, clearServerTimeout, unlock]);
+
+/** 3. End of animation → Dice3D is already displaying the final face; unlock it. */
+  const handleAnimationComplete = useCallback(() => {
+    if (!waitingRef.current) return;
+    clearServerTimeout();
+    unlock();
+  }, [clearServerTimeout, unlock]);
+
+  useEffect(() => clearServerTimeout, [clearServerTimeout]);
 
   return (
-    <Box style={{ flex: 1, minWidth: 220, position: 'relative' }}>
-      <Card withBorder radius="md" shadow="sm" h={150}>
-        <Stack gap="xs" align="center" justify="center">
+    <Box
+      ref={containerRef}
+      style={{ flex: 1, minWidth: 220, width: '100%', position: 'relative' }}
+    >
+      <Card
+        withBorder
+        radius="md"
+        shadow="sm"
+        mih={150}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Stack gap="xs" align="center" justify="center" w="100%">
           <Title order={4}>Dice box</Title>
           <Dice3D
-            size={80}
-            cheatValue={rolledValue}
+            ref={diceRef}
+            size={diceSize}
             onRoll={handleAnimationComplete}
             triggers={[]}
             style={{ pointerEvents: 'none' }}
@@ -59,17 +119,18 @@ export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; ma
       </Card>
       <button
         type="button"
-        onClick={handleRollRequest}
-        disabled={busy}
+        onClick={handleDiceRequest}
+        disabled={busy || !isMyTurn}
         aria-label="Roll the dice"
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: 10,
-          background: 'transparent',
           border: 'none',
           borderRadius: 8,
-          cursor: busy ? 'wait' : 'pointer',
+          background: !isMyTurn ? 'rgba(109, 109, 109, 0.35)' : 'transparent',
+          backdropFilter: !isMyTurn ? 'grayscale(80%)' : undefined,
+          cursor: !isMyTurn ? 'not-allowed' : 'pointer',
         }}
       />
     </Box>

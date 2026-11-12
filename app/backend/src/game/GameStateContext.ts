@@ -1,28 +1,30 @@
 import {
   type GameBoard,
   type GameBoardGraph,
-  Action,
   BuildingsInGame,
-  classicLayout,
   Faction,
-  FACTION_COLORS,
+  Action,
   Phase,
+  LandType,
+  RessourceType,
+  classicLayout,
   POINTS_TO_WIN,
-  ROBBER_ROLL,
   SettlementData,
+  ROBBER_ROLL,
+  FACTION_COLORS,
+  GUIDE_LOG,
+  LAND_RESSOURCE,
 } from '@shared/game/gameboard.types';
 import type {
   GameData,
   GameDataDto,
   Player,
-  GameResponse,
   BuildRequestPayload,
   TradeRequestPayload,
   PlayerDto,
 } from '@shared/game/game.types';
 import {
   isBuildRequestPayload,
-  isTradeRequestPayload,
   updateValue,
   funnyLogs,
   //printAllPlayers,
@@ -30,10 +32,10 @@ import {
 } from './game.utils';
 import { buildCheck } from './calculation/handleBuilds';
 import { createGameBoard } from './calculation/createGameBoard';
-import { resourcesProduction } from './calculation/handleResources';
 import { tradeCheck } from './calculation/handleTrade';
 import { NotFoundException } from '@nestjs/common';
-import { robberRule } from './calculation/handleGameRules';
+import { produceResources } from './calculation/handleResources';
+import { randomizeRobber } from './calculation/randomizeGameBoard';
 
 /**
  * STATE DESIGN PATTERN
@@ -67,7 +69,6 @@ class GameStateContext {
       gameId: gameId,
       masterLog: `${Phase.START}: roll the dices`,
       dicesSum: 0,
-      currentRoll: 0,
       board: board,
       whosTurn: ''
     };
@@ -112,6 +113,7 @@ class GameStateContext {
       faction: this.assignFaction(),
       personalLog: {id: this.logId++, message: `Welcome to the game ${playerId}`},
       guideLog: '',
+      currentRoll: null,
       // BONUS Resources FOR DEV
       resources: { //⚠️ For testing only
         wood: 10, //⚠️ For testing only
@@ -120,6 +122,7 @@ class GameStateContext {
         sheep: 10, //⚠️ For testing only
         ore: 10, //⚠️ For testing only
       },
+      DEVMOD: false,
       //Resources: {
       //  wood: 0,
       //  brick: 0,
@@ -128,6 +131,7 @@ class GameStateContext {
       //  ore: 0,
       //},
     };
+    if (playerId == 'zuck') newPlayer.DEVMOD = true;
     return newPlayer;
   }
 
@@ -153,34 +157,26 @@ class GameStateContext {
     this.state.setGameState(this);
   }
 
-  public diceRequest(
-    playerId: string
-  ): GameResponse {
+  public diceRequest( playerId: string ) {
     return this.state.dice(playerId);
   }
-
+  public skipRequest ( playerId: string ) {
+    this.state.skip(playerId);
+  }
+  public phaseCheckRequest(): void {
+    return this.state.phaseCheck();
+  }
   public tradeRequest(
     playerId: string,
     payload: TradeRequestPayload | null,
   ) {
     return this.state.trade(playerId, payload);
   }
-
   public buildRequest(
     playerId: string,
     payload: BuildRequestPayload | null,
   ) {
     this.state.build(playerId, payload);
-  }
-
-  public skipRequest (
-    playerId: string
-  ) {
-    this.state.skip(playerId);
-  }
-
-  public phaseCheckRequest(): void {
-    return this.state.phaseCheck();
   }
 
   /** Getters */
@@ -246,6 +242,8 @@ class GameStateContext {
       personalLog: p.personalLog,
       guideLog: p.guideLog,
       resources: p.resources,
+      currentRoll: p.currentRoll,
+      DEVMOD: p.DEVMOD,
     };
   }
 
@@ -256,7 +254,6 @@ class GameStateContext {
     if (!p) {
       throw new NotFoundException (`Unknown playerId: ${playerId}`);
     }
-    console.log(`getGameDataDto:whosTurn:${gameData.whosTurn}`)
     return {
       currentPlayer: this.getPlayerDto(p),
       winner: gameData.winner,
@@ -264,7 +261,6 @@ class GameStateContext {
       players: Array.from(gameData.players.values()),
       gameId: gameData.gameId,
       dicesSum: gameData.dicesSum,
-      currentRoll: gameData.currentRoll,
       masterLog: gameData.masterLog,
       board: gameData.board,
       whosTurn: gameData.whosTurn,
@@ -299,13 +295,10 @@ class GameStateContext {
   public setDicesSum(roll: number) {
     this.data.dicesSum = roll;
   }
-  public setCurrentRoll(roll: number | null) {
-    this.data.currentRoll = roll;
-  }
   public setMasterLog(log: string) {
     this.data.masterLog = log;
   }
-  public setPersonalLog(p: Player, message: string, action?: boolean ) {
+  public setPersonalLog(p: Player, message: string) {
     p.personalLog = {
       id: this.logId++,
       message: message,
@@ -334,7 +327,7 @@ class GameStateContext {
     });
   }
 
-  public setTurnCount(count: number | undefined) {
+  public setTurnCount(count?: number) {
     this.data.turnCount = updateValue(
       this.data.turnCount,
       this.data.players.size + 1,
@@ -342,7 +335,7 @@ class GameStateContext {
     );
   }
 
-  public setCurrentTurnIndex(index: number | undefined) {
+  public setCurrentTurnIndex(index?: number) {
     this.data.currentTurnIndex = updateValue(
       this.data.currentTurnIndex,
       this.data.players.size,
@@ -359,20 +352,24 @@ class GameStateContext {
   }
 
   /** Methods */
-  public rollDice(p: Player): GameResponse {
-    let value: number | null = Math.floor(Math.random() * 6) + 1;
-    let message: string | null = null;
+  /** @description Generates: "You can't ${Action} during ${Phase}" */
+  public forbiddenActionLog( action: Action , phase: Phase ): string {
+    return `You can't ${action} during ${phase}`;
+  }
 
+  public rollDice(p: Player): number | null {
+    let value: number | null = Math.floor(Math.random() * 6) + 1;
     if (p.firstDice === 0) {
       p.firstDice = value;
+      console.log(`${p.playerId} #1 rolll: ${value}`);
     } else if (p.secondDice === 0) {
       p.secondDice = value;
+      console.log(`${p.playerId} #2 rolll: ${value}`);
       p.totalDice = p.secondDice + p.firstDice;
     } else {
       value = null;
-      message = `rollDice: you (${p.playerId}) already rolled both dices.`;
     }
-    return { value, message, data: null };
+    return value;
   }
 
   public isVictory(): boolean {
@@ -392,6 +389,67 @@ class GameStateContext {
     });
     return endGame;
   }
+
+  public resourcesProduction( placementPhase: boolean ) {
+    for (const [settlementId, player] of this.buildings) {
+      const graphEntry = this.graph.get(settlementId);
+      if (!graphEntry) continue;
+      graphEntry.adjacentTiles.forEach((tile) => {
+        let prod: number = 0;
+        if (placementPhase === true)
+          prod = produceResources(tile.land, player.resources);
+        else if (tile.value === this.data.dicesSum && !tile.hasRobber) {
+          const settlement = player.settlementsBuilt.get(settlementId);
+          if (settlement)
+            prod = produceResources(tile.land, player.resources, settlement.isCity);
+        }
+        if (prod > 0 && !placementPhase) {
+          this.setPersonalLog(player,
+            `You produced ${prod} ${LAND_RESSOURCE[tile.land]}`);
+          //console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESSOURCE[tile.land]}`);
+        } else if (tile.hasRobber && !placementPhase) {
+          this.setPersonalLog(player,
+            `Robert the Robber stole your ${LAND_RESSOURCE[tile.land]} production !`);
+          //console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by Robert the Robber !`);
+        } else if (tile.land == LandType.DESERT) {
+          this.setPersonalLog(player,
+            `You didn't produce anything with your ${LAND_RESSOURCE[tile.land]} ...`);
+          //console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything in the ${LandType.DESERT}`);
+        } else if (placementPhase) {
+          this.setPersonalLog(player,
+            `You produced your first resources !`);
+        }
+      });
+    }
+  };
+
+  public robberRule( ): void {
+    const DISCARD_THRESHOLD = 7;
+    this.data.players.forEach((player) => {
+      const totalCount = Object.values(player.resources).reduce(
+        (sum, count) => sum + count,
+        0,
+      );
+      if (totalCount <= DISCARD_THRESHOLD) return;
+      const toDiscard = Math.floor(totalCount / 2);
+      // Flatten the player's resources into a list of resource keys,
+      // then remove randomly from it.
+      const pool: RessourceType[] = [];
+      for (const [resource, count] of Object.entries(player.resources)) {
+        for (let i = 0; i < count; i++) pool.push(resource as RessourceType);
+      }
+      for (let i = 0; i < toDiscard; i++) {
+        const pickIndex = Math.floor(Math.random() * pool.length);
+        const picked = pool.splice(pickIndex, 1)[0];
+        if (player.resources[picked] >= 1)
+          player.resources[picked] -= 1;
+      }
+      this.setPersonalLog(player,
+        `Robert the Robber robbed you ${toDiscard} resources !`
+      )
+    });
+    randomizeRobber(this.data.board.layout);
+  };
 }
 
 /**
@@ -406,12 +464,9 @@ abstract class State {
   public setGameState(newGameState: GameStateContext) {
     this.state = newGameState;
   }
-  public abstract dice(
-    playerId: string
-  ): GameResponse;
-  public abstract skip(
-    playerId: string
-  ): void;
+  public abstract dice( playerId: string ): void;
+  public abstract skip( playerId: string ): void;
+  public abstract phaseCheck( ): void;
   public abstract build(
     playerId: string,
     payload: BuildRequestPayload | null,
@@ -420,58 +475,46 @@ abstract class State {
     playerId: string,
     payload: TradeRequestPayload | null,
   ): void;
-  public abstract phaseCheck(): void;
 }
 
 class WhoStartsPhase extends State {
-  public dice( playerId: string ): GameResponse {
+  public dice( playerId: string ) {
     console.log(
       `🏁🎲WhoStartsPhase:dice: handles diceRequest from ${playerId}`,
     );
     const p = this.state.getPlayerById(playerId);
-    if (p === undefined) {
-      throw new Error(`Unknown playerId: ${playerId}`);
-    }
-    const roll: GameResponse = this.state.rollDice(p);
-    if (this.state.hasRolledBothDices(p) && roll.value) {
+    if (!p) return;
+    p.currentRoll = this.state.rollDice(p);
+    if (this.state.hasRolledBothDices(p) && p.currentRoll) {
       this.state.setPersonalLog(p,
-        `You rolled both dices and got a total of ${p.firstDice + p.secondDice}`)
+        `You ${funnyLogs(p.firstDice + p.secondDice)}`)
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
-      this.state.setCurrentTurnIndex(undefined);
-      return {
-        value: null,
-        message: funnyLogs(p.playerId, p.firstDice + p.secondDice),
-        data: null,
-      };
+      this.state.setCurrentTurnIndex();
     }
-    return { value: roll.value, message: roll.message, data: null };
   }
 
   public build( playerId: string ) {
     console.log(`🏁🔨WhoStartsPhase:build: handles buildRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
-    if (p) {
-       this.state.setPersonalLog(p,
-        `You can't ${Action.BUILD} during ${Phase.START}`)
-    }
+    if (!p) return;
+    this.state.setPersonalLog(p,
+    this.state.forbiddenActionLog(Action.BUILD, Phase.START));
   }
 
   public trade( playerId: string ) {
     console.log(`🏁⚖️WhoStartsPhase:trade: handles tradeRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
-    if (p) {
-       this.state.setPersonalLog(p,
-        `You can't ${Action.TRADE} during ${Phase.START}`)
-    }
+    if (!p) return;
+    this.state.setPersonalLog(p,
+    this.state.forbiddenActionLog(Action.TRADE, Phase.START));
   }
 
   public skip( playerId: string ) {
     console.log(`🏁⏭️WhoStartsPhase:trade: handles skipRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
-    if (p) {
-       this.state.setPersonalLog(p,
-        `You can't ${Action.SKIP} during ${Phase.START}`)
-    }
+    if (!p) return;
+    this.state.setPersonalLog(p,
+    this.state.forbiddenActionLog(Action.SKIP, Phase.START));
   }
 
   public computeTurnOrder() {
@@ -499,11 +542,11 @@ class WhoStartsPhase extends State {
       return;
     }
     this.state.resetAllDices();
-    this.state.setTurnCount(0);
+    //this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     this.state.setMasterLog(
       `${Phase.PLACEMENT}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
-    this.state.setAllGuideLogs(`${Phase.PLACEMENT}: place a settlement first and then a road`);
+    this.state.setAllGuideLogs(`${GUIDE_LOG[Phase.PLACEMENT]}`);
     this.state.transitionTo(new PlacementPhase());
   }
 }
@@ -511,18 +554,12 @@ class WhoStartsPhase extends State {
 class PlacementPhase extends State {
   private settlementBuilt: boolean = false;
 
-  public dice( playerId: string ): GameResponse {
+  public dice( playerId: string ) {
     console.log(`🗺️🎲PlacementPhase:dice: handles diceRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
-    if (p) {
-       this.state.setPersonalLog(p,
-        `You can't ${Action.DICE} during ${Phase.PLACEMENT}`)
-    }
-    return {
-      value: null,
-      message: `🗺️🎲PlacementPhase:dice: action forbidden during this phase.`,
-      data: null,
-    };
+    if (!p) return;
+    this.state.setPersonalLog(p,
+    this.state.forbiddenActionLog(Action.DICE, Phase.PLACEMENT));
   }
 
   public build( playerId: string, payload: BuildRequestPayload ) {
@@ -566,8 +603,8 @@ class PlacementPhase extends State {
       `🗺️🔨PlacementPhasee:build: ${playerId} built his/her first settlement and road !`,
     );
     this.settlementBuilt = false;
-    this.state.setTurnCount(undefined);
-    this.state.setCurrentTurnIndex(undefined);
+    this.state.setTurnCount();
+    this.state.setCurrentTurnIndex();
     this.state.setMasterLog(
       `${Phase.PLACEMENT}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
     this.state.setPersonalLog(p,
@@ -577,18 +614,17 @@ class PlacementPhase extends State {
   public trade( playerId: string ) {
     console.log(`🗺️⚖️PlacementPhase:trade: handles tradeRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
-    if (p) {
-       this.state.setPersonalLog(p,
-        `You can't ${Action.TRADE} during ${Phase.PLACEMENT}`)
-    }
+    if (!p) return;
+    this.state.setPersonalLog(p,
+    this.state.forbiddenActionLog(Action.TRADE, Phase.PLACEMENT));
   }
 
   public skip( playerId: string ) {
     console.log(`🗺️⏭️PlacementPhase:skip: handles skipRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
     if (p) {
-       this.state.setPersonalLog(p,
-        `You can't ${Action.SKIP} during ${Phase.PLACEMENT}`)
+      this.state.setPersonalLog(p,
+      this.state.forbiddenActionLog(Action.SKIP, Phase.PLACEMENT));
     }
     return {
       value: null,
@@ -598,116 +634,89 @@ class PlacementPhase extends State {
   }
 
   public phaseCheck(): void {
-    if (this.state.getTurnCount() !== this.state.getPlayers().size) {
-      //console.log(`🗺️🔎PlacementPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
-      return;
-    }
-    resourcesProduction(this.state.getBuildings(), this.state.getGraph(), this.state.getGameData().dicesSum, true);
-    //printAllPlayers(this.state.getGameData().players); // ⚠️DEBUG: remove in prod
+    if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
+    this.state.resourcesProduction(true);
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
-    //this.state.setMasterLog(`The ${Phase.PLACEMENT} is done, let's move to the ${Phase.RESOURCES} !`)
     this.state.setMasterLog(`${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
-    this.state.setAllGuideLogs(`${Phase.RESOURCES}: roll the dices to produce resources`);
+    this.state.setAllGuideLogs(`${GUIDE_LOG[Phase.RESOURCES]}`);
     this.state.transitionTo(new RessourcePhase());
     console.log('🗺️🔎PlacementPhase:phaseCheck: everybody is ready!');
   }
 }
 
 class RessourcePhase extends State {
-  public dice( playerId: string ): GameResponse {
-    console.log(
-      `🪵🎲RessourcePhase:dice: handles diceRequest from ${playerId}`,
-    );
+  public dice( playerId: string ) {
+    //console.log(
+    //  `🪵🎲RessourcePhase:dice: handles diceRequest from ${playerId}`,
+    //);
     const p = this.state.isPlayersTurn(playerId);
-    if (!p) {
-      return { value: null, message: "It's not your turn !", data: null };
-    }
-    const roll: GameResponse = this.state.rollDice(p);
-    this.state.setCurrentRoll(roll.value);
-    if (this.state.hasRolledBothDices(p) && roll.value) {
+    if (!p) return;
+    p.currentRoll = this.state.rollDice(p);
+    if (this.state.hasRolledBothDices(p) && p.currentRoll) {
       this.state.setDicesSum(p.firstDice + p.secondDice);
-      //this.state.setDicesSum(7); //⚠️ For testing 'robberRule' only
-      //this.state.setDicesSum(5); //⚠️ For testing 'robberRule' only
       console.log(
         `🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${this.state.getGameData().dicesSum}`,
       );
-      if (this.state.getGameData().dicesSum == ROBBER_ROLL) {
-        robberRule(this.state.getGameData().players, this.state.getGameData().board.layout);
-        this.state.setPersonalLog(p,
-          "You'll earn nothing this turn because you've just got robbed by Robert !");
-      } else {
-        resourcesProduction(this.state.getBuildings(),
-          this.state.getGraph(), this.state.getGameData().dicesSum, false );
-        this.state.setPersonalLog(p,
-          `You rolled both dices and got a total of ${this.state.getGameData().dicesSum}`);
+      switch (this.state.getGameData().dicesSum) {
+        case ROBBER_ROLL:
+          this.state.robberRule();
+          break;
+        default:
+          this.state.resourcesProduction(false);
+          break;
       }
-      this.state.setCurrentTurnIndex(undefined);
-      this.state.setTurnCount(undefined);
+      this.state.setCurrentTurnIndex();
+      this.state.setTurnCount();
       this.state.setMasterLog(
-        `It's the ${Phase.RESOURCES} now and ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
-      return {
-        value: null,
-        message: funnyLogs(p.playerId, p.firstDice + p.secondDice),
-        data: null,
-      };
+        `${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
     }
-    return { value: roll.value, message: roll.message, data: null };
   }
 
   public build( playerId: string ) {
-    console.log(`🪵🔨RessourcePhase:build: handles buildRequest from ${playerId}`);
+    //console.log(`🪵🔨RessourcePhase:build: handles buildRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
-    if (p) {
-      this.state.setPersonalLog(p,
-        `You can't ${Action.BUILD} during ${Phase.RESOURCES}`)
-    }
+    if (!p) return;
+    this.state.setPersonalLog(p,
+    this.state.forbiddenActionLog(Action.BUILD, Phase.RESOURCES));
   }
 
    public trade( playerId: string ) {
-    console.log(`🪵⚖️RessourcePhase:trade: handles tradeRequest from ${playerId}`);
+    //console.log(`🪵⚖️RessourcePhase:trade: handles tradeRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
-    if (p) {
-      this.state.setPersonalLog(p,
-        `You can't ${Action.TRADE} during ${Phase.RESOURCES}`)
-    }
+    if (!p) return;
+    this.state.setPersonalLog(p,
+    this.state.forbiddenActionLog(Action.TRADE, Phase.RESOURCES));
   }
 
   public skip( playerId: string ) {
-    console.log(`🪵⏭️RessourcePhase:skip: handles skipRequest from ${playerId}`);
+    //console.log(`🪵⏭️RessourcePhase:skip: handles skipRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
-    if (p) {
-      this.state.setPersonalLog(p,
-        `You can't ${Action.SKIP} during ${Phase.RESOURCES}`)
-    }
+    if (!p) return;
+    this.state.setPersonalLog(p,
+    this.state.forbiddenActionLog(Action.SKIP, Phase.RESOURCES));
   }
 
   public phaseCheck(): void {
-    if (this.state.getTurnCount() !== this.state.getPlayers().size) {
-      //console.log(`🪵🔎RessourcePhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
-      return;
-    }
-    //printAllPlayers(this.state.getGameData().players); // ⚠️DEBUG: remove in prod
+    if (this.state.getTurnCount() !==
+      this.state.getPlayers().size) return;
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
     this.state.resetAllDices();
     this.state.setMasterLog(
       `${Phase.TRADE_BUILD}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
-    this.state.setAllGuideLogs(`${Phase.TRADE_BUILD}: trade, build, upgrade or skip your turn`);
+    this.state.setAllGuideLogs(`${GUIDE_LOG[Phase.TRADE_BUILD]}`);
     this.state.transitionTo(new TradeAndBuildPhase());
-    console.log('🪵🔎RessourcePhase:phaseCheck: everybody is ready!');
+    //console.log('🪵🔎RessourcePhase:phaseCheck: everybody is ready!');
   }
 }
 
 class TradeAndBuildPhase extends State {
   public build( playerId: string, payload: BuildRequestPayload ) {
-    console.log(
-      `🤝🔨TradeAndBuildPhase:build: handles buildRequest from ${playerId}`,
-    );
-    if (!isBuildRequestPayload(payload)) {
-      console.log(`🤝🔨TradeAndBuildPhase:build: invalid payload !`);
-      return;
-    }
+    //console.log(
+    //  `🤝🔨TradeAndBuildPhase:build: handles buildRequest from ${playerId}`,
+    //);
+    if (!isBuildRequestPayload(payload)) return;
     const p = this.state.isPlayersTurn(playerId);
     if (!p) return;
     const response = buildCheck(
@@ -719,16 +728,16 @@ class TradeAndBuildPhase extends State {
     );
     this.state.setPersonalLog(p, `${response.message}`);
     if (response.valid === false) return;
-    console.log(
-      `🤝🔨TradeAndBuildPhase:build: ${playerId} built something ...`,
-    );
-    this.state.setTurnCount(undefined);
-    this.state.setCurrentTurnIndex(undefined);
+    //console.log(
+    //  `🤝🔨TradeAndBuildPhase:build: ${playerId} built something ...`,
+    //);
+    this.state.setTurnCount();
+    this.state.setCurrentTurnIndex();
     this.state.setMasterLog(`${playerId} built something ..`)
   }
 
   public trade( playerId: string, payload: TradeRequestPayload ) {
-    console.log(`🤝⚖️TradeAndBuildPhase:trade: handles tradeRequest from ${playerId}`);
+    //console.log(`🤝⚖️TradeAndBuildPhase:trade: handles tradeRequest from ${playerId}`);
     //if (!isTradeRequestPayload(payload)) {
     //  console.log(`🤝🔨TradeAndBuildPhase:trade: invalid payload !`);
     //  return {
@@ -742,54 +751,45 @@ class TradeAndBuildPhase extends State {
     const response = tradeCheck(payload, p, this.state.getGraph());
     this.state.setPersonalLog(p,`${response.message}`)
     if (response.valid === false) return;
-    console.log(
-      `🤝⚖️TradeAndBuildPhase:trade: ${playerId} traded something ...`,
-    );
-    this.state.setTurnCount(undefined);
-    this.state.setCurrentTurnIndex(undefined);
-    this.state.setMasterLog(`${playerId} traded something with a ${payload.trader} ...`)
+    //console.log(
+    //  `🤝⚖️TradeAndBuildPhase:trade: ${playerId} traded something ...`,
+    //);
+    this.state.setTurnCount();
+    this.state.setCurrentTurnIndex();
+    this.state.setMasterLog(
+      `${playerId} traded something with a ${payload.trader} ...`)
   }
 
-  public dice( playerId: string ): GameResponse {
-    console.log(`🤝🎲TradeAndBuildPhase:dice: handles diceRequest from ${playerId}`);
+  public dice( playerId: string ) {
+    //console.log(`🤝🎲TradeAndBuildPhase:dice: handles diceRequest from ${playerId}`);
     const p = this.state.getPlayerById(playerId);
-    if (p) {
-      this.state.setPersonalLog(p,
-        `You can't ${Action.DICE} during ${Phase.TRADE_BUILD}`)
-    }
-    return {
-      value: null,
-      message: `🤝🎲TradeAndBuildPhase:dice: action forbidden during this phase.`,
-      data: null,
-    };
+    if (!p) return;
+    this.state.setPersonalLog(p,
+    this.state.forbiddenActionLog(Action.DICE, Phase.TRADE_BUILD));
   }
 
   public skip( playerId: string ) {
-    console.log(`🤝⏭️TradeAndBuildPhase:skip: handles skipRequest from ${playerId}`);
+    //console.log(`🤝⏭️TradeAndBuildPhase:skip: handles skipRequest from ${playerId}`);
     const p = this.state.isPlayersTurn(playerId);
     if (!p) return;
-    this.state.setTurnCount(undefined);
-    this.state.setCurrentTurnIndex(undefined);
+    this.state.setTurnCount();
+    this.state.setCurrentTurnIndex();
     this.state.setPersonalLog(p, `You skipped your turn !`);
     this.state.setMasterLog(`${playerId} skipped his/her turn !`);
-    console.log(`🤝⏭️TradeAndBuildPhase:skip: ${playerId} skipped his turn !`);
+    //console.log(`🤝⏭️TradeAndBuildPhase:skip: ${playerId} skipped his turn !`);
   }
 
   public phaseCheck(): void {
-    if (this.state.isVictory()) {
-      console.log(`🤝🔎TradeAndBuildPhase:phaseCheck: ${this.state.getGameData().winner} won the game !`);
-      return;
-    }
-    if (this.state.getTurnCount() !== this.state.getPlayers().size) {
-      //console.log(`🤝🔎TradeAndBuildPhase:phaseCheck: some player didn't't played yet. (turn count: ${this.state.getTurnCount()})`);
-      return;
-    }
+    if (this.state.isVictory()) return;
+    if (this.state.getTurnCount() !==
+      this.state.getPlayers().size) return;
     this.state.setTurnCount(0);
     this.state.setCurrentTurnIndex(0);
-    console.log('🤝🔎TradeAndBuildPhase:phaseCheck: everybody is ready!');
-    this.state.setMasterLog(`${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
-    this.state.setAllGuideLogs(`${Phase.RESOURCES}: roll the dices to produce resources`);
+    this.state.setMasterLog(`
+      ${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
+    this.state.setAllGuideLogs(`${GUIDE_LOG[Phase.RESOURCES]}`);
     this.state.transitionTo(new RessourcePhase());
+    //console.log('🤝🔎TradeAndBuildPhase:phaseCheck: everybody is ready!');
   }
 }
 

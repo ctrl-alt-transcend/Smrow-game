@@ -22,12 +22,6 @@ export type PlayerProfile = {
   avatarURL: string | null;
 }
 
-export interface GameResponse {
-  value: number | null;
-  message: string | null;
-  data: GameData | null;
-}
-
 export type PlayerBase = {
   playerId: string;
   username: string;
@@ -37,11 +31,13 @@ export type PlayerBase = {
   firstDice: number,
   secondDice: number,
   totalDice: number,
+  currentRoll: number | null,
   roadsBuilt: number;
   faction: Faction;
   avatarURL: string | null;
   personalLog: GameLog;
   guideLog: string;
+  DEVMOD: boolean;
 }
 
 export type Player = PlayerBase & {
@@ -54,7 +50,6 @@ export type GameDataBase = {
   winner: string | null;
   winCondition: string | null;
   gameId: string;
-  currentRoll: number | null;
   dicesSum: number;
   masterLog: string;
   board: GameBoard;

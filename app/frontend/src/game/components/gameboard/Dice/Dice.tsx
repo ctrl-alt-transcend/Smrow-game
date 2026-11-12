@@ -15,8 +15,7 @@ import type { ButtonHTMLAttributes, CSSProperties } from 'react';
  * ================================================================ */
 
 /** Les six faces possibles du dé. */
-//export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6;
-export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6 | number;
+export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6;
 
 /**
  * Positionnement du dé par rapport à son conteneur.
@@ -81,24 +80,6 @@ interface Dice3DProps
   /** Appelé à chaque stabilisation — sert à synchroniser `value`. */
   onValueChange?: (value: DiceValue) => void;
 }
-
-//export interface Dice3DProps
-//  extends Omit<
-//    ButtonHTMLAttributes<HTMLButtonElement>,
-//    'defaultValue' | 'value' | 'children'
-//  > {
-//  rollingTime?: number;
-//  onRoll?: (value: DiceValue) => void;
-
-//  size?: number;
-//  faceBg?: string;
-//  faces?: string[];
-//  cheatValue?: DiceValue;
-//  placement?: DicePlacement;
-//  sound?: string;
-//  triggers?: string[];
-
-//}
 
 /* ================================================================
  * CSS — injecté une seule fois pour toute l'application.
@@ -243,11 +224,6 @@ const FACE_CLASSNAMES: readonly string[] = [
 
 const GRID_CELLS: readonly number[] = Array.from({ length: 25 }, (_, i) => i);
 
-// useless??
-//const DICE_VALUES: readonly DiceValue[] = [1, 2, 3, 4, 5, 6];
-//function isDiceValue(input: number): input is DiceValue {
-//  return (DICE_VALUES as readonly number[]).includes(input);
-//}
 
 /* ================================================================
  * Face par défaut (les points). Mémoïsée.

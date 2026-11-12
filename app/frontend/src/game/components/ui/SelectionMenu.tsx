@@ -12,19 +12,19 @@ import {
   Title,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { useSelectionDisplay } from "../../hooks/useSelectionDisplay";
-import type { GameBoardSelection } from "../../types/gameboard.types";
+import { useSelectionDisplay } from "../../hooks/useSelectionDisplay.ts";
+import type { GameBoardSelection } from "../../types/gameboard.types.tsx";
 import {
   type BuildRequestPayload,
   type TradeRequestPayload
-} from "../../../../../shared/game/game.types";
+} from "../../../../../shared/game/game.types.ts";
 import {
   GENERIC_PORT_RATE,
   SPECIAL_PORT_RATE,
   RESERVE_RATE,
   RessourceType,
   type TraderType
-} from "../../../../../shared/game/gameboard.types";
+} from "../../../../../shared/game/gameboard.types.ts";
 import { socket } from "../../../socket.tsx";
 
 
@@ -33,6 +33,29 @@ const RESSOURCE_OPTIONS = [RessourceType.WOOD, RessourceType.BRICK,
   RessourceType.SHEEP, RessourceType.WHEAT, RessourceType.ORE].map(
   (r) => ({ value: r, label: r }),
 );
+
+
+/* ------------------------------------------------------------------ *
+ * Responsive helper: measure the container width so font sizes and
+ * layouts adapt to the available space (same approach as DiceRoller).
+ * ------------------------------------------------------------------ */
+function useElementWidth<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      setWidth(entries[0].contentRect.width);
+    });
+    observer.observe(el);
+    setWidth(el.getBoundingClientRect().width);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, width };
+}
 
 
 /* ================================================================== *
@@ -45,6 +68,7 @@ const RESSOURCE_OPTIONS = [RessourceType.WOOD, RessourceType.BRICK,
  *                              offerLockedResource is set (specialized port).
  *  - TARGET side is always freely choosable (resource + amount), whatever
  *    the kind of trade (ports and reserve included).
+ *  - `isMyTurn = false` → every field is disabled (view-only).
  * ================================================================== */
 
 interface TradeOfferPanelProps {
@@ -56,6 +80,8 @@ interface TradeOfferPanelProps {
   sourceKind: TraderType;
   /** recipient player (player-to-player trades only) */
   targetOwnerId?: string | null;
+  /** when false, all fields are disabled */
+  isMyTurn: boolean;
 }
 
 const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
@@ -64,8 +90,9 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
   sourceId,
   sourceKind,
   targetOwnerId = null,
+  isMyTurn,
 }) => {
-  // Target side — always editable
+  // Target side — always editable (when it's the player's turn)
   const [targetResource, setTargetResource] = useState<RessourceType | null>(null);
   const [targetAmount, setTargetAmount] = useState<number>(1);
 
@@ -94,7 +121,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
     targetAmount > 0;
 
   const handleSend = useCallback(() => {
-    if (!isValid) return;
+    if (!isValid || !isMyTurn) return;
 
     const payload: TradeRequestPayload = {
       trader: sourceKind,
@@ -111,6 +138,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
     console.log("Trade offer sent:", payload, "→ owner:", targetOwnerId);
   }, [
     isValid,
+    isMyTurn,
     sourceKind,
     sourceId,
     offerResource,
@@ -123,9 +151,9 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
   return (
     <Stack gap="xs" w="100%">
       {/* Offer side */}
-      <Group justify="space-between" gap="xs" grow>
+      <Group justify="space-between" gap="xs" grow wrap="wrap">
         {isOfferResourceLocked ? (
-          <Text size="sm">
+          <Text size="sm" flex={1} miw={120}>
             Offer: <b>{offerLockedResource}</b> × {offerAmount}{" "}
             <Text component="span" c="dimmed" size="xs">
               (locked by port)
@@ -138,6 +166,8 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
             data={RESSOURCE_OPTIONS}
             value={offerResource}
             onChange={(v) => setOfferResource(v as RessourceType)}
+            disabled={!isMyTurn}
+            style={{ flex: 1, minWidth: 120 }}
           />
         )}
         {!isBankTrade && (
@@ -146,26 +176,30 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
             min={1}
             value={freeOfferAmount}
             onChange={(v) => setFreeOfferAmount(Number(v) || 1)}
-            w={90}
+            disabled={!isMyTurn}
+            style={{ flex: 0, width: 90 }}
           />
         )}
       </Group>
 
       {/* Target side — always freely choosable (ports & reserve included) */}
-      <Group justify="space-between" gap="xs" grow>
+      <Group justify="space-between" gap="xs" grow wrap="wrap">
         <Select
           size="xs"
           placeholder="Target resource"
           data={RESSOURCE_OPTIONS}
           value={targetResource}
           onChange={(v) => setTargetResource(v as RessourceType)}
+          disabled={!isMyTurn}
+          style={{ flex: 1, minWidth: 120 }}
         />
         <NumberInput
           size="xs"
           min={1}
           value={targetAmount}
           onChange={(v) => setTargetAmount(Number(v) || 1)}
-          w={90}
+          disabled={!isMyTurn}
+          style={{ flex: 0, width: 90 }}
         />
       </Group>
 
@@ -176,7 +210,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
           : "Free rate — agreed between players"}
       </Text>
 
-      <Button size="xs" onClick={handleSend} disabled={!isValid}>
+      <Button size="xs" onClick={handleSend} disabled={!isValid || !isMyTurn}>
         Send trade offer
       </Button>
     </Stack>
@@ -184,7 +218,8 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
 };
 
 /* ================================================================== *
- * BuildSelectionButton : road / settlement construction (unchanged logic)
+ * BuildSelectionButton : road / settlement construction (unchanged
+ * core logic; `isMyTurn = false` disables the button entirely)
  * ================================================================== */
 
 interface PendingBuild {
@@ -197,12 +232,15 @@ interface BuildSelectionButtonProps {
   selected: GameBoardSelection;
   masterLog: string | null;
   onBuilt?: (target: BuildRequestPayload) => void;
+  /** when false, building is disabled */
+  isMyTurn: boolean;
 }
 
 const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   selected,
   masterLog,
   onBuilt,
+  isMyTurn,
 }) => {
   const [busy, setBusy] = useState(false);
   const [buttonName, setButtonName] = useState("");
@@ -227,8 +265,8 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   }, [selected.selectedRoad, selected.selectedSettlement]);
 
   /** 1. Save the "build intention" and lock the component */
-  const handleConfirm = useCallback(() => {
-    if (busy || !target) return;
+  const handleBuildRequest = useCallback(() => {
+    if (busy || !target || !isMyTurn) return;
     pendingRef.current = { target, logAtSend: masterLog };
     setBusy(true);
     socket.emit("build", {
@@ -236,7 +274,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
       id: target.id,
       data: target.data,
     });
-  }, [busy, target, masterLog]);
+  }, [busy, target, masterLog, isMyTurn]);
 
   /** 2. Unlock component when the response arrives */
   useEffect(() => {
@@ -265,6 +303,8 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   }, [busy]);
 
   const openModal = () => {
+    if (!isMyTurn) return;
+
     if (!target) {
       modals.openConfirmModal({
         title: "Pick a valid construction location",
@@ -293,7 +333,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
           </Text>
         ),
         labels: { confirm: "Confirm", cancel: "Cancel" },
-        onConfirm: handleConfirm,
+        onConfirm: handleBuildRequest,
         centered: true,
       });
     } else {
@@ -316,7 +356,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
           </Text>
         ),
         labels: { confirm: "Confirm", cancel: "Cancel" },
-        onConfirm: handleConfirm,
+        onConfirm: handleBuildRequest,
         centered: true,
       });
     }
@@ -324,47 +364,53 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
 
 
   return (
-    <Button onClick={openModal} loading={busy} disabled={busy}>
-      Build
+    <Button
+      onClick={openModal}
+      loading={busy}
+      disabled={busy || !isMyTurn}
+    >
+      {buttonName || (isMyTurn ? "Build" : "Not your turn")}
     </Button>
   );
 };
 
 /* ================================================================== *
  * Item list rendering: one line per item, font size adapts to the
- * longest label so every entry fits on a single line.
+ * longest label AND to the actual card width (responsive).
  *
- * TUNING KNOBS:
- *  - ITEMS_FONT_MIN  : minimum size (too low → unreadable, raise this first)
- *  - ITEMS_FONT_MAX  : maximum size for short labels
- *  - ITEMS_AVG_CHAR  : approximates the character width (px) used by Mantine's
- *                      default font at 1em — lowering it allows longer lines
- *                      before shrinking.
- * Very long labels beyond the minimum size are truncated with an ellipsis
- * instead of overflowing.
+ * The available width is measured from the container (ResizeObserver),
+ * so ITEMS_MAX_WIDTH below is only a fallback before the first measure.
+ * Very long labels beyond the minimum size are truncated with an
+ * ellipsis instead of overflowing.
  * ================================================================== */
 
-const ITEMS_FONT_MIN = 18;
+const ITEMS_FONT_MIN = 14;
 const ITEMS_FONT_MAX = 18;
 const ITEMS_AVG_CHAR = 5.2; // px per char at fontSize 1em (default sans-serif)
-const ITEMS_MAX_WIDTH = 220; // available width in the card, in px
+const ITEMS_FALLBACK_WIDTH = 220; // used before the container is measured
 
-const computeItemsFontSize = (labels: string[]): number => {
+const computeItemsFontSize = (labels: string[], availableWidth: number): number => {
   const maxLen = labels.reduce((max, l) => Math.max(max, l.length), 0);
-  const rawSize = ITEMS_MAX_WIDTH / (maxLen * ITEMS_AVG_CHAR);
+  if (maxLen === 0 || availableWidth <= 0) return ITEMS_FONT_MAX;
+  const rawSize = availableWidth / (maxLen * ITEMS_AVG_CHAR);
   return Math.max(ITEMS_FONT_MIN, Math.min(ITEMS_FONT_MAX, rawSize));
 };
 
 interface SelectionItemsProps {
   items: { label: string }[];
+  /** measured available width inside the card, in px */
+  availableWidth: number;
 }
 
-const SelectionItems: React.FC<SelectionItemsProps> = ({ items }) => {
+const SelectionItems: React.FC<SelectionItemsProps> = ({ items, availableWidth }) => {
   if (items.length === 0) {
     return <Text c="dimmed">No selection</Text>;
   }
 
-  const fontSize = computeItemsFontSize(items.map((i) => i.label));
+  const fontSize = computeItemsFontSize(
+    items.map((i) => i.label),
+    availableWidth,
+  );
 
   return (
     <Stack gap={2} w="100%" align="flex-start" pl="xs">
@@ -388,29 +434,42 @@ const SelectionItems: React.FC<SelectionItemsProps> = ({ items }) => {
 };
 
 /* ================================================================== *
- * TileSelection : main component, dispatch by selection kind
+ * SelectionMenu : main component, dispatch by selection kind
  * ================================================================== */
 
-interface TileSelectionProps {
+interface SelectionMenuProps {
   selected: GameBoardSelection;
   masterLog?: string | null;
   onBuilt?: (target: BuildRequestPayload) => void;
   /** id of the current player — TODO wire to your session/auth */
   currentPlayerId?: string | null;
+  isMyTurn: boolean;
 }
 
-export const TileSelection: React.FC<TileSelectionProps> = ({
+export const SelectionMenu: React.FC<SelectionMenuProps> = ({
   selected,
   masterLog = null,
   onBuilt,
+  isMyTurn,
   //currentPlayerId = null,
 }) => {
   const items = useSelectionDisplay(selected);
+  const { ref: cardBodyRef, width: cardBodyWidth } =
+    useElementWidth<HTMLDivElement>();
+
+  // Usable width for the item labels: measured width minus paddings/bullet.
+  const itemsAvailableWidth = cardBodyWidth > 0
+    ? cardBodyWidth - 40
+    : ITEMS_FALLBACK_WIDTH;
 
   /* ------------------------------------------------------------ *
    * Modular content depending on the selected kind
    * ------------------------------------------------------------ */
   const renderActionArea = () => {
+    // Global gate: when it's not the player's turn, everything is
+    // displayed but disabled (fields greyed out, buttons inert).
+    const turnFlag = { isMyTurn };
+
     // 1. COAST: bank trade through a port
     if (selected.selectedCoast) {
       const { port } = selected.selectedCoast;
@@ -429,6 +488,7 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
             ratio={GENERIC_PORT_RATE}
             sourceId={port.coastId}
             sourceKind="generic port"
+            {...turnFlag}
           />
         );
       }
@@ -439,6 +499,7 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
           offerLockedResource={port.type as RessourceType}
           sourceId={port.coastId}
           sourceKind="specialized port"
+          {...turnFlag}
         />
       );
     }
@@ -455,6 +516,7 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
           selected={selected}
           masterLog={masterLog}
           onBuilt={onBuilt}
+          {...turnFlag}
         />
       );
     }
@@ -476,6 +538,7 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
       //        sourceId={selected.selectedSettlement.id}
       //        sourceKind="player"
       //        targetOwnerId={ownerId}
+      //        {...turnFlag}
       //      />
       //    </Stack>
       //  );
@@ -486,6 +549,7 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
           selected={selected}
           masterLog={masterLog}
           onBuilt={onBuilt}
+          {...turnFlag}
         />
       );
     }
@@ -497,6 +561,7 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
           ratio={RESERVE_RATE}
           sourceId={selected.selectedReserve.id}
           sourceKind="reserve"
+          {...turnFlag}
         />
       );
     }
@@ -509,11 +574,29 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
   };
 
   return (
-    <Box style={{ flex: 1, minWidth: 220, alignContent: "center" }}>
-      <Card withBorder radius="md" shadow="sm" h={290}>
-        <Stack gap="xs" justify="center" align="center">
-          <Title order={4}>Selection</Title>
-          <SelectionItems items={items} />
+    <Box style={{ flex: 1, minWidth: 220, width: "100%", alignContent: "center" }}>
+      <Card
+        withBorder
+        radius="md"
+        shadow="sm"
+        mih={290}
+        style={{ display: "flex", flexDirection: "column" }}
+      >
+        <Stack gap="xs" justify="center" align="center" w="100%">
+          <Group justify="space-between" w="100%" wrap="nowrap">
+            <Title order={4}>Selection</Title>
+            {!isMyTurn && (
+              <Text size="xs" c="dimmed" style={{ whiteSpace: "nowrap" }}>
+                Not your turn
+              </Text>
+            )}
+          </Group>
+          <Box ref={cardBodyRef} w="100%">
+            <SelectionItems
+              items={items}
+              availableWidth={itemsAvailableWidth}
+            />
+          </Box>
           {renderActionArea()}
         </Stack>
       </Card>
@@ -521,4 +604,4 @@ export const TileSelection: React.FC<TileSelectionProps> = ({
   );
 };
 
-export default TileSelection;
+export default SelectionMenu;

@@ -23,9 +23,9 @@ export function isTradeRequestPayload(p: unknown): p is TradeRequestPayload {
 export function updateValue(
   currentValue: number,
   limit: number,
-  newValue: number | undefined,
+  newValue?: number,
 ): number {
-  if (newValue !== undefined) {
+  if (newValue) {
     return newValue;
   } else if (currentValue + 1 === limit) {
     return 0;
@@ -34,20 +34,19 @@ export function updateValue(
   }
 }
 
-export function funnyLogs(id: string, value: number): string {
+export function funnyLogs( value: number ): string {
   if (value <= 3) {
-    return `${id} got an almost useless ${value} ...`;
+    return `got an almost useless ${value} ...`;
+  } else if (value > 3 && value <= 6) {
+    return `got a tiny little ${value} ...`;
+  } else if (value === 7) {
+    return `got a damned ${value} !`;
+  } else if (value > 7 && value <= 9) {
+    return `got a solid ${value} .`;
+  } else if (value > 9 && value <= 12) {
+    return `got a huge ${value} !`;
   }
-  if (value > 3 && value <= 6) {
-    return `${id} got a tiny little ${value} ...`;
-  }
-  if (value > 6 && value <= 9) {
-    return `${id} got a solid ${value} .`;
-  }
-  if (value > 9 && value <= 12) {
-    return `${id} got a huge ${value} !`;
-  }
-  return `${id} rolled a ${value}` ;
+  return `rolled a ${value}` ;
 }
 
 export function printPlayer(p: Player) {

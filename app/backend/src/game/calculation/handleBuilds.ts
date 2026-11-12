@@ -275,12 +275,6 @@ export const buildCheck = (
 ): { valid: boolean; message: string } => {
   let check: BuildValidation = { valid: false, message: '' };
   try {
-    if ((payload.data as { id?: unknown })?.id !== payload.id) {
-      return {
-        valid: false,
-        message: 'Incoherent data payload id ...',
-      };
-    }
     let target: RoadData | SettlementData | undefined;
     switch (payload.kind) {
       case 'road':
@@ -307,6 +301,8 @@ export const buildCheck = (
           if (check.valid) player.settlementsBuilt.set(target.id, target);
         } else if (target.ownerId == player.playerId) {
           check = cityUpgradeCheck(target, player);
+        } else {
+          check.message = "This settlement is owned by another player.";
         }
         break;
       default:

@@ -2,7 +2,7 @@ import { AppShell, Burger, Group, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import GameBoard from './components/gameboard/GameBoard.tsx';
 import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
-import { TileSelection } from './components/ui/TileSelection.tsx';
+import { SelectionMenu } from './components/ui/SelectionMenu.tsx';
 import { DiceRoller } from './components/ui/DiceRoller.tsx';
 import GameMasterLog from './components/ui/GameMasterLog.tsx';
 import { useGameState } from './hooks/useGameState.ts';
@@ -26,11 +26,9 @@ function GameShell({ game }: { game: GameDataDto }) {
   const GameBoardProps = useGameBoardFactory(game.board);
   usePersonalNotification(game.currentPlayer.personalLog);
 
-  const isMyTurn = game.currentPlayer.playerId === game.whosTurn;
-  console.log(`whosTurn: ${game.whosTurn}`)
-  const masterLog = isMyTurn
-    ? game.currentPlayer.guideLog
-    : game.masterLog;
+  let isMyTurn = game.currentPlayer.playerId === game.whosTurn;
+  if (game.currentPlayer.DEVMOD) isMyTurn = true;
+  const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
 
   return (
     <AppShell
@@ -57,12 +55,13 @@ function GameShell({ game }: { game: GameDataDto }) {
 
       <AppShell.Navbar p="md">
         <Group grow gap="md" w="100%" align="center" justify="center">
-          <TileSelection
+          <SelectionMenu
             selected={GameBoardProps.selected}
             masterLog={game.masterLog}
+            isMyTurn={isMyTurn}
           />
-          <DiceRoller diceRoll={game.currentRoll} masterLog={game.masterLog} />
-          <SkipTurnButton/>
+          <DiceRoller currentRoll={game.currentPlayer.currentRoll} isMyTurn={isMyTurn}/>
+          <SkipTurnButton isMyTurn={isMyTurn}/>
         </Group>
       </AppShell.Navbar>
 

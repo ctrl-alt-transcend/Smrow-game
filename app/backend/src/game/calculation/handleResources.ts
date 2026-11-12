@@ -1,13 +1,9 @@
 import type { Resources, TradeForm } from '@shared/game/game.types';
 import {
-  GameBoardGraph,
   LandType,
   BuildingType,
-  BuildingsInGame,
-  LAND_RESSOURCE,
   BUILD_COSTS
 } from '@shared/game/gameboard.types';
-
 
 export function earnTradeResources(
   resources: Resources,
@@ -142,7 +138,7 @@ export function hasEnoughResourcesToBuild(
   return false;
 }
 
-function produceResources(
+export function produceResources(
   land: LandType,
   resources: Resources,
   isCity?: boolean
@@ -179,35 +175,4 @@ function produceResources(
       return 0;
   }
   return isCity ? 2 : 1;
-};
-
-export function resourcesProduction(
-  buildings: BuildingsInGame,
-  graph: GameBoardGraph,
-  dicesSum: number,
-  placementPhase: boolean
-) {
-  for (const [settlementId, player] of buildings) {
-    const graphEntry = graph.get(settlementId);
-    if (!graphEntry) {
-      console.log(`👀⛔ResourcesCheck:building: doesn't exists ...`);
-      return { valid: false, reason: 'unknown building' };
-    }
-    graphEntry.adjacentTiles.forEach((tile) => {
-      let prod: number = 0;
-      if (placementPhase === true)
-        prod = produceResources(tile.land, player.resources);
-      else if (tile.value === dicesSum && !tile.hasRobber) {
-        const settlement = player.settlementsBuilt.get(settlementId);
-        if (settlement)
-          prod = produceResources(tile.land, player.resources, settlement.isCity);
-      }
-      if (prod > 0)
-        console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESSOURCE[tile.land]}`);
-      else if (tile.hasRobber)
-        console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by Robert the Robber !`);
-      else if (tile.land == LandType.DESERT)
-        console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything in the ${LandType.DESERT}`);
-    });
-  }
 };

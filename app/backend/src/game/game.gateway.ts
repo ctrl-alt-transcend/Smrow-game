@@ -75,7 +75,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('dice')
   dice(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
-    const result = game.diceRequest(client.data.user.username);
+    game.diceRequest(client.data.user.username);
 
     //⚠️ FOR TESTING
     game.phaseCheckRequest();
@@ -87,7 +87,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     game.phaseCheckRequest();
     this.emitGameDataDto(game, client.data.user.username);
     //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
-    return { ...result };
   }
 
 

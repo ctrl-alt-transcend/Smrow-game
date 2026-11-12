@@ -1,19 +1,12 @@
-//import { useCallback } from "react";
-import {
-  Button,
-  Text,
-} from "@mantine/core";
+import { Button, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { socket } from "../../../socket.tsx";
+import { useCallback } from "react";
 
-export default function SkipTurnButton() {
-  //const handleConfirm = useCallback(() => {
-  //  socket.emit('skip');
-  //}, []);
-
-  const handleConfirm = () => {
+export default function SkipTurnButton({ isMyTurn }: { isMyTurn: boolean }) {
+  const handleSkipRequest = useCallback(() => {
     socket.emit('skip');
-  };
+  }, []);
 
   const openModal = () => {
     modals.openConfirmModal({
@@ -24,14 +17,14 @@ export default function SkipTurnButton() {
         </Text>
       ),
       labels: { confirm: "Confirm", cancel: "Cancel" },
-      onConfirm: handleConfirm,
+      onConfirm: handleSkipRequest,
       centered: true,
     });
   };
 
   return (
-    <Button onClick={openModal} fullWidth>
+    <Button onClick={openModal} disabled={!isMyTurn} fullWidth>
       Skip turn
     </Button>
   );
-};
+}
