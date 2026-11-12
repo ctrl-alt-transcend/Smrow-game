@@ -86,5 +86,6 @@ export class GameService {
     game
       .getPlayers()
       .set(playerProfile.username, game.initPlayer(playerProfile.username));
+    game.setDEVMOD(playerProfile.username); //⚠️REMOVE in PROD
   }
 }

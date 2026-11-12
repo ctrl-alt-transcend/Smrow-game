@@ -85,7 +85,6 @@ class GameStateContext {
       startingRolls: new Map<string, number>(),
       winner: null,
       winCondition: null,
-      turnCount: 0,
       turnOrder: [],
       gameId: gameId,
       masterLog: `${Phase.START}: roll the dices`,
@@ -139,7 +138,6 @@ class GameStateContext {
       victoryPoints: 6, //⚠️ For testing only
       firstDice: 0,
       secondDice: 0,
-      totalDice: 0,
       settlementsBuilt: new Map<string, SettlementData>(),
       roadsBuilt: 0,
       level: 1, //⚠️ For testing only
@@ -166,7 +164,6 @@ class GameStateContext {
       //  ore: 0,
       //},
     };
-    if (playerId == 'zuck') newPlayer.DEVMOD = true;
     return newPlayer;
   }
 
@@ -232,9 +229,6 @@ class GameStateContext {
   public getSettings(): SettingsData {
     return this.settings;
   }
-  public getTurnCount(): number {
-    return this.data.turnCount;
-  }
   public getCurrentTurnIndex(): number {
     return this.data.currentTurnIndex;
   }
@@ -261,7 +255,6 @@ class GameStateContext {
       victoryPoints: p.victoryPoints,
       firstDice: p.firstDice,
       secondDice: p.secondDice,
-      totalDice: p.totalDice,
       roadsBuilt: p.roadsBuilt,
       level: p.level,
       username: p.username,
@@ -344,6 +337,12 @@ class GameStateContext {
       message: message,
     }
   }
+  /** @description Used in DEV: allows player to play for others */
+  public setDEVMOD(playerId: string) {
+    const p = this.getPlayerById(playerId);
+    if (!p) return;
+    p.DEVMOD = true;
+  }
   public resetAllDices() {
     this.data.players.forEach((player) => {
       this.resetDices(player);
@@ -352,23 +351,15 @@ class GameStateContext {
   public resetDices(p: Player) {
     p.firstDice = 0;
     p.secondDice = 0;
-    p.totalDice = 0;
-  }
-  public setTurnCount(count?: number) {
-    this.data.turnCount = updateValue(
-      this.data.turnCount,
-      this.data.players.size + 1,
-      count,
-    );
   }
   public setCurrentTurnIndex(index?: number) {
     this.data.currentTurnIndex = updateValue(
       this.data.currentTurnIndex,
-      this.data.players.size,
+      this.data.players.size + 1,
       index,
     );
     this.data.whosTurn =
-      this.data.turnOrder.at(this.data.currentTurnIndex) ?? '';
+      this.data.turnOrder[this.data.currentTurnIndex];
   }
 
   /** @argument winCondition: explain why the player won  */
@@ -391,7 +382,6 @@ class GameStateContext {
     } else if (p.secondDice === 0) {
       p.secondDice = value;
       console.log(`${p.playerId} #2 rolll: ${value}`);
-      p.totalDice = p.secondDice + p.firstDice;
     } else {
       value = null;
     }
@@ -399,7 +389,6 @@ class GameStateContext {
   }
 
   public setupNextPhase( nextPhase: Phase ) {
-    this.setTurnCount(0);
     this.setCurrentTurnIndex(0);
     this.setCurrentPhase(nextPhase);
     this.setMasterLog(
@@ -497,7 +486,6 @@ class WhoStartsPhase extends State {
     if (!p) return;
     p.currentRoll = this.state.rollDice(p);
     if (this.state.hasRolledBothDices(p) && p.currentRoll) {
-      this.state.setTurnCount();
       this.state.setPersonalLog(p,
         `You ${funnyRollLog(p.firstDice + p.secondDice)}`)
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
@@ -535,15 +523,9 @@ class WhoStartsPhase extends State {
   }
 
   public phaseCheck(): void {
-    if ((this.state.getTurnCount() !==
-      this.state.getPlayers().size) ||
-        (this.state.getStartingRolls().size !==
-          this.state.getPlayers().size)) return;
+    if (this.state.getStartingRolls().size !==
+          this.state.getPlayers().size) return;
     this.computeTurnOrder();
-    let i = 0;
-    this.state.getTurnOrder().forEach(player => {
-      console.log(`Player ${++i}: ${player}`);
-    });
     this.state.setupNextPhase(Phase.PLACEMENT);
     this.state.transitionTo(new PlacementPhase());
   }
@@ -594,7 +576,6 @@ class PlacementPhase extends State {
       return;
     }
     this.settlementBuilt = false;
-    this.state.setTurnCount();
     this.state.setCurrentTurnIndex();
     this.state.setMasterLog(
       `${Phase.PLACEMENT}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
@@ -619,7 +600,9 @@ class PlacementPhase extends State {
   }
 
   public phaseCheck(): void {
-    if (this.state.getTurnCount() !==
+    console.log(`getCurrentTurnIndex: ${this.state.getCurrentTurnIndex()}
+    this.state.getPlayers().size: ${this.state.getPlayers().size}`)
+    if (this.state.getCurrentTurnIndex() !==
       this.state.getPlayers().size) return;
     this.state.resourcesProduction(true);
     this.state.setupNextPhase(Phase.RESOURCES);
@@ -638,9 +621,9 @@ class RessourcePhase extends State {
     p.currentRoll = this.state.rollDice(p);
     if (this.state.hasRolledBothDices(p) && p.currentRoll) {
       this.state.setDicesSum(p.firstDice + p.secondDice);
-      console.log(
-        `🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${this.state.getGameData().dicesSum}`,
-      );
+      //console.log(
+      //  `🪵🎲RessourcePhase:dice: ${p.playerId} rolled both dices and got a total of ${this.state.getGameData().dicesSum}`,
+      //);
       switch (this.state.getGameData().dicesSum) {
         case ROBBER_ROLL:
           this.state.robberRule();
@@ -650,7 +633,6 @@ class RessourcePhase extends State {
           break;
       }
       this.state.setCurrentTurnIndex();
-      this.state.setTurnCount();
       this.state.setMasterLog(
         `${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`)
     }
@@ -681,7 +663,7 @@ class RessourcePhase extends State {
   }
 
   public phaseCheck(): void {
-    if (this.state.getTurnCount() !==
+    if (this.state.getCurrentTurnIndex() !==
       this.state.getPlayers().size) return;
     this.state.setupNextPhase(Phase.TRADE_BUILD);
     this.state.transitionTo(new TradeAndBuildPhase());
@@ -735,11 +717,9 @@ class TradeAndBuildPhase extends State {
     this.state.setPersonalLog(p, `${response.message}`);
     if (response.valid === false) return;
     this.buildCount++;
-    if (this.isTradeBuildLimit(p)) {
-      this.state.setTurnCount();
+    if (this.isTradeBuildLimit(p))
       this.state.setCurrentTurnIndex();
-    }
-    this.state.setMasterLog(`${playerId} built something ..`)
+    this.state.setMasterLog(`${playerId} built something ...`)
   }
 
   public trade( playerId: string, payload: TradeRequestPayload ) {
@@ -755,10 +735,8 @@ class TradeAndBuildPhase extends State {
     this.state.setPersonalLog(p,`${response.message}`)
     if (response.valid === false) return;
     this.tradeCount++;
-    if (this.isTradeBuildLimit(p)) {
-      this.state.setTurnCount();
+    if (this.isTradeBuildLimit(p))
       this.state.setCurrentTurnIndex();
-    }
     this.state.setMasterLog(
       `${playerId} traded something with a ${payload.trader} ...`)
   }
@@ -775,7 +753,6 @@ class TradeAndBuildPhase extends State {
     //console.log(`🤝⏭️TradeAndBuildPhase:skip: handles skipRequest from ${playerId}`);
     const p = this.state.isPlayersTurn(playerId);
     if (!p) return;
-    this.state.setTurnCount();
     this.state.setCurrentTurnIndex();
     this.state.setPersonalLog(p, `You skipped your turn !`);
     this.state.setMasterLog(`${playerId} skipped his/her turn !`);
@@ -785,7 +762,7 @@ class TradeAndBuildPhase extends State {
 
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
-    if (this.state.getTurnCount() !==
+    if (this.state.getCurrentTurnIndex() !==
       this.state.getPlayers().size) return;
     this.state.setupNextPhase(Phase.RESOURCES);
     this.state.transitionTo(new RessourcePhase());

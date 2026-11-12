@@ -25,9 +25,8 @@ export function updateValue(
   limit: number,
   newValue?: number,
 ): number {
-  if (newValue) {
-    return newValue;
-  } else if (currentValue + 1 === limit) {
+  if (newValue !== undefined) return newValue;
+  if (currentValue + 1 === limit) {
     return 0;
   } else {
     return currentValue + 1;

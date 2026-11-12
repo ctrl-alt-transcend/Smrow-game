@@ -31,7 +31,6 @@ export type PlayerBase = {
   resources: Resources;
   firstDice: number,
   secondDice: number,
-  totalDice: number,
   currentRoll: number | null,
   roadsBuilt: number;
   faction: Faction;
@@ -61,7 +60,6 @@ export type GameDataBase = {
 export type GameData = GameDataBase & {
   players: Map<string, Player>;
   startingRolls: Map<string, number>;
-  turnCount: number;
   turnOrder: string[];
   currentTurnIndex: number;
 }
