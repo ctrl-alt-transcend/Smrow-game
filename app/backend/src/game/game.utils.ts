@@ -34,7 +34,7 @@ export function updateValue(
   }
 }
 
-export function funnyLogs( value: number ): string {
+export function funnyRollLog( value: number ): string {
   if (value <= 3) {
     return `got an almost useless ${value} ...`;
   } else if (value > 3 && value <= 6) {

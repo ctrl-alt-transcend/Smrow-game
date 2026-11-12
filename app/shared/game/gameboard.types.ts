@@ -6,6 +6,9 @@ export const GENERIC_PORT_RATE = 3;
 export const RESERVE_RATE = 4;
 export const SETTLEMENT_POINT = 1;
 
+export const TRADE_LIMIT_DFLT = 2;
+export const BUILD_LIMIT_DFLT = 2;
+
 export const CITY_POINT = 1;
 export const POINTS_TO_WIN = 10;
 export const ROBBER_ROLL = 7;
@@ -136,6 +139,8 @@ export const Action = {
   BUILD: 'build',
   TRADE: 'trade',
   SKIP: 'skip the turn',
+  BUILD_LIMIT: 'build more for this turn',
+  TRADE_LIMIT: 'trade more for this turn',
 } as const;
 export type Action = (typeof Action)[keyof typeof Action];
 

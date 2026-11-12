@@ -60,7 +60,7 @@ export type GameDataBase = {
 
 export type GameData = GameDataBase & {
   players: Map<string, Player>;
-  startingRolls: Map<string, number | null>;
+  startingRolls: Map<string, number>;
   turnCount: number;
   turnOrder: string[];
   currentTurnIndex: number;
@@ -71,6 +71,14 @@ export type GameDataDto  = GameDataBase & {
   currentPlayer: PlayerDto;
 }
 
+/**
+ * @var tradeLimit: defines how many valid trades a player can do during 'Trade and Build'
+ * @var buildLimit: defines how many valid build a player can do during 'Trade and Build'
+*/
+export type SettingsData = {
+  tradeLimit: number;
+  buildLimit: number;
+}
 
 export type GameLog = {
   id: number,
