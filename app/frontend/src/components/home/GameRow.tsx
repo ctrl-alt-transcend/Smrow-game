@@ -1,25 +1,29 @@
-import type { Game } from "../../mocks/games.mock";
 import { Table, Button } from "@mantine/core";
+import type { GameList } from '@shared/game/game.types';
+
 
 type GameRowProps = {
-  game: Game;
+  game: GameList;
 };
 
+const maxPlayers = 4;
+
+
 export default function GameRow({ game }: GameRowProps) {
-  const isFull = game.players.length >= game.maxPlayers;
-  const isPlaying = game.status === "playing";
-  const variant = isPlaying ? "default" : "filled";
+  const isFull = game.playerCount >= maxPlayers;
+  const gameStart = game.state !== "waiting for players";
+  const variant = !gameStart ? "default" : "filled";
 
   return (
     <Table.Tr>
-      <Table.Td>{game.id}</Table.Td>
+      <Table.Td>{game.gameId.substring(0, 5)}</Table.Td>
       <Table.Td>
-        {game.players.length}/{game.maxPlayers}
+        {game.playerCount}/{maxPlayers}
       </Table.Td>
-      <Table.Td>{game.status}</Table.Td>
+      <Table.Td>{!gameStart ? "Game Started" : "Waiting for players"}</Table.Td>
       <Table.Td>
-        <Button disabled={!isPlaying && isFull} variant={variant} miw={100}>
-          {isPlaying ? "Spectate" : "Join"}
+        <Button disabled={gameStart && isFull} variant={variant} miw={100}>
+          {!gameStart ? "Spectate" : "Join"}
         </Button>
       </Table.Td>
     </Table.Tr>

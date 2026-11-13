@@ -1,8 +1,8 @@
-import { Controller, Post, UseGuards, Req, Body } from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Body, Get } from '@nestjs/common';
 import { GameService } from './game.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
-import type { PlayerProfile } from '@shared/game/game.types';
+import type { PlayerProfile, GameList } from '@shared/game/game.types';
 import type { UserPublic } from '@shared/types';
 //import type { BuildDto } from './dto/build.dto';
 
@@ -12,6 +12,12 @@ export class GameController {
     private readonly gameService: GameService,
     private readonly userService: UserService,
   ) {}
+
+  @Get('/')
+  @UseGuards(JwtAuthGuard)
+  async getGamesList() : Promise<GameList[]> {
+    return await this.gameService.getGamesList();
+  }
 
   @Post('/create')
   @UseGuards(JwtAuthGuard)

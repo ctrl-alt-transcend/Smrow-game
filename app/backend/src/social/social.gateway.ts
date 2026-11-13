@@ -5,13 +5,13 @@ import {
   SubscribeMessage,
   WebSocketServer
 } from '@nestjs/websockets';
-import { Prisma } from '@prisma/client';
 import { ChatService } from '../chat/chat.service';
 import { JwtService } from '@nestjs/jwt';
 import type {Server, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
-import type { JwtPayload, ChatMessage } from '@shared/types';
+import type { JwtPayload } from '@shared/types';
+import type { GameList } from '@shared/game/game.types';
 
 interface SocketUser {
   id: string;
@@ -55,6 +55,23 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   // handleMessage(client: any, payload: any): string {
   //   return 'Hello world!';
   // }
+
+
+  handleGameList(game: GameList) {
+    this.server.to('gameList').emit('game list update', game)
+  }
+
+  @SubscribeMessage('joinGameList')
+  handleJoimGameList(client: SocketClient) {
+    client.join("gameList");
+  }
+
+  @SubscribeMessage('leaveGameList') 
+  handeLeaveGameList(client: SocketClient) {
+    client.leave("gameList");
+  }
+
+
 
   @SubscribeMessage('chatMessage')
   async handleChatMessage(client: SocketClient, payload: { draft: string }) {

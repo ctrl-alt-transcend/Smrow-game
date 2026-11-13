@@ -8,6 +8,6 @@ import { ChatModule } from '../chat/chat.module';
   imports: [JwtModule.register({ secret: process.env.JWT_SECRET }), UserModule, ChatModule],
   controllers: [],
   providers: [SocialGateway],
-  exports: [],
+  exports: [SocialGateway],
 })
 export class SocialModule {}

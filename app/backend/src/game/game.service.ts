@@ -6,11 +6,24 @@ import {
 import { randomUUID } from 'crypto';
 import type { PlayerProfile } from '@shared/game/game.types';
 import { GameStateContext, WhoStartsPhase } from './GameStateContext';
+import type {GameList} from "@shared/game/game.types";
+import { SocialGateway } from '../social/social.gateway';
 
 @Injectable()
 export class GameService {
   private gameInstances: Map<string, GameStateContext> = new Map();
   private playersMap = new Map<string, string>(); //INFO: link playerId with a gameId
+
+  constructor(private readonly socialGateway: SocialGateway) {}
+
+async getGamesList(): Promise<GameList[]> {
+  const arrayOfGames = Array.from(this.gameInstances.values());
+  return arrayOfGames.map((game: GameStateContext) => ({
+    gameId: game.getGameId(),
+    playerCount: game.getPlayers().size,
+    state: "pending players",
+  }));
+}
 
   /**
    * @brief Create a new game and add the player to it
@@ -23,13 +36,15 @@ export class GameService {
       );
     }
     const gameId = randomUUID();
+    const game = new GameStateContext(gameId, new WhoStartsPhase());
 
     this.gameInstances.set(
       gameId,
-      new GameStateContext(gameId, new WhoStartsPhase()),
-    ); // v.2
+      game,
+    );
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
+    this.socialGateway.handleGameList({gameId: gameId, playerCount: 1, state: "pending players"});
   }
 
   joinGame(playerProfile: PlayerProfile, gameId: string) {

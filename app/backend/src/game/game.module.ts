@@ -4,9 +4,10 @@ import { GameController } from './game.controller';
 import { GameService } from './game.service';
 import { GameGateway } from './game.gateway';
 import { UserModule } from '../user/user.module';
+import { SocialModule } from '../social/social.module';
 
 @Module({
-  imports: [JwtModule.register({ secret: process.env.JWT_SECRET }), UserModule],
+  imports: [JwtModule.register({ secret: process.env.JWT_SECRET }), UserModule, SocialModule],
   controllers: [GameController],
   providers: [GameService, GameGateway],
   exports: [GameService],
