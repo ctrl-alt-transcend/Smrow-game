@@ -6,6 +6,7 @@ import {
   type DiceValue,
 } from "../gameboard/Dice/Dice";
 import { gameSocket as socket } from "../../../sockets/gameSocket";
+import type { DiceRoll } from "shared";
 
 /** Safety timeout: if the server never answers, unlock the UI. */
 const SERVER_TIMEOUT_MS = 5000;
@@ -39,33 +40,20 @@ export function DiceRoller({
   currentRoll,
   isMyTurn,
 }: {
-  currentRoll: number | null;
+  currentRoll: DiceRoll;
   isMyTurn: boolean;
 }) {
-  // `busy` IS the waiting flag: true from the click until the server
-  // has answered AND the animation is done. Render state (drives the
-  // overlay/cursor/guard) — never a ref.
   const [busy, setBusy] = useState(false);
 
-  // Last roll value this component already reacted to. Updated during
-  // render (React-endorsed "adjust state when a prop changes" pattern):
-  // handles the null/invalid case with plain state updates only.
-  const [handledRoll, setHandledRoll] = useState<number | null>(currentRoll);
+  const [handledRoll, setHandledRoll] = useState<DiceRoll>(currentRoll);
 
-  // True between `socket.emit('dice')` and the consumption of the
-  // server's answer. Written in the click handler, consumed in the
-  // animation effect. IMPORTANT: the animation effect depends on
-  // `currentRoll` ONLY — adding `busy` would re-run it on click with
-  // the STALE previous roll and animate before the server answers.
   const rollPendingRef = useRef(false);
   const timeoutRef = useRef<number | null>(null);
   const diceRef = useRef<Dice3DHandle>(null);
 
   const { ref: containerRef, width } = useElementWidth<HTMLDivElement>();
 
-  // Dice size: bounded between 48 and 96 px depending on available width.
   const diceSize = Math.round(Math.max(48, Math.min(96, (width - 64) / 2)));
-
   const locked = !isMyTurn;
 
   const clearServerTimeout = useCallback(() => {
@@ -80,14 +68,9 @@ export function DiceRoller({
     setBusy(false);
   }, [clearServerTimeout]);
 
-  /* Render-phase adjustments — plain state updates only, NO refs here
-   * (the linter forbids touching refs during render):
-   * 1. A NEW server answer arrived and is null/invalid → stop waiting
-   *    immediately (the animation effect ignores null anyway).
-   * 2. Our turn ended while we were waiting → abort cleanly. */
-  if (currentRoll !== handledRoll) {
+  if (currentRoll.id !== handledRoll.id) {
     setHandledRoll(currentRoll);
-    if (!isDiceValue(currentRoll)) {
+    if (!isDiceValue(currentRoll.val)) {
       setBusy(false);
     }
   }
@@ -95,45 +78,31 @@ export function DiceRoller({
     setBusy(false);
   }
 
-  // 1. Click → the request is sent to the server. (Event handler:
-  // writing refs and setState are both fine here.)
   const handleDiceRequest = useCallback(() => {
     if (busy || !isMyTurn) return;
     rollPendingRef.current = true;
     setBusy(true);
     socket.emit("dice");
-    // Safety: if the server never answers, unlock the UI.
     timeoutRef.current = window.setTimeout(unlock, SERVER_TIMEOUT_MS);
   }, [busy, isMyTurn, unlock]);
 
-  // 2. Server answer → animation, ONLY when the roll value changes.
-  // Deps are [currentRoll] on purpose: this effect must NOT re-run on
-  // `busy` toggles, otherwise the stale previous roll animates on click.
-  // Refs are read/written inside the effect, which the linter allows.
   useEffect(() => {
-    if (!rollPendingRef.current || !isDiceValue(currentRoll)) return;
+    if (!rollPendingRef.current || !isDiceValue(currentRoll.val)) return;
     rollPendingRef.current = false;
-    diceRef.current?.rollDice(currentRoll);
-    // `busy` stays true: unlock happens in handleAnimationComplete.
-  }, [currentRoll]);
+    diceRef.current?.rollDice(currentRoll.val);
+  }, [currentRoll.id, currentRoll.val]);
 
-  // 3. Null/invalid answer → release the safety timer and the pending
-  // flag. (Ref access inside an effect only — no setState.)
   useEffect(() => {
-    if (!isDiceValue(currentRoll)) {
+    if (!isDiceValue(currentRoll.val)) {
       clearServerTimeout();
       rollPendingRef.current = false;
     }
-  }, [currentRoll, clearServerTimeout]);
+  }, [currentRoll.id, currentRoll.val, clearServerTimeout]);
 
-  // 4. End of animation → Dice3D already displays the final face; unlock.
-  // Called from Dice3D's completion callback (outside render): setState
-  // is fine here.
   const handleAnimationComplete = useCallback(() => {
     unlock();
   }, [unlock]);
 
-  // Cleanup on unmount.
   useEffect(() => clearServerTimeout, [clearServerTimeout]);
 
   return (
@@ -163,7 +132,6 @@ export function DiceRoller({
           />
         </Stack>
       </Card>
-      {/* Overlay: captures clicks on our turn; grey veil otherwise. */}
       <button
         type="button"
         onClick={handleDiceRequest}

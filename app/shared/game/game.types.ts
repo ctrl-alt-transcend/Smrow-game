@@ -116,15 +116,6 @@ export const LAND_COLORS: Record<LandType, string> = {
   [LandType.DESERT]: '#e8cfa0'
 };
 
-//export const Faction = {
-//  POURPRES_CHYBRES: "Pourpres Chybres",
-//  BOURSES_BLEUES: "Bourses Bleues",
-//  ROSES_FIACS: "Roses Fiacs",
-//  UREE_JAUNE: "Uree Jaune",
-//  DEFAULT: "Kikouneurs (default)",
-//  UNOCCUPIED: "unoccupied ...",
-//} as const;
-//export type Faction = (typeof Faction)[keyof typeof Faction];
 export const Faction = {
   POURPRES_CHYBRES: "Pourpres Chybres",
   BOURSES_BLEUES: "Bourses Bleues",
@@ -170,11 +161,6 @@ export const GUIDE_LOG: Record<Phase, string> = {
   [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade or skip you turn!`,
 } as const;
 
-//export interface Vertex {
-//  id: string; // "{q}:{r}:{cornerIndex}"
-//  x: number;
-//  y: number;
-//}
 /** @description x, y → corner's axial coordinates */
 export const VertexSchema = z.object({
   id: z.string(), // "{q}:{r}:{cornerIndex}"
@@ -183,11 +169,6 @@ export const VertexSchema = z.object({
 });
 export type Vertex = z.infer<typeof VertexSchema>;
 
-//export interface Edge {
-//  id: string; // "{vertexId1}-{vertexId2}"
-//  p1: Vertex;
-//  p2: Vertex;
-//}
 /** @description p1, p2 → segment between two vertices (corner to corner) */
 export const EdgeSchema = z.object({
   id: z.string(), // "{vertexId1}-{vertexId2}"
@@ -212,32 +193,18 @@ export interface TileData {
   hasRobber: boolean;
 }
 
-//export interface BuildData {
-//  faction: Faction;
-//  ownerId: string | null;
-//}
 export const BuildDataSchema = z.object({
   faction: FactionSchema,
   ownerId: z.string().nullable(), // string | null
 });
 export type BuildData = z.infer<typeof BuildDataSchema>;
 
-//export interface RoadData extends BuildData {
-//  id: string;
-//  edge: Edge;
-//}
 export const RoadDataSchema = BuildDataSchema.extend({
   id: z.string(),
   edge: EdgeSchema,
 });
 export type RoadData = z.infer<typeof RoadDataSchema>;
 
-//export interface SettlementData extends BuildData {
-//  id: string;
-//  vertex: Vertex;
-//  isCity: boolean;
-//  isCrossroad?: boolean;
-//}
 export const SettlementDataSchema = BuildDataSchema.extend({
   id: z.string(),
   vertex: VertexSchema,
@@ -247,10 +214,10 @@ export const SettlementDataSchema = BuildDataSchema.extend({
 export type SettlementData = z.infer<typeof SettlementDataSchema>;
 
 export interface CoastData {
-  id: string;              // "coast:<edgeId>"
-  tile: { q: number; r: number };  // tile land that bears the coast
-  edge: Edge;              // the outer edge p1→p2
-  normal: Vertex;          // unit vector pointing toward the sea
+  id: string;                       // "coast:<edgeId>"
+  tile: { q: number; r: number };   // tile land that bears the coast
+  edge: Edge;                       // the outer edge p1→p2
+  normal: Vertex;                   // unit vector pointing toward the sea
   port: PortData | null;
 }
 
@@ -315,8 +282,6 @@ export const classicLayout: TileData[] = [
     { q: -2, r: 2, land: LandType.HILL, value: 8, hasRobber: false },{ q: -1, r: 2, land: LandType.DESERT, value: 10, hasRobber: true }, { q: 0, r: 2, land: LandType.FIELD, value: 12, hasRobber: false }
 ];
 
-// ----------------
-
 export type Resources = {
   wood: number;
   brick: number;
@@ -333,6 +298,11 @@ export type PlayerProfile = {
   avatarURL: string | null;
 };
 
+export type DiceRoll = {
+  val: number | null;
+  id: number;
+}
+
 export type PlayerBase = {
   playerId: string;
   username: string;
@@ -342,7 +312,7 @@ export type PlayerBase = {
   resources: Resources;
   firstDice: number,
   secondDice: number,
-  currentRoll: number | null,
+  currentRoll: DiceRoll,
   roadsBuilt: number;
   faction: Faction;
   avatarURL: string | null;
@@ -386,10 +356,6 @@ export interface GameResponse {
   data: GameData | null;
 }
 
-//export type SettingsData = {
-//  tradeLimit: number;
-//  buildLimit: number;
-//}
 /**
  * @var tradeLimit: defines how many valid trades a player can do during 'Trade and Build'
  * @var buildLimit: defines how many valid build a player can do during 'Trade and Build'
@@ -449,9 +415,6 @@ export const TradePayloadSchema = z.object({
 })
 export type TradePayload = z.infer<typeof TradePayloadSchema>;
 
-//export type BuildPayload =
-//  | { kind: 'road';       id: string; data: RoadData }
-//  | { kind: 'settlement'; id: string; data: SettlementData };
 export const BuildPayloadSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal('road'),

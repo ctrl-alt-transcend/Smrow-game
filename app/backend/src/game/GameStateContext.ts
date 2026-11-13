@@ -25,6 +25,7 @@ import type {
   TradePayload,
   PlayerDto,
   SettingsData,
+  DiceRoll,
 } from 'shared';
 import { updateValue, funnyRollLog } from './game.utils';
 import { buildCheck } from './calculation/handleBuilds';
@@ -66,6 +67,7 @@ class GameStateContext {
   protected settings!: SettingsData;
   protected buildings: BuildingsInGame = new Map();
   private logId: number = 0;
+  private rollId: number = 0;
   private factionSwitch: number = 0;
 
   constructor(gameId: string, state: State) {
@@ -143,7 +145,10 @@ class GameStateContext {
         message: `Welcome to the game ${playerId}`,
       },
       guideLog: `${GUIDE_LOG[Phase.START]}`,
-      currentRoll: null,
+      currentRoll: {
+        id: this.rollId++,
+        val: null,
+      },
       // BONUS Resources FOR DEV
       resources: {
         //⚠️ For testing only
@@ -208,6 +213,9 @@ class GameStateContext {
   }
   public getGameId(): string {
     return this.data.gameId;
+  }
+  public getLogId(): number {
+    return this.rollId;
   }
   public getPlayers(): Map<string, Player> {
     return this.data.players;
@@ -366,18 +374,18 @@ class GameStateContext {
     return `You can't ${action} during ${phase}`;
   }
 
-  public rollDice(p: Player): number | null {
-    let value: number | null = Math.floor(Math.random() * 6) + 1;
+  public rollDice(p: Player): DiceRoll {
+    const roll: DiceRoll = { val: null, id: 0 };
+    roll.val = Math.floor(Math.random() * 6) + 1;
+    roll.id = this.rollId++;
     if (p.firstDice === 0) {
-      p.firstDice = value;
-      console.log(`${p.playerId} #1 rolll: ${value}`);
+      p.firstDice = roll.val;
+      console.log(`${p.playerId} #1 rolll: ${roll.val}`);
     } else if (p.secondDice === 0) {
-      p.secondDice = value;
-      console.log(`${p.playerId} #2 rolll: ${value}`);
-    } else {
-      value = null;
+      p.secondDice = roll.val;
+      console.log(`${p.playerId} #2 rolll: ${roll.val}`);
     }
-    return value;
+    return roll;
   }
 
   public setupNextPhase(nextPhase: Phase) {

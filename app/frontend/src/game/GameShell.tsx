@@ -6,7 +6,7 @@ import { SelectionMenu } from "./components/ui/SelectionMenu.tsx";
 import { DiceRoller } from "./components/ui/DiceRoller.tsx";
 import GameMasterLog from "./components/ui/GameMasterLog.tsx";
 import { useGameState } from "./hooks/useGameState.ts";
-import type { GameDataDto } from "shared";
+import { type GameDataDto, Phase } from "shared";
 import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import { ResourcesPanel } from "./components/ui/ResourcesPanel.tsx";
