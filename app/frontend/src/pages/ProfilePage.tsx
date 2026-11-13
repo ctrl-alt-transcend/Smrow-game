@@ -8,11 +8,10 @@ import {
   Title,
 } from "@mantine/core";
 import { useAuth } from "../hooks/useAuth";
-import { ProfileForm } from "../components/form/ProfileForm";
+import { ProfileSettings } from "../components/form/ProfileForm";
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  console.log("url: ", user?.avatarURL);
   return (
     <>
       <Title mb="xl" ta="center">
@@ -33,7 +32,7 @@ export default function ProfilePage() {
             </Stack>
             <Divider my="md" />
 
-            <ProfileForm />
+            <ProfileSettings />
           </Paper>
         </Grid.Col>
 

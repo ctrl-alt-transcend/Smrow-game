@@ -18,6 +18,7 @@ export const registerUser = async (
     return res.data;
   } catch (error: any) {
     const err_msg = error.response?.data?.message;
+    console.log("code: ", error.code);
     throw err_msg;
   }
 };

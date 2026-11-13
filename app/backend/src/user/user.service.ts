@@ -1,9 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
-// import { CreateUserDto } from './dto/create-user.dto';
 import { PlayerProfile } from 'shared';
-import type { UserProfile, RegisterPost, UpdateProfile } from 'shared';
+import type { UserProfile, RegisterPost, UpdateProfile, Id } from 'shared';
 
 @Injectable()
 export class UserService {
@@ -63,7 +62,7 @@ export class UserService {
     };
   }
 
-  async findPlayerProfile(id: string): Promise<PlayerProfile> {
+  async findPlayerProfile(id: Id): Promise<PlayerProfile> {
     const user = await this.databaseService.user.findUnique({
       where: { id },
       select: {
@@ -99,14 +98,6 @@ export class UserService {
       },
     });
   }
-
-  //  async findOne(username: string) {
-  //    return this.databaseService.user.findUniqueOrThrow({
-  //      where: {
-  //        username,
-  //      },
-  //    });
-  //  }
 
   async findByMail(email: string) {
     return this.databaseService.user.findUniqueOrThrow({

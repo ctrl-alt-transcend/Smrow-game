@@ -20,7 +20,12 @@ export function getUserToken(): string {
 }
 
 export async function updateProfile(data: UpdateProfile): Promise<UserProfile> {
-  const tosend: UpdateProfile = UpdateProfileSchema.parse(data);
-  const res = await http.patch("/auth/me", tosend);
-  return UserProfileSchema.parse(res.data);
+  try {
+    const tosend: UpdateProfile = UpdateProfileSchema.parse(data);
+    const res = await http.patch("/auth/me", tosend);
+    return UserProfileSchema.parse(res.data);
+  } catch (error: any) {
+    const err_msg = error.repsones?.data?.message;
+    throw err_msg;
+  }
 }

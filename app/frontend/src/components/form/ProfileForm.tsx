@@ -1,149 +1,94 @@
-import { useState } from "react";
-import { useForm } from "@mantine/form";
-import { Button, Group, Stack, Textarea, TextInput } from "@mantine/core";
+import { useEffect, useState } from "react";
+import { schemaResolver, useForm } from "@mantine/form";
+import {
+  type PaperProps,
+  Button,
+  Paper,
+  Stack,
+  Textarea,
+  TextInput,
+} from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { UpdateProfileSchema, type UserProfile } from "shared";
+import { UpdateProfileSchema, type UpdateProfile } from "shared";
 import { useAuth } from "../../hooks/useAuth"; // adapte le chemin
+import ErrorMessages from "../utils/ErrorMessages"; // adapte le chemin
 import { updateProfile } from "../../services/user.service";
-
-type Field = "name" | "username" | "email" | "bio" | "avatarURL";
+// import { profile } from "console";
 
 type FieldConfig = {
-  name: Field;
+  name: keyof UpdateProfile;
   label: string;
-  multiline?: boolean;
-  nullable?: boolean;
+  component?: typeof TextInput | typeof Textarea;
 };
 
-const FIELDS: FieldConfig[] = [
+const fields: FieldConfig[] = [
   { name: "name", label: "Name" },
   { name: "username", label: "Username" },
   { name: "email", label: "Email" },
-  { name: "bio", label: "Bio", multiline: true, nullable: true },
-  { name: "avatarURL", label: "Avatar URL", nullable: true },
+  { name: "avatarURL", label: "Avatar" },
+  { name: "bio", label: "bio", component: Textarea },
 ];
 
-const toForm = (u: UserProfile): Record<Field, string> => ({
-  name: u.name,
-  username: u.username,
-  email: u.email,
-  bio: u.bio ?? "",
-  avatarURL: u.avatarURL ?? "",
-});
+export function ProfileSettings(props: PaperProps) {
+  const { user } = useAuth();
+  const [error, setError] = useState<string | string[] | string | null>(null);
 
-export function ProfileForm() {
-  const { user, refreshUser } = useAuth();
-  if (!user) return null;
+  const form = useForm({
+    mode: "controlled",
+    initialValues: {
+      username: user?.username ?? "",
+      name: user?.name ?? "",
+      email: user?.email ?? "",
+      avatarURL: user?.avatarURL ?? "",
+      bio: user?.bio ?? "",
+    },
+    validate: schemaResolver(UpdateProfileSchema, { sync: true }),
+  });
 
-  return (
-    <ProfileFormInner key={user.id} user={user} refreshUser={refreshUser} />
-  );
-}
+  // const { setValues, resetDirty } = form;
 
-type InnerProps = {
-  user: UserProfile;
-  refreshUser: () => Promise<void>;
-};
+  useEffect(() => {
+    if (!user) return;
+    const values = {
+      name: user.name ?? "",
+      username: user.username ?? "",
+      email: user.email ?? "",
+      avatarURL: user.avatarURL ?? "",
+      bio: user.bio ?? "",
+    };
+    form.setValues(values);
+    form.resetDirty(values);
+  }, [user, form]);
 
-function ProfileFormInner({ user, refreshUser }: InnerProps) {
-  const [saving, setSaving] = useState(false);
-  const form = useForm<Record<Field, string>>({ initialValues: toForm(user) });
-
-  const saved = toForm(user);
-
-  const changedFields = FIELDS.filter(
-    (f) => form.values[f.name] !== saved[f.name],
-  );
-  const hasChanges = changedFields.length > 0;
-
-  const handleSave = async () => {
-    form.clearErrors();
-
-    // on n'envoie que les champs modifiés
-    const raw: Partial<Record<Field, string | null>> = {};
-    for (const f of changedFields) {
-      const value = form.values[f.name];
-      raw[f.name] = f.nullable && value === "" ? null : value;
-    }
-
-    // validation de tous les champs modifiés d'un coup
-    const result = UpdateProfileSchema.safeParse(raw);
-    if (!result.success) {
-      for (const issue of result.error.issues) {
-        const field = issue.path[0] as Field | undefined;
-        if (field && FIELDS.some((f) => f.name === field)) {
-          // on garde le premier message d'erreur par champ
-          if (!form.errors[field]) form.setFieldError(field, issue.message);
-        }
-      }
-      return;
-    }
-
+  const handleUpdate = form.onSubmit(async (data) => {
+    setError(null);
     try {
-      setSaving(true);
-      await updateProfile(result.data);
-      await refreshUser();
-      form.resetDirty();
+      await updateProfile(data);
       notifications.show({ message: "Profile updated" });
-    } catch (e) {
-      if (e === 409) {
-        // adapte si ton API indique quel champ est en conflit
-        const conflict = changedFields.filter(
-          (f) => f.name === "username" || f.name === "email",
-        );
-        if (conflict.length > 0) {
-          for (const f of conflict) {
-            form.setFieldError(f.name, `${f.label} already taken`);
-          }
-        } else {
-          notifications.show({ color: "red", message: "Conflict detected" });
-        }
-      } else {
-        notifications.show({
-          color: "red",
-          message: "Could not update profile",
-        });
-      }
-    } finally {
-      setSaving(false);
+    } catch (error: any) {
+      setError(error?.message ?? "Something weird happened");
     }
-  };
+  });
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        void handleSave();
-      }}
-    >
-      <Stack>
-        {FIELDS.map((f) => {
-          const Input = f.multiline ? Textarea : TextInput;
-          return (
-            <Input
-              key={f.name}
-              label={f.label}
-              {...form.getInputProps(f.name)}
+    <Paper ps="xs" withBorder {...props}>
+      <form onSubmit={handleUpdate}>
+        <Stack>
+          {fields.map(({ name, label, component: Field = TextInput }) => (
+            <Field
+              key={form.key(name)}
+              label={label}
+              {...form.getInputProps(name)}
             />
-          );
-        })}
+          ))}
 
-        <Group justify="flex-end">
-          <Button
-            variant="default"
-            disabled={!hasChanges || saving}
-            onClick={() => {
-              form.setValues(saved);
-              form.clearErrors();
-            }}
-          >
-            Reset
-          </Button>
-          <Button type="submit" disabled={!hasChanges} loading={saving}>
+          {error && <ErrorMessages error={error} />}
+
+          <Button type="submit" disabled={!form.isDirty()}>
             Save
           </Button>
-        </Group>
-      </Stack>
-    </form>
+        </Stack>
+      </form>
+    </Paper>
   );
 }
