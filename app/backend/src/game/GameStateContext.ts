@@ -21,8 +21,8 @@ import type {
   GameData,
   GameDataDto,
   Player,
-  BuildRequestPayload,
-  TradeRequestPayload,
+  BuildPayload,
+  TradePayload,
   PlayerDto,
   SettingsData,
 } from 'shared';
@@ -49,14 +49,8 @@ abstract class State {
   public abstract dice(playerId: string): void;
   public abstract skip(playerId: string): void;
   public abstract phaseCheck(): void;
-  public abstract build(
-    playerId: string,
-    payload: BuildRequestPayload | null,
-  ): void;
-  public abstract trade(
-    playerId: string,
-    payload: TradeRequestPayload | null,
-  ): void;
+  public abstract build(playerId: string, payload: BuildPayload | null): void;
+  public abstract trade(playerId: string, payload: TradePayload | null): void;
 }
 
 /**
@@ -131,6 +125,10 @@ class GameStateContext {
   public initPlayer(playerId: string): Player {
     const newPlayer: Player = {
       playerId: playerId,
+      username: playerId,
+      stats: {
+        roadsBuilt: 0,
+      },
       //victoryPoints: 0,
       victoryPoints: 6, //⚠️ For testing only
       firstDice: 0,
@@ -138,7 +136,6 @@ class GameStateContext {
       settlementsBuilt: new Map<string, SettlementData>(),
       roadsBuilt: 0,
       level: 1, //⚠️ For testing only
-      username: playerId,
       avatarURL: null,
       faction: this.assignFaction(),
       personalLog: {
@@ -189,10 +186,10 @@ class GameStateContext {
   public phaseCheckRequest(): void {
     return this.state.phaseCheck();
   }
-  public tradeRequest(playerId: string, payload: TradeRequestPayload | null) {
+  public tradeRequest(playerId: string, payload: TradePayload | null) {
     return this.state.trade(playerId, payload);
   }
-  public buildRequest(playerId: string, payload: BuildRequestPayload | null) {
+  public buildRequest(playerId: string, payload: BuildPayload | null) {
     this.state.build(playerId, payload);
   }
 
@@ -247,6 +244,7 @@ class GameStateContext {
   public getPlayerDto(p: Player): PlayerDto {
     return {
       playerId: p.playerId,
+      stats: p.stats,
       victoryPoints: p.victoryPoints,
       firstDice: p.firstDice,
       secondDice: p.secondDice,
@@ -562,7 +560,7 @@ class PlacementPhase extends State {
     );
   }
 
-  public build(playerId: string, payload: BuildRequestPayload) {
+  public build(playerId: string, payload: BuildPayload) {
     //console.log(
     //  `🗺️🔨PlacementPhase:build: handles buildRequest from ${playerId}`,
     //);
@@ -630,8 +628,6 @@ class PlacementPhase extends State {
   }
 
   public phaseCheck(): void {
-    console.log(`getCurrentTurnIndex: ${this.state.getCurrentTurnIndex()}
-    this.state.getPlayers().size: ${this.state.getPlayers().size}`);
     if (this.state.getCurrentTurnIndex() !== this.state.getPlayers().size)
       return;
     this.state.resourcesProduction(true);
@@ -741,7 +737,7 @@ class TradeAndBuildPhase extends State {
     return true;
   }
 
-  public build(playerId: string, payload: BuildRequestPayload) {
+  public build(playerId: string, payload: BuildPayload) {
     //console.log(
     //  `🤝🔨TradeAndBuildPhase:build: handles buildRequest from ${playerId}`,
     //);
@@ -768,7 +764,7 @@ class TradeAndBuildPhase extends State {
     this.state.setMasterLog(`${playerId} built something ...`);
   }
 
-  public trade(playerId: string, payload: TradeRequestPayload) {
+  public trade(playerId: string, payload: TradePayload) {
     //console.log(`🤝⚖️TradeAndBuildPhase:trade: handles tradeRequest from ${playerId}`);
     const p = this.state.isPlayersTurn(playerId);
     if (!p) return;

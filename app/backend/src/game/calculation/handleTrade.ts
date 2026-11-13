@@ -1,4 +1,4 @@
-import { type TradeRequestPayload, type Player } from 'shared';
+import { type TradePayload, type Player } from 'shared';
 import {
   SPECIAL_PORT_RATE,
   GENERIC_PORT_RATE,
@@ -40,7 +40,7 @@ const rateCheck = (
 };
 
 export const tradeCheck = (
-  payload: TradeRequestPayload,
+  payload: TradePayload,
   player: Player,
   graph: GameBoardGraph,
 ): TradeValidation => {

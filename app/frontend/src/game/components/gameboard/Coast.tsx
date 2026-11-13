@@ -5,8 +5,8 @@ import {
   SAND_WIDTH,
   SAND_COLOR,
   SPECIALIZED_PORT_COLOR,
-  NORMAL_PORT_COLOR
-} from "../../../../../shared/game/gameboard.types";
+  NORMAL_PORT_COLOR,
+} from "shared";
 
 export const Coast: React.FC<CoastProps> = ({
   data,
@@ -37,7 +37,7 @@ export const Coast: React.FC<CoastProps> = ({
   };
   const highlightColor = isSelected ? "#ffd700" : "#ffffff";
   let color: string;
-  if (data.port && data.port.type === 'generic') {
+  if (data.port && data.port.type === "generic") {
     color = NORMAL_PORT_COLOR;
   } else {
     color = SPECIALIZED_PORT_COLOR;

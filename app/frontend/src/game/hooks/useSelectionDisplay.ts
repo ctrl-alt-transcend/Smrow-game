@@ -1,4 +1,4 @@
-import { BUILD_COSTS, LAND_RESSOURCE } from "../../../../shared/game/gameboard.types";
+import { BUILD_COSTS, LAND_RESSOURCE } from "shared";
 import type { GameBoardSelection } from "../types/gameboard.types";
 
 export interface SelectionItem {
@@ -12,51 +12,56 @@ export const useSelectionDisplay = (
 
   if (selected.selectedTile) {
     //items.push({label: `Tile: ${selected.selectedTile.q}, ${selected.selectedTile.r}`});
-    items.push({label: `Land: ${selected.selectedTile.land}`});
-    items.push({label: `Ressource: ${LAND_RESSOURCE[selected.selectedTile.land]}`});
+    items.push({ label: `Land: ${selected.selectedTile.land}` });
+    items.push({
+      label: `Ressource: ${LAND_RESSOURCE[selected.selectedTile.land]}`,
+    });
     if (selected.selectedTile.hasRobber)
-      items.push({label: `Robert the Robber will rob all the ${LAND_RESSOURCE[selected.selectedTile.land]} you produce from this ${selected.selectedTile.land}`});
+      items.push({
+        label: `Robert the Robber will rob all the ${LAND_RESSOURCE[selected.selectedTile.land]} you produce from this ${selected.selectedTile.land}`,
+      });
   }
   if (selected.selectedSettlement) {
     //items.push({label: `Settlement: ${selected.selectedSettlement.id}`});
     //items.push({label: `Faction: ${selected.selectedSettlement.faction}`});
     if (selected.selectedSettlement.ownerId) {
-      items.push({label: `Landlord: ${selected.selectedSettlement.ownerId}`});
+      items.push({ label: `Landlord: ${selected.selectedSettlement.ownerId}` });
       if (!selected.selectedSettlement.isCity) {
-        items.push({label: `Cost to upgrade:`});
-        items.push({label: `Wheat: ${BUILD_COSTS.city.wheat}`});
-        items.push({label: `Ore: ${BUILD_COSTS.city.ore}`});
+        items.push({ label: `Cost to upgrade:` });
+        items.push({ label: `Wheat: ${BUILD_COSTS.city.wheat}` });
+        items.push({ label: `Ore: ${BUILD_COSTS.city.ore}` });
       }
-    }
-    else {
-      items.push({label: `Cost to build:`});
-      items.push({label: `Wood: ${BUILD_COSTS.settlement.wood}`});
-      items.push({label: `Brick: ${BUILD_COSTS.settlement.brick}`});
-      items.push({label: `Wheat: ${BUILD_COSTS.settlement.wheat}`});
-      items.push({label: `Sheep: ${BUILD_COSTS.settlement.sheep}`});
+    } else {
+      items.push({ label: `Cost to build:` });
+      items.push({ label: `Wood: ${BUILD_COSTS.settlement.wood}` });
+      items.push({ label: `Brick: ${BUILD_COSTS.settlement.brick}` });
+      items.push({ label: `Wheat: ${BUILD_COSTS.settlement.wheat}` });
+      items.push({ label: `Sheep: ${BUILD_COSTS.settlement.sheep}` });
     }
   }
   if (selected.selectedRoad) {
     //items.push({label: `Road: ${selected.selectedRoad.id}` });
     //items.push({label: `Faction: ${selected.selectedRoad.faction}`});
     if (selected.selectedRoad.ownerId) {
-      items.push({label: `Landlord: ${selected.selectedRoad.ownerId}`});
-    }
-    else {
-      items.push({label: `Cost to build:`});
-      items.push({label: `Wood: ${BUILD_COSTS.road.wood}`});
-      items.push({label: `Brick: ${BUILD_COSTS.road.brick}`});
+      items.push({ label: `Landlord: ${selected.selectedRoad.ownerId}` });
+    } else {
+      items.push({ label: `Cost to build:` });
+      items.push({ label: `Wood: ${BUILD_COSTS.road.wood}` });
+      items.push({ label: `Brick: ${BUILD_COSTS.road.brick}` });
     }
   }
   if (selected.selectedCoast) {
     //items.push({label: `${selected.selectedCoast.id}` });
-    if (selected.selectedCoast.port && selected.selectedCoast.port.type === 'generic')
-      items.push({label: 'Generic Port'});
+    if (
+      selected.selectedCoast.port &&
+      selected.selectedCoast.port.type === "generic"
+    )
+      items.push({ label: "Generic Port" });
     else if (selected.selectedCoast.port)
-      items.push({label: 'Specialized Port'});
+      items.push({ label: "Specialized Port" });
   }
-  if(selected.selectedReserve) {
-    items.push({label: `Shnek the Trader`});
+  if (selected.selectedReserve) {
+    items.push({ label: `Shnek the Trader` });
   }
   return items;
 };

@@ -1,3 +1,4 @@
+import z from "zod";
 import type { Player, Resources } from "./game.types.ts";
 
 /** Rules value */
@@ -51,6 +52,7 @@ export const TraderType = {
   PLAYER: "player",
 } as const;
 export type TraderType = (typeof TraderType)[keyof typeof TraderType];
+export const TraderTypeSchema = z.enum(TraderType);
 
 export const BUILD_COSTS: Record<BuildingType, Resources> = {
   [BuildingType.ROAD]: {
@@ -95,6 +97,7 @@ export const ResourceType = {
   DUST: "dust",
 } as const;
 export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType];
+export const ResourceTypeSchema = z.enum(ResourceType);
 
 export const LAND_RESSOURCE: Record<LandType, string> = {
   [LandType.FOREST]: ResourceType.WOOD,
@@ -114,6 +117,15 @@ export const LAND_COLORS: Record<LandType, string> = {
   [LandType.DESERT]: '#e8cfa0'
 };
 
+//export const Faction = {
+//  POURPRES_CHYBRES: "Pourpres Chybres",
+//  BOURSES_BLEUES: "Bourses Bleues",
+//  ROSES_FIACS: "Roses Fiacs",
+//  UREE_JAUNE: "Uree Jaune",
+//  DEFAULT: "Kikouneurs (default)",
+//  UNOCCUPIED: "unoccupied ...",
+//} as const;
+//export type Faction = (typeof Faction)[keyof typeof Faction];
 export const Faction = {
   POURPRES_CHYBRES: "Pourpres Chybres",
   BOURSES_BLEUES: "Bourses Bleues",
@@ -123,7 +135,7 @@ export const Faction = {
   UNOCCUPIED: "unoccupied ...",
 } as const;
 export type Faction = (typeof Faction)[keyof typeof Faction];
-
+export const FactionSchema = z.enum(Faction);
 
 export const FACTION_COLORS: Record<Faction, string> = {
   [Faction.POURPRES_CHYBRES]: '#cf69f8',
@@ -159,19 +171,31 @@ export const GUIDE_LOG: Record<Phase, string> = {
   [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade or skip you turn!`,
 } as const;
 
+//export interface Vertex {
+//  id: string; // "{q}:{r}:{cornerIndex}"
+//  x: number;
+//  y: number;
+//}
 /** @description x, y → corner's axial coordinates */
-export interface Vertex {
-  id: string; // "{q}:{r}:{cornerIndex}"
-  x: number;
-  y: number;
-}
+export const VertexSchema = z.object({
+  id: z.string(), // "{q}:{r}:{cornerIndex}"
+  x: z.number(),
+  y: z.number(),
+});
+export type Vertex = z.infer<typeof VertexSchema>;
 
+//export interface Edge {
+//  id: string; // "{vertexId1}-{vertexId2}"
+//  p1: Vertex;
+//  p2: Vertex;
+//}
 /** @description p1, p2 → segment between two vertices (corner to corner) */
-export interface Edge {
-  id: string; // "{vertexId1}-{vertexId2}"
-  p1: Vertex;
-  p2: Vertex;
-}
+export const EdgeSchema = z.object({
+  id: z.string(), // "{vertexId1}-{vertexId2}"
+  p1: VertexSchema,
+  p2: VertexSchema,
+});
+export type Edge = z.infer<typeof EdgeSchema>;
 
 export interface SvgBounds {
   svgWidth: number;
@@ -189,22 +213,39 @@ export interface TileData {
   hasRobber: boolean;
 }
 
-export interface BuildData {
-  faction: Faction;
-  ownerId: string | null;
-}
+//export interface BuildData {
+//  faction: Faction;
+//  ownerId: string | null;
+//}
+export const BuildDataSchema = z.object({
+  faction: FactionSchema,
+  ownerId: z.string().nullable(), // string | null
+});
+export type BuildData = z.infer<typeof BuildDataSchema>;
 
-export interface RoadData extends BuildData {
-  id: string;
-  edge: Edge;
-}
+//export interface RoadData extends BuildData {
+//  id: string;
+//  edge: Edge;
+//}
+export const RoadDataSchema = BuildDataSchema.extend({
+  id: z.string(),
+  edge: EdgeSchema,
+});
+export type RoadData = z.infer<typeof RoadDataSchema>;
 
-export interface SettlementData extends BuildData {
-  id: string;
-  vertex: Vertex;
-  isCity: boolean;
-  isCrossroad?: boolean;
-}
+//export interface SettlementData extends BuildData {
+//  id: string;
+//  vertex: Vertex;
+//  isCity: boolean;
+//  isCrossroad?: boolean;
+//}
+export const SettlementDataSchema = BuildDataSchema.extend({
+  id: z.string(),
+  vertex: VertexSchema,
+  isCity: z.boolean(),
+  isCrossroad: z.boolean().optional(),
+});
+export type SettlementData = z.infer<typeof SettlementDataSchema>;
 
 export interface CoastData {
   id: string;              // "coast:<edgeId>"

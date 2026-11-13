@@ -15,16 +15,14 @@ import { modals } from "@mantine/modals";
 import { useSelectionDisplay } from "../../hooks/useSelectionDisplay.ts";
 import type { GameBoardSelection } from "../../types/gameboard.types.tsx";
 import {
-  type BuildRequestPayload,
-  type TradeRequestPayload,
-} from "../../../../../shared/game/game.types.ts";
-import {
   GENERIC_PORT_RATE,
   SPECIAL_PORT_RATE,
   RESERVE_RATE,
   ResourceType,
+  type BuildPayload,
+  type TradePayload,
   type TraderType,
-} from "../../../../../shared/game/gameboard.types.ts";
+} from "shared";
 import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 
 /** Resource options (keep in sync with your ResourceType union) */
@@ -137,7 +135,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
   const handleSend = useCallback(() => {
     if (!isValid || !isMyTurn) return;
 
-    const payload: TradeRequestPayload = {
+    const payload: TradePayload = {
       trader: sourceKind,
       sourceId,
       offer: { resource: offerResource!, amount: offerAmount },
@@ -249,7 +247,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
  * ================================================================== */
 
 interface PendingBuild {
-  target: BuildRequestPayload;
+  target: BuildPayload;
   logAtSend: string | null;
 }
 const BUILD_TIMEOUT_MS = 500;
@@ -257,7 +255,7 @@ const BUILD_TIMEOUT_MS = 500;
 interface BuildSelectionButtonProps {
   selected: GameBoardSelection;
   masterLog: string | null;
-  onBuilt?: (target: BuildRequestPayload) => void;
+  onBuilt?: (target: BuildPayload) => void;
   /** when false, building is disabled */
   isMyTurn: boolean;
 }
@@ -272,7 +270,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   const [buttonName, setButtonName] = useState("");
   const pendingRef = useRef<PendingBuild | null>(null);
 
-  const target = useMemo<BuildRequestPayload | null>(() => {
+  const target = useMemo<BuildPayload | null>(() => {
     if (selected.selectedRoad) {
       return {
         kind: "road",
@@ -467,7 +465,7 @@ const SelectionItems: React.FC<SelectionItemsProps> = ({
 interface SelectionMenuProps {
   selected: GameBoardSelection;
   masterLog?: string | null;
-  onBuilt?: (target: BuildRequestPayload) => void;
+  onBuilt?: (target: BuildPayload) => void;
   /** id of the current player — TODO wire to your session/auth */
   currentPlayerId?: string | null;
   isMyTurn: boolean;

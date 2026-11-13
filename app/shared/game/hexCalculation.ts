@@ -1,4 +1,4 @@
-import { type Edge, type Vertex, HEX_SIZE } from "./gameboard.types.js";
+import { type Edge, type Vertex, HEX_SIZE } from "./game.types.js";
 
 /** @description axial coordinates (col & row) to pixels (pointy-topped) */
 export const axialToPixel = (q: number, r: number, size: number) => ({

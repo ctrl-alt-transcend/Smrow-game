@@ -1,9 +1,9 @@
-import type { CoastData } from "@shared/game/gameboard.types"
 import {
+  type CoastData,
   WATER_WIDTH,
   WATER_COLOR,
-  WATER_OPACITY
-} from "../../../../../shared/game/gameboard.types";
+  WATER_OPACITY,
+} from "shared";
 
 export const Water: React.FC<{ data: CoastData }> = ({ data }) => {
   const { edge, normal } = data;

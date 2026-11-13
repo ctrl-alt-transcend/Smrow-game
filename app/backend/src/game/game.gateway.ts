@@ -10,11 +10,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import type { JwtPayload } from 'shared';
-import type {
-  BuildRequestPayload,
-  GameDataDto,
-  TradeRequestPayload,
-} from 'shared';
+import type { BuildPayload, GameDataDto, TradePayload } from 'shared';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
@@ -110,7 +106,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('build')
   build(
     @ConnectedSocket() client: SocketClient,
-    @MessageBody() payload: BuildRequestPayload,
+    @MessageBody() payload: BuildPayload,
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.buildRequest(client.data.user.username, payload);
@@ -131,7 +127,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('trade')
   trade(
     @ConnectedSocket() client: SocketClient,
-    @MessageBody() payload: TradeRequestPayload,
+    @MessageBody() payload: TradePayload,
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.tradeRequest(client.data.user.username, payload);

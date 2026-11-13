@@ -11,7 +11,6 @@ import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import { ResourcesPanel } from "./components/ui/ResourcesPanel.tsx";
 import { usePersonalNotification } from "./hooks/usePersonalNotification.ts";
-import { Phase } from "../../../shared/game/gameboard.types.ts";
 
 export default function Game() {
   const { game } = useGameState();

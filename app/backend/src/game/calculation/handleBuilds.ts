@@ -15,7 +15,7 @@ import {
 } from './handleResources';
 import { crossroadRule } from './handleGameRules';
 
-export type BuildRequestPayload =
+export type BuildPayload =
   | { kind: 'road'; id: string; data: RoadData }
   | { kind: 'settlement'; id: string; data: SettlementData };
 
@@ -277,7 +277,7 @@ function roadCheck(
 }
 
 export const buildCheck = (
-  payload: BuildRequestPayload,
+  payload: BuildPayload,
   player: Player,
   board: GameBoard,
   graph: GameBoardGraph,
