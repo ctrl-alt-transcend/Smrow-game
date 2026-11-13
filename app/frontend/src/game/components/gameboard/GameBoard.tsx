@@ -24,7 +24,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   handleRoadHover,
   handleSettlementHover,
   handleCoastHover,
-  handleReserveHover
+  handleReserveHover,
 }) => {
   const { layout, roads, settlements, coasts, svgBounds } = board;
 
@@ -44,15 +44,14 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           onHoverChange={(h) => handleReserveHover(h, board.reserve)}
           onClick={handleReserveClick}
         />
-        <WaterLayer data={coasts}/>
+        <WaterLayer data={coasts} />
         {coasts.map((coast) => (
           <Coast
+            key={coast.id}
             data={coast}
             isSelected={selected.selectedCoast?.id === coast.id}
             isHovered={isCoastHovered(coast)}
-            onHoverChange={(isHovered) =>
-              handleCoastHover(isHovered, coast)
-            }
+            onHoverChange={(isHovered) => handleCoastHover(isHovered, coast)}
             onClick={handleCoastClick}
           />
         ))}
@@ -91,7 +90,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             onClick={handleSettlementClick}
           />
         ))}
-
       </svg>
     </div>
   );
