@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { gameSocket as socket } from "../../sockets/gameSocket.tsx";
-import type { GameDataDto } from "@shared/game/game.types.ts";
+import type { GameDataDto } from "shared";
 
 export function useGameState(): { game: GameDataDto | null } {
   const [game, setGame] = useState<GameDataDto | null>(null); //INFO: game is the state variable that will hold the game state, and setGame is the function that will update it.

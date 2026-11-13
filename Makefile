@@ -10,8 +10,8 @@ ENV_DIR=app
 MIGRATION_NAME ?= init
 FRONTEND_DIR=./app/frontend
 BACKEND_DIR=./app/backend
-FRONTEND_LOCK=$(FRONTEND_DIR)/package-lock.json
-BACKEND_LOCK=$(BACKEND_DIR)/package-lock.json
+SHARED_DIR=./app/shared
+APP_DIR=./app
 
 all: up
 
@@ -25,7 +25,7 @@ pull:
 build:
 	docker compose -f $(DOCKER_COMPOSE_FILE) build
 
-up: install secrets
+up: install secrets shared
 	docker compose -f $(DOCKER_COMPOSE_FILE) up -d
 
 watch: up
@@ -35,18 +35,18 @@ watch: up
 		echo "'Watch' command is only available in dev environment"; \
 	fi
 
+# Build shared for dev
+shared:
+	cd $(APP_DIR) && npm run build:shared
+
 down:
 	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
-install: $(FRONTEND_DIR)/node_modules/.package-lock.json  $(BACKEND_DIR)/node_modules/.package-lock.json
+install: $(APP_DIR)/node_modules/.package-lock.json
 
-$(FRONTEND_DIR)/node_modules/.package-lock.json: $(FRONTEND_DIR)/package.json $(FRONTEND_LOCK)
+$(APP_DIR)/node_modules/.package-lock.json: $(APP_DIR)/package.json $(APP_DIR)/package-lock.json
 	@echo "Installing frontend packages..."
-	cd $(FRONTEND_DIR) && npm ci
-
-$(BACKEND_DIR)/node_modules/.package-lock.json: $(BACKEND_DIR)/package.json $(BACKEND_LOCK)
-	@echo "Installing frontend packages..."
-	cd $(BACKEND_DIR) && npm ci
+	cd $(APP_DIR) && npm ci
 
 check: check-back check-front
 
@@ -90,7 +90,7 @@ re: fclean
 
 initdb:
 	docker compose -f $(DOCKER_COMPOSE_FILE) exec backend npx prisma migrate deploy
-	npx prisma generate
+	cd $(BACKEND_DIR) && npx prisma generate
 
 # how to use: make migrate MIGRATION_NAME="Your_migration_name_between_double_quotes"
 migrate:

@@ -1,9 +1,9 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-google-oauth20';
-import googleOauthConfig from 'src/config/google-oauth.config';
+import googleOauthConfig from '../config/google-oauth.config';
 import type { ConfigType } from '@nestjs/config';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 
 /**
  * validates the response from googleOauth takes the response message with the profile and uses

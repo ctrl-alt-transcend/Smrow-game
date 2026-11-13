@@ -1,5 +1,4 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-client-exception.filter';
 import cookieParser from 'cookie-parser';
@@ -8,17 +7,6 @@ import cookieParser from 'cookie-parser';
  */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  /** @brief: A Pipe operates on a handler’s arguments (route parameters, body, query).
-   *           Its role is to validate or transform data before it reaches a controller.
-   */
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
 
   app.use(cookieParser());
   const { httpAdapter } = app.get(HttpAdapterHost);

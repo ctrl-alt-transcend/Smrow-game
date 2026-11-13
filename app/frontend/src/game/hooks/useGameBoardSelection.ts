@@ -1,10 +1,6 @@
 import { useState, useCallback } from "react";
 import type { GameBoardSelection } from "../types/gameboard.types";
-import type {
-  TileData,
-  SettlementData,
-  RoadData,
-} from "@shared/game/gameboard.types";
+import type { TileData, SettlementData, RoadData } from "shared";
 
 const resetSelection = (): GameBoardSelection => ({
   selectedTile: null,

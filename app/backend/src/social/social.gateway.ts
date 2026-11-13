@@ -7,7 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
-import type { JwtPayload } from '@shared/types';
+import type { JwtPayload } from 'shared';
 import { instrument } from '@socket.io/admin-ui'; //WARN: dev only
 
 export interface SocketUser {

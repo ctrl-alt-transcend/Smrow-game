@@ -10,12 +10,13 @@ import {
   type PaperProps,
 } from "@mantine/core";
 
-import { useForm } from "@mantine/form";
+import { schemaResolver, useForm } from "@mantine/form";
 import { upperFirst, useToggle } from "@mantine/hooks";
 import { useState } from "react";
 
 import { useAuth } from "../../hooks/useAuth";
 import ErrorMessages from "../utils/ErrorMessages";
+import { RegisterPostSchema, LoginPostSchema } from "shared";
 
 export function LoginPanel(props: PaperProps) {
   const { register, login } = useAuth();
@@ -23,26 +24,23 @@ export function LoginPanel(props: PaperProps) {
   const [error, setError] = useState<string | string[] | null>(null);
 
   const registerForm = useForm({
+    mode: "uncontrolled",
     initialValues: {
-      email: "",
-      name: "",
       username: "",
+      name: "",
+      email: "",
       password: "",
     },
-    validate: {
-      email: (val) => (/^\S+@\S+$/.test(val) ? null : "Invalid email"),
-      password: (val) =>
-        val.length <= 6
-          ? "Password should include at least 6 characters"
-          : null,
-    },
+    validate: schemaResolver(RegisterPostSchema, { sync: true }),
   });
 
   const loginForm = useForm({
+    mode: "uncontrolled",
     initialValues: {
       email: "",
       password: "",
     },
+    validate: schemaResolver(LoginPostSchema, { sync: true }),
   });
 
   const handleRegister = registerForm.onSubmit(async (data) => {
@@ -80,45 +78,34 @@ export function LoginPanel(props: PaperProps) {
         <form onSubmit={handleRegister}>
           <Stack>
             <TextInput
+              label="Name"
               placeholder="Your name"
-              value={registerForm.values.name}
-              onChange={(event) =>
-                registerForm.setFieldValue("name", event.currentTarget.value)
-              }
+              key={registerForm.key("name")}
+              {...registerForm.getInputProps("name")}
+              error={registerForm.errors.name}
             />
             <TextInput
+              label="Username"
               placeholder="Your username"
-              value={registerForm.values.username}
-              onChange={(event) =>
-                registerForm.setFieldValue(
-                  "username",
-                  event.currentTarget.value,
-                )
-              }
+              key={registerForm.key("username")}
+              {...registerForm.getInputProps("username")}
+              error={registerForm.errors.username}
             />
             <TextInput
               required
+              label="Email"
               placeholder="Your email"
-              value={registerForm.values.email}
-              onChange={(event) =>
-                registerForm.setFieldValue("email", event.currentTarget.value)
-              }
-              error={registerForm.errors.email && "Invalid email"}
+              key={registerForm.key("email")}
+              {...registerForm.getInputProps("email")}
+              error={registerForm.errors.email}
             />
             <PasswordInput
               required
+              label="Password"
               placeholder="Your password"
-              value={registerForm.values.password}
-              onChange={(event) =>
-                registerForm.setFieldValue(
-                  "password",
-                  event.currentTarget.value,
-                )
-              }
-              error={
-                registerForm.errors.password &&
-                "Password should include at least 6 characters"
-              }
+              key={registerForm.key("password")}
+              {...registerForm.getInputProps("password")}
+              error={registerForm.errors.password}
             />
           </Stack>
 
@@ -133,20 +120,20 @@ export function LoginPanel(props: PaperProps) {
           <Stack>
             <TextInput
               required
+              label="Email"
               placeholder="Your email"
-              value={loginForm.values.email}
-              onChange={(event) =>
-                loginForm.setFieldValue("email", event.currentTarget.value)
-              }
-              error={loginForm.errors.email && "Invalid email"}
+              key={loginForm.key("email")}
+              {...loginForm.getInputProps("email")}
+              error={loginForm.errors.email}
             />
+
             <PasswordInput
               required
+              label="Password"
               placeholder="Your password"
-              value={loginForm.values.password}
-              onChange={(event) =>
-                loginForm.setFieldValue("password", event.currentTarget.value)
-              }
+              key={loginForm.key("password")}
+              {...loginForm.getInputProps("password")}
+              error={loginForm.errors.password}
             />
           </Stack>
           <Group justify="space-between" mt="xl">

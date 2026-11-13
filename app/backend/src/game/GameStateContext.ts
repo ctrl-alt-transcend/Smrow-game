@@ -5,14 +5,14 @@ import {
   classicLayout,
   Faction,
   FACTION_COLORS,
-} from '@shared/game/gameboard.types';
+} from 'shared';
 import type {
   GameData,
   GameDataDto,
   Player,
   GameResponse,
   BuildRequestPayload,
-} from '@shared/game/game.types';
+} from 'shared';
 import {
   isBuildRequestPayload,
   updateValue,

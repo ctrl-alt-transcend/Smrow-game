@@ -1,11 +1,17 @@
 import { Controller, Body, Post, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthUserDto } from './dto/auth-user.dto';
-import { CreateUserDto } from '../user/dto/create-user.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Req, Res } from '@nestjs/common';
-import type { UserProfile, UserPublic } from '@shared/types';
-import { GoogleAuthGuard } from 'src/guards/google-auth/google-auth.guard';
+import { type UserProfile, UserPublic } from 'shared';
+import { ZodSerializerDto } from 'nestjs-zod';
+import {
+  LoginDto,
+  LoginResponseDto,
+  RegisterDto,
+  RegisterResponseDto,
+  UserProfileDto,
+} from './dto/auth.dto';
+import { GoogleAuthGuard } from '../guards/google-auth/google-auth.guard';
 import type { Request, Response } from 'express';
 
 @Controller('auth')
@@ -13,18 +19,21 @@ export class AuthController {
   constructor(private readonly AuthService: AuthService) {}
 
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto): Promise<unknown> {
-    return this.AuthService.signUp(createUserDto);
+  @ZodSerializerDto(RegisterResponseDto)
+  async register(@Body() body: RegisterDto) {
+    return this.AuthService.signUp(body);
   }
 
   @Post('login')
-  async login(@Body() authUserDto: AuthUserDto): Promise<unknown> {
-    return this.AuthService.signIn(authUserDto.email, authUserDto.password);
+  @ZodSerializerDto(LoginResponseDto)
+  async login(@Body() body: LoginDto) {
+    return this.AuthService.signIn(body);
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async me(@Req() req: { user: UserPublic }): Promise<unknown> {
+  @ZodSerializerDto(UserProfileDto)
+  async me(@Req() req: { user: UserPublic }) {
     return this.AuthService.getProfile(req.user.id);
   }
 
@@ -48,9 +57,9 @@ export class AuthController {
     @Req() req: { user: UserProfile },
     @Res() res: Response,
   ) {
-    const response = await this.AuthService.createJWTToken(req.user);
+    const access_token = await this.AuthService.createJWTToken(req.user);
 
-    res.cookie('access_token', response.access_token, {
+    res.cookie('access_token', access_token, {
       httpOnly: true,
       secure: false, // for dev
       sameSite: 'lax',

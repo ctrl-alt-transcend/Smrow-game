@@ -5,7 +5,7 @@ import type {
   LoginPost,
   RegisterResponse,
   LoginResponse,
-} from "@shared/types";
+} from "shared";
 
 export const registerUser = async (
   data: RegisterPost,
