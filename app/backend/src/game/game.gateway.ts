@@ -147,9 +147,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
         // Check is the client has a token or a cookie and save the cookie for verification with JWT
 
         const authToken = client.handshake.auth.token as string;
-        const cookies: Record<string, string> = parseCookie(
-          client.handshake.headers.cookie ?? '',
-        );
+        const cookies = parseCookie(client.handshake.headers.cookie ?? '');
         const cookieToken = cookies.access_token;
         const token =
           cookieToken ||
