@@ -1,27 +1,25 @@
 import { useNavigate } from "react-router";
-import { getUserToken } from "../../services/user.service.tsx"
-import axios from 'axios'
+import axios from "axios";
+import { http } from "../../services/http.tsx";
 
 export function useCreateLobby() {
   const navigate = useNavigate();
 
   return async function createLobby() {
     try {
-      await axios.post('/api/game/create', null, {
-        headers: { Authorization: `Bearer ${getUserToken()}` },
-      });
+      await http.post("/game/create");
+      navigate("/game");
+      console.log("Game created succesfully");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
-        navigate ('/')
-        return ;
+        navigate("/");
+        return;
       }
-      console.log('User already in a game');
-      navigate('/game');
-      return ;
+      console.log("User already in a game");
+      navigate("/game");
+      return;
     }
-    console.log('Game created succesfully');
-    navigate('/game');
-  }
+  };
 }
 
 export function useJoinLobby() {
@@ -29,14 +27,10 @@ export function useJoinLobby() {
 
   return async function joinLobby(gameId: string) {
     try {
-      await axios.post('/api/game/join', { gameId } , { //INFO: { gameId } is shorthand for { gameId: gameId } if the key and the variable have the same name
-        headers: { Authorization: `Bearer ${getUserToken()}` },
-      });
+      await http.post("/api/game/join", { gameId });
     } catch {
-      navigate('/error');
+      navigate("/error");
     }
-
-    navigate('/game');
-  }
+    navigate("/game");
+  };
 }
-
