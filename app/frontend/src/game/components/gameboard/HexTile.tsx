@@ -5,8 +5,8 @@ import { HEX_SIZE } from "@shared/game/gameboard.types";
 import {
   getTileFillColor,
   getTileStrokeColor,
-  getTileStrokeWidth
-} from '../../utils/tileRendering';
+  getTileStrokeWidth,
+} from "../../utils/tileRendering";
 
 const TOKEN_RADIUS = HEX_SIZE * 0.34;
 const TOKEN_FONT_SIZE = HEX_SIZE * 0.46;
@@ -45,8 +45,11 @@ export const HexTile: React.FC<TileProps> = ({
     <g
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onClick={(e) => { e.stopPropagation(); onClick(data); }}
-      style={{ cursor: 'pointer' }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(data);
+      }}
+      style={{ cursor: "pointer" }}
     >
       <polygon
         points={points}

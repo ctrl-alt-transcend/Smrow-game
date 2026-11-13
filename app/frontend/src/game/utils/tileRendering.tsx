@@ -5,7 +5,7 @@ import {
   FACTION_COLORS,
   SELECTED_COLOR,
   HOVER_COLOR,
-  DEFAULT_COLOR
+  DEFAULT_COLOR,
 } from "@shared/game/gameboard.types";
 
 /** @description render tile color based on state, land type or faction */

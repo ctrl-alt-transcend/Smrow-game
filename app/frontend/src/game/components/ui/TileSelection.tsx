@@ -40,12 +40,18 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
 
   const target = useMemo<BuildRequestPayload | null>(() => {
     if (selected.selectedRoad) {
-      return { kind: "road", id: selected.selectedRoad.edge.id,
-        data: selected.selectedRoad };
+      return {
+        kind: "road",
+        id: selected.selectedRoad.edge.id,
+        data: selected.selectedRoad,
+      };
     }
     if (selected.selectedSettlement) {
-      return { kind: "settlement", id: selected.selectedSettlement.vertex.id,
-        data: selected.selectedSettlement };
+      return {
+        kind: "settlement",
+        id: selected.selectedSettlement.vertex.id,
+        data: selected.selectedSettlement,
+      };
     }
     return null;
   }, [selected.selectedRoad, selected.selectedSettlement]);
@@ -81,8 +87,8 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   }, [masterLog, onBuilt]);
 
   /**
-  * 3. Anti-blocking guard if server deosn't respond
-  */
+   * 3. Anti-blocking guard if server deosn't respond
+   */
   useEffect(() => {
     if (!busy) return;
     const timer = window.setTimeout(() => {

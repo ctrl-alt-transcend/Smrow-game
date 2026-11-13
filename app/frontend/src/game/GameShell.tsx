@@ -1,21 +1,19 @@
-import { AppShell, Burger, Group } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import GameBoard from './components/gameboard/GameBoard.tsx';
-import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
-import { TileSelection } from './components/ui/TileSelection.tsx';
-import { DiceRoller } from './components/ui/DiceRoller.tsx';
-import GameMasterLog from './components/ui/GameMasterLog.tsx';
-import { useGameState } from './hooks/useGameState.ts';
-import type { GameDataDto } from '@shared/game/game.types.ts';
-import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
-import SkipTurnButton from './components/ui/SkipTurnButton.tsx';
+import { AppShell, Burger, Group } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import GameBoard from "./components/gameboard/GameBoard.tsx";
+import { useGameBoardFactory } from "./hooks/useGameBoardFactory.ts";
+import { TileSelection } from "./components/ui/TileSelection.tsx";
+import { DiceRoller } from "./components/ui/DiceRoller.tsx";
+import GameMasterLog from "./components/ui/GameMasterLog.tsx";
+import { useGameState } from "./hooks/useGameState.ts";
+import type { GameDataDto } from "@shared/game/game.types.ts";
+import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
+import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 
 export default function Game() {
   const { game } = useGameState();
-  if (!game)
-    return <div>Loading game...</div>;
-  if (!game.board)
-    return <div>Loading gameboard...</div>;
+  if (!game) return <div>Loading game...</div>;
+  if (!game.board) return <div>Loading gameboard...</div>;
   return <GameShell game={game} />;
 }
 
@@ -29,12 +27,12 @@ function GameShell({ game }: { game: GameDataDto }) {
       footer={{ height: 95 }}
       navbar={{
         width: 300,
-        breakpoint: 'xs',
+        breakpoint: "xs",
         collapsed: { desktop: !opened, mobile: !opened },
       }}
       aside={{
         width: 300,
-        breakpoint: 'xl',
+        breakpoint: "xl",
         collapsed: { desktop: false, mobile: true },
       }}
       padding="xs"
@@ -53,7 +51,7 @@ function GameShell({ game }: { game: GameDataDto }) {
             masterLog={game.masterLog}
           />
           <DiceRoller diceRoll={game.diceRoll} masterLog={game.masterLog} />
-          <SkipTurnButton/>
+          <SkipTurnButton />
         </Group>
       </AppShell.Navbar>
 
