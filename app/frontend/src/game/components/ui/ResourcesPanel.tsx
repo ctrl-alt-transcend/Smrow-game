@@ -1,5 +1,14 @@
-import { Box, Card, Group, Stack, Table, Text, ThemeIcon, Title } from "@mantine/core";
-import type { Player, PlayerDto } from "@shared/game/game.types";
+import {
+  Box,
+  Card,
+  Group,
+  Stack,
+  Table,
+  Text,
+  ThemeIcon,
+  Title,
+} from "@mantine/core";
+import type { PlayerDto } from "shared";
 
 export type Resources = {
   wood: number;
@@ -30,8 +39,15 @@ type ResourcesPanelProps = {
   withTotal?: boolean;
 };
 
-export function ResourcesPanel({ currentPlayer, title = currentPlayer.playerId, withTotal = true }: ResourcesPanelProps) {
-  const total = RESOURCE_META.reduce((sum, meta) => sum + currentPlayer.resources[meta.key], 0);
+export function ResourcesPanel({
+  currentPlayer,
+  title = currentPlayer.playerId,
+  withTotal = true,
+}: ResourcesPanelProps) {
+  const total = RESOURCE_META.reduce(
+    (sum, meta) => sum + currentPlayer.resources[meta.key],
+    0,
+  );
 
   const rows = RESOURCE_META.map((meta) => (
     <Table.Tr key={meta.key}>
