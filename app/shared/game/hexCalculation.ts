@@ -1,13 +1,9 @@
-import {
-  type Edge,
-  type Vertex,
-  HEX_SIZE
-} from "./gameboard.types";
+import { type Edge, type Vertex, HEX_SIZE } from "./gameboard.types.js";
 
 /** @description axial coordinates (col & row) to pixels (pointy-topped) */
 export const axialToPixel = (q: number, r: number, size: number) => ({
   x: size * (Math.sqrt(3) * q + (Math.sqrt(3) / 2) * r),
-  y: size * (3 / 2 * r),
+  y: size * ((3 / 2) * r),
 });
 
 /* ================================================================== *
@@ -50,7 +46,11 @@ interface VertexKey {
  * Les 3 tuiles candidates sont (q,r), (q,r)+d_i et (q,r)+d_(i+5) ;
  * on garde la plus petite lexicographiquement.
  */
-export const canonicalVertexKey = (q: number, r: number, i: number): VertexKey => {
+export const canonicalVertexKey = (
+  q: number,
+  r: number,
+  i: number,
+): VertexKey => {
   const c = mod(i, 6);
   const next = DIRECTIONS[c];
   const prev = DIRECTIONS[mod(c + 5, 6)];
@@ -61,11 +61,14 @@ export const canonicalVertexKey = (q: number, r: number, i: number): VertexKey =
     { q: q + prev.q, r: r + prev.r, corner: mod(c + 2, 6) },
   ];
 
-  return candidates.reduce((best, cand) => (isSmaller(cand, best) ? cand : best));
+  return candidates.reduce((best, cand) =>
+    isSmaller(cand, best) ? cand : best,
+  );
 };
 
 /** @description id canonique d'un sommet : "{q}:{r}:{corner}" */
-export const vertexId = (key: VertexKey): string => `${key.q}:${key.r}:${key.corner}`;
+export const vertexId = (key: VertexKey): string =>
+  `${key.q}:${key.r}:${key.corner}`;
 
 /* ================================================================== *
  * SOMMETS
@@ -169,14 +172,16 @@ export const auditTopology = (
 
   for (const e of edges.values()) {
     for (const id of [e.p1.id, e.p2.id]) {
-      if (!vertices.has(id)) problems.push(`arête ${e.id} → sommet inconnu ${id}`);
+      if (!vertices.has(id))
+        problems.push(`arête ${e.id} → sommet inconnu ${id}`);
       edgesPerVertex.set(id, (edgesPerVertex.get(id) ?? 0) + 1);
     }
   }
 
   // un sommet de grille hexagonale touche au maximum 3 arêtes
   for (const [id, count] of edgesPerVertex) {
-    if (count > 3) problems.push(`sommet ${id} touché par ${count} arêtes (> 3)`);
+    if (count > 3)
+      problems.push(`sommet ${id} touché par ${count} arêtes (> 3)`);
   }
 
   // rayon déduit du nombre de tuiles : T = 3N² + 3N + 1
@@ -209,4 +214,3 @@ export const auditTopology = (
     problems,
   };
 };
-

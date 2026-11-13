@@ -4,8 +4,8 @@ import {
   type SettlementData,
   type CoastData,
   type GameBoard,
-  type ReserveData
-} from "@shared/game/gameboard.types";
+  type ReserveData,
+} from "shared";
 
 /** @description common definition for all interactive game features */
 export interface InteractiveProps<T> {
@@ -17,11 +17,11 @@ export interface InteractiveProps<T> {
   hasOwner?: boolean | null;
 }
 
-export interface TileProps extends InteractiveProps<TileData> { }
-export interface RoadProps extends InteractiveProps<RoadData> { }
-export interface SettlementProps extends InteractiveProps<SettlementData> { }
-export interface CoastProps extends InteractiveProps<CoastData> { }
-export interface ReserveProps extends InteractiveProps<ReserveData> { }
+export interface TileProps extends InteractiveProps<TileData> {}
+export interface RoadProps extends InteractiveProps<RoadData> {}
+export interface SettlementProps extends InteractiveProps<SettlementData> {}
+export interface CoastProps extends InteractiveProps<CoastData> {}
+export interface ReserveProps extends InteractiveProps<ReserveData> {}
 
 /** @description set selected interactive element */
 export interface GameBoardSelection {
@@ -59,7 +59,8 @@ export interface ReserveHover {
   id: string;
 }
 
-export type HoverEntity = TileHover | RoadHover | SettlementHover | CoastHover | ReserveHover | null;
+export type HoverEntity =
+  TileHover | RoadHover | SettlementHover | CoastHover | ReserveHover | null;
 
 export interface GameBoardProps {
   board: GameBoard;

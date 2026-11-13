@@ -1,4 +1,4 @@
-import type { Player, Resources } from "./game.types";
+import type { Player, Resources } from "./game.types.ts";
 
 /** Rules value */
 export const SPECIAL_PORT_RATE = 2;
@@ -15,9 +15,9 @@ export const ROBBER_ROLL = 7;
 export const CROSSROADS_RULE = 3;
 
 /** Rendering */
-export const SELECTED_COLOR = '#c30000';
-export const HOVER_COLOR = '#ff0f0f';
-export const DEFAULT_COLOR = '#e4e4e4';
+export const SELECTED_COLOR = "#c30000";
+export const HOVER_COLOR = "#ff0f0f";
+export const DEFAULT_COLOR = "#e4e4e4";
 
 export const RENDER_SIZE = 50;
 export const HEX_SIZE = RENDER_SIZE;
@@ -38,17 +38,17 @@ export const SPECIALIZED_PORT_COLOR = "#ffffff";
 export const NORMAL_PORT_COLOR = "#000000";
 
 export const BuildingType = {
-  ROAD: 'road',
-  SETTLEMENT: 'settlement',
-  CITY: 'city',
+  ROAD: "road",
+  SETTLEMENT: "settlement",
+  CITY: "city",
 } as const;
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
 
 export const TraderType = {
   SPECIALIZED_PORT: 'specialized port',
-  GENERIC_PORT: 'generic port',
+  GENERIC_PORT: "generic port",
   RESERVE: 'reserve',
-  PLAYER: 'player'
+  PLAYER: "player",
 } as const;
 export type TraderType = (typeof TraderType)[keyof typeof TraderType];
 
@@ -77,32 +77,32 @@ export const BUILD_COSTS: Record<BuildingType, Resources> = {
 };
 
 export const LandType = {
-  FOREST: 'forest',
-  PASTURE: 'pasture',
-  HILL: 'hill',
-  MOUNTAIN: 'mountain',
-  FIELD: 'field',
-  DESERT: 'desert'
+  FOREST: "forest",
+  PASTURE: "pasture",
+  HILL: "hill",
+  MOUNTAIN: "mountain",
+  FIELD: "field",
+  DESERT: "desert"
 } as const;
 export type LandType = (typeof LandType)[keyof typeof LandType];
 
-export const RessourceType = {
+export const ResourceType = {
   WOOD: 'wood',
   SHEEP: 'sheep',
   BRICK: 'brick',
   ORE: 'ore',
   WHEAT: 'wheat',
-  DUST: 'dust'
+  DUST: "dust",
 } as const;
-export type RessourceType = (typeof RessourceType)[keyof typeof RessourceType];
+export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType];
 
 export const LAND_RESSOURCE: Record<LandType, string> = {
-  [LandType.FOREST]: RessourceType.WOOD,
-  [LandType.PASTURE]: RessourceType.SHEEP,
-  [LandType.HILL]: RessourceType.BRICK,
-  [LandType.MOUNTAIN]: RessourceType.ORE,
-  [LandType.FIELD]: RessourceType.WHEAT,
-  [LandType.DESERT]: RessourceType.DUST
+  [LandType.FOREST]: ResourceType.WOOD,
+  [LandType.PASTURE]: ResourceType.SHEEP,
+  [LandType.HILL]: ResourceType.BRICK,
+  [LandType.MOUNTAIN]: ResourceType.ORE,
+  [LandType.FIELD]: ResourceType.WHEAT,
+  [LandType.DESERT]: ResourceType.DUST
 };
 
 export const LAND_COLORS: Record<LandType, string> = {
@@ -115,12 +115,12 @@ export const LAND_COLORS: Record<LandType, string> = {
 };
 
 export const Faction = {
-  POURPRES_CHYBRES: 'Pourpres Chybres',
-  BOURSES_BLEUES: 'Bourses Bleues',
-  ROSES_FIACS: 'Roses Fiacs',
-  UREE_JAUNE: 'Uree Jaune',
-  DEFAULT: 'Kikouneurs (default)',
-  UNOCCUPIED: 'unoccupied ...'
+  POURPRES_CHYBRES: "Pourpres Chybres",
+  BOURSES_BLEUES: "Bourses Bleues",
+  ROSES_FIACS: "Roses Fiacs",
+  UREE_JAUNE: "Uree Jaune",
+  DEFAULT: "Kikouneurs (default)",
+  UNOCCUPIED: "unoccupied ...",
 } as const;
 export type Faction = (typeof Faction)[keyof typeof Faction];
 
@@ -161,14 +161,14 @@ export const GUIDE_LOG: Record<Phase, string> = {
 
 /** @description x, y → corner's axial coordinates */
 export interface Vertex {
-  id: string;       // "{q}:{r}:{cornerIndex}"
+  id: string; // "{q}:{r}:{cornerIndex}"
   x: number;
   y: number;
 }
 
 /** @description p1, p2 → segment between two vertices (corner to corner) */
 export interface Edge {
-  id: string;       // "{vertexId1}-{vertexId2}"
+  id: string; // "{vertexId1}-{vertexId2}"
   p1: Vertex;
   p2: Vertex;
 }
@@ -214,7 +214,7 @@ export interface CoastData {
   port: PortData | null;
 }
 
-export type PortType = RessourceType | 'generic';
+export type PortType = ResourceType | 'generic';
 
 export interface PortData {
   id: string;

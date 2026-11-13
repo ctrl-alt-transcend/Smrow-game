@@ -1,20 +1,18 @@
 import { Button, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { socket } from "../../../socket.tsx";
+import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 import { useCallback } from "react";
 
 export default function SkipTurnButton({ isMyTurn }: { isMyTurn: boolean }) {
   const handleSkipRequest = useCallback(() => {
-    socket.emit('skip');
+    socket.emit("skip");
   }, []);
 
   const openModal = () => {
     modals.openConfirmModal({
       title: "Confirm skip turn",
       children: (
-        <Text size="sm">
-          Are you sure you want to skip your turn ?
-        </Text>
+        <Text size="sm">Are you sure you want to skip your turn ?</Text>
       ),
       labels: { confirm: "Confirm", cancel: "Cancel" },
       onConfirm: handleSkipRequest,

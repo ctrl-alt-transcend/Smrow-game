@@ -23,8 +23,8 @@ export const router = createBrowserRouter([
           { path: "stats", Component: StatsPage },
         ],
       },
+      { path: "/game", Component: GameShell },
     ],
   },
-  { path: "/game", Component: GameShell },
   { path: "*", Component: NotFoundPage },
 ]);

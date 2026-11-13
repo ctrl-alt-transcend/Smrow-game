@@ -5,19 +5,18 @@ import {
   type RoadData,
   type SettlementData,
   type CoastData,
-  type PortData,
   type GameBoard,
   type ConnectedElements,
   type GameBoardGraph,
   HEX_SIZE,
   WATER_WIDTH,
   Faction,
-  RessourceType,
+  ResourceType,
   ReserveData,
   CoreElement,
-} from '@shared/game/gameboard.types';
-import { getHexCorners, getHexEdges } from '@shared/game/hexCalculation';
-import { randomizeRobber } from './randomizeGameBoard';
+  getHexCorners,
+  getHexEdges,
+} from 'shared';
 
 /* ================================================================== *
  * initGameBoard
@@ -69,8 +68,14 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
     allPoints.push(
       edge.p1,
       edge.p2,
-      { x: edge.p1.x + normal.x * WATER_WIDTH, y: edge.p1.y + normal.y * WATER_WIDTH },
-      { x: edge.p2.x + normal.x * WATER_WIDTH, y: edge.p2.y + normal.y * WATER_WIDTH },
+      {
+        x: edge.p1.x + normal.x * WATER_WIDTH,
+        y: edge.p1.y + normal.y * WATER_WIDTH,
+      },
+      {
+        x: edge.p2.x + normal.x * WATER_WIDTH,
+        y: edge.p2.y + normal.y * WATER_WIDTH,
+      },
     );
   }
 
@@ -91,9 +96,9 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
 
   const reserveRadius = 40;
   const reserve: ReserveData = {
-    id: "reserve",
+    id: 'reserve',
     position: {
-      id: "reserve-pos",
+      id: 'reserve-pos',
       x: bounds.minX - reserveRadius * 0.6 + 50,
       y: bounds.minY - reserveRadius * 0.6 + 50,
     },
@@ -154,7 +159,10 @@ const generateCoasts = (tiles: TileData[]): CoastData[] => {
   for (const tile of tiles) {
     const corners = getHexCorners(tile.q, tile.r, HEX_SIZE);
     const center = corners.reduce(
-      (acc, c) => ({ x: acc.x + c.x / corners.length, y: acc.y + c.y / corners.length }),
+      (acc, c) => ({
+        x: acc.x + c.x / corners.length,
+        y: acc.y + c.y / corners.length,
+      }),
       { x: 0, y: 0 },
     );
 
@@ -186,20 +194,14 @@ const SPECIALIZED_PORT_COUNT = 5;
 const GENERIC_PORT_COUNT = 4;
 const TOTAL_PORTS = SPECIALIZED_PORT_COUNT + GENERIC_PORT_COUNT;
 
-const SPECIALTIES: RessourceType[] = [
-  'wood',
-  'brick',
-  'sheep',
-  'wheat',
-  'ore',
-];
+const SPECIALTIES: ResourceType[] = ['wood', 'brick', 'sheep', 'wheat', 'ore'];
 
 /**
  * Standard Fisher-Yates shuffle using Math.random: the board layout itself
  * stays deterministic (tiles), but ports are intentionally scattered
  * differently on every new game.
  */
-const shuffle = <T,>(arr: T[]): T[] => {
+const shuffle = <T>(arr: T[]): T[] => {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -213,23 +215,21 @@ const shuffle = <T,>(arr: T[]): T[] => {
  * specialties (2:1), the 4 last ones a generic type (3:1).
  * Shuffling the whole sequence would blur the specialized/generic split.
  */
-
-const buildPortTypeOrder = (): (RessourceType | 'generic')[] => [
+const buildPortTypeOrder = (): (ResourceType | 'generic')[] => [
   ...shuffle(SPECIALTIES),
-  ...Array(GENERIC_PORT_COUNT).fill('generic' as const),
+  ...Array.from({ length: GENERIC_PORT_COUNT }, () => 'generic' as const),
 ];
 
 /** attach a port to a RANDOM coastal edge of the given tile */
 const attachPortToTile = (
   coastsByTile: Map<string, CoastData[]>,
   tile: TileData,
-  type: RessourceType | 'generic',
+  type: ResourceType | 'generic',
 ) => {
   const tileCoasts = coastsByTile.get(axialKey(tile.q, tile.r)) ?? [];
   if (tileCoasts.length === 0) return;
 
-  const coast =
-    tileCoasts[Math.floor(Math.random() * tileCoasts.length)];
+  const coast = tileCoasts[Math.floor(Math.random() * tileCoasts.length)];
 
   coast.port = {
     id: `port:${tile.q},${tile.r}`,
@@ -366,14 +366,14 @@ export const linkGameBoard = (board: GameBoard): GameBoardGraph => {
 
   // STEP 1: Creating empty entries
   for (const road of board.roads) {
-    register(graph, road.id, {type: 'road', data: road});
+    register(graph, road.id, { type: 'road', data: road });
   }
   for (const settlement of board.settlements) {
-    register(graph, settlement.id, {type: 'settlement', data: settlement});
+    register(graph, settlement.id, { type: 'settlement', data: settlement });
   }
   for (const coast of board.coasts) {
-    if(coast.port) {
-      register(graph, coast.port.id, {type: 'port', data: coast.port});
+    if (coast.port) {
+      register(graph, coast.port.id, { type: 'port', data: coast.port });
     }
   }
 

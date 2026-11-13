@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { PlayerProfile } from '@shared/game/game.types';
+import type { PlayerProfile } from 'shared';
 import { GameStateContext, WhoStartsPhase } from './GameStateContext';
 
 @Injectable()

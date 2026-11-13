@@ -16,24 +16,25 @@ import { useSelectionDisplay } from "../../hooks/useSelectionDisplay.ts";
 import type { GameBoardSelection } from "../../types/gameboard.types.tsx";
 import {
   type BuildRequestPayload,
-  type TradeRequestPayload
+  type TradeRequestPayload,
 } from "../../../../../shared/game/game.types.ts";
 import {
   GENERIC_PORT_RATE,
   SPECIAL_PORT_RATE,
   RESERVE_RATE,
-  RessourceType,
-  type TraderType
+  ResourceType,
+  type TraderType,
 } from "../../../../../shared/game/gameboard.types.ts";
-import { socket } from "../../../socket.tsx";
+import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 
-
-/** Resource options (keep in sync with your RessourceType union) */
-const RESSOURCE_OPTIONS = [RessourceType.WOOD, RessourceType.BRICK,
-  RessourceType.SHEEP, RessourceType.WHEAT, RessourceType.ORE].map(
-  (r) => ({ value: r, label: r }),
-);
-
+/** Resource options (keep in sync with your ResourceType union) */
+const RESSOURCE_OPTIONS = [
+  ResourceType.WOOD,
+  ResourceType.BRICK,
+  ResourceType.SHEEP,
+  ResourceType.WHEAT,
+  ResourceType.ORE,
+].map((r) => ({ value: r, label: r }));
 
 /* ------------------------------------------------------------------ *
  * Responsive helper: measure the container width so font sizes and
@@ -57,7 +58,6 @@ function useElementWidth<T extends HTMLElement>() {
   return { ref, width };
 }
 
-
 /* ================================================================== *
  * TradeOfferPanel : reusable trade panel
  *  - ratio = null            → free trade (players): offer + target fully
@@ -74,7 +74,7 @@ function useElementWidth<T extends HTMLElement>() {
 interface TradeOfferPanelProps {
   ratio: number | null;
   /** resource imposed on the offer side (specialized port only) */
-  offerLockedResource?: RessourceType;
+  offerLockedResource?: ResourceType;
   /** identifies the trade in the payload sent to the server */
   sourceId: string;
   sourceKind: TraderType;
@@ -93,26 +93,40 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
   isMyTurn,
 }) => {
   // Target side — always editable (when it's the player's turn)
-  const [targetResource, setTargetResource] = useState<RessourceType | null>(null);
+  const [targetResource, setTargetResource] = useState<ResourceType | null>(
+    null,
+  );
   const [targetAmount, setTargetAmount] = useState<number>(1);
 
   // Offer resource — free unless locked by a specialized port
-  const [offerResource, setOfferResource] = useState<RessourceType | null>(
-    offerLockedResource ?? null,
-  );
+  //const [offerResource, setOfferResource] = useState<ResourceType | null>(
+  //  offerLockedResource ?? null,
+  //);
+
   // Offer amount — free only for player-to-player trades
   const [freeOfferAmount, setFreeOfferAmount] = useState<number>(1);
 
   const isBankTrade = ratio !== null;
   const isOfferResourceLocked = Boolean(offerLockedResource);
 
-  // Keep the offer resource in sync when the locked resource changes
-  useEffect(() => {
-    setOfferResource(offerLockedResource ?? null);
-  }, [offerLockedResource]);
+  //// Keep the offer resource in sync when the locked resource changes
+  //useEffect(() => {
+  //  setOfferResource(offerLockedResource ?? null);
+  //}, [offerLockedResource]);
+
+  // Remove the state initialized from the prop AND the effect entirely.
+
+  // Keep only the free-choice state:
+  const [chosenOfferResource, setChosenOfferResource] =
+    useState<ResourceType | null>(null);
+
+  // Derive during render: the lock always wins when present.
+  const offerResource = offerLockedResource ?? chosenOfferResource;
 
   // Bank trade: offer amount is always derived from the target amount
-  const offerAmount = isBankTrade ? targetAmount * (ratio as number) : freeOfferAmount;
+  const offerAmount = isBankTrade
+    ? targetAmount * (ratio as number)
+    : freeOfferAmount;
 
   const isValid =
     offerResource !== null &&
@@ -165,9 +179,12 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
             placeholder="Offer resource"
             data={RESSOURCE_OPTIONS}
             value={offerResource}
-            onChange={(v) => setOfferResource(v as RessourceType)}
+            onChange={(v) => setChosenOfferResource(v as ResourceType)}
             disabled={!isMyTurn}
-            style={{ flex: 1, minWidth: 120 }}
+            style={{
+              flex: 1,
+              minWidth: 120,
+            }}
           />
         )}
         {!isBankTrade && (
@@ -177,7 +194,10 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
             value={freeOfferAmount}
             onChange={(v) => setFreeOfferAmount(Number(v) || 1)}
             disabled={!isMyTurn}
-            style={{ flex: 0, width: 90 }}
+            style={{
+              flex: 0,
+              width: 90,
+            }}
           />
         )}
       </Group>
@@ -189,9 +209,12 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
           placeholder="Target resource"
           data={RESSOURCE_OPTIONS}
           value={targetResource}
-          onChange={(v) => setTargetResource(v as RessourceType)}
+          onChange={(v) => setTargetResource(v as ResourceType)}
           disabled={!isMyTurn}
-          style={{ flex: 1, minWidth: 120 }}
+          style={{
+            flex: 1,
+            minWidth: 120,
+          }}
         />
         <NumberInput
           size="xs"
@@ -199,7 +222,10 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
           value={targetAmount}
           onChange={(v) => setTargetAmount(Number(v) || 1)}
           disabled={!isMyTurn}
-          style={{ flex: 0, width: 90 }}
+          style={{
+            flex: 0,
+            width: 90,
+          }}
         />
       </Group>
 
@@ -362,13 +388,8 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     }
   };
 
-
   return (
-    <Button
-      onClick={openModal}
-      loading={busy}
-      disabled={busy || !isMyTurn}
-    >
+    <Button onClick={openModal} loading={busy} disabled={busy || !isMyTurn}>
       {buttonName || (isMyTurn ? "Build" : "Not your turn")}
     </Button>
   );
@@ -389,7 +410,10 @@ const ITEMS_FONT_MAX = 18;
 const ITEMS_AVG_CHAR = 5.2; // px per char at fontSize 1em (default sans-serif)
 const ITEMS_FALLBACK_WIDTH = 220; // used before the container is measured
 
-const computeItemsFontSize = (labels: string[], availableWidth: number): number => {
+const computeItemsFontSize = (
+  labels: string[],
+  availableWidth: number,
+): number => {
   const maxLen = labels.reduce((max, l) => Math.max(max, l.length), 0);
   if (maxLen === 0 || availableWidth <= 0) return ITEMS_FONT_MAX;
   const rawSize = availableWidth / (maxLen * ITEMS_AVG_CHAR);
@@ -402,7 +426,10 @@ interface SelectionItemsProps {
   availableWidth: number;
 }
 
-const SelectionItems: React.FC<SelectionItemsProps> = ({ items, availableWidth }) => {
+const SelectionItems: React.FC<SelectionItemsProps> = ({
+  items,
+  availableWidth,
+}) => {
   if (items.length === 0) {
     return <Text c="dimmed">No selection</Text>;
   }
@@ -458,9 +485,8 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
     useElementWidth<HTMLDivElement>();
 
   // Usable width for the item labels: measured width minus paddings/bullet.
-  const itemsAvailableWidth = cardBodyWidth > 0
-    ? cardBodyWidth - 40
-    : ITEMS_FALLBACK_WIDTH;
+  const itemsAvailableWidth =
+    cardBodyWidth > 0 ? cardBodyWidth - 40 : ITEMS_FALLBACK_WIDTH;
 
   /* ------------------------------------------------------------ *
    * Modular content depending on the selected kind
@@ -496,7 +522,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
       return (
         <TradeOfferPanel
           ratio={SPECIAL_PORT_RATE}
-          offerLockedResource={port.type as RessourceType}
+          offerLockedResource={port.type as ResourceType}
           sourceId={port.coastId}
           sourceKind="specialized port"
           {...turnFlag}
@@ -574,13 +600,24 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
   };
 
   return (
-    <Box style={{ flex: 1, minWidth: 220, width: "100%", alignContent: "center" }}>
+    <Box
+      style={{
+        flex: 1,
+        minWidth: 220,
+        width: "100%",
+        alignContent: "center",
+        cursor: !isMyTurn ? "not-allowed" : "pointer",
+      }}
+    >
       <Card
         withBorder
         radius="md"
         shadow="sm"
         mih={290}
-        style={{ display: "flex", flexDirection: "column" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
         <Stack gap="xs" justify="center" align="center" w="100%">
           <Group justify="space-between" w="100%" wrap="nowrap">

@@ -1,4 +1,4 @@
-import type { Player } from '@shared/game/game.types';
+import type { Player } from 'shared';
 import {
   type GameBoard,
   type RoadData,
@@ -8,8 +8,11 @@ import {
   BuildingsInGame,
   SETTLEMENT_POINT,
   CITY_POINT,
-} from '@shared/game/gameboard.types';
-import { hasEnoughResourcesToBuild, payBuildResources } from './handleResources';
+} from 'shared';
+import {
+  hasEnoughResourcesToBuild,
+  payBuildResources,
+} from './handleResources';
 import { crossroadRule } from './handleGameRules';
 
 export type BuildRequestPayload =
@@ -158,27 +161,32 @@ interface BuildValidation {
 
 function cityUpgradeCheck(
   target: SettlementData,
-  player: Player
+  player: Player,
 ): BuildValidation {
   if (target.isCity) {
-    console.log(`👀⛔buildCheck: ${player.playerId} try to upgrade settlement but it's already a city !`);
+    console.log(
+      `👀⛔buildCheck: ${player.playerId} try to upgrade settlement but it's already a city !`,
+    );
     return {
       valid: false,
       message: "Can't upgrade more, it's already a city !",
     };
-  } else if (
-    !hasEnoughResourcesToBuild(player.resources, 'city')
-  ) {
-    console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a city`);
+  } else if (!hasEnoughResourcesToBuild(player.resources, 'city')) {
+    console.log(
+      `👀⛔buildCheck: ${player.playerId} has not enough Resources to build a city`,
+    );
     return {
       valid: false,
-      message: "You don't have enough resources to upgrade your settlement to a city ...",
+      message:
+        "You don't have enough resources to upgrade your settlement to a city ...",
     };
   }
-  console.log(`👀✅buildCheck: ${player.playerId} upgraded a settlement to a city`);
+  console.log(
+    `👀✅buildCheck: ${player.playerId} upgraded a settlement to a city`,
+  );
   player.victoryPoints += CITY_POINT;
   target.isCity = true;
-  payBuildResources(player.resources, 'city')
+  payBuildResources(player.resources, 'city');
   return {
     valid: true,
     message: 'Settlement upgraded to a city !',
@@ -193,9 +201,12 @@ function settlementCheck(
   placementPhase?: boolean,
 ): BuildValidation {
   if (
-    !placementPhase && !hasEnoughResourcesToBuild(player.resources, 'settlement')
+    !placementPhase &&
+    !hasEnoughResourcesToBuild(player.resources, 'settlement')
   ) {
-    console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a settlement`);
+    console.log(
+      `👀⛔buildCheck: ${player.playerId} has not enough Resources to build a settlement`,
+    );
     return {
       valid: false,
       message: "You don't have enough resources to build a settlement ...",
@@ -235,10 +246,10 @@ function roadCheck(
   player: Player,
   placementPhase?: boolean,
 ): BuildValidation {
-  if (
-    !placementPhase && !hasEnoughResourcesToBuild(player.resources, 'road')
-  ) {
-    console.log(`👀⛔buildCheck: ${player.playerId} has not enough Resources to build a road`);
+  if (!placementPhase && !hasEnoughResourcesToBuild(player.resources, 'road')) {
+    console.log(
+      `👀⛔buildCheck: ${player.playerId} has not enough Resources to build a road`,
+    );
     return {
       valid: false,
       message: "You don't have enough resources to build a road ...",
@@ -256,7 +267,7 @@ function roadCheck(
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-    payBuildResources(player.resources, 'road')
+    payBuildResources(player.resources, 'road');
   }
   console.log(`👀✅buildCheck: ${player.playerId} built a road`);
   return {
@@ -288,7 +299,8 @@ export const buildCheck = (
             console.log(`👀✅buildCheck: ${player.playerId} built a crossroad`);
             return {
               valid: true,
-              message: "Road built and 'Crossroad' objective achieved, you earn one bonus victory point!",
+              message:
+                "Road built and 'Crossroad' objective achieved, you earn one bonus victory point!",
             };
           }
         }
@@ -302,7 +314,7 @@ export const buildCheck = (
         } else if (target.ownerId == player.playerId) {
           check = cityUpgradeCheck(target, player);
         } else {
-          check.message = "This settlement is owned by another player.";
+          check.message = 'This settlement is owned by another player.';
         }
         break;
       default:

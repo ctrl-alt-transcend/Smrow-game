@@ -5,8 +5,8 @@ import type {
   SettlementData,
   RoadData,
   CoastData,
-  ReserveData
-} from "@shared/game/gameboard.types";
+  ReserveData,
+} from "shared";
 
 const resetSelection = (): GameBoardSelection => ({
   selectedTile: null,
@@ -44,8 +44,7 @@ export const useGameBoardSelection = () => {
     [],
   );
 
-  const handleRoadClick = useCallback(
-    (road: RoadData | null) => {
+  const handleRoadClick = useCallback((road: RoadData | null) => {
     setSelected((prev) => {
       if (!road) return resetSelection();
       const isSameRoad = prev.selectedRoad?.id === road.id;
@@ -55,8 +54,7 @@ export const useGameBoardSelection = () => {
     });
   }, []);
 
-  const handleCoastClick = useCallback(
-    (coast: CoastData | null) => {
+  const handleCoastClick = useCallback((coast: CoastData | null) => {
     setSelected((prev) => {
       if (!coast) return resetSelection();
       const isSameCoast = prev.selectedCoast?.id === coast.id;
@@ -66,8 +64,7 @@ export const useGameBoardSelection = () => {
     });
   }, []);
 
-  const handleReserveClick = useCallback(
-    (reserve: ReserveData | null) => {
+  const handleReserveClick = useCallback((reserve: ReserveData | null) => {
     setSelected((prev) => {
       if (!reserve) return resetSelection();
       const isSameReserve = prev.selectedReserve?.id === reserve.id;

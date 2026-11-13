@@ -1,6 +1,4 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-import { IoAdapter } from '@nestjs/platform-socket.io';
-import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-client-exception.filter';
 
@@ -8,19 +6,6 @@ import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-cl
  */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
-  app.useWebSocketAdapter(new IoAdapter(app));
-
-  /** @brief: A Pipe operates on a handler’s arguments (route parameters, body, query).
-   *           Its role is to validate or transform data before it reaches a controller.
-   */
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
 
   const { httpAdapter } = app.get(HttpAdapterHost);
 

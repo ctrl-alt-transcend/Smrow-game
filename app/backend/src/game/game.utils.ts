@@ -1,5 +1,5 @@
-import type { Player, BuildRequestPayload, TradeRequestPayload } from '@shared/game/game.types';
-import { TraderType } from '@shared/game/gameboard.types';
+import type { Player, BuildRequestPayload, TradeRequestPayload } from 'shared';
+import { TraderType } from 'shared';
 
 // TODO: move to DTO??
 export function isBuildRequestPayload(p: unknown): p is BuildRequestPayload {
@@ -33,7 +33,7 @@ export function updateValue(
   }
 }
 
-export function funnyRollLog( value: number ): string {
+export function funnyRollLog(value: number): string {
   if (value <= 3) {
     return `got an almost useless ${value} ...`;
   } else if (value > 3 && value <= 6) {
@@ -45,7 +45,7 @@ export function funnyRollLog( value: number ): string {
   } else if (value > 9 && value <= 12) {
     return `got a huge ${value} !`;
   }
-  return `rolled a ${value}` ;
+  return `rolled a ${value}`;
 }
 
 export function printPlayer(p: Player) {
@@ -56,7 +56,6 @@ export function printPlayer(p: Player) {
   console.log(`- ore: ${p.resources.ore}`);
   console.log(`- wheat: ${p.resources.wheat}`);
   console.log(`- roads: ${p.roadsBuilt}`);
-  console.log(`- settlements: ${p.settlementsBuilt}`);
 }
 
 export function printAllPlayers(p: Map<string, Player>) {

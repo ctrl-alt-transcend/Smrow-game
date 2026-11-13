@@ -1,24 +1,22 @@
-import { AppShell, Burger, Group, Title } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import GameBoard from './components/gameboard/GameBoard.tsx';
-import { useGameBoardFactory } from './hooks/useGameBoardFactory.ts';
-import { SelectionMenu } from './components/ui/SelectionMenu.tsx';
-import { DiceRoller } from './components/ui/DiceRoller.tsx';
-import GameMasterLog from './components/ui/GameMasterLog.tsx';
-import { useGameState } from './hooks/useGameState.ts';
-import type { GameDataDto } from '@shared/game/game.types.ts';
-import { PlayerPanel } from './components/ui/PlayerPanel.tsx';
-import SkipTurnButton from './components/ui/SkipTurnButton.tsx';
-import { ResourcesPanel } from './components/ui/ResourcesPanel.tsx';
-import { usePersonalNotification } from './hooks/usePersonalNotification.ts';
-import { Phase } from '../../../shared/game/gameboard.types.ts';
+import { AppShell, Burger, Group, Title } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import GameBoard from "./components/gameboard/GameBoard.tsx";
+import { useGameBoardFactory } from "./hooks/useGameBoardFactory.ts";
+import { SelectionMenu } from "./components/ui/SelectionMenu.tsx";
+import { DiceRoller } from "./components/ui/DiceRoller.tsx";
+import GameMasterLog from "./components/ui/GameMasterLog.tsx";
+import { useGameState } from "./hooks/useGameState.ts";
+import type { GameDataDto } from "shared";
+import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
+import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
+import { ResourcesPanel } from "./components/ui/ResourcesPanel.tsx";
+import { usePersonalNotification } from "./hooks/usePersonalNotification.ts";
+import { Phase } from "../../../shared/game/gameboard.types.ts";
 
 export default function Game() {
   const { game } = useGameState();
-  if (!game)
-    return <div>Loading game...</div>;
-  if (!game.board)
-    return <div>Loading gameboard...</div>;
+  if (!game) return <div>Loading game...</div>;
+  if (!game.board) return <div>Loading gameboard...</div>;
   return <GameShell game={game} />;
 }
 
@@ -28,7 +26,8 @@ function GameShell({ game }: { game: GameDataDto }) {
   usePersonalNotification(game.currentPlayer.personalLog);
 
   let isMyTurn = game.currentPlayer.playerId === game.whosTurn;
-  if (game.currentPlayer.DEVMOD || game.currentPhase === Phase.START) isMyTurn = true;
+  if (game.currentPlayer.DEVMOD || game.currentPhase === Phase.START)
+    isMyTurn = true;
   const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
 
   return (
@@ -37,12 +36,12 @@ function GameShell({ game }: { game: GameDataDto }) {
       footer={{ height: 95 }}
       navbar={{
         width: 300,
-        breakpoint: 'xs',
+        breakpoint: "xs",
         collapsed: { desktop: !opened, mobile: !opened },
       }}
       aside={{
         width: 300,
-        breakpoint: 'md',
+        breakpoint: "md",
         collapsed: { desktop: false, mobile: true },
       }}
       padding="xs"
@@ -61,22 +60,30 @@ function GameShell({ game }: { game: GameDataDto }) {
             masterLog={game.masterLog}
             isMyTurn={isMyTurn}
           />
-          <DiceRoller currentRoll={game.currentPlayer.currentRoll} isMyTurn={isMyTurn}/>
-          <SkipTurnButton isMyTurn={isMyTurn}/>
+          <DiceRoller
+            currentRoll={game.currentPlayer.currentRoll}
+            isMyTurn={isMyTurn}
+          />
+          <SkipTurnButton isMyTurn={isMyTurn} />
         </Group>
       </AppShell.Navbar>
 
       <AppShell.Main>
         <Group justify="center" align="center">
           {!game.winner && <GameBoard {...GameBoardProps} />}
-          {game.winner && <Title> {game.winner} {game.winCondition} </Title>}
+          {game.winner && (
+            <Title>
+              {" "}
+              {game.winner} {game.winCondition}{" "}
+            </Title>
+          )}
         </Group>
       </AppShell.Main>
 
       <AppShell.Aside p="md">
         Aside
         <PlayerPanel players={game.players} />
-        <ResourcesPanel currentPlayer={game.currentPlayer}/>
+        <ResourcesPanel currentPlayer={game.currentPlayer} />
       </AppShell.Aside>
       <AppShell.Footer p="xs">
         <GameMasterLog log={masterLog} />

@@ -1,11 +1,12 @@
-import { Faction,
+import {
+  Faction,
   Phase,
-  RessourceType,
+  ResourceType,
   TraderType,
   type GameBoard,
   type RoadData,
-  type SettlementData
-} from "./gameboard.types";
+  type SettlementData,
+} from 'shared';
 
 export type Resources = {
   wood: number;
@@ -21,7 +22,7 @@ export type PlayerProfile = {
   username: string;
   //level: number;
   avatarURL: string | null;
-}
+};
 
 export type PlayerBase = {
   playerId: string;
@@ -57,6 +58,11 @@ export type GameDataBase = {
   currentPhase: Phase;
 }
 
+export type GameDataDto  = GameDataBase & {
+  players: Player[];
+  currentPlayer: PlayerDto;
+}
+
 export type GameData = GameDataBase & {
   players: Map<string, Player>;
   startingRolls: Map<string, number>;
@@ -64,9 +70,10 @@ export type GameData = GameDataBase & {
   currentTurnIndex: number;
 }
 
-export type GameDataDto  = GameDataBase & {
-  players: Player[];
-  currentPlayer: PlayerDto;
+export interface GameResponse {
+  value: number | null;
+  message: string | null;
+  data: GameData | null;
 }
 
 /**
@@ -85,7 +92,7 @@ export type GameLog = {
 }
 
 export type TradeForm = {
-  resource: RessourceType;
+  resource: ResourceType;
   amount: number;
 }
 

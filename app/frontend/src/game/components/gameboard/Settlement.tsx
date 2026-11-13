@@ -1,17 +1,13 @@
 import type { SettlementProps } from "../../types/gameboard.types";
 import { useHover } from "../../hooks/useGameBoardHover";
 import { getFillColor } from "../../utils/tileRendering";
-import {
-  GoblinSettlementIcon,
-  GoblinCityIcon
-} from "./GameIcon";
+import { GoblinSettlementIcon, GoblinCityIcon } from "./GameIcon";
 import {
   VERTEX_SIZE,
   SETTLEMENT_SIZE,
   HOVER_EFFECT,
-  ICON_SCALE_BASE
-} from "../../../../../shared/game/gameboard.types";
-
+  ICON_SCALE_BASE,
+} from "shared";
 
 export const Settlement: React.FC<SettlementProps> = ({
   data,
@@ -66,7 +62,6 @@ export const Settlement: React.FC<SettlementProps> = ({
       }}
       style={{ cursor: "pointer" }}
     >
-
       {/* invisible click area */}
       <circle r={16 / scale} fill="transparent" />
 

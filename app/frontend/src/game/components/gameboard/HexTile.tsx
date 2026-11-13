@@ -1,7 +1,7 @@
 import type { TileProps } from "../../types/gameboard.types";
 import { useHover } from "../../hooks/useGameBoardHover";
-import { axialToPixel } from "../../../../../shared/game/hexCalculation";
-import { HEX_SIZE } from "../../../../../shared/game/gameboard.types";
+import { axialToPixel } from "shared";
+import { HEX_SIZE } from "shared";
 import {
   getFillColor,
   getTileStrokeColor,
@@ -27,7 +27,12 @@ export const HexTile: React.FC<TileProps> = ({
     onMouseEnter,
     onMouseLeave,
   } = useHover(isHovered, onHoverChange);
-  const fillColor = getFillColor(data.land, null, isSelected, effectiveIsHovered);
+  const fillColor = getFillColor(
+    data.land,
+    null,
+    isSelected,
+    effectiveIsHovered,
+  );
   const strokeColor = getTileStrokeColor(effectiveIsHovered);
   const strokeWidth = getTileStrokeWidth(effectiveIsHovered);
   const { x: centerX, y: centerY } = axialToPixel(data.q, data.r, HEX_SIZE);
@@ -82,16 +87,16 @@ export const HexTile: React.FC<TileProps> = ({
       )}
 
       {data.hasRobber && (
-      <g>
-        <image
-          href={robberUrl}
-          x={centerX - 2}
-          y={centerY - 10}
-          width={THIEF_WIDTH}
-          height={THIEF_HEIGHT}
-          style={{ filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.4))" }}
-        />
-      </g>
+        <g>
+          <image
+            href={robberUrl}
+            x={centerX - 2}
+            y={centerY - 10}
+            width={THIEF_WIDTH}
+            height={THIEF_HEIGHT}
+            style={{ filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.4))" }}
+          />
+        </g>
       )}
     </g>
   );
