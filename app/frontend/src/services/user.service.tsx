@@ -19,11 +19,17 @@ export function getUserToken(): string {
   return token;
 }
 
-export async function updateProfile(data: UpdateProfile): Promise<UserProfile> {
+export async function updateProfile(
+  identifier: string,
+  data: UpdateProfile,
+): Promise<UserProfile> {
   try {
-    const tosend: UpdateProfile = UpdateProfileSchema.parse(data);
-    const res = await http.patch("/auth/me", tosend);
-    return UserProfileSchema.parse(res.data);
+    const payload: UpdateProfile = UpdateProfileSchema.parse(data);
+    const res = await http.patch(
+      `/user/update/${encodeURIComponent(identifier)}`,
+      payload,
+    );
+    return UserProfileSchema.parse(res.data.user);
   } catch (error: any) {
     const err_msg = error.repsones?.data?.message;
     throw err_msg;

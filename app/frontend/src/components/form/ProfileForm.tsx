@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { schemaResolver, useForm } from "@mantine/form";
 import {
   type PaperProps,
@@ -13,7 +13,6 @@ import { UpdateProfileSchema, type UpdateProfile } from "shared";
 import { useAuth } from "../../hooks/useAuth"; // adapte le chemin
 import ErrorMessages from "../utils/ErrorMessages"; // adapte le chemin
 import { updateProfile } from "../../services/user.service";
-// import { profile } from "console";
 
 type FieldConfig = {
   name: keyof UpdateProfile;
@@ -45,25 +44,11 @@ export function ProfileSettings(props: PaperProps) {
     validate: schemaResolver(UpdateProfileSchema, { sync: true }),
   });
 
-  // const { setValues, resetDirty } = form;
-
-  useEffect(() => {
-    if (!user) return;
-    const values = {
-      name: user.name ?? "",
-      username: user.username ?? "",
-      email: user.email ?? "",
-      avatarURL: user.avatarURL ?? "",
-      bio: user.bio ?? "",
-    };
-    form.setValues(values);
-    form.resetDirty(values);
-  }, [user, form]);
-
   const handleUpdate = form.onSubmit(async (data) => {
     setError(null);
     try {
-      await updateProfile(data);
+      if (!user) return;
+      await updateProfile(user.id, data);
       notifications.show({ message: "Profile updated" });
     } catch (error: any) {
       setError(error?.message ?? "Something weird happened");
@@ -71,7 +56,7 @@ export function ProfileSettings(props: PaperProps) {
   });
 
   return (
-    <Paper ps="xs" withBorder {...props}>
+    <Paper p="xs" withBorder {...props}>
       <form onSubmit={handleUpdate}>
         <Stack>
           {fields.map(({ name, label, component: Field = TextInput }) => (

@@ -32,7 +32,6 @@ export class UserController {
     @Body() updateUserDto: UpdateProfile,
   ) {
     const updatedUser = await this.userService.update(username, updateUserDto);
-
     return {
       message: `User updated correctly`,
       user: {
