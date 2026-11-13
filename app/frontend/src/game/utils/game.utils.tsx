@@ -27,10 +27,10 @@ export function useJoinLobby() {
 
   return async function joinLobby(gameId: string) {
     try {
-      await http.post("/api/game/join", { gameId });
+      await http.post("/game/join", { gameId });
+      navigate("/game");
     } catch {
       navigate("/error");
     }
-    navigate("/game");
   };
 }
