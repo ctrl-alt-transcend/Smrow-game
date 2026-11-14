@@ -3,13 +3,17 @@ import { useHover } from "../../hooks/useGameBoardHover";
 import { axialToPixel } from "shared";
 import { HEX_SIZE } from "shared";
 import {
-  getTileFillColor,
+  getFillColor,
   getTileStrokeColor,
   getTileStrokeWidth,
 } from "../../utils/tileRendering";
+import robberUrl from "../../assets/RobertTheRobber.svg";
 
 const TOKEN_RADIUS = HEX_SIZE * 0.34;
 const TOKEN_FONT_SIZE = HEX_SIZE * 0.46;
+
+const THIEF_WIDTH = TOKEN_RADIUS * 2;
+const THIEF_HEIGHT = THIEF_WIDTH;
 
 export const HexTile: React.FC<TileProps> = ({
   data,
@@ -23,7 +27,7 @@ export const HexTile: React.FC<TileProps> = ({
     onMouseEnter,
     onMouseLeave,
   } = useHover(isHovered, onHoverChange);
-  const fillColor = getTileFillColor(
+  const fillColor = getFillColor(
     data.land,
     null,
     isSelected,
@@ -79,6 +83,19 @@ export const HexTile: React.FC<TileProps> = ({
           >
             {tokenValue}
           </text>
+        </g>
+      )}
+
+      {data.hasRobber && (
+        <g>
+          <image
+            href={robberUrl}
+            x={centerX - 2}
+            y={centerY - 10}
+            width={THIEF_WIDTH}
+            height={THIEF_HEIGHT}
+            style={{ filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.4))" }}
+          />
         </g>
       )}
     </g>
