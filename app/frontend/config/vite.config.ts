@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import svgr from "vite-plugin-svgr";
 
 /**
  * The Vite proxy acts as an intermediary between the client and the backend.
@@ -13,7 +14,8 @@ import react from "@vitejs/plugin-react";
  * @Warning: The Vite proxy is only used in development !
  */
 export default defineConfig({
-  plugins: [react()],
+  //plugins: [react(), svgr()]
+  plugins: [svgr(), react()],
   resolve: {},
   server: {
     proxy: {

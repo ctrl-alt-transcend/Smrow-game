@@ -1,14 +1,16 @@
-import { AppShell, Burger, Group } from "@mantine/core";
+import { AppShell, Burger, Group, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import GameBoard from "./components/gameboard/GameBoard.tsx";
 import { useGameBoardFactory } from "./hooks/useGameBoardFactory.ts";
-import { TileSelection } from "./components/ui/TileSelection.tsx";
+import { SelectionMenu } from "./components/ui/SelectionMenu.tsx";
 import { DiceRoller } from "./components/ui/DiceRoller.tsx";
 import GameMasterLog from "./components/ui/GameMasterLog.tsx";
 import { useGameState } from "./hooks/useGameState.ts";
-import type { GameDataDto } from "shared";
+import { type GameDataDto, Phase } from "shared";
 import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
+import { ResourcesPanel } from "./components/ui/ResourcesPanel.tsx";
+import { usePersonalNotification } from "./hooks/usePersonalNotification.ts";
 
 export default function Game() {
   const { game } = useGameState();
@@ -20,6 +22,12 @@ export default function Game() {
 function GameShell({ game }: { game: GameDataDto }) {
   const [opened, { toggle }] = useDisclosure();
   const GameBoardProps = useGameBoardFactory(game.board);
+  usePersonalNotification(game.currentPlayer.personalLog);
+
+  let isMyTurn = game.currentPlayer.playerId === game.whosTurn;
+  if (game.currentPlayer.DEVMOD || game.currentPhase === Phase.START)
+    isMyTurn = true;
+  const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
 
   return (
     <AppShell
@@ -32,7 +40,7 @@ function GameShell({ game }: { game: GameDataDto }) {
       }}
       aside={{
         width: 300,
-        breakpoint: "xl",
+        breakpoint: "md",
         collapsed: { desktop: false, mobile: true },
       }}
       padding="xs"
@@ -46,28 +54,38 @@ function GameShell({ game }: { game: GameDataDto }) {
 
       <AppShell.Navbar p="md">
         <Group grow gap="md" w="100%" align="center" justify="center">
-          <TileSelection
+          <SelectionMenu
             selected={GameBoardProps.selected}
             masterLog={game.masterLog}
+            isMyTurn={isMyTurn}
           />
-          <DiceRoller diceRoll={game.diceRoll} masterLog={game.masterLog} />
-          <SkipTurnButton />
+          <DiceRoller
+            currentRoll={game.currentPlayer.currentRoll}
+            isMyTurn={isMyTurn}
+          />
+          <SkipTurnButton isMyTurn={isMyTurn} />
         </Group>
       </AppShell.Navbar>
 
       <AppShell.Main>
         <Group justify="center" align="center">
-          <GameBoard {...GameBoardProps} />
+          {!game.winner && <GameBoard {...GameBoardProps} />}
+          {game.winner && (
+            <Title>
+              {" "}
+              {game.winner} {game.winCondition}{" "}
+            </Title>
+          )}
         </Group>
       </AppShell.Main>
 
       <AppShell.Aside p="md">
         Aside
         <PlayerPanel players={game.players} />
+        <ResourcesPanel currentPlayer={game.currentPlayer} />
       </AppShell.Aside>
-
       <AppShell.Footer p="xs">
-        <GameMasterLog log={game.masterLog} />
+        <GameMasterLog log={masterLog} />
       </AppShell.Footer>
     </AppShell>
   );
