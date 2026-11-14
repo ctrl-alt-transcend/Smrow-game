@@ -332,6 +332,17 @@ export const customLayout1: TileData[] = [
     { q: -1, r: 2, land: LandType.FIELD, value: 12, hasRobber: false }, { q: 0, r: 2, land: LandType.PASTURE, value: 9, hasRobber: false },
 ];
 
+/** @description custom Layout #2 (19 tiles) */
+export const customLayout2: TileData[] = [
+  { q: 1, r: -2, land: LandType.HILL, value: 6, hasRobber: false }, { q: 3, r: -2, land: LandType.FIELD, value: 5, hasRobber: false }, { q: 4, r: -2, land: LandType.MOUNTAIN, value: 4, hasRobber: false },
+  { q: 1, r: -1, land: LandType.MOUNTAIN, value: 2, hasRobber: false }, { q: 2, r: -1, land: LandType.PASTURE, value: 9, hasRobber: false }, { q: 3, r: -1, land: LandType.FOREST, value: 8, hasRobber: false },
+  { q: -2, r: 1, land: LandType.HILL, value: 12, hasRobber: false }, { q: -1, r: 1, land: LandType.DESERT, value: 5, hasRobber: true }, { q: 0, r: 1, land: LandType.MOUNTAIN, value: 10, hasRobber: false }, { q: 1, r: 1, land: LandType.FOREST, value: 3, hasRobber: false },
+  { q: -1, r: 0, land: LandType.FOREST, value: 4, hasRobber: false }, { q: 0, r: 0, land: LandType.PASTURE, value: 11, hasRobber: false }, { q: 1, r: 0, land: LandType.FIELD, value: 8, hasRobber: false },
+  { q: -1, r: 2, land: LandType.FIELD, value: 12, hasRobber: false }, { q: 0, r: 2, land: LandType.PASTURE, value: 9, hasRobber: false },
+  { q: -1, r: 3, land: LandType.HILL, value: 8, hasRobber: false },{ q: 0, r: 3, land: LandType.FIELD, value: 10, hasRobber: false },
+  { q: 0, r: 4, land: LandType.FOREST, value: 11, hasRobber: false }, { q: -1, r: 4, land: LandType.PASTURE, value:6, hasRobber: false },
+];
+
 /***********************************
  * Graph
  **********************************/
