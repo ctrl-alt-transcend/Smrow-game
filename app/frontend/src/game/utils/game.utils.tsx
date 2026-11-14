@@ -1,13 +1,20 @@
 import { useNavigate } from "react-router";
 import { getUserToken } from "../../services/user.service.tsx";
 import axios from "axios";
+import { SettingsDataSchema, type SettingsData } from "shared";
+import { z } from "zod";
 
 export function useCreateLobby() {
   const navigate = useNavigate();
 
-  return async function createLobby() {
+  return async function createLobby(values: SettingsData) {
+    const parsed = SettingsDataSchema.safeParse(values);
+    if (!parsed.success) {
+      console.error("Invalid settings:", z.treeifyError(parsed.error));
+      return;
+    }
     try {
-      await axios.post("/api/game/create", null, {
+      await axios.post("/api/game/create", parsed.data, {
         headers: { Authorization: `Bearer ${getUserToken()}` },
       });
     } catch (error) {
@@ -19,7 +26,7 @@ export function useCreateLobby() {
       navigate("/game");
       return;
     }
-    console.log("Game created succesfully");
+    console.log("Game created successfully");
     navigate("/game");
   };
 }

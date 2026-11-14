@@ -38,7 +38,6 @@ watch: up
 
 # Build shared for dev
 shared:
-	rm -rf $(DIST_DIR)
 	cd $(APP_DIR) && npm run build:shared
 
 down:
@@ -84,6 +83,7 @@ secrets:
 
 fclean: down
 	docker compose -f $(DOCKER_COMPOSE_FILE) down --rmi all --volumes --remove-orphans
+	rm -rf $(DIST_DIR)
 
 re: fclean shared
 	docker compose -f $(DOCKER_COMPOSE_FILE) build --no-cache

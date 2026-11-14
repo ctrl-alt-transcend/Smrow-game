@@ -11,15 +11,6 @@ import {
   LAND_RESSOURCE,
   YOU_ROLLED,
   YOU_DIDNT_ROLLED,
-  TRADE_LIMIT_DFLT,
-  BUILD_LIMIT_DFLT,
-  SPECIAL_PORT_RATE_DFLT,
-  GENERIC_PORT_RATE_DFLT,
-  RESERVE_RATE_DFLT,
-  ROAD_POINT_DFLT,
-  SETTLEMENT_POINT_DFLT,
-  CITY_POINT_DFLT,
-  POINTS_TO_WIN_DFLT,
 } from 'shared';
 import type {
   GameBoard,
@@ -76,7 +67,7 @@ class GameStateContext {
   private rollId: number = 0;
   private factionSwitch: number = 0;
 
-  constructor(gameId: string, state: State) {
+  constructor(gameId: string, settings: SettingsData, state: State) {
     const { board, graph } = createGameBoard(classicLayout);
     this.graph = graph;
     this.data = {
@@ -93,36 +84,7 @@ class GameStateContext {
       winner: null,
       winCondition: null,
     };
-    this.settings = {
-      tradeLimit: TRADE_LIMIT_DFLT,
-      buildLimit: BUILD_LIMIT_DFLT,
-      specialPortRate: SPECIAL_PORT_RATE_DFLT,
-      genericPortRate: GENERIC_PORT_RATE_DFLT,
-      reserveRate: RESERVE_RATE_DFLT,
-      roadPoints: ROAD_POINT_DFLT,
-      settlementPoints: SETTLEMENT_POINT_DFLT,
-      cityPoints: CITY_POINT_DFLT,
-      pointsToWin: POINTS_TO_WIN_DFLT,
-      //tradeLimit: 5,        //⚠️ For testing only
-      //buildLimit: 5,        //⚠️ For testing only
-      //specialPortRate: 10,  //⚠️ For testing only
-      //genericPortRate: 1,   //⚠️ For testing only
-      //reserveRate: 2,       //⚠️ For testing only
-      //roadPoints: 2,        //⚠️ For testing only
-      //settlementPoints: 10, //⚠️ For testing only
-      //cityPoints: 100,      //⚠️ For testing only
-      //pointsToWin: 100,     //⚠️ For testing only
-      //woodBonus: 0,
-      //sheepBonus: 0,
-      //brickBonus: 0,
-      //wheatBonus: 0,
-      //oreBonus: 0,
-      woodBonus: 20, //⚠️ For testing only
-      sheepBonus: 20, //⚠️ For testing only
-      brickBonus: 20, //⚠️ For testing only
-      wheatBonus: 20, //⚠️ For testing only
-      oreBonus: 20, //⚠️ For testing only
-    };
+    this.settings = settings;
     this.transitionTo(state);
   }
 

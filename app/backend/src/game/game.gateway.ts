@@ -7,15 +7,23 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import {
+  BuildPayload,
+  BuildPayloadSchema,
+  TradePayload,
+  TradePayloadSchema,
+  GameDataDto,
+  ZGEG_DEV,
+  type JwtPayload,
+} from 'shared';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
-import { ZGEG_DEV, type JwtPayload } from 'shared';
-import type { BuildPayload, GameDataDto, TradePayload } from 'shared';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
 import { GameStateContext } from './GameStateContext';
 import { instrument } from '@socket.io/admin-ui'; //WARN: dev only
+import { ZodValidationPipe } from 'nestjs-zod';
 
 export interface SocketUser {
   id: string;
@@ -100,7 +108,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('build')
   build(
     @ConnectedSocket() client: SocketClient,
-    @MessageBody() payload: BuildPayload,
+    @MessageBody(new ZodValidationPipe(BuildPayloadSchema))
+    payload: BuildPayload,
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.buildRequest(client.data.user.username, payload);
@@ -117,7 +126,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('trade')
   trade(
     @ConnectedSocket() client: SocketClient,
-    @MessageBody() payload: TradePayload,
+    @MessageBody(new ZodValidationPipe(TradePayloadSchema))
+    payload: TradePayload,
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.tradeRequest(client.data.user.username, payload);

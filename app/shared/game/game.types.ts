@@ -20,47 +20,54 @@ export const SETTLEMENT_POINT_DFLT = 1;
 export const CITY_POINT_DFLT = 1;
 export const POINTS_TO_WIN_DFLT = 10;
 
-export const CROSSROAD_RULE = 3;
-export const ROBBER_ROLL = 7;
+export const MIN_SETTINGS = 1;
+export const MAX_LIMIT = 20;
+export const MAX_RATE = 6;
+export const MAX_POINTS = 10;
+export const MAX_POINTS_TO_WIN = 100;
+export const MAX_BONUS = 30;
 
 export const SettingsDataSchema = z.object({
   // Limits settings
   /** Number of trades authorized during 'Trade and Buil' phase */
-  tradeLimit: z.number().int().nonnegative(),
+  tradeLimit: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_LIMIT),
   /** Number of builds authorized during 'Trade and Buil' phase */
-  buildLimit: z.number().int().nonnegative(),
+  buildLimit: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_LIMIT),
 
   // Trades settings
   /** 'Specialized Port' trade ratio */
-  specialPortRate: z.number().int().nonnegative().min(1).max(10),
+  specialPortRate: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_RATE),
   /** 'Generic Port' trade ratio */
-  genericPortRate: z.number().int().nonnegative().min(1).max(10),
+  genericPortRate: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_RATE),
   /** 'Reserve' trade ratio */
-  reserveRate: z.number().int().nonnegative().min(1).max(10),
+  reserveRate: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_RATE),
 
   // Victory Points settings
-  /** Amount of points earned by building a road */
-  roadPoints: z.number().int().nonnegative().min(0).max(10),
   /** Amount of points earned by building a settlement */
-  settlementPoints: z.number().int().nonnegative().min(1).max(10),
+  settlementPoints: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_POINTS),
   /** Amount of points earned by building a city */
-  cityPoints: z.number().int().nonnegative().min(0).max(10),
+  cityPoints: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_POINTS),
   /** Amount of points to win the game */
-  pointsToWin: z.number().int().nonnegative().min(0).max(1000),
+  /** Amount of points earned by building a road */
+  roadPoints: z.number().int().nonnegative().min(0).max(MAX_POINTS),
+  pointsToWin: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_POINTS_TO_WIN),
 
   // Bonus settings
   /** Amount of wood to start the game with*/
-  woodBonus: z.number().int().nonnegative().min(0).max(1000),
+  woodBonus: z.number().int().nonnegative().min(0).max(MAX_BONUS),
   /** Amount of sheep to start the game with*/
-  sheepBonus: z.number().int().nonnegative().min(0).max(1000),
+  sheepBonus: z.number().int().nonnegative().min(0).max(MAX_BONUS),
   /** Amount of brick to start the game with*/
-  brickBonus: z.number().int().nonnegative().min(0).max(1000),
+  brickBonus: z.number().int().nonnegative().min(0).max(MAX_BONUS),
   /** Amount of ore to start the game with*/
-  oreBonus: z.number().int().nonnegative().min(0).max(1000),
+  oreBonus: z.number().int().nonnegative().min(0).max(MAX_BONUS),
   /** Amount of wheat to start the game with*/
-  wheatBonus: z.number().int().nonnegative().min(0).max(1000),
+  wheatBonus: z.number().int().nonnegative().min(0).max(MAX_BONUS),
 });
 export type SettingsData = z.infer<typeof SettingsDataSchema>;
+
+export const CROSSROAD_RULE = 3;
+export const ROBBER_ROLL = 7;
 
 export const BuildingType = {
   ROAD: "road",
@@ -70,10 +77,10 @@ export const BuildingType = {
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
 
 export const TraderType = {
-  SPECIALIZED_PORT: 'specialized port',
-  GENERIC_PORT: "generic port",
-  RESERVE: 'reserve',
-  PLAYER: "player",
+  SPECIALIZED_PORT: 'Specialized Port',
+  GENERIC_PORT: 'Generic Port',
+  RESERVE: 'Shnek the Trader',
+  PLAYER: 'Player',
 } as const;
 export type TraderType = (typeof TraderType)[keyof typeof TraderType];
 export const TraderTypeSchema = z.enum(TraderType);
