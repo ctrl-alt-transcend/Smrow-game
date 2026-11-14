@@ -5,7 +5,11 @@ import { SocialGateway } from './social.gateway';
 import { ChatModule } from '../chat/chat.module';
 
 @Module({
-  imports: [JwtModule.register({ secret: process.env.JWT_SECRET }), UserModule, ChatModule],
+  imports: [
+    JwtModule.register({ secret: process.env.JWT_SECRET }),
+    UserModule,
+    ChatModule,
+  ],
   controllers: [],
   providers: [SocialGateway],
   exports: [SocialGateway],

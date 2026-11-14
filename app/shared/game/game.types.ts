@@ -1,8 +1,9 @@
-import { Faction,
+import {
+  Faction,
   type GameBoard,
   type RoadData,
-  type SettlementData
-} from "./gameboard.types";
+  type SettlementData,
+} from "./gameboard.types.js";
 
 export type Ressources = {
   wood: number;
@@ -10,7 +11,7 @@ export type Ressources = {
   hay: number;
   sheep: number;
   rock: number;
-}
+};
 
 export type Player = {
   playerId: string;
@@ -18,14 +19,14 @@ export type Player = {
   score: number;
   level: number;
   ressources: Ressources;
-  firstDice: number,
-  secondDice: number,
-  totalDice: number,
+  firstDice: number;
+  secondDice: number;
+  totalDice: number;
   settlementsBuilt: number;
   roadsBuilt: number;
   faction: Faction;
   avatarURL: string | null;
-}
+};
 
 //INFO: data we need to colect from the database when a client join a game
 export type PlayerProfile = {
@@ -33,7 +34,7 @@ export type PlayerProfile = {
   username: string;
   //level: number;
   avatarURL: string | null;
-}
+};
 
 export type GameData = {
   players: Map<string, Player>;
@@ -45,7 +46,7 @@ export type GameData = {
   diceRoll: number | null;
   masterLog: string | null;
   board: GameBoard;
-}
+};
 
 export interface GameResponse {
   value: number | null;
@@ -53,7 +54,8 @@ export interface GameResponse {
   data: GameData | null;
 }
 
-export type GameDataDto = { //INFO: data we send to the client every time the game state changes
+export type GameDataDto = {
+  //INFO: data we send to the client every time the game state changes
   players: Player[];
   //turnCount: number;
   //turnOrder: string[];
@@ -62,7 +64,7 @@ export type GameDataDto = { //INFO: data we send to the client every time the ga
   diceRoll: number | null;
   masterLog: string | null;
   board: GameBoard;
-}
+};
 
 export type BuildRequestPayload =
   | { kind: 'road';       id: string; data: RoadData }

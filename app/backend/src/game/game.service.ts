@@ -4,9 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { PlayerProfile } from '@shared/game/game.types';
+import type { PlayerProfile, GameList } from 'shared';
 import { GameStateContext, WhoStartsPhase } from './GameStateContext';
-import type {GameList} from "@shared/game/game.types";
 import { SocialGateway } from '../social/social.gateway';
 
 @Injectable()
@@ -16,14 +15,14 @@ export class GameService {
 
   constructor(private readonly socialGateway: SocialGateway) {}
 
-async getGamesList(): Promise<GameList[]> {
-  const arrayOfGames = Array.from(this.gameInstances.values());
-  return arrayOfGames.map((game: GameStateContext) => ({
-    gameId: game.getGameId(),
-    playerCount: game.getPlayers().size,
-    state: "pending players",
-  }));
-}
+  getGamesList(): GameList[] {
+    const arrayOfGames = Array.from(this.gameInstances.values());
+    return arrayOfGames.map((game: GameStateContext) => ({
+      gameId: game.getGameId(),
+      playerCount: game.getPlayers().size,
+      state: 'pending players',
+    }));
+  }
 
   /**
    * @brief Create a new game and add the player to it
@@ -38,13 +37,14 @@ async getGamesList(): Promise<GameList[]> {
     const gameId = randomUUID();
     const game = new GameStateContext(gameId, new WhoStartsPhase());
 
-    this.gameInstances.set(
-      gameId,
-      game,
-    );
+    this.gameInstances.set(gameId, game);
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
-    this.socialGateway.handleGameList({gameId: gameId, playerCount: 1, state: "pending players"});
+    this.socialGateway.handleGameList({
+      gameId: gameId,
+      playerCount: 1,
+      state: 'pending players',
+    });
   }
 
   joinGame(playerProfile: PlayerProfile, gameId: string) {

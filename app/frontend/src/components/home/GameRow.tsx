@@ -1,13 +1,11 @@
 import { Table, Button } from "@mantine/core";
-import type { GameList } from '@shared/game/game.types';
-
+import type { GameList } from "@shared/game/game.types";
 
 type GameRowProps = {
   game: GameList;
 };
 
 const maxPlayers = 4;
-
 
 export default function GameRow({ game }: GameRowProps) {
   const isFull = game.playerCount >= maxPlayers;

@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, type Chat } from '@prisma/client';
-import { DatabaseService } from 'src/database/database.service';
-import { ChatMessage } from '@shared/types'
-import { UserService } from 'src/user/user.service';
-import { IncomingMessage } from 'node:http';
+import { Prisma } from '@prisma/client';
+import { DatabaseService } from '../database/database.service';
+import { ChatMessage } from 'shared';
+// import { IncomingMessage } from 'node:http';
 
 /**
  * @brief Prisma options to fetch a message along with its author.
@@ -25,11 +24,7 @@ type ChatWithUser = Prisma.ChatGetPayload<typeof chatWithUser>;
 
 @Injectable()
 export class ChatService {
-
-  constructor(
-    private readonly databaseService: DatabaseService,
-    private readonly userService: UserService
-  ) {}
+  constructor(private readonly databaseService: DatabaseService) {}
 
   async getChatHistory(): Promise<ChatMessage[]> {
     // const chatMessages: ChatMessage[] = [
@@ -47,21 +42,20 @@ export class ChatService {
     //   },
     // ]
 
-
     const messages = await this.databaseService.chat.findMany({
       include: { user: { select: { username: true } } },
-    })
+    });
 
-    return messages.map((message ) => this.toChatMessage(message));
+    return messages.map((message) => this.toChatMessage(message));
   }
 
-  async addChatMessage(userId: string, content: string)  {
+  async addChatMessage(userId: string, content: string) {
     const message = await this.databaseService.chat.create({
       data: {
         content: content,
         user: { connect: { id: userId } },
       },
-      include: { user: { select: { username: true } } },
+      include: chatWithUser.include,
     });
     return this.toChatMessage(message);
   }
@@ -71,7 +65,7 @@ export class ChatService {
       id: chat.id,
       date: chat.writedAt.getTime(),
       content: chat.content,
-      username: chat.user.username
-    }
+      username: chat.user.username,
+    };
   }
 }

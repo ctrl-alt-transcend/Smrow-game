@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { socialSocket as socket } from "../../sockets/socialSocket";
 import { http } from "../../services/http";
 import {
@@ -25,21 +25,20 @@ export default function Chat() {
       setMessages((prevMessages) => {
         return prevMessages.concat(message);
       });
-    }
+    };
 
     const loadOldMessages = async () => {
       try {
         const response = await http.get<ChatMessage[]>("/chat");
         if (cancelled) return;
-        
+
         const history = response.data;
         setMessages(history);
         setLoaded(true);
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Failed to fetch chat history with error - ", error);
       }
-    }
+    };
 
     socket.emit("joinChat");
     socket.on("new chat message", onMessage);
@@ -50,29 +49,25 @@ export default function Chat() {
       socket.off("new chat message", onMessage);
       socket.emit("leaveChat");
     };
-
   }, []);
 
   if (!loaded) {
-
     return (
       <Paper withBorder p="md" h="100%">
         <Title order={3} ta="center" mb="md">
           Toxic chat
         </Title>
-          loading chat...
+        loading chat...
       </Paper>
     );
   }
 
-
   function handleSend() {
     if (draft.trim() === "") return;
 
-    socket.emit("chatMessage", {draft})
+    socket.emit("chatMessage", { draft });
     setDraft("");
   }
-
 
   return (
     <Paper withBorder p="md" h="100%">
@@ -82,7 +77,11 @@ export default function Chat() {
       <ScrollArea h={480}>
         <Stack gap="xs" align="flex-start">
           {messages.map((message) => (
-            <MessageItem key={message.id} content={message.content} author={message.username}/>
+            <MessageItem
+              key={message.id}
+              content={message.content}
+              author={message.username}
+            />
           ))}
         </Stack>
       </ScrollArea>

@@ -3,15 +3,14 @@ import {
   OnGatewayInit,
   OnGatewayConnection,
   SubscribeMessage,
-  WebSocketServer
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { ChatService } from '../chat/chat.service';
 import { JwtService } from '@nestjs/jwt';
-import type {Server, Socket, DefaultEventsMap } from 'socket.io';
+import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
-import type { JwtPayload } from '@shared/types';
-import type { GameList } from '@shared/game/game.types';
+import type { JwtPayload, GameList } from 'shared';
 
 interface SocketUser {
   id: string;
@@ -42,7 +41,6 @@ type SocketClient = Socket<
     credentials: true,
   }, //WARN: dev only
 })
-
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   constructor(
     private readonly jwtService: JwtService,
@@ -56,50 +54,52 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   //   return 'Hello world!';
   // }
 
-
   handleGameList(game: GameList) {
-    this.server.to('gameList').emit('game list update', game)
+    this.server.to('gameList').emit('game list update', game);
   }
 
   @SubscribeMessage('joinGameList')
-  handleJoimGameList(client: SocketClient) {
-    client.join("gameList");
+  async handleJoimGameList(client: SocketClient) {
+    await client.join('gameList');
   }
 
-  @SubscribeMessage('leaveGameList') 
-  handeLeaveGameList(client: SocketClient) {
-    client.leave("gameList");
+  @SubscribeMessage('leaveGameList')
+  async handeLeaveGameList(client: SocketClient) {
+    await client.leave('gameList');
   }
-
-
 
   @SubscribeMessage('chatMessage')
   async handleChatMessage(client: SocketClient, payload: { draft: string }) {
-    if (typeof payload.draft !== "string") { return; }
+    if (typeof payload.draft !== 'string') {
+      return;
+    }
     const content = payload.draft.trim();
-    if (content.length === 0 || content.length > 500)  { return; }
+    if (content.length === 0 || content.length > 500) {
+      return;
+    }
     console.log(client.data.user.username, 'sent a chat message:', content); //TEST: DEV_ONLY
 
-    const chatMessage = await this.chatService.addChatMessage(client.data.user.id, content);
+    const chatMessage = await this.chatService.addChatMessage(
+      client.data.user.id,
+      content,
+    );
     this.server.to('chat').emit('new chat message', chatMessage);
   }
 
   @SubscribeMessage('joinChat')
-  handleJoinChat(client: SocketClient) {
-    client.join("chat");
+  async handleJoinChat(client: SocketClient) {
+    await client.join('chat');
   }
 
   @SubscribeMessage('leaveChat')
-  handleLeaveChat(client: SocketClient) {
-    client.leave("chat");
+  async handleLeaveChat(client: SocketClient) {
+    await client.leave('chat');
   }
 
-
-  afterInit(server: SocketServer) {
+  async afterInit(server: SocketServer) {
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
-
-      const { instrument } = require('@socket.io/admin-ui'); //WARN: dev only
+      const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
       instrument(server, {
         auth: false,
         mode: 'development',
@@ -125,7 +125,7 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
     });
   }
 
-  async handleConnection(client: Socket) {
+  handleConnection(client: Socket) {
     //TODO: handle multiple connections from the same user.
     console.log('Client connected:', client.id); //TEST:
   }

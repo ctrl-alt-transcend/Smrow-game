@@ -1,15 +1,22 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
-import { useForm } from '@mantine/form';
-import { useDisclosure } from '@mantine/hooks';
-import { useCreateLobby, useJoinLobby } from '../../game/utils/game.utils.tsx'
+import { useForm } from "@mantine/form";
+import { useDisclosure } from "@mantine/hooks";
+import { useCreateLobby, useJoinLobby } from "../../game/utils/game.utils.tsx";
 
-function JoinLobbyModal({opened, onClose } : {opened: boolean, onClose: () => void }) {
+function JoinLobbyModal({
+  opened,
+  onClose,
+}: {
+  opened: boolean;
+  onClose: () => void;
+}) {
   const gameForm = useForm({
     initialValues: {
-      gameId: '',
+      gameId: "",
     },
     validate: {
-      gameId: (val: string) => (val.trim().length === 0 ? "field is empty" : null),
+      gameId: (val: string) =>
+        val.trim().length === 0 ? "field is empty" : null,
     },
   });
   const joinLobby = useJoinLobby();
@@ -22,22 +29,26 @@ function JoinLobbyModal({opened, onClose } : {opened: boolean, onClose: () => vo
           label="Join a game"
           placeholder="Inset game code..."
           value={gameForm.values.gameId}
-          onChange={(event) => gameForm.setFieldValue("gameId", event.currentTarget.value)}
+          onChange={(event) =>
+            gameForm.setFieldValue("gameId", event.currentTarget.value)
+          }
         />
       </form>
     </Modal>
-  )
-};
+  );
+}
 
 export default function GameActions() {
   const createLobby = useCreateLobby();
-  const [opened, { open, close}] = useDisclosure(false);
+  const [opened, { open, close }] = useDisclosure(false);
 
-	return (
-		<Group>
-			<Button onClick={open}>Join da game</Button>
-      <JoinLobbyModal opened={opened} onClose={close}/>
-			<Button variant="default" onClick={createLobby}>Create a game</Button>
-		</Group>
-	)
+  return (
+    <Group>
+      <Button onClick={open}>Join da game</Button>
+      <JoinLobbyModal opened={opened} onClose={close} />
+      <Button variant="default" onClick={createLobby}>
+        Create a game
+      </Button>
+    </Group>
+  );
 }

@@ -7,7 +7,11 @@ import { UserModule } from '../user/user.module';
 import { SocialModule } from '../social/social.module';
 
 @Module({
-  imports: [JwtModule.register({ secret: process.env.JWT_SECRET }), UserModule, SocialModule],
+  imports: [
+    JwtModule.register({ secret: process.env.JWT_SECRET }),
+    UserModule,
+    SocialModule,
+  ],
   controllers: [GameController],
   providers: [GameService, GameGateway],
   exports: [GameService],

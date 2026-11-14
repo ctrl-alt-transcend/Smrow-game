@@ -9,8 +9,8 @@ import {
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
-import type { JwtPayload } from '@shared/types';
-import type { BuildRequestPayload } from '@shared/game/game.types';
+import type { JwtPayload } from 'shared';
+import type { BuildRequestPayload } from 'shared';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
@@ -131,10 +131,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     }
   }
 
-  afterInit(server: SocketServer) {
+  async afterInit(server: SocketServer) {
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
-      const { instrument } = require('@socket.io/admin-ui'); //WARN: dev only
+      const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
       instrument(this.server, {
         auth: false,
         mode: 'development',

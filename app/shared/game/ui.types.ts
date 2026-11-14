@@ -1,4 +1,3 @@
-
 export type PlayerCardProps = {
   name: string;
   level: number;

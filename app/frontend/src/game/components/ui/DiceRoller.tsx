@@ -1,17 +1,21 @@
-import { useState, useCallback, useRef } from 'react';
-import { Card, Stack, Title, Box } from '@mantine/core';
-import { Dice3D, type DiceValue } from '../gameboard/Dice/Dice';
-import { useRollDice } from '../../hooks/useRollDice';
-import type { GameResponse } from '@shared/game/game.types';
+import { useState, useCallback, useRef } from "react";
+import { Card, Stack, Title, Box } from "@mantine/core";
+import { Dice3D, type DiceValue } from "../gameboard/Dice/Dice";
+import { useRollDice } from "../../hooks/useRollDice";
+import type { GameResponse } from "shared";
 
-
-export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; masterLog: string | null }) {
+export function DiceRoller({
+  diceRoll,
+  masterLog,
+}: {
+  diceRoll: number | null;
+  masterLog: string | null;
+}) {
   const [rolledValue, setRolledValue] = useState<DiceValue | null>(null);
   const [busy, setBusy] = useState(false);
   //const pendingResultRef = useRef<{ value: DiceValue | number | null; message: string | null} | null>(null);
   const pendingResultRef = useRef<GameResponse | null>(null);
   const { roll } = useRollDice();
-
 
   const handleRollRequest = useCallback(async () => {
     if (busy) return;
@@ -19,16 +23,20 @@ export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; ma
     try {
       await roll();
       setBusy(false);
-      if(diceRoll === null) {
+      if (diceRoll === null) {
         //if(masterLog)
         //  updateMasterLog(masterLog);
         setBusy(false);
         return;
       }
-      pendingResultRef.current = { value: diceRoll, message: masterLog, data: null };
+      pendingResultRef.current = {
+        value: diceRoll,
+        message: masterLog,
+        data: null,
+      };
       setRolledValue(diceRoll);
     } catch (err) {
-      console.error('Failed to roll dice:', err);
+      console.error("Failed to roll dice:", err);
       //updateMasterLog('Error rolling dice');
       setBusy(false);
     }
@@ -43,12 +51,13 @@ export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; ma
       pendingResultRef.current = null;
       setRolledValue(null);
       setBusy(false);
-    }, []
+    },
+    [],
     //[updateMasterLog]
   );
 
   return (
-    <Box style={{ flex: 1, minWidth: 220, position: 'relative' }}>
+    <Box style={{ flex: 1, minWidth: 220, position: "relative" }}>
       <Card withBorder radius="md" shadow="sm" h={220}>
         <Stack gap="xl" align="center" justify="center">
           <Title order={4}>Dice box</Title>
@@ -57,7 +66,7 @@ export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; ma
             cheatValue={rolledValue ?? undefined}
             onRoll={handleAnimationComplete}
             triggers={[]}
-            style={{ pointerEvents: 'none' }}
+            style={{ pointerEvents: "none" }}
           />
         </Stack>
       </Card>
@@ -67,13 +76,13 @@ export function DiceRoller({diceRoll, masterLog}: { diceRoll: number | null ; ma
         disabled={busy}
         aria-label="Roll the dice"
         style={{
-          position: 'absolute',
+          position: "absolute",
           inset: 0,
           zIndex: 10,
-          background: 'transparent',
-          border: 'none',
+          background: "transparent",
+          border: "none",
           borderRadius: 8,
-          cursor: busy ? 'wait' : 'pointer',
+          cursor: busy ? "wait" : "pointer",
         }}
       />
     </Box>

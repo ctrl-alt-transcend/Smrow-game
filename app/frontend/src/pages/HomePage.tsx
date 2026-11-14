@@ -4,8 +4,7 @@ import GameActions from "../components/home/GameActions";
 import GameList from "../components/home/GameList";
 import Chat from "../components/home/Chat";
 
-
-export default function HomePage()   {
+export default function HomePage() {
   const { user } = useAuth();
 
   return (

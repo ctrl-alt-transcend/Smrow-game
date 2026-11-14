@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { socialSocket as socket } from "../../sockets/socialSocket";
 import { http } from "../../services/http";
 import { Title, Text, Paper, Table } from "@mantine/core";
@@ -8,10 +8,10 @@ import GameRow from "./GameRow";
 export default function GameList() {
   const [loaded, setLoaded] = useState(false);
   const [games, setGames] = useState<GameList[]>([]);
- 
+
   useEffect(() => {
     let cancelled = false;
-    const getGamesList = async() => {
+    const getGamesList = async () => {
       try {
         const response = await http.get<GameList[]>("/game");
         if (cancelled) return;
@@ -19,11 +19,10 @@ export default function GameList() {
         const gameList = response.data;
         setGames(gameList);
         setLoaded(true);
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Failed to fetch chat history with error - ", error);
       }
-    }
+    };
 
     const onGameListUpdate = (game: GameList[]) => {
       return games.concat(game);
@@ -37,7 +36,7 @@ export default function GameList() {
       cancelled = true;
       socket.off("game list update", onGameListUpdate);
       socket.emit("leaveGameList");
-    }
+    };
   });
 
   return (
@@ -50,9 +49,7 @@ export default function GameList() {
         <Text c="dimmed" ta="center" py="xl">
           No game in progress ..
         </Text>
-      ) : (
-
-      games.length === 0 ? (
+      ) : games.length === 0 ? (
         <Text c="dimmed" ta="center" py="xl">
           No game in progress ..
         </Text>
@@ -74,8 +71,7 @@ export default function GameList() {
             ))}
           </Table.Tbody>
         </Table>
-      ))}
+      )}
     </Paper>
   );
 }
-

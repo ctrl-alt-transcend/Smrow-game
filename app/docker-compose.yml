@@ -3,7 +3,9 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/dockerfile
+      target: runner
     container_name: backend
     restart: unless-stopped
     networks:
