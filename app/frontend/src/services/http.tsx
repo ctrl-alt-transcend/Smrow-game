@@ -2,8 +2,11 @@ import axios from "axios";
 import { KEY } from "../config/config";
 import { authEvents } from "../context/AuthEvents";
 
+// withCredentials, allows axios to automatically include cookies with every request
+
 export const http = axios.create({
   baseURL: "/api",
+  withCredentials: true,
 });
 
 http.interceptors.request.use((config) => {

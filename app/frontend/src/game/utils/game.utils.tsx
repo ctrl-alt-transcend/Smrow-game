@@ -1,15 +1,15 @@
 import { useNavigate } from "react-router";
-import { getUserToken } from "../../services/user.service.tsx";
 import axios from "axios";
+import { http } from "../../services/http.tsx";
 
 export function useCreateLobby() {
   const navigate = useNavigate();
 
   return async function createLobby() {
     try {
-      await axios.post("/api/game/create", null, {
-        headers: { Authorization: `Bearer ${getUserToken()}` },
-      });
+      await http.post("/game/create");
+      navigate("/game");
+      console.log("Game created succesfully");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         navigate("/");
@@ -19,8 +19,6 @@ export function useCreateLobby() {
       navigate("/game");
       return;
     }
-    console.log("Game created succesfully");
-    navigate("/game");
   };
 }
 
@@ -29,18 +27,10 @@ export function useJoinLobby() {
 
   return async function joinLobby(gameId: string) {
     try {
-      await axios.post(
-        "/api/game/join",
-        { gameId },
-        {
-          //INFO: { gameId } is shorthand for { gameId: gameId } if the key and the variable have the same name
-          headers: { Authorization: `Bearer ${getUserToken()}` },
-        },
-      );
+      await http.post("/game/join", { gameId });
+      navigate("/game");
     } catch {
       navigate("/error");
     }
-
-    navigate("/game");
   };
 }

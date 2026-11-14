@@ -5,12 +5,22 @@ import type { JwtPayload } from 'shared';
 import { UserService } from '../user/user.service';
 import { readSecret } from './readSecret';
 import { AUTH } from '../config/config';
+import type { Request } from 'express';
+
+// extractor for the cookie returned by the backend
+const cookieExtractor = (req: Request): string | null => {
+  const token: unknown = req.cookies?.access_token ?? null;
+  return typeof token === 'string' ? token : null;
+};
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly userService: UserService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        cookieExtractor, //added the cookie stractor to the JwtStrategy so we intercept the cookie inside
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ]),
       ignoreExpiration: false,
       secretOrKey: readSecret(AUTH.JWT_FILE),
     });

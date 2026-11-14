@@ -12,7 +12,7 @@ export type Id = z.infer<typeof IdSchema>;
 export const EmailSchema = z.email("Invalid email !");
 export type Email = z.infer<typeof EmailSchema>;
 
-export const UsernameSchema = z.string().min(4, "Username too short !").max(20, "Username too long !");
+export const UsernameSchema = z.string().min(4, "Username too short !").max(30, "Username too long !");
 export type Username = z.infer<typeof UsernameSchema>;
 
 export const NameSchema = z.string().nonempty("Can't be empty").max(20, "Name too long !");
