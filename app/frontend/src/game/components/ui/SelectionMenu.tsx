@@ -16,9 +16,9 @@ import { useSelectionDisplay } from "../../hooks/useSelectionDisplay.ts";
 import type { GameBoardSelection } from "../../types/gameboard.types.tsx";
 import {
   ResourceType,
+  TraderType,
   type BuildPayload,
   type TradePayload,
-  type TraderType,
   type SettingsData,
 } from "shared";
 import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
@@ -466,7 +466,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
           <TradeOfferPanel
             ratio={settings.genericPortRate}
             sourceId={port.coastId}
-            sourceKind="generic port"
+            sourceKind={TraderType.GENERIC_PORT}
             {...turnFlag}
           />
         );
@@ -477,7 +477,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
           ratio={settings.specialPortRate}
           offerLockedResource={port.type as ResourceType}
           sourceId={port.coastId}
-          sourceKind="specialized port"
+          sourceKind={TraderType.SPECIALIZED_PORT}
           {...turnFlag}
         />
       );
@@ -512,7 +512,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
         <TradeOfferPanel
           ratio={settings.reserveRate}
           sourceId={selected.selectedReserve.id}
-          sourceKind="reserve"
+          sourceKind={TraderType.RESERVE}
           {...turnFlag}
         />
       );
