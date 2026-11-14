@@ -35,15 +35,15 @@ export function updateValue(
 
 export function funnyRollLog(value: number): string {
   if (value <= 3) {
-    return `got an almost useless ${value} ...`;
+    return `got an almost useless ${value} in total ...`;
   } else if (value > 3 && value <= 6) {
-    return `got a tiny little ${value} ...`;
+    return `got a tiny little ${value} in total ...`;
   } else if (value === 7) {
-    return `got a damned ${value} !`;
+    return `got a damned ${value} in total !`;
   } else if (value > 7 && value <= 9) {
-    return `got a solid ${value} .`;
+    return `got a solid ${value} in total .`;
   } else if (value > 9 && value <= 12) {
-    return `got a huge ${value} !`;
+    return `got a huge ${value} in total !`;
   }
   return `rolled a ${value}`;
 }

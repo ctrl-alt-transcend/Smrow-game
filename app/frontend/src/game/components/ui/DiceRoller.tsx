@@ -9,15 +9,13 @@ import { gameSocket as socket } from "../../../sockets/gameSocket";
 import type { DiceRoll } from "shared";
 
 /** Safety timeout: if the server never answers, unlock the UI. */
-const SERVER_TIMEOUT_MS = 5000;
+const SERVER_TIMEOUT_MS = 2000;
 
 function isDiceValue(n: unknown): n is DiceValue {
   return typeof n === "number" && Number.isInteger(n) && n >= 1 && n <= 6;
 }
 
-/**
- * Measures the container width to adapt the dice size (responsive).
- */
+/** Measures the container width to adapt the dice size (responsive). */
 function useElementWidth<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [width, setWidth] = useState(0);

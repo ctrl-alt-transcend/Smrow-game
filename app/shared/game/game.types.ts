@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+/** DEV */
+export const ZGEG_DEV = 'zGeG_tHe_dEv';
+
 /** Rules value */
 export const SPECIAL_PORT_RATE = 2;
 export const GENERIC_PORT_RATE = 3;
@@ -36,6 +39,10 @@ export const WATER_OPACITY = 1;
 
 export const SPECIALIZED_PORT_COLOR = "#ffffff";
 export const NORMAL_PORT_COLOR = "#000000";
+
+/** Logs */
+export const YOU_ROLLED = 'You rolled a';
+export const YOU_DIDNT_ROLLED = "You couldn't roll the dice";
 
 export const BuildingType = {
   ROAD: "road",

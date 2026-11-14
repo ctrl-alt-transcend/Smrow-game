@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
-import type { JwtPayload } from 'shared';
+import { ZGEG_DEV, type JwtPayload } from 'shared';
 import type { BuildPayload, GameDataDto, TradePayload } from 'shared';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
@@ -73,34 +73,28 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   dice(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.diceRequest(client.data.user.username);
+    game.phaseCheckRequest();
 
     //⚠️ FOR TESTING
+    game.diceRequest(`${ZGEG_DEV}`);
     game.phaseCheckRequest();
-    game.diceRequest('enriquest');
-    //game.phaseCheckRequest();
-    //game.diceRequest('spagg');
     // -------------
 
-    game.phaseCheckRequest();
     this.emitGameDataDto(game, client.data.user.username);
-    //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
   }
 
   @SubscribeMessage('skip')
   skip(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.skipRequest(client.data.user.username);
+    game.phaseCheckRequest();
 
     //⚠️ FOR TESTING
+    game.skipRequest(`${ZGEG_DEV}`);
     game.phaseCheckRequest();
-    game.skipRequest('enriquest');
-    //game.phaseCheckRequest();
-    //game.skipRequest('spagg');
     // -------------
 
-    game.phaseCheckRequest();
     this.emitGameDataDto(game, client.data.user.username);
-    //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
   }
 
   @SubscribeMessage('build')
@@ -110,18 +104,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.buildRequest(client.data.user.username, payload);
+    game.phaseCheckRequest();
 
     //⚠️ FOR TESTING
+    game.buildRequest(`${ZGEG_DEV}`, payload);
     game.phaseCheckRequest();
-    game.buildRequest('enriquest', payload);
-    //game.phaseCheckRequest();
-    //game.buildRequest('spagg', payload);
     // -------------
 
-    game.phaseCheckRequest();
-    //game.setCurrentRoll(result.value);
     this.emitGameDataDto(game, client.data.user.username);
-    //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
   }
 
   @SubscribeMessage('trade')
@@ -131,18 +121,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.tradeRequest(client.data.user.username, payload);
+    game.phaseCheckRequest();
 
     //⚠️ FOR TESTING
+    game.tradeRequest(`${ZGEG_DEV}`, payload);
     game.phaseCheckRequest();
-    game.tradeRequest('enriquest', payload);
-    //game.phaseCheckRequest();
-    //game.tradeRequest('spagg', payload);
     // -------------
 
-    game.phaseCheckRequest();
-    //game.setCurrentRoll(result.value);
     this.emitGameDataDto(game, client.data.user.username);
-    //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
   }
 
   @SubscribeMessage('joinRoom')
@@ -152,7 +138,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       const game = this.gameService.getGameInstanceByUserId(userId);
       await client.join(game.getGameId());
       this.emitGameDataDto(game, client.data.user.username);
-      //this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto(client.data.user.username));
       return { ok: true, data: game.getGameDataDto(client.data.user.username) };
     } catch (e) {
       console.log('joinRoom failed', e);

@@ -1,9 +1,10 @@
-import type { Player } from 'shared';
 import {
   type GameBoard,
   type RoadData,
   type SettlementData,
   type GameBoardGraph,
+  type Player,
+  type BuildPayload,
   Faction,
   BuildingsInGame,
   SETTLEMENT_POINT,
@@ -14,10 +15,6 @@ import {
   payBuildResources,
 } from './handleResources';
 import { crossroadRule } from './handleGameRules';
-
-export type BuildPayload =
-  | { kind: 'road'; id: string; data: RoadData }
-  | { kind: 'settlement'; id: string; data: SettlementData };
 
 /* ================================================================== *
  * INDEX UTILS
@@ -164,26 +161,17 @@ function cityUpgradeCheck(
   player: Player,
 ): BuildValidation {
   if (target.isCity) {
-    console.log(
-      `👀⛔buildCheck: ${player.playerId} try to upgrade settlement but it's already a city !`,
-    );
     return {
       valid: false,
       message: "Can't upgrade more, it's already a city !",
     };
   } else if (!hasEnoughResourcesToBuild(player.resources, 'city')) {
-    console.log(
-      `👀⛔buildCheck: ${player.playerId} has not enough Resources to build a city`,
-    );
     return {
       valid: false,
       message:
         "You don't have enough resources to upgrade your settlement to a city ...",
     };
   }
-  console.log(
-    `👀✅buildCheck: ${player.playerId} upgraded a settlement to a city`,
-  );
   player.victoryPoints += CITY_POINT;
   target.isCity = true;
   payBuildResources(player.resources, 'city');
@@ -204,9 +192,6 @@ function settlementCheck(
     !placementPhase &&
     !hasEnoughResourcesToBuild(player.resources, 'settlement')
   ) {
-    console.log(
-      `👀⛔buildCheck: ${player.playerId} has not enough Resources to build a settlement`,
-    );
     return {
       valid: false,
       message: "You don't have enough resources to build a settlement ...",
@@ -227,7 +212,6 @@ function settlementCheck(
       message: settlementResult.reason,
     };
   }
-  console.log(`👀✅buildCheck: ${player.playerId} built a settlement`);
   player.victoryPoints += SETTLEMENT_POINT;
   target.faction = player.faction;
   target.ownerId = player.playerId;
@@ -247,9 +231,6 @@ function roadCheck(
   placementPhase?: boolean,
 ): BuildValidation {
   if (!placementPhase && !hasEnoughResourcesToBuild(player.resources, 'road')) {
-    console.log(
-      `👀⛔buildCheck: ${player.playerId} has not enough Resources to build a road`,
-    );
     return {
       valid: false,
       message: "You don't have enough resources to build a road ...",
@@ -269,7 +250,6 @@ function roadCheck(
   if (!placementPhase) {
     payBuildResources(player.resources, 'road');
   }
-  console.log(`👀✅buildCheck: ${player.playerId} built a road`);
   return {
     valid: true,
     message: 'Road built !',
@@ -296,7 +276,6 @@ export const buildCheck = (
           player.roadsBuilt++;
           if (crossroadRule(target, graph)) {
             player.victoryPoints++;
-            console.log(`👀✅buildCheck: ${player.playerId} built a crossroad`);
             return {
               valid: true,
               message:

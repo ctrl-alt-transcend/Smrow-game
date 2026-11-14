@@ -16,6 +16,8 @@ import {
   LAND_RESSOURCE,
   TRADE_LIMIT_DFLT,
   BUILD_LIMIT_DFLT,
+  YOU_ROLLED,
+  YOU_DIDNT_ROLLED,
 } from 'shared';
 import type {
   GameData,
@@ -91,16 +93,6 @@ class GameStateContext {
       tradeLimit: TRADE_LIMIT_DFLT,
       buildLimit: BUILD_LIMIT_DFLT,
     };
-    // TODO
-    /**
-     * this.stats {
-     *  victoryPointsEarned: X
-     *  roadsBuilt: X
-     *  dicesRolled: ...
-     *  ...
-     * }
-     */
-    this.initGameData(); //⚠️ FOR TESTING WITH MOCKED VALUE
     this.transitionTo(state);
   }
 
@@ -130,9 +122,10 @@ class GameStateContext {
       username: playerId,
       stats: {
         roadsBuilt: 0,
+        // ....
       },
-      //victoryPoints: 0,
-      victoryPoints: 6, //⚠️ For testing only
+      victoryPoints: 0,
+      //victoryPoints: 6, //⚠️ For testing only
       firstDice: 0,
       secondDice: 0,
       settlementsBuilt: new Map<string, SettlementData>(),
@@ -149,7 +142,8 @@ class GameStateContext {
         id: this.rollId++,
         val: null,
       },
-      // BONUS Resources FOR DEV
+      DEVMOD: false,
+      // BONUS RESOURCES
       resources: {
         //⚠️ For testing only
         wood: 10, //⚠️ For testing only
@@ -158,8 +152,7 @@ class GameStateContext {
         sheep: 10, //⚠️ For testing only
         ore: 10, //⚠️ For testing only
       },
-      DEVMOD: false,
-      //Resources: {
+      //resources: {
       //  wood: 0,
       //  brick: 0,
       //  wheat: 0,
@@ -168,12 +161,6 @@ class GameStateContext {
       //},
     };
     return newPlayer;
-  }
-
-  protected initGameData() {
-    //⚠️ FOR TESTING //TEST: REMOVE THIS IN PROD
-    //this.data.players.set('spagg', this.initPlayer('spagg'));
-    this.data.players.set('enriquest', this.initPlayer('enriquest'));
   }
 
   /** The Context allows changing the State object at runtime. */
@@ -380,10 +367,15 @@ class GameStateContext {
     roll.id = this.rollId++;
     if (p.firstDice === 0) {
       p.firstDice = roll.val;
-      console.log(`${p.playerId} #1 rolll: ${roll.val}`);
+      this.setPersonalLog(p, `${YOU_ROLLED} ${roll.val}`);
+      //console.log(`${p.playerId} #1 rolll: ${roll.val}`);
     } else if (p.secondDice === 0) {
       p.secondDice = roll.val;
-      console.log(`${p.playerId} #2 rolll: ${roll.val}`);
+      this.setPersonalLog(p, `${YOU_ROLLED} ${roll.val}`);
+      //console.log(`${p.playerId} #2 rolll: ${roll.val}`);
+    } else {
+      roll.val = null;
+      this.setPersonalLog(p, `${YOU_DIDNT_ROLLED}`);
     }
     return roll;
   }
@@ -428,9 +420,9 @@ class GameStateContext {
       if (!graphEntry) continue;
       graphEntry.adjacentTiles.forEach((tile) => {
         let prod: number = 0;
-        if (placementPhase === true)
+        if (placementPhase === true) {
           prod = produceResources(tile.land, player.resources);
-        else if (tile.value === this.data.dicesSum && !tile.hasRobber) {
+        } else if (tile.value === this.data.dicesSum && !tile.hasRobber) {
           const settlement = player.settlementsBuilt.get(settlementId);
           if (settlement)
             prod = produceResources(
@@ -451,7 +443,7 @@ class GameStateContext {
             `Robert the Robber stole your ${LAND_RESSOURCE[tile.land]} production !`,
           );
           //console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by Robert the Robber !`);
-        } else if (tile.land == LandType.DESERT) {
+        } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
             player,
             `You didn't produce anything with your ${LAND_RESSOURCE[tile.land]} ...`,
@@ -473,8 +465,6 @@ class GameStateContext {
       );
       if (totalCount <= DISCARD_THRESHOLD) return;
       const toDiscard = Math.floor(totalCount / 2);
-      // Flatten the player's resources into a list of resource keys,
-      // then remove randomly from it.
       const pool: ResourceType[] = [];
       for (const [resource, count] of Object.entries(player.resources)) {
         for (let i = 0; i < count; i++) pool.push(resource as ResourceType);

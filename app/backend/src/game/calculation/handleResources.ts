@@ -126,14 +126,6 @@ export function hasEnoughResourcesToBuild(
   return false;
 }
 
-function addResource(resource: number, isCity?: boolean) {
-  if (isCity) {
-    resource += 2;
-  } else {
-    resource += 1;
-  }
-}
-
 export function produceResources(
   land: LandType,
   resources: Resources,
@@ -144,19 +136,24 @@ export function produceResources(
       return 0;
     }
     case 'field':
-      addResource(resources.wheat, isCity);
+      if (isCity) resources.wheat += 2;
+      else resources.wheat += 1;
       break;
     case 'forest':
-      addResource(resources.wood, isCity);
+      if (isCity) resources.wood += 2;
+      else resources.wood += 1;
       break;
     case 'hill':
-      addResource(resources.brick, isCity);
+      if (isCity) resources.brick += 2;
+      else resources.brick += 1;
       break;
     case 'mountain':
-      addResource(resources.ore, isCity);
+      if (isCity) resources.ore += 2;
+      else resources.ore += 1;
       break;
     case 'pasture':
-      addResource(resources.sheep, isCity);
+      if (isCity) resources.sheep += 2;
+      else resources.sheep += 1;
       break;
     default:
       return 0;

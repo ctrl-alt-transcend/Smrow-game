@@ -25,7 +25,6 @@ import {
 } from "shared";
 import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 
-/** Resource options (keep in sync with your ResourceType union) */
 const RESSOURCE_OPTIONS = [
   ResourceType.WOOD,
   ResourceType.BRICK,
@@ -68,17 +67,12 @@ function useElementWidth<T extends HTMLElement>() {
  *    the kind of trade (ports and reserve included).
  *  - `isMyTurn = false` → every field is disabled (view-only).
  * ================================================================== */
-
 interface TradeOfferPanelProps {
   ratio: number | null;
-  /** resource imposed on the offer side (specialized port only) */
   offerLockedResource?: ResourceType;
-  /** identifies the trade in the payload sent to the server */
   sourceId: string;
   sourceKind: TraderType;
-  /** recipient player (player-to-player trades only) */
   targetOwnerId?: string | null;
-  /** when false, all fields are disabled */
   isMyTurn: boolean;
 }
 
@@ -95,33 +89,14 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
     null,
   );
   const [targetAmount, setTargetAmount] = useState<number>(1);
-
-  // Offer resource — free unless locked by a specialized port
-  //const [offerResource, setOfferResource] = useState<ResourceType | null>(
-  //  offerLockedResource ?? null,
-  //);
-
   // Offer amount — free only for player-to-player trades
   const [freeOfferAmount, setFreeOfferAmount] = useState<number>(1);
-
   const isBankTrade = ratio !== null;
   const isOfferResourceLocked = Boolean(offerLockedResource);
-
-  //// Keep the offer resource in sync when the locked resource changes
-  //useEffect(() => {
-  //  setOfferResource(offerLockedResource ?? null);
-  //}, [offerLockedResource]);
-
-  // Remove the state initialized from the prop AND the effect entirely.
-
-  // Keep only the free-choice state:
   const [chosenOfferResource, setChosenOfferResource] =
     useState<ResourceType | null>(null);
-
-  // Derive during render: the lock always wins when present.
   const offerResource = offerLockedResource ?? chosenOfferResource;
 
-  // Bank trade: offer amount is always derived from the target amount
   const offerAmount = isBankTrade
     ? targetAmount * (ratio as number)
     : freeOfferAmount;
@@ -141,11 +116,6 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
       offer: { resource: offerResource!, amount: offerAmount },
       target: { resource: targetResource!, amount: targetAmount },
     };
-
-    // Server-side TODO: route according to payload.kind
-    //  - "port"  : validate ratio + resource ownership, credit target
-    //  - "player": notify targetOwnerId, wait for their acceptance
-
     socket.emit("trade", { ...payload, targetOwnerId });
     console.log("Trade offer sent:", payload, "→ owner:", targetOwnerId);
   }, [
@@ -245,7 +215,6 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
  * BuildSelectionButton : road / settlement construction (unchanged
  * core logic; `isMyTurn = false` disables the button entirely)
  * ================================================================== */
-
 interface PendingBuild {
   target: BuildPayload;
   logAtSend: string | null;
@@ -256,7 +225,6 @@ interface BuildSelectionButtonProps {
   selected: GameBoardSelection;
   masterLog: string | null;
   onBuilt?: (target: BuildPayload) => void;
-  /** when false, building is disabled */
   isMyTurn: boolean;
 }
 
@@ -288,7 +256,6 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     return null;
   }, [selected.selectedRoad, selected.selectedSettlement]);
 
-  /** 1. Save the "build intention" and lock the component */
   const handleBuildRequest = useCallback(() => {
     if (busy || !target || !isMyTurn) return;
     pendingRef.current = { target, logAtSend: masterLog };
@@ -300,7 +267,6 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     });
   }, [busy, target, masterLog, isMyTurn]);
 
-  /** 2. Unlock component when the response arrives */
   useEffect(() => {
     const pending = pendingRef.current;
     if (!pending) return;
@@ -313,7 +279,6 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     onBuilt?.(pending.target);
   }, [masterLog, onBuilt]);
 
-  /** 3. Anti-blocking guard if the server doesn't respond */
   useEffect(() => {
     if (!busy) return;
     const timer = window.setTimeout(() => {
@@ -402,11 +367,10 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
  * Very long labels beyond the minimum size are truncated with an
  * ellipsis instead of overflowing.
  * ================================================================== */
-
 const ITEMS_FONT_MIN = 14;
 const ITEMS_FONT_MAX = 18;
-const ITEMS_AVG_CHAR = 5.2; // px per char at fontSize 1em (default sans-serif)
-const ITEMS_FALLBACK_WIDTH = 220; // used before the container is measured
+const ITEMS_AVG_CHAR = 5.2;
+const ITEMS_FALLBACK_WIDTH = 220;
 
 const computeItemsFontSize = (
   labels: string[],
@@ -420,7 +384,6 @@ const computeItemsFontSize = (
 
 interface SelectionItemsProps {
   items: { label: string }[];
-  /** measured available width inside the card, in px */
   availableWidth: number;
 }
 
@@ -461,12 +424,10 @@ const SelectionItems: React.FC<SelectionItemsProps> = ({
 /* ================================================================== *
  * SelectionMenu : main component, dispatch by selection kind
  * ================================================================== */
-
 interface SelectionMenuProps {
   selected: GameBoardSelection;
   masterLog?: string | null;
   onBuilt?: (target: BuildPayload) => void;
-  /** id of the current player — TODO wire to your session/auth */
   currentPlayerId?: string | null;
   isMyTurn: boolean;
 }
@@ -476,13 +437,11 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
   masterLog = null,
   onBuilt,
   isMyTurn,
-  //currentPlayerId = null,
 }) => {
   const items = useSelectionDisplay(selected);
   const { ref: cardBodyRef, width: cardBodyWidth } =
     useElementWidth<HTMLDivElement>();
 
-  // Usable width for the item labels: measured width minus paddings/bullet.
   const itemsAvailableWidth =
     cardBodyWidth > 0 ? cardBodyWidth - 40 : ITEMS_FALLBACK_WIDTH;
 
@@ -490,8 +449,6 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
    * Modular content depending on the selected kind
    * ------------------------------------------------------------ */
   const renderActionArea = () => {
-    // Global gate: when it's not the player's turn, everything is
-    // displayed but disabled (fields greyed out, buttons inert).
     const turnFlag = { isMyTurn };
 
     // 1. COAST: bank trade through a port
@@ -533,7 +490,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
       return null;
     }
 
-    // 3. ROAD: current behavior
+    // 3. ROAD: informations display and build options
     if (selected.selectedRoad) {
       return (
         <BuildSelectionButton
@@ -545,29 +502,8 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
       );
     }
 
-    // 4. SETTLEMENT: current behavior + player-to-player trade
+    // 4. SETTLEMENT: informations display and build options
     if (selected.selectedSettlement) {
-      //const { ownerId } = selected.selectedSettlement;
-
-      // TODO: if ownerId matches the current player → keep the build button
-      // (upgrade settlement/city). For now: foreign owner → free trade.
-      //if (ownerId && ownerId !== currentPlayerId) {
-      //  return (
-      //    <Stack gap="xs" w="100%">
-      //      <Text size="xs" c="dimmed">
-      //        Trade with player <b>{ownerId}</b> (free rate)
-      //      </Text>
-      //      <TradeOfferPanel
-      //        ratio={null}
-      //        sourceId={selected.selectedSettlement.id}
-      //        sourceKind="player"
-      //        targetOwnerId={ownerId}
-      //        {...turnFlag}
-      //      />
-      //    </Stack>
-      //  );
-      //}
-
       return (
         <BuildSelectionButton
           selected={selected}
@@ -578,7 +514,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
       );
     }
 
-    // 5. RESERVE: 4:1
+    // 5. RESERVE: 4 offer : 1 target — offer resource freely chosen
     if (selected.selectedReserve) {
       return (
         <TradeOfferPanel

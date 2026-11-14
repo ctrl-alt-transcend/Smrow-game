@@ -11,16 +11,16 @@ import {
 import type { ButtonHTMLAttributes, CSSProperties } from "react";
 
 /* ================================================================
- * Types publics
+ * Public types
  * ================================================================ */
 
-/** Les six faces possibles du dé. */
+/** The six possible faces of the die. */
 export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6;
 
 /**
- * Positionnement du dé par rapport à son conteneur.
- * Les valeurs courantes sont proposées en autocomplétion, mais
- * n'importe quelle chaîne est acceptée (voir `placementStyle`).
+ * Positioning of the die relative to its container.
+ * Common values are offered in autocomplete, but
+ * any string is accepted (see `placementStyle`).
  */
 export type DicePlacement =
   | "top"
@@ -34,55 +34,55 @@ export type DicePlacement =
   // eslint-disable-next-line @typescript-eslint/ban-types
   | (string & {});
 
-/** Ce que le parent peut piloter via une ref. */
+/** What the parent can control via a ref. */
 interface Dice3DHandle {
-  /** Lance le dé. `forcedValue` court-circuite l'aléatoire. */
+  /** Rolls the die. `forcedValue` bypasses the randomness. */
   rollDice: (forcedValue?: DiceValue) => void;
 }
 
 /**
- * Props du composant.
+ * Component props.
  *
- * On hérite de `ButtonHTMLAttributes` pour accepter tout attribut DOM
- * valide sur le `<button>` (id, aria-*, data-*, title…), en retirant
- * ceux qu'on redéfinit avec un sens différent.
+ * We extend `ButtonHTMLAttributes` to accept any valid DOM
+ * attribute on the `<button>` (id, aria-*, data-*, title…), while removing
+ * the ones we redefine with a different meaning.
  */
 interface Dice3DProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Durée de l'animation de lancer, en ms. @default 1000 */
+  /** Duration of the roll animation, in ms. @default 1000 */
   rollingTime?: number;
-  /** Appelé quand le dé se stabilise, avec la face obtenue. */
+  /** Called when the die settles, with the resulting face. */
   onRoll?: (value: DiceValue) => void;
-  /** Face affichée au premier rendu (mode non contrôlé). @default 6 */
+  /** Face shown on first render (uncontrolled mode). @default 6 */
   defaultValue?: DiceValue;
-  /** Arête du cube en pixels. @default 250 */
+  /** Cube edge length in pixels. @default 250 */
   size?: number;
-  /** Couleur de fond des faces (ignorée si une image est fournie). */
+  /** Background color of the faces (ignored if an image is provided). */
   faceBg?: string;
-  /** Images des faces, dans l'ordre 1→6. Une entrée vide = face par défaut. */
+  /** Images of the faces, in order 1→6. An empty entry = default face. */
   faces?: string[];
   disabled?: boolean;
-  /** Force la face obtenue au prochain lancer (triche / tests). */
-  cheatValue?: DiceValue; // Valeur fournie par le parent pour forcer l'animation
-  /** Ancrage du dé, ex. `"top-left"`. */
+  /** Forces the resulting face on the next roll (cheating / tests). */
+  cheatValue?: DiceValue; // Value provided by the parent to force the animation
+  /** Anchor of the die, e.g. `"top-left"`. */
   placement?: DicePlacement;
-  /** URL d'un son joué pendant le lancer. */
+  /** URL of a sound played during the roll. */
   sound?: string;
-  /** Touches déclenchant le lancer, plus `"click"`. @default ['click'] */
+  /** Keys triggering the roll, in addition to `"click"`. @default ['click'] */
   triggers?: string[];
   className?: string;
   style?: CSSProperties;
   /**
-   * Face affichée en mode contrôlé. Fournir cette prop bascule le
-   * composant en contrôlé : il n'avancera plus tout seul.
+   * Face displayed in controlled mode. Providing this prop switches the
+   * component to controlled: it will no longer advance on its own.
    */
   value?: DiceValue;
-  /** Appelé à chaque stabilisation — sert à synchroniser `value`. */
+  /** Called on every settle — used to sync `value`. */
   onValueChange?: (value: DiceValue) => void;
 }
 
 /* ================================================================
- * CSS — injecté une seule fois pour toute l'application.
- * Idéalement, déplace-le dans un vrai fichier .css importé ici.
+ * CSS — injected only once for the whole application.
+ * Ideally, move it into a real .css file imported here.
  * ================================================================ */
 
 const DICE_CSS = `
@@ -145,7 +145,7 @@ const DICE_CSS = `
 ._space3d.three ._3dbox { transform: rotateX(0deg)   rotateY(180deg) rotateZ(0deg); }
 ._space3d.four  ._3dbox { transform: rotateX(-90deg) rotateY(90deg)  rotateZ(90deg); }
 ._space3d.five  ._3dbox { transform: rotateX(90deg)  rotateY(-90deg) rotateZ(90deg); }
-/* Pas de règle ".six" : la transform par défaut de ._3dbox EST la face 6. */
+/* No ".six" rule: the default ._3dbox transform IS face 6. */
 ._space3d.rolling ._3dbox {
   transform-style: preserve-3d;
   animation: spin 2s infinite linear;
@@ -173,7 +173,7 @@ function injectDiceCSS(): void {
 }
 
 /* ================================================================
- * Tables statiques — au niveau module, références stables à vie.
+ * Static tables — at module level, references stable for life.
  * ================================================================ */
 
 const VALUE_TO_CLASS: Record<DiceValue, string> = {
@@ -202,7 +202,7 @@ const FACE_TRANSFORM: Record<DiceValue, (half: number) => CSSProperties> = {
   6: (half) => ({ transform: `rotateX(90deg) translate3d(0, 0, ${half}px)` }),
 };
 
-/** Cellules allumées sur la grille 5×5, par face. */
+/** Cells lit up on the 5×5 grid, per face. */
 const PIPS: Record<DiceValue, readonly number[]> = {
   1: [12],
   2: [11, 13],
@@ -224,7 +224,7 @@ const FACE_CLASSNAMES: readonly string[] = [
 const GRID_CELLS: readonly number[] = Array.from({ length: 25 }, (_, i) => i);
 
 /* ================================================================
- * Face par défaut (les points). Mémoïsée.
+ * Default face (the pips). Memoized.
  * ================================================================ */
 
 interface DefaultFaceProps {
@@ -246,9 +246,8 @@ const DefaultFace = memo(function DefaultFace({
 });
 
 /* ================================================================
- * Composant principal
+ * Main component
  * ================================================================ */
-
 const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
   const {
     rollingTime = 1000,
@@ -324,7 +323,7 @@ const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
     [rollingTime, sound],
   );
 
-  // Si cheatValue change, on déclenche automatiquement l'animation
+  // If cheatValue changes, the animation is triggered automatically
   useEffect(() => {
     if (cheatValue !== undefined && !rolling && !disabled) {
       animateCheat(cheatValue); //WARN: Hook error here
@@ -336,7 +335,7 @@ const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
       if (forcedValue !== undefined) {
         animateCheat(forcedValue);
       } else {
-        // Lancer aléatoire local (fallback)
+        // Local random roll (fallback)
         const random = (Math.floor(Math.random() * 6) + 1) as DiceValue;
         animateCheat(random);
       }
@@ -346,7 +345,7 @@ const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
 
   useImperativeHandle(ref, () => ({ rollDice }), [rollDice]);
 
-  /* --- Triggers : clé primitive pour éviter les réabonnements --- */
+  /* --- Triggers: primitive key to avoid re-subscriptions --- */
   const triggersKey = Array.isArray(triggers) ? triggers.join("|") : "";
 
   const triggersList = useMemo<string[]>(
@@ -368,8 +367,8 @@ const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
     return () => window.removeEventListener("keypress", handleKeyPress);
   }, [triggersList, rollDice]);
 
-  /* --- Faces : clé primitive, immunise contre les nouvelles
-           identités de tableau passées par le parent. --- */
+  /* --- Faces: primitive key, immunizes against new
+           array identities passed by the parent. --- */
   const facesKey = Array.isArray(faces) ? faces.join("|") : "";
 
   const facesList = useMemo<string[]>(
@@ -403,7 +402,7 @@ const Dice3D = forwardRef<Dice3DHandle, Dice3DProps>((props, ref) => {
     });
   }, [size, faceBg, facesList]);
 
-  /* --- Styles dérivés --- */
+  /* --- Derived styles --- */
   const placementStyle = useMemo<CSSProperties>(() => {
     if (!placement) return {};
 
