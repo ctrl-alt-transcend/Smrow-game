@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { PlayerProfile } from 'shared';
+import { ZGEG_DEV, type PlayerProfile } from 'shared';
 import { GameStateContext, WhoStartsPhase } from './GameStateContext';
 
 @Injectable()
@@ -86,5 +86,16 @@ export class GameService {
     game
       .getPlayers()
       .set(playerProfile.username, game.initPlayer(playerProfile.username));
+
+    //⚠️REMOVE in PROD -------------------
+    console.log(`---------------------------------------
+⚠️ The following is currently set in 'app/backend/src/game/game.service.ts':
+- 'DEVMOD' (allow playing for others): enabled for '${playerProfile.username}'
+- added mocked player '${ZGEG_DEV}' that will send requests in game,
+disable his calls in 'app/backend/src/game/game.gateway.ts'
+---------------------------------------`);
+    game.setDEVMOD(playerProfile.username);
+    game.getPlayers().set(`${ZGEG_DEV}`, game.initPlayer(`${ZGEG_DEV}`));
+    // -----------------------------------
   }
 }

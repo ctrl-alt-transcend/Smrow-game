@@ -1,11 +1,19 @@
 import { useState, useCallback } from "react";
 import type { GameBoardSelection } from "../types/gameboard.types";
-import type { TileData, SettlementData, RoadData } from "shared";
+import type {
+  TileData,
+  SettlementData,
+  RoadData,
+  CoastData,
+  ReserveData,
+} from "shared";
 
 const resetSelection = (): GameBoardSelection => ({
   selectedTile: null,
   selectedSettlement: null,
   selectedRoad: null,
+  selectedCoast: null,
+  selectedReserve: null,
 });
 
 export const useGameBoardSelection = () => {
@@ -46,6 +54,26 @@ export const useGameBoardSelection = () => {
     });
   }, []);
 
+  const handleCoastClick = useCallback((coast: CoastData | null) => {
+    setSelected((prev) => {
+      if (!coast) return resetSelection();
+      const isSameCoast = prev.selectedCoast?.id === coast.id;
+      return isSameCoast
+        ? resetSelection()
+        : { ...resetSelection(), selectedCoast: coast };
+    });
+  }, []);
+
+  const handleReserveClick = useCallback((reserve: ReserveData | null) => {
+    setSelected((prev) => {
+      if (!reserve) return resetSelection();
+      const isSameReserve = prev.selectedReserve?.id === reserve.id;
+      return isSameReserve
+        ? resetSelection()
+        : { ...resetSelection(), selectedReserve: reserve };
+    });
+  }, []);
+
   const clearSelection = useCallback(() => {
     return resetSelection();
   }, []);
@@ -55,6 +83,8 @@ export const useGameBoardSelection = () => {
     handleTileClick,
     handleRoadClick,
     handleSettlementClick,
+    handleCoastClick,
+    handleReserveClick,
     clearSelection,
   };
 };

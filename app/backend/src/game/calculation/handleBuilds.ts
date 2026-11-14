@@ -1,16 +1,20 @@
-import type { Player } from 'shared';
 import {
   type GameBoard,
   type RoadData,
   type SettlementData,
   type GameBoardGraph,
+  type Player,
+  type BuildPayload,
   Faction,
-  Buildings,
+  BuildingsInGame,
+  SETTLEMENT_POINT,
+  CITY_POINT,
 } from 'shared';
-
-export type BuildRequestPayload =
-  | { kind: 'road'; id: string; data: RoadData }
-  | { kind: 'settlement'; id: string; data: SettlementData };
+import {
+  hasEnoughResourcesToBuild,
+  payBuildResources,
+} from './handleResources';
+import { crossroadRule } from './handleGameRules';
 
 /* ================================================================== *
  * INDEX UTILS
@@ -45,36 +49,33 @@ export const validateRoadPlacement = (
   ownerFaction: Faction,
   graph: GameBoardGraph,
 ): { valid: true } | { valid: false; reason: string } => {
-  if (road.hasOwner) {
-    //console.log(`👀⛔buildCheck:road: already occupied`);
-    return { valid: false, reason: 'road already occupied' };
+  if (road.ownerId) {
+    return { valid: false, reason: 'Road already owned by a player !' };
   }
 
   const settlementsByVertex = indexSettlementsByVertex([]);
   const graphEntry = graph.get(road.id);
 
   if (!graphEntry) {
-    //console.log(`👀⛔buildCheck:road: doesn't exists ...`);
-    return { valid: false, reason: 'unknown road' };
+    return { valid: false, reason: 'Unknown road ...' };
   }
   const endpoints = [road.edge.p1.id, road.edge.p2.id];
   let connectedToNetwork = false;
 
   for (const vertexId of endpoints) {
     const settlement = settlementsByVertex.get(vertexId);
-    if (settlement?.hasOwner && settlement.faction !== ownerFaction) {
-      //console.log(`👀⛔buildCheck:road: blocked by opponent`);
+    if (settlement?.ownerId && settlement.faction !== ownerFaction) {
       continue;
     }
 
-    if (settlement?.hasOwner && settlement.faction === ownerFaction) {
+    if (settlement?.ownerId && settlement.faction === ownerFaction) {
       connectedToNetwork = true;
       break;
     }
 
     const hasConnectionViaNeighbor = graphEntry.connectedRoads.some(
       (neighbor) =>
-        neighbor.hasOwner &&
+        neighbor.ownerId &&
         neighbor.faction === ownerFaction &&
         (neighbor.edge.p1.id === vertexId || neighbor.edge.p2.id === vertexId),
     );
@@ -85,23 +86,20 @@ export const validateRoadPlacement = (
     }
   }
 
-  const hasOwnAdjacentSettlement = graphEntry.adjacentSettlements.some(
-    (s) => s.hasOwner && s.faction === ownerFaction,
+  const hasOwnAdjacentSettlement = graphEntry.connectedSettlements.some(
+    (s) => s.ownerId && s.faction === ownerFaction,
   );
   if (!hasOwnAdjacentSettlement) {
     if (connectedToNetwork) {
-      //console.log(`👀✅buildCheck:road: is valid`);
       return { valid: true };
     }
   }
   if (!connectedToNetwork && !hasOwnAdjacentSettlement) {
-    //console.log(`👀⛔buildCheck:road: must be connected to network`);
     return {
       valid: false,
-      reason: 'road must be connected to network',
+      reason: 'A road must be connected to your network ...',
     };
   }
-  //console.log(`👀✅buildCheck:road: is valid`);
   return { valid: true };
 };
 
@@ -115,54 +113,72 @@ export const validateSettlementPlacement = (
   roads: RoadData[],
   placementPhase?: boolean,
 ): { valid: true } | { valid: false; reason: string } => {
-  if (settlement.hasOwner) {
-    //console.log(`👀⛔buildCheck:settlement: already occupied`);
+  if (settlement.ownerId) {
     return {
       valid: false,
-      reason: 'settlement already owned by another player',
+      reason: 'This settlement is already owned by a player !',
     };
   }
 
   const graphEntry = graph.get(settlement.id);
 
   if (!graphEntry) {
-    //console.log(`👀⛔buildCheck:settlement: doesn't exists ...`);
-    return { valid: false, reason: 'unknown settlement' };
+    return { valid: false, reason: 'Unknown settlement ...' };
   }
 
-  // Règle de distance : aucun sommet adjacent occupé (lu depuis le graph)
-  const nearbyOccupied = graphEntry.connectedSettlements.some(
-    (s) => s.hasOwner,
+  const nearbyOccupied = graphEntry.neighboursSettlements.some(
+    (s) => s.ownerId,
   );
   if (nearbyOccupied) {
-    //console.log(`👀⛔buildCheck:settlement: too close to another one`);
     return {
       valid: false,
-      reason: 'settlement too close to another one',
+      reason: 'Another settlement is too close !',
     };
   }
 
-  // Doit toucher une de ses propres routes
   const roadsByVertex = indexRoadsByVertex(roads);
   const adjacentRoads = roadsByVertex.get(settlement.vertex.id) ?? [];
   const hasOwnAdjacentRoad = adjacentRoads.some(
-    (r) => r.hasOwner && r.faction === ownerFaction,
+    (r) => r.ownerId && r.faction === ownerFaction,
   );
 
   if (!hasOwnAdjacentRoad && placementPhase === undefined) {
-    //console.log(`👀⛔buildCheck:settlement: must be connected`);
     return {
       valid: false,
-      reason: 'settlement must be connected to a road',
+      reason: 'A settlement must be connected to a road !',
     };
   }
-  //console.log(`👀✅buildCheck:settlement: is valid`);
   return { valid: true };
 };
 
 interface BuildValidation {
   valid: boolean;
   message: string;
+}
+
+function cityUpgradeCheck(
+  target: SettlementData,
+  player: Player,
+): BuildValidation {
+  if (target.isCity) {
+    return {
+      valid: false,
+      message: "Can't upgrade more, it's already a city !",
+    };
+  } else if (!hasEnoughResourcesToBuild(player.resources, 'city')) {
+    return {
+      valid: false,
+      message:
+        "You don't have enough resources to upgrade your settlement to a city ...",
+    };
+  }
+  player.victoryPoints += CITY_POINT;
+  target.isCity = true;
+  payBuildResources(player.resources, 'city');
+  return {
+    valid: true,
+    message: 'Settlement upgraded to a city !',
+  };
 }
 
 function settlementCheck(
@@ -172,6 +188,16 @@ function settlementCheck(
   player: Player,
   placementPhase?: boolean,
 ): BuildValidation {
+  if (
+    !placementPhase &&
+    !hasEnoughResourcesToBuild(player.resources, 'settlement')
+  ) {
+    return {
+      valid: false,
+      message: "You don't have enough resources to build a settlement ...",
+    };
+  }
+
   const settlementResult = validateSettlementPlacement(
     target,
     player.faction,
@@ -179,37 +205,22 @@ function settlementCheck(
     board.roads,
     placementPhase,
   );
-  if (
-    !placementPhase &&
-    player.ressources.brick < 1 &&
-    player.ressources.wood < 1 &&
-    player.ressources.sheep < 1 &&
-    player.ressources.hay < 1
-  ) {
-    //console.log(`👀⛔buildCheck:settlement: not enough ressources`);
-    return {
-      valid: false,
-      message: 'not enough ressources',
-    };
-  }
+
   if (!settlementResult.valid) {
-    //console.log(`👀⛔buildCheck:settlement: invalid, element doesn't exist`);
     return {
       valid: false,
       message: settlementResult.reason,
     };
   }
+  player.victoryPoints += SETTLEMENT_POINT;
   target.faction = player.faction;
-  target.hasOwner = true;
+  target.ownerId = player.playerId;
   if (!placementPhase) {
-    player.ressources.brick--;
-    player.ressources.wood--;
-    player.ressources.sheep--;
-    player.ressources.hay--;
+    payBuildResources(player.resources, 'settlement');
   }
   return {
     valid: true,
-    message: 'valid settlement',
+    message: 'Settlement built !',
   };
 }
 
@@ -219,18 +230,15 @@ function roadCheck(
   player: Player,
   placementPhase?: boolean,
 ): BuildValidation {
-  const roadResult = validateRoadPlacement(target, player.faction, graph);
-  if (
-    !placementPhase &&
-    player.ressources.brick < 1 &&
-    player.ressources.wood < 1
-  ) {
-    //console.log(`👀⛔buildCheck:road: not enough ressources`);
+  if (!placementPhase && !hasEnoughResourcesToBuild(player.resources, 'road')) {
     return {
       valid: false,
-      message: 'not enough ressources',
+      message: "You don't have enough resources to build a road ...",
     };
   }
+
+  const roadResult = validateRoadPlacement(target, player.faction, graph);
+
   if (!roadResult.valid) {
     return {
       valid: false,
@@ -238,46 +246,55 @@ function roadCheck(
     };
   }
   target.faction = player.faction;
-  target.hasOwner = true;
+  target.ownerId = player.playerId;
   if (!placementPhase) {
-    player.ressources.brick--;
-    player.ressources.wood--;
+    payBuildResources(player.resources, 'road');
   }
   return {
     valid: true,
-    message: 'valid road',
+    message: 'Road built !',
   };
 }
 
 export const buildCheck = (
-  payload: BuildRequestPayload,
+  payload: BuildPayload,
   player: Player,
   board: GameBoard,
   graph: GameBoardGraph,
-  buildings: Buildings,
+  buildings: BuildingsInGame,
   placementPhase?: boolean,
 ): { valid: boolean; message: string } => {
   let check: BuildValidation = { valid: false, message: '' };
   try {
-    if ((payload.data as { id?: unknown })?.id !== payload.id) {
-      return {
-        valid: false,
-        message: 'incoherent data payload id',
-      };
-    }
     let target: RoadData | SettlementData | undefined;
     switch (payload.kind) {
       case 'road':
         target = board.roads.find((r) => r.id === payload.id);
         if (!target) break;
         check = roadCheck(target, graph, player, placementPhase);
-        if (check.valid) player.roadsBuilt++;
+        if (check.valid) {
+          player.roadsBuilt++;
+          if (crossroadRule(target, graph)) {
+            player.victoryPoints++;
+            return {
+              valid: true,
+              message:
+                "Road built and 'Crossroad' objective achieved, you earn one bonus victory point!",
+            };
+          }
+        }
         break;
       case 'settlement':
         target = board.settlements.find((r) => r.id === payload.id);
         if (!target) break;
-        check = settlementCheck(board, target, graph, player, placementPhase);
-        if (check.valid) player.settlementsBuilt++;
+        if (!target.ownerId) {
+          check = settlementCheck(board, target, graph, player, placementPhase);
+          if (check.valid) player.settlementsBuilt.set(target.id, target);
+        } else if (target.ownerId == player.playerId) {
+          check = cityUpgradeCheck(target, player);
+        } else {
+          check.message = 'This settlement is owned by another player.';
+        }
         break;
       default:
         break;
@@ -288,12 +305,8 @@ export const buildCheck = (
       message: error instanceof Error ? error.message : 'unknown error',
     };
   }
-  if (check.valid) {
+  if (check.valid && !buildings.has(payload.id)) {
     buildings.set(payload.id, player);
-    return check;
   }
-  return {
-    valid: false,
-    message: 'invalid element',
-  };
+  return check;
 };

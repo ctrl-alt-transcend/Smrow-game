@@ -9,7 +9,7 @@ import {
 } from "shared";
 
 /** @description render tile color based on state, land type or faction */
-export const getTileFillColor = (
+export const getFillColor = (
   landType: LandType | null,
   faction: Faction | null,
   isSelected: boolean,

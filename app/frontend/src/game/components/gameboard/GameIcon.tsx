@@ -1,0 +1,499 @@
+import { useHover } from "../../hooks/useGameBoardHover";
+import { HOVER_COLOR, SAND_WIDTH } from "shared";
+import type { ReserveProps } from "../../types/gameboard.types";
+import traderUrl from "../../assets/ShnekTheTrader.svg";
+
+interface ReserveIconArtProps {
+  /** true → subtle glow outline (selection feedback) */
+  highlighted: boolean;
+  x: number;
+  y: number;
+}
+
+const ReserveIconArt: React.FC<ReserveIconArtProps> = ({
+  highlighted,
+  x,
+  y,
+}) => (
+  <g strokeWidth={1.6} strokeLinejoin="round">
+    <image
+      href={traderUrl}
+      x={x}
+      y={y}
+      width={90}
+      height={60}
+      style={{ filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.4))" }}
+    />
+
+    {highlighted && (
+      <circle
+        cx={x + 43}
+        cy={y + 29}
+        r={36}
+        fill="none"
+        stroke={HOVER_COLOR}
+        strokeWidth={2.5}
+        strokeDasharray="6,4"
+        opacity={0.8}
+        pointerEvents="none"
+      />
+    )}
+  </g>
+);
+
+export const ReserveIcon: React.FC<ReserveProps> = ({
+  data,
+  isSelected,
+  isHovered,
+  onHoverChange,
+  onClick,
+}) => {
+  const {
+    isHovered: effectiveIsHovered,
+    onMouseEnter,
+    onMouseLeave,
+  } = useHover(isHovered, onHoverChange);
+
+  return (
+    <g
+      transform={`translate(${data.position.x}, ${data.position.y})`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(data);
+      }}
+      style={{ cursor: "pointer" }}
+    >
+      {/* invisible generous hit area */}
+      <circle r={38} fill="transparent" x={-30} y={20} />
+      <ReserveIconArt
+        highlighted={isSelected || effectiveIsHovered}
+        x={-30}
+        y={10}
+      />
+    </g>
+  );
+};
+
+const DOCK_COLOR = "#8b6e4b";
+const DOCK_SHADOW = "#5a4630";
+const LOG_DARK = "#6b4a2b";
+const LOG_LIGHT = "#7d5834";
+const BEAM = "#4a3018";
+const PLASTER = "#cfa878";
+const ROOF = "#8a5a33";
+const STONE = "#8f8f94";
+const STONE_DARK = "#6e6e73";
+const SHADOW = "rgba(0, 0, 0, 0.35)";
+const FLAG_POLE = "#3d2a15";
+
+interface GoblinIconProps {
+  flagColor: string;
+}
+
+/** flag */
+export const FactionFlag: React.FC<{
+  flagColor: string;
+  x: number;
+  y: number;
+}> = ({ flagColor, x, y }) => (
+  <g>
+    {/* mast */}
+    <line
+      x1={x}
+      y1={y}
+      x2={x}
+      y2={y + 10}
+      stroke={FLAG_POLE}
+      strokeWidth={1.2}
+    />
+    {/* knob */}
+    <circle
+      cx={x}
+      cy={y}
+      r={1.2}
+      fill="#8b6e4b"
+      stroke="#3d2a15"
+      strokeWidth={0.5}
+    />
+    {/* fanion */}
+    <polygon
+      points={`${x},${y + 1} ${x + 9},${y + 3} ${x},${y + 5.5}`}
+      fill={flagColor}
+      stroke="#1a1a1a"
+      strokeWidth={0.7}
+    />
+  </g>
+);
+
+interface PortIconProps {
+  p1: { x: number; y: number };
+  p2: { x: number; y: number };
+  normal: { x: number; y: number };
+  flagColor: string;
+}
+
+export const PortIcon: React.FC<PortIconProps> = ({
+  p1,
+  p2,
+  normal,
+  flagColor,
+}) => {
+  const midX = (p1.x + p2.x) / 2;
+  const midY = (p1.y + p2.y) / 2;
+
+  return (
+    <g
+      transform={`translate(${midX + normal.x * (SAND_WIDTH / 2)}, ${
+        midY + normal.y * (SAND_WIDTH / 2)
+      }) rotate(${(Math.atan2(normal.y, normal.x) * 180) / Math.PI})`}
+      pointerEvents="none"
+    >
+      {/* platform in the sand */}
+      <rect
+        x={-2}
+        y={-4}
+        width={20}
+        height={8}
+        rx={1}
+        fill={DOCK_COLOR}
+        stroke={DOCK_SHADOW}
+        strokeWidth={0.7}
+      />
+      {/* boards */}
+      <line
+        x1={0}
+        y1={-4}
+        x2={0}
+        y2={4}
+        stroke={DOCK_SHADOW}
+        strokeWidth={0.5}
+        opacity={0.6}
+      />
+      <line
+        x1={5}
+        y1={-4}
+        x2={5}
+        y2={4}
+        stroke={DOCK_SHADOW}
+        strokeWidth={0.5}
+        opacity={0.6}
+      />
+      <line
+        x1={10}
+        y1={-4}
+        x2={10}
+        y2={4}
+        stroke={DOCK_SHADOW}
+        strokeWidth={0.5}
+        opacity={0.6}
+      />
+      <line
+        x1={15}
+        y1={-4}
+        x2={15}
+        y2={4}
+        stroke={DOCK_SHADOW}
+        strokeWidth={0.5}
+        opacity={0.6}
+      />
+      {/* stilts on the seaside */}
+      <line
+        x1={21}
+        y1={-2.5}
+        x2={17.5}
+        y2={-2.5}
+        stroke={DOCK_SHADOW}
+        strokeWidth={1.2}
+      />
+      <line
+        x1={21}
+        y1={2.5}
+        x2={17.5}
+        y2={2.5}
+        stroke={DOCK_SHADOW}
+        strokeWidth={1.2}
+      />
+      <FactionFlag flagColor={flagColor} x={14} y={-12} />
+    </g>
+  );
+};
+
+const GroundBaseShadow: React.FC<{ x: number; y: number; radius: number }> = ({
+  x,
+  y,
+  radius,
+}) => (
+  <ellipse cx={x} cy={y} rx={radius} ry={2.8} fill={SHADOW} opacity={0.6} />
+);
+
+const SpikeBarricade: React.FC<{ x: number; groundY: number }> = ({
+  x,
+  groundY,
+}) => {
+  const logs: [number, number][] = [
+    [0, 7],
+    [3, 9],
+    [6, 6.5],
+    [9, 8.5],
+    [12, 7],
+  ];
+  return (
+    <g>
+      {logs.map(([ox, h], i) => {
+        const baseX = x + ox;
+        const tipY = groundY - h;
+        const bodyTop = groundY - h + 2.5;
+        return (
+          <path
+            key={i}
+            d={`M${baseX},${groundY} V${bodyTop} L${baseX + 1.4},${tipY} L${baseX + 2.8},${bodyTop} V${groundY} Z`}
+            fill={i % 2 === 0 ? LOG_DARK : LOG_LIGHT}
+            stroke="#3d2a15"
+            strokeWidth={0.5}
+          />
+        );
+      })}
+      <rect
+        x={x - 1}
+        y={groundY - 4}
+        width={14.5}
+        height={2}
+        fill="#5a3a21"
+        stroke="#3d2a15"
+        strokeWidth={0.5}
+      />
+    </g>
+  );
+};
+
+const SmallHut: React.FC<{ x: number; groundY: number }> = ({ x, groundY }) => (
+  <g>
+    <rect
+      x={x - 3}
+      y={groundY - 6}
+      width={7}
+      height={6}
+      fill={PLASTER}
+      stroke={BEAM}
+      strokeWidth={0.6}
+    />
+    <polygon
+      points={`${x - 5},${groundY - 4} ${x + 0.5},${groundY - 10} ${x + 6},${groundY - 4}`}
+      fill={ROOF}
+      stroke={BEAM}
+      strokeWidth={0.8}
+    />
+    <rect x={x + 0.5} y={groundY - 3} width={2.5} height={3} fill="#2a1a0a" />
+  </g>
+);
+
+export const GoblinSettlementIcon: React.FC<GoblinIconProps> = ({
+  flagColor,
+}) => (
+  <g>
+    <FactionFlag x={-4} y={-17} flagColor={flagColor} />
+    <GroundBaseShadow x={0} y={9.5} radius={19} />
+    <rect
+      x={-9}
+      y={-2}
+      width={10}
+      height={9}
+      fill={PLASTER}
+      stroke={BEAM}
+      strokeWidth={0.8}
+    />
+    <line x1={-6} y1={-2} x2={-6} y2={7} stroke={BEAM} strokeWidth={1} />
+    <line x1={-2.5} y1={-2} x2={-2.5} y2={7} stroke={BEAM} strokeWidth={1} />
+    <line x1={-9} y1={2.5} x2={1} y2={2.5} stroke={BEAM} strokeWidth={0.8} />
+    <line x1={-6} y1={2.5} x2={-2.5} y2={-2} stroke={BEAM} strokeWidth={0.8} />
+    <polygon
+      points="-11,-2 -4,-10 3,-2"
+      fill={ROOF}
+      stroke={BEAM}
+      strokeWidth={0.8}
+    />
+    <rect x={-4.5} y={2.5} width={4} height={4.5} fill="#3a2510" />
+    <rect
+      x={-1.5}
+      y={-7}
+      width={2}
+      height={4}
+      fill="#6b4a2b"
+      stroke="#3d2a15"
+      strokeWidth={0.5}
+    />
+    <SmallHut x={-13} groundY={9} />
+    <SmallHut x={11} groundY={9} />
+    <SpikeBarricade x={-2} groundY={12} />
+  </g>
+);
+
+const RusticStoneWall: React.FC<{
+  x: number;
+  groundY: number;
+  width: number;
+}> = ({ x, groundY, width }) => {
+  const merlons = [0, 1, 3, 4, 6, 7, 9];
+  const merlonW = width / 10;
+  return (
+    <g>
+      <rect
+        x={x}
+        y={groundY - 6}
+        width={width}
+        height={6}
+        fill={STONE}
+        stroke={STONE_DARK}
+        strokeWidth={0.6}
+      />
+      {merlons.map((m) => (
+        <rect
+          key={m}
+          x={x + m * merlonW + (m % 2 === 0 ? 0 : 0.4)}
+          y={groundY - 8}
+          width={merlonW * 0.7}
+          height={2}
+          fill={STONE}
+          stroke={STONE_DARK}
+          strokeWidth={0.6}
+        />
+      ))}
+      <line
+        x1={x}
+        y1={groundY - 3.5}
+        x2={x + width}
+        y2={groundY - 3.5}
+        stroke={STONE_DARK}
+        strokeWidth={0.5}
+        opacity={0.7}
+      />
+      <line
+        x1={x + width * 0.3}
+        y1={groundY - 6}
+        x2={x + width * 0.3}
+        y2={groundY - 3.5}
+        stroke={STONE_DARK}
+        strokeWidth={0.5}
+        opacity={0.7}
+      />
+      <line
+        x1={x + width * 0.65}
+        y1={groundY - 3.5}
+        x2={x + width * 0.65}
+        y2={groundY}
+        stroke={STONE_DARK}
+        strokeWidth={0.5}
+        opacity={0.7}
+      />
+    </g>
+  );
+};
+
+export const GoblinCityIcon: React.FC<GoblinIconProps> = ({ flagColor }) => (
+  <g>
+    <GroundBaseShadow x={0} y={11} radius={20} />
+    <FactionFlag x={0} y={-24} flagColor={flagColor} />
+    {/* main body */}
+    <rect
+      x={-7}
+      y={-6}
+      width={14}
+      height={16}
+      fill={PLASTER}
+      stroke={BEAM}
+      strokeWidth={0.8}
+    />
+    {/* side wings with thatched/wooden roofs */}
+    <rect
+      x={-14}
+      y={-1}
+      width={7}
+      height={10}
+      fill={PLASTER}
+      stroke={BEAM}
+      strokeWidth={0.8}
+    />
+    <polygon
+      points="-14.5,-1 -10.5,-6 -6.5,-1"
+      fill={ROOF}
+      stroke={BEAM}
+      strokeWidth={0.8}
+    />
+    <rect
+      x={7}
+      y={-1}
+      width={7}
+      height={10}
+      fill={PLASTER}
+      stroke={BEAM}
+      strokeWidth={0.8}
+    />
+    <polygon
+      points="6.5,-1 10.5,-6 14.5,-1"
+      fill={ROOF}
+      stroke={BEAM}
+      strokeWidth={0.8}
+    />
+
+    {/* dome at the top */}
+    <path
+      d="M-7,-6 A7,7 0 0 1 7,-6 Z"
+      fill="#9aa0a6"
+      stroke={STONE_DARK}
+      strokeWidth={0.8}
+    />
+    {/* dome ribs */}
+    <line
+      x1={0}
+      y1={-13}
+      x2={0}
+      y2={-6}
+      stroke={STONE_DARK}
+      strokeWidth={0.6}
+      opacity={0.8}
+    />
+    <line
+      x1={-4}
+      y1={-11.5}
+      x2={-2.5}
+      y2={-6}
+      stroke={STONE_DARK}
+      strokeWidth={0.6}
+      opacity={0.8}
+    />
+    <line
+      x1={4}
+      y1={-11.5}
+      x2={2.5}
+      y2={-6}
+      stroke={STONE_DARK}
+      strokeWidth={0.6}
+      opacity={0.8}
+    />
+    {/* lantern at the top of the dome */}
+    <rect
+      x={-1.5}
+      y={-15.5}
+      width={3}
+      height={3}
+      fill={STONE}
+      stroke={STONE_DARK}
+      strokeWidth={0.6}
+    />
+    <polygon
+      points="-1.5,-15.5 0,-17.5 1.5,-15.5"
+      fill={ROOF}
+      stroke={BEAM}
+      strokeWidth={0.6}
+    />
+
+    {/* black arched door */}
+    <path d="M-3.5,10 V5 A3.5,3.5 0 0 1 3.5,5 V10 Z" fill="#1e1410" />
+
+    {/* rustic stone wall in front */}
+    <RusticStoneWall x={-17} groundY={11} width={12} />
+    <RusticStoneWall x={5} groundY={11} width={12} />
+  </g>
+);
