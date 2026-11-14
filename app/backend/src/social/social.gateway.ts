@@ -54,7 +54,7 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   //   return 'Hello world!';
   // }
 
-  handleGameList(game: GameList) {
+  handleGameList(game: GameList[]) {
     this.server.to('gameList').emit('game list update', game);
   }
 

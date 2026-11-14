@@ -11,7 +11,7 @@ import {
   Button,
 } from "@mantine/core";
 import MessageItem from "./MessageItem";
-import type { ChatMessage } from "@shared/types";
+import type { ChatMessage } from "shared";
 
 export default function Chat() {
   const [draft, setDraft] = useState("");

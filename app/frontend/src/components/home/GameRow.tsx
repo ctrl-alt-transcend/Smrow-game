@@ -1,5 +1,5 @@
 import { Table, Button } from "@mantine/core";
-import type { GameList } from "@shared/game/game.types";
+import type { GameList } from "shared";
 
 type GameRowProps = {
   game: GameList;
@@ -9,8 +9,8 @@ const maxPlayers = 4;
 
 export default function GameRow({ game }: GameRowProps) {
   const isFull = game.playerCount >= maxPlayers;
-  const gameStart = game.state !== "waiting for players";
-  const variant = !gameStart ? "default" : "filled";
+  const gameStart = game.state !== "pending players";
+  const variant = gameStart ? "default" : "filled";
 
   return (
     <Table.Tr>
@@ -18,10 +18,10 @@ export default function GameRow({ game }: GameRowProps) {
       <Table.Td>
         {game.playerCount}/{maxPlayers}
       </Table.Td>
-      <Table.Td>{!gameStart ? "Game Started" : "Waiting for players"}</Table.Td>
+      <Table.Td>{gameStart ? "Game Started" : "Waiting for players"}</Table.Td>
       <Table.Td>
         <Button disabled={gameStart && isFull} variant={variant} miw={100}>
-          {!gameStart ? "Spectate" : "Join"}
+          {gameStart ? "Spectate" : "Join"}
         </Button>
       </Table.Td>
     </Table.Tr>

@@ -70,9 +70,3 @@ export type BuildRequestPayload =
   | { kind: 'road';       id: string; data: RoadData }
   | { kind: 'settlement'; id: string; data: SettlementData };
 
-export type GameList = {
-  gameId: string,
-  playerCount: number, 
-  state: string, //FIX: CHANGE THIS FOR A `Phase` TYPE LATER
-}
-

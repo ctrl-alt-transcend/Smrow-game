@@ -40,11 +40,6 @@ export class GameService {
     this.gameInstances.set(gameId, game);
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
-    this.socialGateway.handleGameList({
-      gameId: gameId,
-      playerCount: 1,
-      state: 'pending players',
-    });
   }
 
   joinGame(playerProfile: PlayerProfile, gameId: string) {
@@ -101,5 +96,6 @@ export class GameService {
     game
       .getPlayers()
       .set(playerProfile.username, game.initPlayer(playerProfile.username));
+    this.socialGateway.handleGameList(this.getGamesList());
   }
 }

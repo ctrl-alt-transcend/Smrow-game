@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { socialSocket as socket } from "../../sockets/socialSocket";
 import { http } from "../../services/http";
 import { Title, Text, Paper, Table } from "@mantine/core";
-import type { GameList } from "@shared/game/game.types";
+import type { GameList } from "shared";
 import GameRow from "./GameRow";
 
 export default function GameList() {
@@ -20,12 +20,12 @@ export default function GameList() {
         setGames(gameList);
         setLoaded(true);
       } catch (error) {
-        console.error("Failed to fetch chat history with error - ", error);
+        console.error("Failed to fetch games - ", error);
       }
     };
 
-    const onGameListUpdate = (game: GameList[]) => {
-      return games.concat(game);
+    const onGameListUpdate = (gameList: GameList[]) => {
+      setGames(gameList);
     };
 
     socket.emit("joinGameList");
@@ -37,7 +37,7 @@ export default function GameList() {
       socket.off("game list update", onGameListUpdate);
       socket.emit("leaveGameList");
     };
-  });
+  }, []);
 
   return (
     <Paper withBorder p="md" mih={600} h="100%">
