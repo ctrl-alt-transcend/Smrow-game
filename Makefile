@@ -11,6 +11,7 @@ MIGRATION_NAME ?= init
 FRONTEND_DIR=./app/frontend
 BACKEND_DIR=./app/backend
 SHARED_DIR=./app/shared
+DIST_DIR=./app/shared/dist
 APP_DIR=./app
 
 all: up
@@ -37,6 +38,7 @@ watch: up
 
 # Build shared for dev
 shared:
+	rm -rf $(DIST_DIR)
 	cd $(APP_DIR) && npm run build:shared
 
 down:
@@ -83,7 +85,7 @@ secrets:
 fclean: down
 	docker compose -f $(DOCKER_COMPOSE_FILE) down --rmi all --volumes --remove-orphans
 
-re: fclean
+re: fclean shared
 	docker compose -f $(DOCKER_COMPOSE_FILE) build --no-cache
 	$(MAKE) up
 	$(MAKE) initdb

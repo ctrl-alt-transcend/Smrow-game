@@ -1,4 +1,4 @@
-import { CROSSROADS_RULE, type GameBoardGraph, RoadData } from 'shared';
+import { CROSSROAD_RULE, type GameBoardGraph, RoadData } from 'shared';
 
 /**
  * Cross Roads custom rule: a settlement surrounded by 3 owned roads
@@ -19,7 +19,7 @@ export function crossroadRule(road: RoadData, graph: GameBoardGraph): boolean {
     const ownedRoads = entry!.connectedRoads.filter(
       (r) => r.ownerId === road.ownerId,
     ).length;
-    if (ownedRoads == CROSSROADS_RULE) {
+    if (ownedRoads == CROSSROAD_RULE) {
       settlement.data.isCrossroad = true;
       return true;
     }

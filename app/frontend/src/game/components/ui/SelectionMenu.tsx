@@ -15,13 +15,11 @@ import { modals } from "@mantine/modals";
 import { useSelectionDisplay } from "../../hooks/useSelectionDisplay.ts";
 import type { GameBoardSelection } from "../../types/gameboard.types.tsx";
 import {
-  GENERIC_PORT_RATE,
-  SPECIAL_PORT_RATE,
-  RESERVE_RATE,
   ResourceType,
   type BuildPayload,
   type TradePayload,
   type TraderType,
+  type SettingsData,
 } from "shared";
 import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 
@@ -425,15 +423,17 @@ const SelectionItems: React.FC<SelectionItemsProps> = ({
  * SelectionMenu : main component, dispatch by selection kind
  * ================================================================== */
 interface SelectionMenuProps {
-  selected: GameBoardSelection;
-  masterLog?: string | null;
-  onBuilt?: (target: BuildPayload) => void;
-  currentPlayerId?: string | null;
   isMyTurn: boolean;
+  selected: GameBoardSelection;
+  settings: SettingsData;
+  masterLog?: string | null;
+  currentPlayerId?: string | null;
+  onBuilt?: (target: BuildPayload) => void;
 }
 
 export const SelectionMenu: React.FC<SelectionMenuProps> = ({
   selected,
+  settings,
   masterLog = null,
   onBuilt,
   isMyTurn,
@@ -451,7 +451,6 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
   const renderActionArea = () => {
     const turnFlag = { isMyTurn };
 
-    // 1. COAST: bank trade through a port
     if (selected.selectedCoast) {
       const { port } = selected.selectedCoast;
 
@@ -463,20 +462,19 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
         );
       }
       if (port && port.type === "generic") {
-        // Generic port: 3 offer : 1 target — offer resource freely chosen
         return (
           <TradeOfferPanel
-            ratio={GENERIC_PORT_RATE}
+            ratio={settings.genericPortRate}
             sourceId={port.coastId}
             sourceKind="generic port"
             {...turnFlag}
           />
         );
       }
-      // Specialized port: 2 (locked resource) : 1 target
+
       return (
         <TradeOfferPanel
-          ratio={SPECIAL_PORT_RATE}
+          ratio={settings.specialPortRate}
           offerLockedResource={port.type as ResourceType}
           sourceId={port.coastId}
           sourceKind="specialized port"
@@ -485,12 +483,8 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
       );
     }
 
-    // 2. TILE: information only, no construction action
-    if (selected.selectedTile) {
-      return null;
-    }
+    if (selected.selectedTile) return null;
 
-    // 3. ROAD: informations display and build options
     if (selected.selectedRoad) {
       return (
         <BuildSelectionButton
@@ -502,7 +496,6 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
       );
     }
 
-    // 4. SETTLEMENT: informations display and build options
     if (selected.selectedSettlement) {
       return (
         <BuildSelectionButton
@@ -514,11 +507,10 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
       );
     }
 
-    // 5. RESERVE: 4 offer : 1 target — offer resource freely chosen
     if (selected.selectedReserve) {
       return (
         <TradeOfferPanel
-          ratio={RESERVE_RATE}
+          ratio={settings.reserveRate}
           sourceId={selected.selectedReserve.id}
           sourceKind="reserve"
           {...turnFlag}

@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { ZGEG_DEV, type PlayerProfile } from 'shared';
-import { GameStateContext, WhoStartsPhase } from './GameStateContext';
+import { GameStateContext, StartPhase } from './GameStateContext';
 
 @Injectable()
 export class GameService {
@@ -26,7 +26,7 @@ export class GameService {
 
     this.gameInstances.set(
       gameId,
-      new GameStateContext(gameId, new WhoStartsPhase()),
+      new GameStateContext(gameId, new StartPhase()),
     ); // v.2
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);

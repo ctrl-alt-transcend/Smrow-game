@@ -15,11 +15,12 @@ export const SPECIAL_PORT_RATE_DFLT = 2;
 export const GENERIC_PORT_RATE_DFLT = 3;
 export const RESERVE_RATE_DFLT = 4;
 
+export const ROAD_POINT_DFLT = 0;
 export const SETTLEMENT_POINT_DFLT = 1;
 export const CITY_POINT_DFLT = 1;
 export const POINTS_TO_WIN_DFLT = 10;
-export const CROSSROADS_RULE_DFLT = 3;
 
+export const CROSSROAD_RULE = 3;
 export const ROBBER_ROLL = 7;
 
 export const SettingsDataSchema = z.object({
@@ -39,13 +40,25 @@ export const SettingsDataSchema = z.object({
 
   // Victory Points settings
   /** Amount of points earned by building a road */
-  roadVictoryPoints: z.number().int().nonnegative().min(0).max(10),
+  roadPoints: z.number().int().nonnegative().min(0).max(10),
   /** Amount of points earned by building a settlement */
-  settlementVictoryPoints: z.number().int().nonnegative().min(1).max(10),
+  settlementPoints: z.number().int().nonnegative().min(1).max(10),
   /** Amount of points earned by building a city */
-  cityVictoryPoints: z.number().int().nonnegative().min(0).max(10),
+  cityPoints: z.number().int().nonnegative().min(0).max(10),
   /** Amount of points to win the game */
   pointsToWin: z.number().int().nonnegative().min(0).max(1000),
+
+  // Bonus settings
+  /** Amount of wood to start the game with*/
+  woodBonus: z.number().int().nonnegative().min(0).max(1000),
+  /** Amount of sheep to start the game with*/
+  sheepBonus: z.number().int().nonnegative().min(0).max(1000),
+  /** Amount of brick to start the game with*/
+  brickBonus: z.number().int().nonnegative().min(0).max(1000),
+  /** Amount of ore to start the game with*/
+  oreBonus: z.number().int().nonnegative().min(0).max(1000),
+  /** Amount of wheat to start the game with*/
+  wheatBonus: z.number().int().nonnegative().min(0).max(1000),
 });
 export type SettingsData = z.infer<typeof SettingsDataSchema>;
 
@@ -343,6 +356,7 @@ export type GameDataBase = {
 export type GameDataDto  = GameDataBase & {
   players: Player[];
   currentPlayer: PlayerDto;
+  settings: SettingsData;
 }
 
 export type GameData = GameDataBase & {
@@ -392,7 +406,6 @@ export type PlayerBase = {
   firstDice: number,
   secondDice: number,
   currentRoll: DiceRoll,
-  roadsBuilt: number;
   faction: Faction;
   avatarURL: string | null;
   personalLog: GameLog;
