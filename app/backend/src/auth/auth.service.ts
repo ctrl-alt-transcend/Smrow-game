@@ -18,12 +18,14 @@ import {
   PasswordSchema,
   LoginResponse,
 } from 'shared';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly JwtService: JwtService,
+    private readonly databaseService: DatabaseService,
   ) {}
 
   async signUp(recvData: RegisterPost): Promise<RegisterResponse> {
@@ -75,15 +77,93 @@ export class AuthService {
     return PasswordSchema.parse(hash);
   }
 
-  /*
-   * @brief:   Create a JWT token for the given user
-   * @details: the payload is the visible part of the token, it contains the userId and username
+  /**
+   * @brief :   Create a JWT token for the given user
+   * @details : the payload is the visible part of the token, it contains the userId and username
    */
-  private async createJWTToken(
+  async createJWTToken(
     user: Pick<UserPublic, 'id' | 'username'>,
   ): Promise<JwtToken> {
     const payload: JwtPayload = { sub: user.id, username: user.username };
     const access_token: string = await this.JwtService.signAsync(payload);
     return JwtTokenSchema.parse(access_token);
+  }
+
+  /**
+   * @brief  Service used by the google Strategy, will validate, if the user exists in the db and create it if not
+   * If the user info returned by google OAuth
+   * is or not registered in the platform and it will create a new user if not.
+   * If the user has already a local account with the same email, it will create a google-account
+   * and link both profiles
+   * @param googleUser as data we will receive from the strategy.
+   * @returns the user information
+   */
+  async validateGoogleUser(googleUser: {
+    googleId: string;
+    email: string;
+    name: string;
+    emailVerified: boolean;
+  }) {
+    {
+      const account = await this.databaseService.account.findUnique({
+        where: {
+          provider_providerAccountId: {
+            provider: 'google',
+            providerAccountId: googleUser.googleId,
+          },
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      // check google register exists
+
+      if (account) {
+        return account.user;
+      }
+
+      const existingUser = await this.databaseService.user.findUnique({
+        where: {
+          email: googleUser.email,
+        },
+      });
+
+      // check if user mail was already registered and link to google account
+      if (existingUser) {
+        await this.databaseService.account.create({
+          data: {
+            provider: 'google',
+            providerAccountId: googleUser.googleId,
+            userId: existingUser.id,
+          },
+        });
+        return existingUser;
+      }
+
+      // when no registers exist, create the account and user with an Interactive Transaction
+      // this executes the user and account creation safely, if one fails it rolls back all.
+      // $transaction( async (tx) => {...} )
+
+      await this.databaseService.$transaction(async (tx) => {
+        const user = tx.user.create({
+          data: {
+            email: googleUser.email,
+            username: `google_${googleUser.googleId}`,
+            name: googleUser.name,
+          },
+        });
+
+        await tx.account.create({
+          data: {
+            provider: 'google',
+            providerAccountId: googleUser.googleId,
+            userId: (await user).id,
+          },
+        });
+
+        return user;
+      });
+    }
   }
 }
