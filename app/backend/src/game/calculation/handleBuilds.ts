@@ -6,7 +6,6 @@ import {
   type Player,
   type BuildPayload,
   Faction,
-  BuildingsInGame,
   SETTLEMENT_POINT,
   CITY_POINT,
 } from 'shared';
@@ -15,6 +14,12 @@ import {
   payBuildResources,
 } from './handleResources';
 import { crossroadRule } from './handleGameRules';
+
+/**
+ * @key settlement id
+ * @value player who built
+ */
+export type BuildingsInGame = Map<string, Player>;
 
 /* ================================================================== *
  * INDEX UTILS

@@ -1,7 +1,4 @@
 import {
-  type GameBoard,
-  type GameBoardGraph,
-  BuildingsInGame,
   Faction,
   Action,
   Phase,
@@ -9,7 +6,6 @@ import {
   ResourceType,
   classicLayout,
   POINTS_TO_WIN,
-  SettlementData,
   ROBBER_ROLL,
   FACTION_COLORS,
   GUIDE_LOG,
@@ -20,8 +16,11 @@ import {
   YOU_DIDNT_ROLLED,
 } from 'shared';
 import type {
+  GameBoard,
+  GameBoardGraph,
   GameData,
   GameDataDto,
+  SettlementData,
   Player,
   BuildPayload,
   TradePayload,
@@ -30,7 +29,7 @@ import type {
   DiceRoll,
 } from 'shared';
 import { updateValue, funnyRollLog } from './game.utils';
-import { buildCheck } from './calculation/handleBuilds';
+import { buildCheck, BuildingsInGame } from './calculation/handleBuilds';
 import { createGameBoard } from './calculation/createGameBoard';
 import { tradeCheck } from './calculation/handleTrade';
 import { NotFoundException } from '@nestjs/common';
@@ -402,7 +401,7 @@ class GameStateContext {
         endGame = true;
         return;
       }
-      if (player.victoryPoints === POINTS_TO_WIN) {
+      if (player.victoryPoints >= POINTS_TO_WIN) {
         this.setVictory(
           player.playerId,
           `won by earning ${player.victoryPoints} victory points !`,
