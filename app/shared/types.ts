@@ -35,3 +35,16 @@ export type JwtToken = z.infer<typeof JwtTokenSchema>;
 
 export const AvatarUrlSchema = z.url().optional();
 export type avatarURL = z.infer<typeof AvatarUrlSchema>;
+
+export type ChatMessage = {
+  id: number;
+  date: number;
+  content: string;
+  username: string;
+}
+
+export type GameList = {
+  gameId: string,
+  playerCount: number, 
+  state: string, //FIX: CHANGE THIS FOR A `Phase` TYPE LATER
+}

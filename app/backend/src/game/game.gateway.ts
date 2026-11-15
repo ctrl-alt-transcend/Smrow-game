@@ -15,25 +15,24 @@ import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
 import { GameStateContext } from './GameStateContext';
-import { instrument } from '@socket.io/admin-ui'; //WARN: dev only
 import { parseCookie } from 'cookie';
 
-export interface SocketUser {
+interface SocketUser {
   id: string;
   username: string;
 }
 
-export interface SocketData {
+interface SocketData {
   user: SocketUser;
 }
 
-export type SocketServer = Server<
+type SocketServer = Server<
   DefaultEventsMap,
   DefaultEventsMap,
   DefaultEventsMap,
   SocketData
 >;
-export type SocketClient = Socket<
+type SocketClient = Socket<
   DefaultEventsMap,
   DefaultEventsMap,
   DefaultEventsMap,
@@ -146,9 +145,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     }
   }
 
-  afterInit(server: SocketServer) {
+  async afterInit(server: SocketServer) {
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
+      const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
       instrument(this.server, {
         auth: false,
         mode: 'development',
