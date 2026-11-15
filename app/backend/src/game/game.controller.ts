@@ -2,7 +2,14 @@ import { Controller, Post, UseGuards, Req, Body, Get } from '@nestjs/common';
 import { GameService } from './game.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
-import type { PlayerProfile, UserPublic, GameList } from 'shared';
+import {
+  type PlayerProfile,
+  type SettingsData,
+  SettingsDataSchema,
+  UserPublic,
+  GameList,
+} from 'shared';
+import { ZodValidationPipe } from 'nestjs-zod';
 //import type { BuildDto } from './dto/build.dto';
 
 @Controller('game')
@@ -20,12 +27,16 @@ export class GameController {
 
   @Post('/create')
   @UseGuards(JwtAuthGuard)
-  async createGame(@Req() req: { user: UserPublic }) {
+  async createGame(
+    @Req() req: { user: UserPublic },
+    @Body(new ZodValidationPipe(SettingsDataSchema)) body: SettingsData,
+  ) {
     const playerProfile: PlayerProfile =
       await this.userService.findPlayerProfile(req.user.id);
-    return this.gameService.createGame(playerProfile);
+    return this.gameService.createGame(playerProfile, body);
   }
 
+  // /join inchangé — sauf si tu veux le même traitement :
   @Post('/join')
   @UseGuards(JwtAuthGuard)
   async joingame(

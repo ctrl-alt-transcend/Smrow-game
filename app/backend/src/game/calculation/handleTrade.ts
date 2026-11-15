@@ -1,11 +1,9 @@
 import {
   type TradePayload,
   type Player,
-  SPECIAL_PORT_RATE,
-  GENERIC_PORT_RATE,
-  RESERVE_RATE,
   TraderType,
   type GameBoardGraph,
+  SettingsData,
 } from 'shared';
 import {
   earnTradeResources,
@@ -22,16 +20,19 @@ const rateCheck = (
   offerAmount: number,
   targetAmount: number,
   trader: TraderType,
+  settings: SettingsData,
 ): boolean => {
   switch (trader) {
-    case 'specialized port':
-      if (offerAmount / targetAmount === SPECIAL_PORT_RATE) return true;
+    case TraderType.SPECIALIZED_PORT:
+      if (offerAmount / targetAmount === settings.specialPortOfferRate)
+        return true;
       break;
-    case 'generic port':
-      if (offerAmount / targetAmount === GENERIC_PORT_RATE) return true;
+    case TraderType.GENERIC_PORT:
+      if (offerAmount / targetAmount === settings.genericPortOfferRate)
+        return true;
       break;
-    case 'reserve':
-      if (offerAmount / targetAmount === RESERVE_RATE) return true;
+    case TraderType.RESERVE:
+      if (offerAmount / targetAmount === settings.reserveOfferRate) return true;
       break;
     default:
       break;
@@ -44,6 +45,7 @@ export const tradeCheck = (
   payload: TradePayload,
   player: Player,
   graph: GameBoardGraph,
+  settings: SettingsData,
 ): TradeValidation => {
   if (payload.offer.resource === payload.target.resource) {
     return {
@@ -51,7 +53,14 @@ export const tradeCheck = (
       message: `Can't trade ${payload.offer.resource} for ${payload.target.resource} !`,
     };
   }
-  if (!rateCheck(payload.offer.amount, payload.target.amount, payload.trader)) {
+  if (
+    !rateCheck(
+      payload.offer.amount,
+      payload.target.amount,
+      payload.trader,
+      settings,
+    )
+  ) {
     return {
       valid: false,
       message: `Invalid ratio, can't trade ${payload.offer.resource} for ${payload.target.resource} in ${payload.trader}`,
@@ -62,8 +71,8 @@ export const tradeCheck = (
     message: 'Unsuccessfull trade',
   };
   switch (payload.trader) {
-    case 'generic port':
-    case 'specialized port': {
+    case TraderType.GENERIC_PORT:
+    case TraderType.SPECIALIZED_PORT: {
       const target = graph.get(payload.sourceId);
       if (!target) {
         validation.message = `Unknown ${payload.trader}`;
@@ -93,18 +102,18 @@ export const tradeCheck = (
       }
       break;
     }
-    case 'reserve':
+    case TraderType.RESERVE:
       if (hasEnoughResourcesToTrade(player.resources, payload.offer)) {
         payTradeResources(player.resources, payload.offer);
         earnTradeResources(player.resources, payload.target);
         return {
           valid: true,
-          message: `Successfully traded with Schnek: ${payload.offer.amount}x ${payload.offer.resource} for ${payload.target.amount}x ${payload.target.resource}`,
+          message: `Successfully traded with ${payload.trader}: ${payload.offer.amount}x ${payload.offer.resource} for ${payload.target.amount}x ${payload.target.resource}`,
         };
       }
       return {
         valid: false,
-        message: `Not enough ${payload.offer.resource} to trade ${payload.target.amount}x ${payload.target.resource} with Schnek`,
+        message: `Not enough ${payload.offer.resource} to trade ${payload.target.amount}x ${payload.target.resource} with ${payload.trader}`,
       };
     default:
       break;

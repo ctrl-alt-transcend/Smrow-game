@@ -6,15 +6,20 @@ import {
   type Player,
   type BuildPayload,
   Faction,
-  BuildingsInGame,
-  SETTLEMENT_POINT,
-  CITY_POINT,
+  SettingsData,
+  BuildingType,
 } from 'shared';
 import {
   hasEnoughResourcesToBuild,
   payBuildResources,
 } from './handleResources';
 import { crossroadRule } from './handleGameRules';
+
+/**
+ * @key settlement id
+ * @value player who built
+ */
+export type BuildingsInGame = Map<string, Player>;
 
 /* ================================================================== *
  * INDEX UTILS
@@ -159,22 +164,23 @@ interface BuildValidation {
 function cityUpgradeCheck(
   target: SettlementData,
   player: Player,
+  cityPoints: number,
 ): BuildValidation {
   if (target.isCity) {
     return {
       valid: false,
       message: "Can't upgrade more, it's already a city !",
     };
-  } else if (!hasEnoughResourcesToBuild(player.resources, 'city')) {
+  } else if (!hasEnoughResourcesToBuild(player.resources, BuildingType.CITY)) {
     return {
       valid: false,
       message:
         "You don't have enough resources to upgrade your settlement to a city ...",
     };
   }
-  player.victoryPoints += CITY_POINT;
+  player.victoryPoints += cityPoints;
   target.isCity = true;
-  payBuildResources(player.resources, 'city');
+  payBuildResources(player.resources, BuildingType.CITY);
   return {
     valid: true,
     message: 'Settlement upgraded to a city !',
@@ -186,11 +192,12 @@ function settlementCheck(
   target: SettlementData,
   graph: GameBoardGraph,
   player: Player,
+  settlementPoints: number,
   placementPhase?: boolean,
 ): BuildValidation {
   if (
     !placementPhase &&
-    !hasEnoughResourcesToBuild(player.resources, 'settlement')
+    !hasEnoughResourcesToBuild(player.resources, BuildingType.SETTLEMENT)
   ) {
     return {
       valid: false,
@@ -212,11 +219,11 @@ function settlementCheck(
       message: settlementResult.reason,
     };
   }
-  player.victoryPoints += SETTLEMENT_POINT;
+  player.victoryPoints += settlementPoints;
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-    payBuildResources(player.resources, 'settlement');
+    payBuildResources(player.resources, BuildingType.SETTLEMENT);
   }
   return {
     valid: true,
@@ -228,9 +235,13 @@ function roadCheck(
   target: RoadData,
   graph: GameBoardGraph,
   player: Player,
+  roadPoints: number,
   placementPhase?: boolean,
 ): BuildValidation {
-  if (!placementPhase && !hasEnoughResourcesToBuild(player.resources, 'road')) {
+  if (
+    !placementPhase &&
+    !hasEnoughResourcesToBuild(player.resources, BuildingType.ROAD)
+  ) {
     return {
       valid: false,
       message: "You don't have enough resources to build a road ...",
@@ -245,10 +256,11 @@ function roadCheck(
       message: roadResult.reason,
     };
   }
+  player.victoryPoints += roadPoints;
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-    payBuildResources(player.resources, 'road');
+    payBuildResources(player.resources, BuildingType.ROAD);
   }
   return {
     valid: true,
@@ -262,18 +274,24 @@ export const buildCheck = (
   board: GameBoard,
   graph: GameBoardGraph,
   buildings: BuildingsInGame,
+  settings: SettingsData,
   placementPhase?: boolean,
 ): { valid: boolean; message: string } => {
   let check: BuildValidation = { valid: false, message: '' };
   try {
     let target: RoadData | SettlementData | undefined;
     switch (payload.kind) {
-      case 'road':
+      case BuildingType.ROAD:
         target = board.roads.find((r) => r.id === payload.id);
         if (!target) break;
-        check = roadCheck(target, graph, player, placementPhase);
+        check = roadCheck(
+          target,
+          graph,
+          player,
+          settings.roadPoints,
+          placementPhase,
+        );
         if (check.valid) {
-          player.roadsBuilt++;
           if (crossroadRule(target, graph)) {
             player.victoryPoints++;
             return {
@@ -284,14 +302,21 @@ export const buildCheck = (
           }
         }
         break;
-      case 'settlement':
+      case BuildingType.SETTLEMENT:
         target = board.settlements.find((r) => r.id === payload.id);
         if (!target) break;
         if (!target.ownerId) {
-          check = settlementCheck(board, target, graph, player, placementPhase);
+          check = settlementCheck(
+            board,
+            target,
+            graph,
+            player,
+            settings.settlementPoints,
+            placementPhase,
+          );
           if (check.valid) player.settlementsBuilt.set(target.id, target);
         } else if (target.ownerId == player.playerId) {
-          check = cityUpgradeCheck(target, player);
+          check = cityUpgradeCheck(target, player, settings.cityPoints);
         } else {
           check.message = 'This settlement is owned by another player.';
         }
