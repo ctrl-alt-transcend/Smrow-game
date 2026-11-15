@@ -4,8 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { ZGEG_DEV, type PlayerProfile, type GameList } from 'shared';
-import { GameStateContext, WhoStartsPhase } from './GameStateContext';
+import {
+  ZGEG_DEV,
+  type SettingsData,
+  type PlayerProfile,
+  type GameList,
+} from 'shared';
+import { GameStateContext, StartPhase } from './GameStateContext';
 import { SocialGateway } from '../social/social.gateway';
 
 @Injectable()
@@ -28,16 +33,18 @@ export class GameService {
    * @brief Create a new game and add the player to it
    * @param playerId - The user ID of the player to be added to the game
    */
-  createGame(playerProfile: PlayerProfile) {
+  createGame(playerProfile: PlayerProfile, settings: SettingsData) {
     if (this.playersMap.has(playerProfile.id)) {
       throw new ConflictException(
         `Player with id ${playerProfile.username} is already in a game`,
       );
     }
     const gameId = randomUUID();
-    const game = new GameStateContext(gameId, new WhoStartsPhase());
 
-    this.gameInstances.set(gameId, game);
+    this.gameInstances.set(
+      gameId,
+      new GameStateContext(gameId, settings, new StartPhase()),
+    );
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
   }

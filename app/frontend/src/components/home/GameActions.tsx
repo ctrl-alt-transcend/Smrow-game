@@ -1,7 +1,8 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { useCreateLobby, useJoinLobby } from "../../game/utils/game.utils.tsx";
+import { useJoinLobby } from "../../game/utils/game.utils.tsx";
+import GameLaunchMenu from "./GameLaunchMenu.tsx";
 
 function JoinLobbyModal({
   opened,
@@ -39,16 +40,12 @@ function JoinLobbyModal({
 }
 
 export default function GameActions() {
-  const createLobby = useCreateLobby();
   const [opened, { open, close }] = useDisclosure(false);
-
   return (
     <Group>
       <Button onClick={open}>Join da game</Button>
       <JoinLobbyModal opened={opened} onClose={close} />
-      <Button variant="default" onClick={createLobby}>
-        Create a game
-      </Button>
+      <GameLaunchMenu />
     </Group>
   );
 }
