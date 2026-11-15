@@ -31,7 +31,12 @@ export async function updateProfile(
     );
     return UserProfileSchema.parse(res.data.user);
   } catch (error: any) {
-    const err_msg = error.repsones?.data?.message;
-    throw err_msg;
+    const apiMessage = error?.response?.data?.message;
+    if (apiMessage) {
+      throw new Error(
+        Array.isArray(apiMessage) ? apiMessage.join(", ") : apiMessage,
+      );
+    }
+    throw error instanceof Error ? error : new Error("Unexpected error");
   }
 }

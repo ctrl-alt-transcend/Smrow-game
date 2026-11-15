@@ -42,6 +42,7 @@ export class UserController {
     };
   }
 
+  // NEED TO ADD EVERYTHIGN FROM USER ABOve
   @Delete('deluser/:username')
   async removeUser(@Param('username') username: string) {
     await this.userService.removeUser(username);
