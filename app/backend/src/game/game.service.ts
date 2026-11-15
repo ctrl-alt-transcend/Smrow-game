@@ -25,7 +25,7 @@ export class GameService {
     return arrayOfGames.map((game: GameStateContext) => ({
       gameId: game.getGameId(),
       playerCount: game.getPlayers().size,
-      state: 'pending players',
+      state: game.getCurrentPhase(),
     }));
   }
 
