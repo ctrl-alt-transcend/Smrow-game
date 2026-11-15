@@ -1,9 +1,14 @@
-import { Controller, Post, UseGuards, Req, Body } from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Body, Get } from '@nestjs/common';
 import { GameService } from './game.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
-import { SettingsDataSchema, type PlayerProfile } from 'shared';
-import type { SettingsData, UserPublic } from 'shared';
+import {
+  type PlayerProfile,
+  SettingsDataSchema,
+  SettingsData,
+  UserPublic,
+  GameList,
+} from 'shared';
 import { ZodValidationPipe } from 'nestjs-zod';
 //import type { BuildDto } from './dto/build.dto';
 
@@ -13,6 +18,12 @@ export class GameController {
     private readonly gameService: GameService,
     private readonly userService: UserService,
   ) {}
+
+  @Get('/')
+  @UseGuards(JwtAuthGuard)
+  getGamesList(): GameList[] {
+    return this.gameService.getGamesList();
+  }
 
   @Post('/create')
   @UseGuards(JwtAuthGuard)

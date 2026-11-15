@@ -4,13 +4,30 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { type SettingsData, type PlayerProfile, ZGEG_DEV } from 'shared';
+import {
+  ZGEG_DEV,
+  type SettingsData,
+  type PlayerProfile,
+  type GameList,
+} from 'shared';
 import { GameStateContext, StartPhase } from './GameStateContext';
+import { SocialGateway } from '../social/social.gateway';
 
 @Injectable()
 export class GameService {
   private gameInstances: Map<string, GameStateContext> = new Map();
   private playersMap = new Map<string, string>(); //INFO: link playerId with a gameId
+
+  constructor(private readonly socialGateway: SocialGateway) {}
+
+  getGamesList(): GameList[] {
+    const arrayOfGames = Array.from(this.gameInstances.values());
+    return arrayOfGames.map((game: GameStateContext) => ({
+      gameId: game.getGameId(),
+      playerCount: game.getPlayers().size,
+      state: 'pending players',
+    }));
+  }
 
   /**
    * @brief Create a new game and add the player to it
@@ -86,6 +103,7 @@ export class GameService {
     game
       .getPlayers()
       .set(playerProfile.username, game.initPlayer(playerProfile.username));
+    this.socialGateway.handleGameList(this.getGamesList());
 
     //⚠️REMOVE in PROD -------------------
     console.log(`---------------------------------------
