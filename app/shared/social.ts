@@ -14,7 +14,7 @@ export const ChatMessage = z.object({
 export type ChatMessage = z.infer<typeof ChatMessage>;
 
 export const GameList = z.object({
-  gameId: typeof IdSchema,
+  gameId: IdSchema,
   playerCount: z.number().int(),
   state: z.string().nonempty(),
 });
