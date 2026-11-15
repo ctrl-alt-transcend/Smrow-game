@@ -11,6 +11,7 @@ import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
 import type { JwtPayload, GameList } from 'shared';
+import { parseCookie } from 'cookie';
 
 interface SocketUser {
   id: string;
@@ -107,7 +108,17 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
     }
     server.use((client: SocketClient, next) => {
       try {
-        const token = client.handshake.auth.token as string;
+        const authToken = client.handshake.auth.token as string;
+        const cookies = parseCookie(client.handshake.headers.cookie ?? '');
+        const cookieToken = cookies.access_token;
+        const token =
+          cookieToken ||
+          (typeof authToken === 'string' && authToken.length > 0
+            ? authToken
+            : cookieToken);
+        if (!token) {
+          throw new Error('JWT must be provided');
+        }
         const payload = this.jwtService.verify<JwtPayload>(token, {
           secret: readSecret(AUTH.JWT_FILE),
         });
