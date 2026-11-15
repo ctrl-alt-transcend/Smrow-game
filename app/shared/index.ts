@@ -9,3 +9,4 @@ export * from "./user.js";
 //export * from "./game/hexCalculation.js"
 //export * from "./game/ui.types.js"
 //-------------------------------
+export * from "./social.js";

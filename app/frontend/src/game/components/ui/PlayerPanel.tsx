@@ -1,8 +1,15 @@
 import { Card, Stack, Text, Avatar } from "@mantine/core";
-import type { Player, PlayerCardProps } from "shared";
+import type { Player } from "shared";
 import defaultAvatar from "../../../../public/default-pp.png";
 
 const AVATAR_SIZE = 50;
+
+type PlayerCardProps = {
+  name: string;
+  level: number;
+  score: number;
+  avatarURL: string | null;
+};
 
 export function PlayerCard({ name, level, score, avatarURL }: PlayerCardProps) {
   const avatarSrc = avatarURL || defaultAvatar;
