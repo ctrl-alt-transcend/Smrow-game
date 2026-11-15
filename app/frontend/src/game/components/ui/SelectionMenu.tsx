@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Anchor,
   Box,
   Button,
   Card,
@@ -11,7 +10,6 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { modals } from "@mantine/modals";
 import { useSelectionDisplay } from "../../hooks/useSelectionDisplay.ts";
 import type { GameBoardSelection } from "../../types/gameboard.types.tsx";
 import {
@@ -20,10 +18,12 @@ import {
   type BuildPayload,
   type TradePayload,
   type SettingsData,
+  SETTLEMENT,
+  ROAD,
 } from "shared";
 import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 
-const RESSOURCE_OPTIONS = [
+const RESOURCE_OPTIONS = [
   ResourceType.WOOD,
   ResourceType.BRICK,
   ResourceType.SHEEP,
@@ -53,16 +53,30 @@ function useElementWidth<T extends HTMLElement>() {
   return { ref, width };
 }
 
+/* ------------------------------------------------------------------ *
+ * Action zone sizing: every mode renders its controls inside a
+ * fixed-height footer so buttons and trade fields always appear at
+ * the SAME position, whichever mode is active.
+ * ------------------------------------------------------------------ */
+const ACTION_ZONE_MIN_HEIGHT = 170;
+
 /* ================================================================== *
  * TradeOfferPanel : reusable trade panel
+ *  - Same 4-row structure for ALL trade modes (requirement: fields
+ *    always at the same place):
+ *      row 1 → offer resource  (+ offer amount if free-rate trade)
+ *      row 2 → target resource + target amount
+ *      row 3 → rate hint
+ *      row 4 → send button
  *  - ratio = null            → free trade (players): offer + target fully
  *                              editable by the player.
  *  - ratio = N (bank trade)  → the offer AMOUNT is auto-derived from the
- *                              target amount (target × N), but the OFFER
- *                              RESOURCE stays freely choosable unless
- *                              offerLockedResource is set (specialized port).
- *  - TARGET side is always freely choosable (resource + amount), whatever
- *    the kind of trade (ports and reserve included).
+ *                              target amount (target × N).
+ *  - offerLockedResource (specialized port) → the offer Select is
+ *    pre-filled with the specialized resource and DISABLED (dropdown
+ *    blocked), but keeps the exact same slot/size as the other modes'
+ *    Select, so switching between trade modes never shifts the layout.
+ *  - TARGET side is always freely choosable (resource + amount).
  *  - `isMyTurn = false` → every field is disabled (view-only).
  * ================================================================== */
 interface TradeOfferPanelProps {
@@ -82,6 +96,9 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
   targetOwnerId = null,
   isMyTurn,
 }) => {
+  // Offer resource — pre-set to the specialized resource when locked
+  const [chosenOfferResource, setChosenOfferResource] =
+    useState<ResourceType | null>(offerLockedResource ?? null);
   // Target side — always editable (when it's the player's turn)
   const [targetResource, setTargetResource] = useState<ResourceType | null>(
     null,
@@ -90,11 +107,8 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
   // Offer amount — free only for player-to-player trades
   const [freeOfferAmount, setFreeOfferAmount] = useState<number>(1);
   const isBankTrade = ratio !== null;
-  const isOfferResourceLocked = Boolean(offerLockedResource);
-  const [chosenOfferResource, setChosenOfferResource] =
-    useState<ResourceType | null>(null);
-  const offerResource = offerLockedResource ?? chosenOfferResource;
 
+  const offerResource = offerLockedResource ?? chosenOfferResource;
   const offerAmount = isBankTrade
     ? targetAmount * (ratio as number)
     : freeOfferAmount;
@@ -130,29 +144,18 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
 
   return (
     <Stack gap="xs" w="100%">
-      {/* Offer side */}
+      {/* Row 1 — offer side (Select in EVERY mode; disabled + pre-filled
+          for specialized ports, editable elsewhere: same slot either way) */}
       <Group justify="space-between" gap="xs" grow wrap="wrap">
-        {isOfferResourceLocked ? (
-          <Text size="sm" flex={1} miw={120}>
-            Offer: <b>{offerLockedResource}</b> × {offerAmount}{" "}
-            <Text component="span" c="dimmed" size="xs">
-              (locked by port)
-            </Text>
-          </Text>
-        ) : (
-          <Select
-            size="xs"
-            placeholder="Offer resource"
-            data={RESSOURCE_OPTIONS}
-            value={offerResource}
-            onChange={(v) => setChosenOfferResource(v as ResourceType)}
-            disabled={!isMyTurn}
-            style={{
-              flex: 1,
-              minWidth: 120,
-            }}
-          />
-        )}
+        <Select
+          size="xs"
+          placeholder="Offer resource"
+          data={RESOURCE_OPTIONS}
+          value={offerResource}
+          onChange={(v) => setChosenOfferResource(v as ResourceType)}
+          disabled={Boolean(offerLockedResource) || !isMyTurn}
+          style={{ flex: 1, minWidth: 120 }}
+        />
         {!isBankTrade && (
           <NumberInput
             size="xs"
@@ -160,27 +163,21 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
             value={freeOfferAmount}
             onChange={(v) => setFreeOfferAmount(Number(v) || 1)}
             disabled={!isMyTurn}
-            style={{
-              flex: 0,
-              width: 90,
-            }}
+            style={{ flex: 0, width: 90 }}
           />
         )}
       </Group>
 
-      {/* Target side — always freely choosable (ports & reserve included) */}
+      {/* Row 2 — target side (always freely choosable) */}
       <Group justify="space-between" gap="xs" grow wrap="wrap">
         <Select
           size="xs"
           placeholder="Target resource"
-          data={RESSOURCE_OPTIONS}
+          data={RESOURCE_OPTIONS}
           value={targetResource}
           onChange={(v) => setTargetResource(v as ResourceType)}
           disabled={!isMyTurn}
-          style={{
-            flex: 1,
-            minWidth: 120,
-          }}
+          style={{ flex: 1, minWidth: 120 }}
         />
         <NumberInput
           size="xs"
@@ -188,20 +185,18 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
           value={targetAmount}
           onChange={(v) => setTargetAmount(Number(v) || 1)}
           disabled={!isMyTurn}
-          style={{
-            flex: 0,
-            width: 90,
-          }}
+          style={{ flex: 0, width: 90 }}
         />
       </Group>
 
-      {/* Rate hint */}
-      <Text size="xs" c="dimmed">
+      {/* Row 3 — rate hint */}
+      <Text size="xs" c="dimmed" style={{ minHeight: 16 }}>
         {isBankTrade
           ? `Rate: ${ratio} : 1 — giving ${offerAmount} ${offerResource ?? "?"} for ${targetAmount} ${targetResource ?? "?"}`
           : "Free rate — agreed between players"}
       </Text>
 
+      {/* Row 4 — send button, always last, always bottom-aligned */}
       <Button size="xs" onClick={handleSend} disabled={!isValid || !isMyTurn}>
         Send trade offer
       </Button>
@@ -210,8 +205,12 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
 };
 
 /* ================================================================== *
- * BuildSelectionButton : road / settlement construction (unchanged
- * core logic; `isMyTurn = false` disables the button entirely)
+ * BuildSelectionButton : road / settlement construction
+ *  - SINGLE click sends the build request straight to the server
+ *    (no modal, no double-click confirmation).
+ *  - The busy/request-tracking flow is unchanged: the response is
+ *    detected via masterLog, with a safety timeout.
+ *  - `isMyTurn = false` disables the button entirely.
  * ================================================================== */
 interface PendingBuild {
   target: BuildPayload;
@@ -233,20 +232,19 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   isMyTurn,
 }) => {
   const [busy, setBusy] = useState(false);
-  const [buttonName, setButtonName] = useState("");
   const pendingRef = useRef<PendingBuild | null>(null);
 
   const target = useMemo<BuildPayload | null>(() => {
     if (selected.selectedRoad) {
       return {
-        kind: "road",
+        kind: ROAD,
         id: selected.selectedRoad.edge.id,
         data: selected.selectedRoad,
       };
     }
     if (selected.selectedSettlement) {
       return {
-        kind: "settlement",
+        kind: SETTLEMENT,
         id: selected.selectedSettlement.vertex.id,
         data: selected.selectedSettlement,
       };
@@ -254,6 +252,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     return null;
   }, [selected.selectedRoad, selected.selectedSettlement]);
 
+  // Single click → emit the build request immediately
   const handleBuildRequest = useCallback(() => {
     if (busy || !target || !isMyTurn) return;
     pendingRef.current = { target, logAtSend: masterLog };
@@ -265,6 +264,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     });
   }, [busy, target, masterLog, isMyTurn]);
 
+  // Resolve the pending request when the server answers (masterLog moved)
   useEffect(() => {
     const pending = pendingRef.current;
     if (!pending) return;
@@ -277,6 +277,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     onBuilt?.(pending.target);
   }, [masterLog, onBuilt]);
 
+  // Safety timeout if the server never answers
   useEffect(() => {
     if (!busy) return;
     const timer = window.setTimeout(() => {
@@ -289,69 +290,17 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     return () => window.clearTimeout(timer);
   }, [busy]);
 
-  const openModal = () => {
-    if (!isMyTurn) return;
-
-    if (!target) {
-      modals.openConfirmModal({
-        title: "Pick a valid construction location",
-        labels: { confirm: "OK", cancel: "Cancel" },
-        centered: true,
-      });
-      return;
-    }
-    if (target.kind === "settlement" && target.data.ownerId) {
-      setButtonName("Upgrade");
-      modals.openConfirmModal({
-        title: "Confirm upgrade",
-        children: (
-          <Text size="sm">
-            Are you sure you want to upgrade:{" "}
-            <Anchor
-              href="#"
-              onClick={(event) => {
-                event.preventDefault();
-                console.log(`Upgrade ${target.kind} to city at:`, target.id);
-              }}
-            >
-              Settlement ({target.id})
-            </Anchor>{" "}
-            to a City?
-          </Text>
-        ),
-        labels: { confirm: "Confirm", cancel: "Cancel" },
-        onConfirm: handleBuildRequest,
-        centered: true,
-      });
-    } else {
-      setButtonName("Build");
-      modals.openConfirmModal({
-        title: "Confirm construction",
-        children: (
-          <Text size="sm">
-            Are you sure you want to build:{" "}
-            <Anchor
-              href="#"
-              onClick={(event) => {
-                event.preventDefault();
-                console.log(`Build ${target.kind} at:`, target.id);
-              }}
-            >
-              {target.kind === "road" ? "Road" : "Settlement"} ({target.id})
-            </Anchor>
-            ?
-          </Text>
-        ),
-        labels: { confirm: "Confirm", cancel: "Cancel" },
-        onConfirm: handleBuildRequest,
-        centered: true,
-      });
-    }
-  };
+  const actionLabel =
+    target?.kind === SETTLEMENT && target.data.ownerId ? "Upgrade" : "Build";
 
   return (
-    <Button onClick={openModal} loading={busy} disabled={busy || !isMyTurn}>
-      {buttonName || (isMyTurn ? "Build" : "Not your turn")}
+    <Button
+      w="100%"
+      onClick={handleBuildRequest}
+      loading={busy}
+      disabled={busy || !isMyTurn}
+    >
+      {busy ? "Building…" : actionLabel}
     </Button>
   );
 };
@@ -359,11 +308,6 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
 /* ================================================================== *
  * Item list rendering: one line per item, font size adapts to the
  * longest label AND to the actual card width (responsive).
- *
- * The available width is measured from the container (ResizeObserver),
- * so ITEMS_MAX_WIDTH below is only a fallback before the first measure.
- * Very long labels beyond the minimum size are truncated with an
- * ellipsis instead of overflowing.
  * ================================================================== */
 const ITEMS_FONT_MIN = 14;
 const ITEMS_FONT_MAX = 18;
@@ -446,7 +390,9 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
     cardBodyWidth > 0 ? cardBodyWidth - 40 : ITEMS_FALLBACK_WIDTH;
 
   /* ------------------------------------------------------------ *
-   * Modular content depending on the selected kind
+   * Modular content depending on the selected kind.
+   * Every branch renders INSIDE the same fixed-height action zone,
+   * so controls stay at the same position across modes.
    * ------------------------------------------------------------ */
   const renderActionArea = () => {
     const turnFlag = { isMyTurn };
@@ -464,7 +410,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
       if (port && port.type === "generic") {
         return (
           <TradeOfferPanel
-            ratio={settings.genericPortRate}
+            ratio={settings.genericPortOfferRate}
             sourceId={port.coastId}
             sourceKind={TraderType.GENERIC_PORT}
             {...turnFlag}
@@ -474,7 +420,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
 
       return (
         <TradeOfferPanel
-          ratio={settings.specialPortRate}
+          ratio={settings.specialPortOfferRate}
           offerLockedResource={port.type as ResourceType}
           sourceId={port.coastId}
           sourceKind={TraderType.SPECIALIZED_PORT}
@@ -485,18 +431,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
 
     if (selected.selectedTile) return null;
 
-    if (selected.selectedRoad) {
-      return (
-        <BuildSelectionButton
-          selected={selected}
-          masterLog={masterLog}
-          onBuilt={onBuilt}
-          {...turnFlag}
-        />
-      );
-    }
-
-    if (selected.selectedSettlement) {
+    if (selected.selectedRoad || selected.selectedSettlement) {
       return (
         <BuildSelectionButton
           selected={selected}
@@ -510,7 +445,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
     if (selected.selectedReserve) {
       return (
         <TradeOfferPanel
-          ratio={settings.reserveRate}
+          ratio={settings.reserveOfferRate}
           sourceId={selected.selectedReserve.id}
           sourceKind={TraderType.RESERVE}
           {...turnFlag}
@@ -540,10 +475,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
         radius="md"
         shadow="sm"
         mih={290}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-        }}
+        style={{ display: "flex", flexDirection: "column" }}
       >
         <Stack gap="xs" justify="center" align="center" w="100%">
           <Group justify="space-between" w="100%" wrap="nowrap">
@@ -560,7 +492,21 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
               availableWidth={itemsAvailableWidth}
             />
           </Box>
-          {renderActionArea()}
+
+          {/* Fixed-height action zone: whichever mode is active, its
+              controls (button or trade panel) always start at the same
+              y-position, so nothing "jumps" between modes. */}
+          <Box
+            w="100%"
+            style={{
+              minHeight: ACTION_ZONE_MIN_HEIGHT,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+            }}
+          >
+            {renderActionArea()}
+          </Box>
         </Stack>
       </Card>
     </Box>

@@ -24,13 +24,15 @@ const rateCheck = (
 ): boolean => {
   switch (trader) {
     case TraderType.SPECIALIZED_PORT:
-      if (offerAmount / targetAmount === settings.specialPortRate) return true;
+      if (offerAmount / targetAmount === settings.specialPortOfferRate)
+        return true;
       break;
     case TraderType.GENERIC_PORT:
-      if (offerAmount / targetAmount === settings.genericPortRate) return true;
+      if (offerAmount / targetAmount === settings.genericPortOfferRate)
+        return true;
       break;
     case TraderType.RESERVE:
-      if (offerAmount / targetAmount === settings.reserveRate) return true;
+      if (offerAmount / targetAmount === settings.reserveOfferRate) return true;
       break;
     default:
       break;

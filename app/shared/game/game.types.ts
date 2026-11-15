@@ -8,12 +8,29 @@ export const ZGEG_DEV = 'zGeG_tHe_dEv';
 /***********************************
  * Rules value
  **********************************/
-export const TRADE_LIMIT_DFLT = 2;
-export const BUILD_LIMIT_DFLT = 2;
+export const ROAD = 'Road';
+export const SETTLEMENT = 'Settlement';
+export const CITY = 'City';
+export const PORT = 'Port';
+export const COAST = 'Coast';
+export const TILE = 'Tile';
+export const RESERVE = 'Reserve';
+export const NONE = 'none';
 
-export const SPECIAL_PORT_RATE_DFLT = 2;
-export const GENERIC_PORT_RATE_DFLT = 3;
-export const RESERVE_RATE_DFLT = 4;
+export const GameboardLayout = {
+  CLASSIC_LAYOUT: 'Catan Island',
+  SMROW_LAYOUT: 'Smrow Island',
+  GORP_LAYOUT: 'Gorp Island',
+} as const;
+export type GameboardLayout = (typeof GameboardLayout)[keyof typeof GameboardLayout];
+export const GameboardLayoutSchema = z.enum(GameboardLayout);
+
+export const TRADE_LIMIT_DFLT = 8;
+export const BUILD_LIMIT_DFLT = 4;
+
+export const SPECIAL_PORT_OFFER_RATE_DFLT = 2;
+export const GENERIC_PORT_OFFER_RATE_DFLT = 3;
+export const RESERVE_OFFER_RATE_DFLT = 4;
 
 export const ROAD_POINT_DFLT = 0;
 export const SETTLEMENT_POINT_DFLT = 1;
@@ -21,13 +38,18 @@ export const CITY_POINT_DFLT = 1;
 export const POINTS_TO_WIN_DFLT = 10;
 
 export const MIN_SETTINGS = 1;
-export const MAX_LIMIT = 20;
+export const MAX_LIMIT = 40;
 export const MAX_RATE = 6;
 export const MAX_POINTS = 10;
 export const MAX_POINTS_TO_WIN = 100;
 export const MAX_BONUS = 30;
+export const MAX_MULTIPLIER = 5;
+export const MIN_MULTIPLIER = 1;
+export const MULTIPLIER_DFLT = 2;
 
 export const SettingsDataSchema = z.object({
+  gameboardLayout: GameboardLayoutSchema,
+
   // Limits settings
   /** Number of trades authorized during 'Trade and Buil' phase */
   tradeLimit: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_LIMIT),
@@ -35,24 +57,26 @@ export const SettingsDataSchema = z.object({
   buildLimit: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_LIMIT),
 
   // Trades settings
-  /** 'Specialized Port' trade ratio */
-  specialPortRate: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_RATE),
-  /** 'Generic Port' trade ratio */
-  genericPortRate: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_RATE),
-  /** 'Reserve' trade ratio */
-  reserveRate: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_RATE),
+  /** 'Specialized Port' trade offer ratio */
+  specialPortOfferRate: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_RATE),
+  /** 'Generic Port' trade offer ratio */
+  genericPortOfferRate: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_RATE),
+  /** 'Reserve' trade offer ratio */
+  reserveOfferRate: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_RATE),
 
   // Victory Points settings
   /** Amount of points earned by building a settlement */
   settlementPoints: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_POINTS),
   /** Amount of points earned by building a city */
   cityPoints: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_POINTS),
-  /** Amount of points to win the game */
   /** Amount of points earned by building a road */
   roadPoints: z.number().int().nonnegative().min(0).max(MAX_POINTS),
+  /** Amount of points to win the game */
   pointsToWin: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_POINTS_TO_WIN),
 
   // Bonus settings
+  /** Resource multiplication at production */
+  resourcesMultiplier: z.number().int().nonnegative().min(MIN_MULTIPLIER).max(MAX_MULTIPLIER),
   /** Amount of wood to start the game with*/
   woodBonus: z.number().int().nonnegative().min(0).max(MAX_BONUS),
   /** Amount of sheep to start the game with*/
@@ -70,43 +94,45 @@ export const CROSSROAD_RULE = 3;
 export const ROBBER_ROLL = 7;
 
 export const BuildingType = {
-  ROAD: "road",
-  SETTLEMENT: "settlement",
-  CITY: "city",
+  ROAD: ROAD,
+  SETTLEMENT: SETTLEMENT,
+  CITY: CITY,
 } as const;
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
+export const BuildingTypeSchema = z.enum(BuildingType);
+
 
 export const TraderType = {
   SPECIALIZED_PORT: 'Specialized Port',
   GENERIC_PORT: 'Generic Port',
-  RESERVE: 'Shnek the Trader',
+  RESERVE: 'Reserve',
   PLAYER: 'Player',
 } as const;
 export type TraderType = (typeof TraderType)[keyof typeof TraderType];
 export const TraderTypeSchema = z.enum(TraderType);
 
 export const LandType = {
-  FOREST: "forest",
-  PASTURE: "pasture",
-  HILL: "hill",
-  MOUNTAIN: "mountain",
-  FIELD: "field",
-  DESERT: "desert"
+  FOREST: "Forest",
+  PASTURE: "Pasture",
+  HILL: "Hill",
+  MOUNTAIN: "Mountain",
+  FIELD: "Field",
+  DESERT: "Desert"
 } as const;
 export type LandType = (typeof LandType)[keyof typeof LandType];
 
 export const ResourceType = {
-  WOOD: 'wood',
-  SHEEP: 'sheep',
-  BRICK: 'brick',
-  ORE: 'ore',
-  WHEAT: 'wheat',
-  DUST: "dust",
+  WOOD: 'Wood',
+  SHEEP: 'Sheep',
+  BRICK: 'Brick',
+  ORE: 'Ore',
+  WHEAT: 'Wheat',
+  DUST: "Dust",
 } as const;
 export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType];
 export const ResourceTypeSchema = z.enum(ResourceType);
 
-export const LAND_RESSOURCE: Record<LandType, string> = {
+export const LAND_RESOURCE: Record<LandType, string> = {
   [LandType.FOREST]: ResourceType.WOOD,
   [LandType.PASTURE]: ResourceType.SHEEP,
   [LandType.HILL]: ResourceType.BRICK,
@@ -149,17 +175,17 @@ export const Action = {
   DICE: 'roll the dices',
   BUILD: 'build',
   TRADE: 'trade',
-  SKIP: 'skip the turn',
+  SKIP: 'end the turn',
   BUILD_LIMIT: 'build more for this turn',
   TRADE_LIMIT: 'trade more for this turn',
 } as const;
 export type Action = (typeof Action)[keyof typeof Action];
 
 export const Phase = {
-  START: 'start phase',
-  PLACEMENT: 'placement phase',
-  RESOURCES: 'resources phase',
-  TRADE_BUILD: 'trade and build phase'
+  START: 'Start Phase',
+  PLACEMENT: 'Placement Phase',
+  RESOURCES: 'Resources Phase',
+  TRADE_BUILD: 'Trade and Build Phase'
 } as const;
 export type Phase = (typeof Phase)[keyof typeof Phase];
 
@@ -167,7 +193,7 @@ export const GUIDE_LOG: Record<Phase, string> = {
   [Phase.START]: `${Phase.START}: ${Action.DICE}`,
   [Phase.PLACEMENT]: `${Phase.PLACEMENT}: build a settllement and a road`,
   [Phase.RESOURCES]: `${Phase.RESOURCES}: ${Action.DICE} to collect you resources`,
-  [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade or skip you turn!`,
+  [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade! End your turn when you're done`,
 } as const;
 
 /***********************************
@@ -323,7 +349,7 @@ export const classicLayout: TileData[] = [
 ];
 
 /** @description custom Layout #1 (19 tiles) */
-export const customLayout1: TileData[] = [
+export const smrowIsland: TileData[] = [
     { q: 1, r: -3, land: LandType.HILL, value: 8, hasRobber: false },{ q: 2, r: -3, land: LandType.DESERT, value: 10, hasRobber: true },
     { q: 1, r: -2, land: LandType.MOUNTAIN, value: 2, hasRobber: false }, { q: 2, r: -2, land: LandType.PASTURE, value: 9, hasRobber: false }, { q: 3, r: -2, land: LandType.FOREST, value: 8, hasRobber: false },
     { q: -1, r: -1, land: LandType.FOREST, value: 11, hasRobber: false }, { q: 0, r: -1, land: LandType.HILL, value: 6, hasRobber: false }, { q: 1, r: -1, land: LandType.FIELD, value: 5, hasRobber: false }, { q: 2, r: -1, land: LandType.MOUNTAIN, value: 4, hasRobber: false },
@@ -333,7 +359,7 @@ export const customLayout1: TileData[] = [
 ];
 
 /** @description custom Layout #2 (19 tiles) */
-export const customLayout2: TileData[] = [
+export const gorpIsland: TileData[] = [
   { q: 1, r: -2, land: LandType.HILL, value: 6, hasRobber: false }, { q: 3, r: -2, land: LandType.FIELD, value: 5, hasRobber: false }, { q: 4, r: -2, land: LandType.MOUNTAIN, value: 4, hasRobber: false },
   { q: 1, r: -1, land: LandType.MOUNTAIN, value: 2, hasRobber: false }, { q: 2, r: -1, land: LandType.PASTURE, value: 9, hasRobber: false }, { q: 3, r: -1, land: LandType.FOREST, value: 8, hasRobber: false },
   { q: -2, r: 1, land: LandType.HILL, value: 12, hasRobber: false }, { q: -1, r: 1, land: LandType.DESERT, value: 5, hasRobber: true }, { q: 0, r: 1, land: LandType.MOUNTAIN, value: 10, hasRobber: false }, { q: 1, r: 1, land: LandType.FOREST, value: 3, hasRobber: false },
@@ -347,9 +373,9 @@ export const customLayout2: TileData[] = [
  * Graph
  **********************************/
 export type CoreElement =
-{ type: 'road'; data: RoadData} |
-{ type: 'settlement'; data: SettlementData} |
-{ type: 'port'; data: PortData} |
+{ type: 'Road'; data: RoadData} |
+{ type: 'Settlement'; data: SettlementData} |
+{ type: 'Port'; data: PortData} |
 { type: 'none'; data: null};
 
 /** @description keeps relations between each gameboard's elements*/
@@ -495,12 +521,12 @@ export type TradePayload = z.infer<typeof TradePayloadSchema>;
 
 export const BuildPayloadSchema = z.discriminatedUnion("kind", [
   z.object({
-    kind: z.literal('road'),
+    kind: z.literal(BuildingType.ROAD),
     id: z.string(),
     data: RoadDataSchema,
   }),
   z.object({
-    kind: z.literal('settlement'),
+    kind: z.literal(BuildingType.SETTLEMENT),
     id: z.string(),
     data: SettlementDataSchema,
   }),

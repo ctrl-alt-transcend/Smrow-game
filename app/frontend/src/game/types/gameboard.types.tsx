@@ -34,28 +34,28 @@ export interface GameBoardSelection {
 
 // Hover effects
 export interface TileHover {
-  type: "tile";
+  type: "Tile";
   q: number;
   r: number;
 }
 
 export interface RoadHover {
-  type: "road";
+  type: "Road";
   id: string;
 }
 
 export interface SettlementHover {
-  type: "settlement";
+  type: "Settlement";
   id: string;
 }
 
 export interface CoastHover {
-  type: "coast";
+  type: "Coast";
   id: string;
 }
 
 export interface ReserveHover {
-  type: "reserve";
+  type: "Reserve";
   id: string;
 }
 

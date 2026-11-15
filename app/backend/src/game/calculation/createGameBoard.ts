@@ -16,6 +16,13 @@ import {
   CoreElement,
   getHexCorners,
   getHexEdges,
+  GameboardLayout,
+  smrowIsland,
+  gorpIsland,
+  classicLayout,
+  ROAD,
+  SETTLEMENT,
+  PORT,
 } from 'shared';
 
 /* ================================================================== *
@@ -194,7 +201,13 @@ const SPECIALIZED_PORT_COUNT = 5;
 const GENERIC_PORT_COUNT = 4;
 const TOTAL_PORTS = SPECIALIZED_PORT_COUNT + GENERIC_PORT_COUNT;
 
-const SPECIALTIES: ResourceType[] = ['wood', 'brick', 'sheep', 'wheat', 'ore'];
+const SPECIALTIES: ResourceType[] = [
+  ResourceType.WOOD,
+  ResourceType.BRICK,
+  ResourceType.SHEEP,
+  ResourceType.WHEAT,
+  ResourceType.ORE,
+];
 
 /**
  * Standard Fisher-Yates shuffle using Math.random: the board layout itself
@@ -366,14 +379,14 @@ export const linkGameBoard = (board: GameBoard): GameBoardGraph => {
 
   // STEP 1: Creating empty entries
   for (const road of board.roads) {
-    register(graph, road.id, { type: 'road', data: road });
+    register(graph, road.id, { type: ROAD, data: road });
   }
   for (const settlement of board.settlements) {
-    register(graph, settlement.id, { type: 'settlement', data: settlement });
+    register(graph, settlement.id, { type: SETTLEMENT, data: settlement });
   }
   for (const coast of board.coasts) {
     if (coast.port) {
-      register(graph, coast.port.id, { type: 'port', data: coast.port });
+      register(graph, coast.port.id, { type: PORT, data: coast.port });
     }
   }
 
@@ -466,8 +479,21 @@ export interface LinkedGameBoard {
   graph: GameBoardGraph;
 }
 
-export const createGameBoard = (tiles: TileData[]): LinkedGameBoard => {
-  const board = initGameBoard(tiles);
+function pickLayout(gameboardLayout: GameboardLayout): TileData[] {
+  switch (gameboardLayout) {
+    case GameboardLayout.SMROW_LAYOUT:
+      return smrowIsland;
+    case GameboardLayout.GORP_LAYOUT:
+      return gorpIsland;
+    default:
+      return classicLayout;
+  }
+}
+
+export const createGameBoard = (
+  gameboardLayout: GameboardLayout,
+): LinkedGameBoard => {
+  const board = initGameBoard(pickLayout(gameboardLayout));
   return { board, graph: linkGameBoard(board) };
 };
 

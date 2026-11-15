@@ -4,13 +4,14 @@ import {
   Phase,
   LandType,
   ResourceType,
-  classicLayout,
   ROBBER_ROLL,
   FACTION_COLORS,
   GUIDE_LOG,
-  LAND_RESSOURCE,
+  LAND_RESOURCE,
   YOU_ROLLED,
   YOU_DIDNT_ROLLED,
+  SETTLEMENT,
+  ROAD,
 } from 'shared';
 import type {
   GameBoard,
@@ -68,7 +69,8 @@ class GameStateContext {
   private factionSwitch: number = 0;
 
   constructor(gameId: string, settings: SettingsData, state: State) {
-    const { board, graph } = createGameBoard(classicLayout);
+    this.settings = settings;
+    const { board, graph } = createGameBoard(this.settings.gameboardLayout);
     this.graph = graph;
     this.data = {
       gameId: gameId,
@@ -84,7 +86,6 @@ class GameStateContext {
       winner: null,
       winCondition: null,
     };
-    this.settings = settings;
     this.transitionTo(state);
   }
 
@@ -126,7 +127,7 @@ class GameStateContext {
       faction: this.assignFaction(),
       personalLog: {
         id: this.logId++,
-        message: `Welcome to the game ${playerId}`,
+        message: `Welcome to ${this.settings.gameboardLayout} ${playerId}`,
       },
       guideLog: `${GUIDE_LOG[Phase.START]}`,
       currentRoll: {
@@ -411,32 +412,37 @@ class GameStateContext {
       graphEntry.adjacentTiles.forEach((tile) => {
         let prod: number = 0;
         if (placementPhase === true) {
-          prod = produceResources(tile.land, player.resources);
+          prod = produceResources(
+            tile.land,
+            player.resources,
+            this.settings.resourcesMultiplier,
+          );
         } else if (tile.value === this.data.dicesSum && !tile.hasRobber) {
           const settlement = player.settlementsBuilt.get(settlementId);
           if (settlement)
             prod = produceResources(
               tile.land,
               player.resources,
+              this.settings.resourcesMultiplier,
               settlement.isCity,
             );
         }
         if (prod > 0 && !placementPhase) {
           this.setPersonalLog(
             player,
-            `You produced ${prod} ${LAND_RESSOURCE[tile.land]}`,
+            `You produced ${prod} ${LAND_RESOURCE[tile.land]}`,
           );
-          //console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESSOURCE[tile.land]}`);
+          //console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESOURCE[tile.land]}`);
         } else if (tile.hasRobber && !placementPhase) {
           this.setPersonalLog(
             player,
-            `Robert the Robber stole your ${LAND_RESSOURCE[tile.land]} production !`,
+            `Robert the Robber stole your ${LAND_RESOURCE[tile.land]} production !`,
           );
           //console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by Robert the Robber !`);
         } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
             player,
-            `You didn't produce anything with your ${LAND_RESSOURCE[tile.land]} ...`,
+            `You didn't produce anything with your ${LAND_RESOURCE[tile.land]} ...`,
           );
           //console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything in the ${LandType.DESERT}`);
         } else if (placementPhase) {
@@ -550,13 +556,13 @@ class PlacementPhase extends State {
   public build(playerId: string, payload: BuildPayload) {
     const p = this.state.isPlayersTurn(playerId);
     if (!p) return;
-    if (payload.kind === 'settlement' && this.settlementBuilt) {
+    if (payload.kind === SETTLEMENT && this.settlementBuilt) {
       this.state.setPersonalLog(
         p,
         'You already built a settlement, build a road now ...',
       );
       return;
-    } else if (payload.kind === 'road' && !this.settlementBuilt) {
+    } else if (payload.kind === ROAD && !this.settlementBuilt) {
       this.state.setPersonalLog(p, 'You must build a settlement first ...');
       return;
     }
@@ -573,7 +579,7 @@ class PlacementPhase extends State {
       this.state.setPersonalLog(p, `${response.message}`);
       return;
     }
-    if (payload.kind == 'settlement' && this.settlementBuilt == false) {
+    if (payload.kind == SETTLEMENT && this.settlementBuilt == false) {
       this.settlementBuilt = true;
       this.state.setPersonalLog(
         p,
@@ -778,8 +784,8 @@ class TradeAndBuildPhase extends State {
     const p = this.state.isPlayersTurn(playerId);
     if (!p) return;
     this.state.setCurrentTurnIndex();
-    this.state.setPersonalLog(p, `You skipped your turn !`);
-    this.state.setMasterLog(`${playerId} skipped his/her turn !`);
+    this.state.setPersonalLog(p, `You ended your turn !`);
+    this.state.setMasterLog(`${playerId} ended his/her turn !`);
     this.resetTradeBuildCount();
   }
 

@@ -7,6 +7,7 @@ import {
   type BuildPayload,
   Faction,
   SettingsData,
+  BuildingType,
 } from 'shared';
 import {
   hasEnoughResourcesToBuild,
@@ -170,7 +171,7 @@ function cityUpgradeCheck(
       valid: false,
       message: "Can't upgrade more, it's already a city !",
     };
-  } else if (!hasEnoughResourcesToBuild(player.resources, 'city')) {
+  } else if (!hasEnoughResourcesToBuild(player.resources, BuildingType.CITY)) {
     return {
       valid: false,
       message:
@@ -179,7 +180,7 @@ function cityUpgradeCheck(
   }
   player.victoryPoints += cityPoints;
   target.isCity = true;
-  payBuildResources(player.resources, 'city');
+  payBuildResources(player.resources, BuildingType.CITY);
   return {
     valid: true,
     message: 'Settlement upgraded to a city !',
@@ -196,7 +197,7 @@ function settlementCheck(
 ): BuildValidation {
   if (
     !placementPhase &&
-    !hasEnoughResourcesToBuild(player.resources, 'settlement')
+    !hasEnoughResourcesToBuild(player.resources, BuildingType.SETTLEMENT)
   ) {
     return {
       valid: false,
@@ -222,7 +223,7 @@ function settlementCheck(
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-    payBuildResources(player.resources, 'settlement');
+    payBuildResources(player.resources, BuildingType.SETTLEMENT);
   }
   return {
     valid: true,
@@ -237,7 +238,10 @@ function roadCheck(
   roadPoints: number,
   placementPhase?: boolean,
 ): BuildValidation {
-  if (!placementPhase && !hasEnoughResourcesToBuild(player.resources, 'road')) {
+  if (
+    !placementPhase &&
+    !hasEnoughResourcesToBuild(player.resources, BuildingType.ROAD)
+  ) {
     return {
       valid: false,
       message: "You don't have enough resources to build a road ...",
@@ -256,7 +260,7 @@ function roadCheck(
   target.faction = player.faction;
   target.ownerId = player.playerId;
   if (!placementPhase) {
-    payBuildResources(player.resources, 'road');
+    payBuildResources(player.resources, BuildingType.ROAD);
   }
   return {
     valid: true,
@@ -277,7 +281,7 @@ export const buildCheck = (
   try {
     let target: RoadData | SettlementData | undefined;
     switch (payload.kind) {
-      case 'road':
+      case BuildingType.ROAD:
         target = board.roads.find((r) => r.id === payload.id);
         if (!target) break;
         check = roadCheck(
@@ -298,7 +302,7 @@ export const buildCheck = (
           }
         }
         break;
-      case 'settlement':
+      case BuildingType.SETTLEMENT:
         target = board.settlements.find((r) => r.id === payload.id);
         if (!target) break;
         if (!target.ownerId) {

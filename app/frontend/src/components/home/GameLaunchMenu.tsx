@@ -5,6 +5,7 @@ import {
   Button,
   Group,
   Paper,
+  Select,
   Slider,
   Stack,
   Text,
@@ -12,14 +13,15 @@ import {
 import {
   BUILD_LIMIT_DFLT,
   CITY_POINT_DFLT,
-  GENERIC_PORT_RATE_DFLT,
+  GENERIC_PORT_OFFER_RATE_DFLT,
   POINTS_TO_WIN_DFLT,
-  RESERVE_RATE_DFLT,
+  RESERVE_OFFER_RATE_DFLT,
   ROAD_POINT_DFLT,
   SETTLEMENT_POINT_DFLT,
-  SPECIAL_PORT_RATE_DFLT,
+  SPECIAL_PORT_OFFER_RATE_DFLT,
   TRADE_LIMIT_DFLT,
   MIN_SETTINGS,
+  GameboardLayout,
   TraderType,
   MAX_LIMIT,
   MAX_RATE,
@@ -27,19 +29,26 @@ import {
   MAX_POINTS_TO_WIN,
   MAX_BONUS,
   type SettingsData,
+  MULTIPLIER_DFLT,
+  MIN_MULTIPLIER,
+  MAX_MULTIPLIER,
+  Phase,
+  ResourceType,
 } from "shared";
 import { useCreateLobby } from "../../game/utils/game.utils";
 
 const DEFAULTS: SettingsData = {
+  gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
   tradeLimit: TRADE_LIMIT_DFLT,
   buildLimit: BUILD_LIMIT_DFLT,
-  specialPortRate: SPECIAL_PORT_RATE_DFLT,
-  genericPortRate: GENERIC_PORT_RATE_DFLT,
-  reserveRate: RESERVE_RATE_DFLT,
+  specialPortOfferRate: SPECIAL_PORT_OFFER_RATE_DFLT,
+  genericPortOfferRate: GENERIC_PORT_OFFER_RATE_DFLT,
+  reserveOfferRate: RESERVE_OFFER_RATE_DFLT,
   settlementPoints: SETTLEMENT_POINT_DFLT,
   cityPoints: CITY_POINT_DFLT,
   pointsToWin: POINTS_TO_WIN_DFLT,
   roadPoints: ROAD_POINT_DFLT,
+  resourcesMultiplier: MULTIPLIER_DFLT,
   woodBonus: 0,
   sheepBonus: 0,
   brickBonus: 0,
@@ -48,7 +57,8 @@ const DEFAULTS: SettingsData = {
 };
 
 type SliderConfig = {
-  key: keyof SettingsData;
+  // Numeric settings only — the layout is handled separately by the Select
+  key: Exclude<keyof SettingsData, "gameboardLayout">;
   label: string;
   description?: string;
   min: number;
@@ -58,19 +68,19 @@ type SliderConfig = {
 const SECTIONS: { id: string; title: string; sliders: SliderConfig[] }[] = [
   {
     id: "limits",
-    title: "Actions limits (number of action per player)",
+    title: "Actions limits",
     sliders: [
       {
         key: "tradeLimit",
         label: "Trades authorized",
-        description: "during « Trade and Build » phase",
+        description: `during « ${Phase.TRADE_BUILD} »`,
         min: MIN_SETTINGS,
         max: MAX_LIMIT,
       },
       {
         key: "buildLimit",
         label: "Builds authorized",
-        description: "during « Trade and Build » phase",
+        description: `during « ${Phase.TRADE_BUILD} »`,
         min: MIN_SETTINGS,
         max: MAX_LIMIT,
       },
@@ -78,23 +88,26 @@ const SECTIONS: { id: string; title: string; sliders: SliderConfig[] }[] = [
   },
   {
     id: "trades",
-    title: "Trade rates (price paid for one resource)",
+    title: "Trade Rates",
     sliders: [
       {
-        key: "specialPortRate",
+        key: "specialPortOfferRate",
         label: TraderType.SPECIALIZED_PORT,
+        description: "specialized resource to be paid for the targeted one",
         min: MIN_SETTINGS,
         max: MAX_RATE,
       },
       {
-        key: "genericPortRate",
+        key: "genericPortOfferRate",
         label: TraderType.GENERIC_PORT,
+        description: "resource to be paid for the targeted one",
         min: MIN_SETTINGS,
         max: MAX_RATE,
       },
       {
-        key: "reserveRate",
+        key: "reserveOfferRate",
         label: TraderType.RESERVE,
+        description: "resource to be paid for the targeted one",
         min: MIN_SETTINGS,
         max: MAX_RATE,
       },
@@ -102,26 +115,26 @@ const SECTIONS: { id: string; title: string; sliders: SliderConfig[] }[] = [
   },
   {
     id: "points",
-    title: "Victory points",
+    title: "Victory Points Earnings",
     sliders: [
       {
         key: "roadPoints",
         label: "Road",
-        description: "amount of points earned when building a road",
+        description: "points per road built",
         min: 0,
         max: MAX_POINTS,
       },
       {
         key: "settlementPoints",
         label: "Settlement",
-        description: "amount of points earned when building a settlement",
+        description: "points per settlement built",
         min: MIN_SETTINGS,
         max: MAX_POINTS,
       },
       {
         key: "cityPoints",
         label: "City",
-        description: "amount of points earned when building a city",
+        description: "points per ctiy built",
         min: MIN_SETTINGS,
         max: MAX_POINTS,
       },
@@ -136,13 +149,40 @@ const SECTIONS: { id: string; title: string; sliders: SliderConfig[] }[] = [
   },
   {
     id: "bonus",
-    title: "Starting resources",
+    title: "Resources",
     sliders: [
-      { key: "woodBonus", label: "Wood", min: 0, max: MAX_BONUS },
-      { key: "sheepBonus", label: "Sheep", min: 0, max: MAX_BONUS },
-      { key: "brickBonus", label: "Brick", min: 0, max: MAX_BONUS },
-      { key: "oreBonus", label: "Ore", min: 0, max: MAX_BONUS },
-      { key: "wheatBonus", label: "Wheat", min: 0, max: MAX_BONUS },
+      {
+        key: "resourcesMultiplier",
+        label: "Resources Multiplier",
+        description: `multiplicator applied to resources produced during « ${Phase.RESOURCES} »`,
+        min: MIN_MULTIPLIER,
+        max: MAX_MULTIPLIER,
+      },
+      {
+        key: "woodBonus",
+        label: `${ResourceType.WOOD}`,
+        min: 0,
+        max: MAX_BONUS,
+      },
+      {
+        key: "sheepBonus",
+        label: `${ResourceType.SHEEP}`,
+        min: 0,
+        max: MAX_BONUS,
+      },
+      {
+        key: "brickBonus",
+        label: `${ResourceType.BRICK}`,
+        min: 0,
+        max: MAX_BONUS,
+      },
+      { key: "oreBonus", label: `${ResourceType.ORE}`, min: 0, max: MAX_BONUS },
+      {
+        key: "wheatBonus",
+        label: `${ResourceType.WHEAT}`,
+        min: 0,
+        max: MAX_BONUS,
+      },
     ],
   },
 ];
@@ -183,10 +223,6 @@ function SettingsSlider({
         value={value}
         onChange={onChange}
         thumbSize={26}
-        marks={[
-          { value: config.min, label: String(config.min) },
-          { value: config.max, label: String(config.max) },
-        ]}
       />
     </Stack>
   );
@@ -197,8 +233,11 @@ export default function GameLaunchMenu() {
   const [values, setValues] = useState<SettingsData>({ ...DEFAULTS });
   const [opened, setOpened] = useState(false);
 
-  const setValue = (key: keyof SettingsData, val: number) =>
-    setValues((prev) => ({ ...prev, [key]: Math.round(val) }));
+  // Generic setter: handles the layout (string) and numeric sliders alike
+  const setValue = <K extends keyof SettingsData>(
+    key: K,
+    val: SettingsData[K],
+  ) => setValues((prev) => ({ ...prev, [key]: val }));
 
   const reset = () => setValues({ ...DEFAULTS });
 
@@ -217,7 +256,19 @@ export default function GameLaunchMenu() {
 
       {opened && (
         <Box pt="sm">
-          <Accordion defaultValue="limits" chevronPosition="left">
+          {/* Gameboard layout — not a numeric setting, so it lives outside the sliders */}
+          <Select
+            label="Gameboard layout"
+            data={Object.values(GameboardLayout) as GameboardLayout[]}
+            value={values.gameboardLayout}
+            onChange={(val) =>
+              val !== null &&
+              setValue("gameboardLayout", val as GameboardLayout)
+            }
+            allowDeselect={false}
+            mb="md"
+          />
+          <Accordion chevronPosition="left">
             {SECTIONS.map((section) => (
               <Accordion.Item key={section.id} value={section.id}>
                 <Accordion.Control>{section.title}</Accordion.Control>
@@ -228,7 +279,9 @@ export default function GameLaunchMenu() {
                         key={config.key}
                         config={config}
                         value={values[config.key]}
-                        onChange={(val) => setValue(config.key, val)}
+                        onChange={(val) =>
+                          setValue(config.key, Math.round(val))
+                        }
                       />
                     ))}
                   </Stack>
