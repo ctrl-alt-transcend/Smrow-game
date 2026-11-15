@@ -8,7 +8,7 @@ import {
   ThemeIcon,
   Title,
 } from "@mantine/core";
-import type { PlayerDto } from "shared";
+import { ResourceType, type PlayerDto } from "shared";
 
 export type Resources = {
   wood: number;
@@ -25,11 +25,11 @@ type ResourceMeta = {
 };
 
 const RESOURCE_META: ResourceMeta[] = [
-  { key: "wood", label: "Wood", icon: "🌲" },
-  { key: "brick", label: "Brick", icon: "🧱" },
-  { key: "wheat", label: "Wheat", icon: "🌾" },
-  { key: "sheep", label: "Sheep", icon: "🐑" },
-  { key: "ore", label: "Ore", icon: "🪨" },
+  { key: "wood", label: ResourceType.WOOD, icon: "🌲" },
+  { key: "brick", label: ResourceType.BRICK, icon: "🧱" },
+  { key: "wheat", label: ResourceType.WHEAT, icon: "🌾" },
+  { key: "sheep", label: ResourceType.SHEEP, icon: "🐑" },
+  { key: "ore", label: ResourceType.ORE, icon: "🪨" },
 ];
 
 type ResourcesPanelProps = {

@@ -1,13 +1,20 @@
 import { useNavigate } from "react-router";
 import axios from "axios";
+import { SettingsDataSchema, type SettingsData } from "shared";
+import { z } from "zod";
 import { http } from "../../services/http.tsx";
 
 export function useCreateLobby() {
   const navigate = useNavigate();
 
-  return async function createLobby() {
+  return async function createLobby(values: SettingsData) {
+    const parsed = SettingsDataSchema.safeParse(values);
+    if (!parsed.success) {
+      console.error("Invalid settings:", z.treeifyError(parsed.error));
+      return;
+    }
     try {
-      await http.post("/game/create");
+      await http.post("/game/create", parsed.data);
       navigate("/game");
       console.log("Game created succesfully");
     } catch (error) {

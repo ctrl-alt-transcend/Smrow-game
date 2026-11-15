@@ -10,10 +10,8 @@ export default function SkipTurnButton({ isMyTurn }: { isMyTurn: boolean }) {
 
   const openModal = () => {
     modals.openConfirmModal({
-      title: "Confirm skip turn",
-      children: (
-        <Text size="sm">Are you sure you want to skip your turn ?</Text>
-      ),
+      title: "Confirm end turn",
+      children: <Text size="sm">Are you sure you want to end your turn ?</Text>,
       labels: { confirm: "Confirm", cancel: "Cancel" },
       onConfirm: handleSkipRequest,
       centered: true,
@@ -22,7 +20,7 @@ export default function SkipTurnButton({ isMyTurn }: { isMyTurn: boolean }) {
 
   return (
     <Button onClick={openModal} disabled={!isMyTurn} fullWidth>
-      Skip turn
+      End turn
     </Button>
   );
 }

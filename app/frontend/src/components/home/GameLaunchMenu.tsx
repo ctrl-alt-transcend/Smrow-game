@@ -1,0 +1,304 @@
+import { useState } from "react";
+import {
+  Accordion,
+  Box,
+  Button,
+  Group,
+  Paper,
+  Select,
+  Slider,
+  Stack,
+  Text,
+} from "@mantine/core";
+import {
+  BUILD_LIMIT_DFLT,
+  CITY_POINT_DFLT,
+  GENERIC_PORT_OFFER_RATE_DFLT,
+  POINTS_TO_WIN_DFLT,
+  RESERVE_OFFER_RATE_DFLT,
+  ROAD_POINT_DFLT,
+  SETTLEMENT_POINT_DFLT,
+  SPECIAL_PORT_OFFER_RATE_DFLT,
+  TRADE_LIMIT_DFLT,
+  MIN_SETTINGS,
+  GameboardLayout,
+  TraderType,
+  MAX_LIMIT,
+  MAX_RATE,
+  MAX_POINTS,
+  MAX_POINTS_TO_WIN,
+  MAX_BONUS,
+  type SettingsData,
+  MULTIPLIER_DFLT,
+  MIN_MULTIPLIER,
+  MAX_MULTIPLIER,
+  Phase,
+  ResourceType,
+} from "shared";
+import { useCreateLobby } from "../../game/utils/game.utils";
+
+const DEFAULTS: SettingsData = {
+  gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
+  tradeLimit: TRADE_LIMIT_DFLT,
+  buildLimit: BUILD_LIMIT_DFLT,
+  specialPortOfferRate: SPECIAL_PORT_OFFER_RATE_DFLT,
+  genericPortOfferRate: GENERIC_PORT_OFFER_RATE_DFLT,
+  reserveOfferRate: RESERVE_OFFER_RATE_DFLT,
+  settlementPoints: SETTLEMENT_POINT_DFLT,
+  cityPoints: CITY_POINT_DFLT,
+  pointsToWin: POINTS_TO_WIN_DFLT,
+  roadPoints: ROAD_POINT_DFLT,
+  resourcesMultiplier: MULTIPLIER_DFLT,
+  woodBonus: 0,
+  sheepBonus: 0,
+  brickBonus: 0,
+  oreBonus: 0,
+  wheatBonus: 0,
+};
+
+type SliderConfig = {
+  // Numeric settings only — the layout is handled separately by the Select
+  key: Exclude<keyof SettingsData, "gameboardLayout">;
+  label: string;
+  description?: string;
+  min: number;
+  max: number;
+};
+
+const SECTIONS: { id: string; title: string; sliders: SliderConfig[] }[] = [
+  {
+    id: "limits",
+    title: "Actions limits",
+    sliders: [
+      {
+        key: "tradeLimit",
+        label: "Trades authorized",
+        description: `during « ${Phase.TRADE_BUILD} »`,
+        min: MIN_SETTINGS,
+        max: MAX_LIMIT,
+      },
+      {
+        key: "buildLimit",
+        label: "Builds authorized",
+        description: `during « ${Phase.TRADE_BUILD} »`,
+        min: MIN_SETTINGS,
+        max: MAX_LIMIT,
+      },
+    ],
+  },
+  {
+    id: "trades",
+    title: "Trade Rates",
+    sliders: [
+      {
+        key: "specialPortOfferRate",
+        label: TraderType.SPECIALIZED_PORT,
+        description: "specialized resource to be paid for the targeted one",
+        min: MIN_SETTINGS,
+        max: MAX_RATE,
+      },
+      {
+        key: "genericPortOfferRate",
+        label: TraderType.GENERIC_PORT,
+        description: "resource to be paid for the targeted one",
+        min: MIN_SETTINGS,
+        max: MAX_RATE,
+      },
+      {
+        key: "reserveOfferRate",
+        label: TraderType.RESERVE,
+        description: "resource to be paid for the targeted one",
+        min: MIN_SETTINGS,
+        max: MAX_RATE,
+      },
+    ],
+  },
+  {
+    id: "points",
+    title: "Victory Points Earnings",
+    sliders: [
+      {
+        key: "roadPoints",
+        label: "Road",
+        description: "points per road built",
+        min: 0,
+        max: MAX_POINTS,
+      },
+      {
+        key: "settlementPoints",
+        label: "Settlement",
+        description: "points per settlement built",
+        min: MIN_SETTINGS,
+        max: MAX_POINTS,
+      },
+      {
+        key: "cityPoints",
+        label: "City",
+        description: "points per ctiy built",
+        min: MIN_SETTINGS,
+        max: MAX_POINTS,
+      },
+      {
+        key: "pointsToWin",
+        label: "Points to win",
+        description: "amount of points for victory",
+        min: MIN_SETTINGS,
+        max: MAX_POINTS_TO_WIN,
+      },
+    ],
+  },
+  {
+    id: "bonus",
+    title: "Resources",
+    sliders: [
+      {
+        key: "resourcesMultiplier",
+        label: "Resources Multiplier",
+        description: `multiplicator applied to resources produced during « ${Phase.RESOURCES} »`,
+        min: MIN_MULTIPLIER,
+        max: MAX_MULTIPLIER,
+      },
+      {
+        key: "woodBonus",
+        label: `${ResourceType.WOOD}`,
+        min: 0,
+        max: MAX_BONUS,
+      },
+      {
+        key: "sheepBonus",
+        label: `${ResourceType.SHEEP}`,
+        min: 0,
+        max: MAX_BONUS,
+      },
+      {
+        key: "brickBonus",
+        label: `${ResourceType.BRICK}`,
+        min: 0,
+        max: MAX_BONUS,
+      },
+      { key: "oreBonus", label: `${ResourceType.ORE}`, min: 0, max: MAX_BONUS },
+      {
+        key: "wheatBonus",
+        label: `${ResourceType.WHEAT}`,
+        min: 0,
+        max: MAX_BONUS,
+      },
+    ],
+  },
+];
+
+function SettingsSlider({
+  config,
+  value,
+  onChange,
+}: {
+  config: SliderConfig;
+  value: number;
+  onChange: (val: number) => void;
+}) {
+  return (
+    <Stack gap={4}>
+      <Group justify="space-between" gap="xs" wrap="nowrap">
+        <Box>
+          <Text size="sm" fw={500} component="span">
+            {config.label}
+          </Text>
+          {config.description && (
+            <>
+              {" "}
+              <Text size="xs" c="dimmed" component="span">
+                — {config.description}
+              </Text>
+            </>
+          )}
+        </Box>
+        <Text size="sm" c="dimmed" ff="monospace" style={{ flexShrink: 0 }}>
+          {value}
+        </Text>
+      </Group>
+      <Slider
+        min={config.min}
+        max={config.max}
+        step={1}
+        value={value}
+        onChange={onChange}
+        thumbSize={26}
+      />
+    </Stack>
+  );
+}
+
+export default function GameLaunchMenu() {
+  const createLobby = useCreateLobby();
+  const [values, setValues] = useState<SettingsData>({ ...DEFAULTS });
+  const [opened, setOpened] = useState(false);
+
+  // Generic setter: handles the layout (string) and numeric sliders alike
+  const setValue = <K extends keyof SettingsData>(
+    key: K,
+    val: SettingsData[K],
+  ) => setValues((prev) => ({ ...prev, [key]: val }));
+
+  const reset = () => setValues({ ...DEFAULTS });
+
+  return (
+    <Paper shadow="xs" radius="md" p={{ base: "sm", sm: "md" }} w="100%">
+      <Button
+        variant="light"
+        fullWidth
+        justify="space-between"
+        rightSection={<Text size="sm">{opened ? "▲" : "▼"}</Text>}
+        onClick={() => setOpened((o) => !o)}
+        aria-expanded={opened}
+      >
+        Create a game
+      </Button>
+
+      {opened && (
+        <Box pt="sm">
+          {/* Gameboard layout — not a numeric setting, so it lives outside the sliders */}
+          <Select
+            label="Gameboard layout"
+            data={Object.values(GameboardLayout) as GameboardLayout[]}
+            value={values.gameboardLayout}
+            onChange={(val) =>
+              val !== null &&
+              setValue("gameboardLayout", val as GameboardLayout)
+            }
+            allowDeselect={false}
+            mb="md"
+          />
+          <Accordion chevronPosition="left">
+            {SECTIONS.map((section) => (
+              <Accordion.Item key={section.id} value={section.id}>
+                <Accordion.Control>{section.title}</Accordion.Control>
+                <Accordion.Panel>
+                  <Stack gap="lg">
+                    {section.sliders.map((config) => (
+                      <SettingsSlider
+                        key={config.key}
+                        config={config}
+                        value={values[config.key]}
+                        onChange={(val) =>
+                          setValue(config.key, Math.round(val))
+                        }
+                      />
+                    ))}
+                  </Stack>
+                </Accordion.Panel>
+              </Accordion.Item>
+            ))}
+          </Accordion>
+          <Group justify="space-between" mt="md" gap="sm" wrap="wrap">
+            <Button variant="subtle" color="gray" onClick={reset}>
+              Default
+            </Button>
+            <Button onClick={() => createLobby(values)}>
+              Validate and create game
+            </Button>
+          </Group>
+        </Box>
+      )}
+    </Paper>
+  );
+}
