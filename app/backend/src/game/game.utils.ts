@@ -1,7 +1,8 @@
-import type { Player, BuildRequestPayload } from 'shared';
+import type { Player, BuildPayload, TradePayload } from 'shared';
+import { TraderType } from 'shared';
 
 // TODO: move to DTO??
-export function isBuildRequestPayload(p: unknown): p is BuildRequestPayload {
+export function isBuildPayload(p: unknown): p is BuildPayload {
   if (typeof p !== 'object' || p === null) return false;
   const o = p as Record<string, unknown>;
   if (o.kind !== 'road' && o.kind !== 'settlement') return false;
@@ -10,45 +11,51 @@ export function isBuildRequestPayload(p: unknown): p is BuildRequestPayload {
   );
 }
 
+export function isTradePayload(p: unknown): p is TradePayload {
+  if (typeof p !== 'object' || p === null) return false;
+  const o = p as Record<string, unknown>;
+  if (o.trader !== TraderType) return false;
+  return (
+    typeof o.id === 'string' && typeof o.data === 'object' && o.data !== null
+  );
+}
+
 export function updateValue(
   currentValue: number,
   limit: number,
-  newValue: number | undefined,
+  newValue?: number,
 ): number {
-  if (newValue !== undefined) {
-    return newValue;
-  } else if (currentValue + 1 === limit) {
+  if (newValue !== undefined) return newValue;
+  if (currentValue + 1 === limit) {
     return 0;
   } else {
     return currentValue + 1;
   }
 }
 
-export function funnyLogs(id: string, value: number): string {
+export function funnyRollLog(value: number): string {
   if (value <= 3) {
-    return `${id} got an almost useless ${value}...`;
+    return `got an almost useless ${value} in total ...`;
+  } else if (value > 3 && value <= 6) {
+    return `got a tiny little ${value} in total ...`;
+  } else if (value === 7) {
+    return `got a damned ${value} in total !`;
+  } else if (value > 7 && value <= 9) {
+    return `got a solid ${value} in total .`;
+  } else if (value > 9 && value <= 12) {
+    return `got a huge ${value} in total !`;
   }
-  if (value > 3 && value <= 6) {
-    return `${id} got a tiny little ${value}...`;
-  }
-  if (value > 6 && value <= 9) {
-    return `${id} got a solid ${value}.`;
-  }
-  if (value > 9 && value <= 12) {
-    return `${id} got a huge ${value}!`;
-  }
-  return `${id} rolled a ${value}`;
+  return `rolled a ${value}`;
 }
 
 export function printPlayer(p: Player) {
   console.log(`🖨️ printPlayer: ${p.playerId}:`);
-  console.log(`- wood: ${p.ressources.wood}`);
-  console.log(`- sheep: ${p.ressources.sheep}`);
-  console.log(`- brick: ${p.ressources.brick}`);
-  console.log(`- rock: ${p.ressources.rock}`);
-  console.log(`- hay: ${p.ressources.hay}`);
+  console.log(`- wood: ${p.resources.wood}`);
+  console.log(`- sheep: ${p.resources.sheep}`);
+  console.log(`- brick: ${p.resources.brick}`);
+  console.log(`- ore: ${p.resources.ore}`);
+  console.log(`- wheat: ${p.resources.wheat}`);
   console.log(`- roads: ${p.roadsBuilt}`);
-  console.log(`- settlements: ${p.settlementsBuilt}`);
 }
 
 export function printAllPlayers(p: Map<string, Player>) {

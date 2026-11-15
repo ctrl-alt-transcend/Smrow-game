@@ -7,7 +7,7 @@
 		"frontend"
 	],
 	"scripts": {
-		"build:shared": "npm run build -w shared",
+		"build:shared": "npm run build -w shared ",
 		"prepare": "cd ../ && husky app/.husky"
 	},
 	"allowScripts": {

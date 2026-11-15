@@ -9,29 +9,30 @@ import {
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
-import type { JwtPayload } from 'shared';
-import type { BuildRequestPayload } from 'shared';
+import { ZGEG_DEV, type JwtPayload } from 'shared';
+import type { BuildPayload, GameDataDto, TradePayload } from 'shared';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
-import { instrument } from '@socket.io/admin-ui'; //WARN: dev only
+import { GameStateContext } from './GameStateContext';
+import { parseCookie } from 'cookie';
 
-export interface SocketUser {
+interface SocketUser {
   id: string;
   username: string;
 }
 
-export interface SocketData {
+interface SocketData {
   user: SocketUser;
 }
 
-export type SocketServer = Server<
+type SocketServer = Server<
   DefaultEventsMap,
   DefaultEventsMap,
   DefaultEventsMap,
   SocketData
 >;
-export type SocketClient = Socket<
+type SocketClient = Socket<
   DefaultEventsMap,
   DefaultEventsMap,
   DefaultEventsMap,
@@ -53,6 +54,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     private readonly gameService: GameService,
   ) {}
 
+  private emitGameDataDto(game: GameStateContext, user: string) {
+    let gameData: GameDataDto;
+    try {
+      gameData = game.getGameDataDto(user);
+    } catch (e) {
+      console.log(`Error: ${e}`);
+      return;
+    }
+    this.server.to(game.getGameId()).emit('gameState', gameData);
+  }
+
   /**
    * @brief Handle the 'dice' event from the client.
    * @details Always broadcasts the new gameState to all clients in the room.
@@ -60,61 +72,63 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('dice')
   dice(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
-    const result = game.diceRequest(client.data.user.username);
+    game.diceRequest(client.data.user.username);
+    game.phaseCheckRequest();
 
     //⚠️ FOR TESTING
+    game.diceRequest(`${ZGEG_DEV}`);
     game.phaseCheckRequest();
-    game.diceRequest('enriquest');
-    game.phaseCheckRequest();
-    game.diceRequest('spagg');
     // -------------
 
-    game.phaseCheckRequest();
-    game.setDiceRoll(result.value);
-    game.setMasterLog(result.message);
-    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
-    return { ...result };
+    this.emitGameDataDto(game, client.data.user.username);
   }
 
   @SubscribeMessage('skip')
   skip(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
-    const result = game.skipRequest(client.data.user.username);
+    game.skipRequest(client.data.user.username);
+    game.phaseCheckRequest();
 
     //⚠️ FOR TESTING
+    game.skipRequest(`${ZGEG_DEV}`);
     game.phaseCheckRequest();
-    game.skipRequest('enriquest');
-    game.phaseCheckRequest();
-    game.skipRequest('spagg');
     // -------------
 
-    game.phaseCheckRequest();
-    game.setDiceRoll(result.value);
-    game.setMasterLog(result.message);
-    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
-    return { ...result };
+    this.emitGameDataDto(game, client.data.user.username);
   }
 
   @SubscribeMessage('build')
   build(
     @ConnectedSocket() client: SocketClient,
-    @MessageBody() payload: BuildRequestPayload,
+    @MessageBody() payload: BuildPayload,
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
-    const result = game.buildRequest(client.data.user.username, payload);
+    game.buildRequest(client.data.user.username, payload);
+    game.phaseCheckRequest();
 
     //⚠️ FOR TESTING
+    game.buildRequest(`${ZGEG_DEV}`, payload);
     game.phaseCheckRequest();
-    game.buildRequest('enriquest', payload);
-    game.phaseCheckRequest();
-    game.buildRequest('spagg', payload);
     // -------------
 
+    this.emitGameDataDto(game, client.data.user.username);
+  }
+
+  @SubscribeMessage('trade')
+  trade(
+    @ConnectedSocket() client: SocketClient,
+    @MessageBody() payload: TradePayload,
+  ) {
+    const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    game.tradeRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-    game.setDiceRoll(result.value);
-    game.setMasterLog(result.message);
-    this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
-    return { ...result };
+
+    //⚠️ FOR TESTING
+    game.tradeRequest(`${ZGEG_DEV}`, payload);
+    game.phaseCheckRequest();
+    // -------------
+
+    this.emitGameDataDto(game, client.data.user.username);
   }
 
   @SubscribeMessage('joinRoom')
@@ -123,18 +137,18 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     try {
       const game = this.gameService.getGameInstanceByUserId(userId);
       await client.join(game.getGameId());
-      game.setMasterLog(`${client.data.user.username} joined the room`);
-      this.server.to(game.getGameId()).emit('gameState', game.getGameDataDto());
-      return { ok: true, data: game.getGameDataDto() };
+      this.emitGameDataDto(game, client.data.user.username);
+      return { ok: true, data: game.getGameDataDto(client.data.user.username) };
     } catch (e) {
       console.log('joinRoom failed', e);
       return { ok: false, error: 'not in game' };
     }
   }
 
-  afterInit(server: SocketServer) {
+  async afterInit(server: SocketServer) {
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
+      const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
       instrument(this.server, {
         auth: false,
         mode: 'development',
@@ -143,7 +157,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
 
     server.use((client: SocketClient, next) => {
       try {
-        const token = client.handshake.auth.token as string;
+        // Check is the client has a token or a cookie and save the cookie for verification with JWT
+
+        const authToken = client.handshake.auth.token as string;
+        const cookies = parseCookie(client.handshake.headers.cookie ?? '');
+        const cookieToken = cookies.access_token;
+        const token =
+          cookieToken ||
+          (typeof authToken === 'string' && authToken.length > 0
+            ? authToken
+            : cookieToken);
+        if (!token) {
+          throw new Error('JWT must be provided');
+        }
         const payload = this.jwtService.verify<JwtPayload>(token, {
           secret: readSecret(AUTH.JWT_FILE),
         });

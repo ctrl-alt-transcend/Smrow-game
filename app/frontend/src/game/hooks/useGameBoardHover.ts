@@ -1,6 +1,12 @@
 import { useState, useCallback } from "react";
 import type { HoverEntity } from "../types/gameboard.types";
-import type { TileData, RoadData, SettlementData } from "shared";
+import type {
+  TileData,
+  RoadData,
+  SettlementData,
+  CoastData,
+  ReserveData,
+} from "shared";
 
 /** @description generic hook for gameboard interactive elements */
 export const useHover = (
@@ -53,6 +59,20 @@ export const useGameBoardHover = () => {
     [],
   );
 
+  const handleCoastHover = useCallback(
+    (isHovered: boolean, coast: CoastData) => {
+      setHovered(isHovered ? { type: "coast", id: coast.id } : null);
+    },
+    [],
+  );
+
+  const handleReserveHover = useCallback(
+    (isHovered: boolean, reserve: ReserveData) => {
+      setHovered(isHovered ? { type: "reserve", id: reserve.id } : null);
+    },
+    [],
+  );
+
   const isTileHovered = useCallback(
     (tile: TileData) =>
       hovered?.type === "tile" && hovered.q === tile.q && hovered.r === tile.r,
@@ -64,9 +84,20 @@ export const useGameBoardHover = () => {
     [hovered],
   );
 
+  const isCoastHovered = useCallback(
+    (coast: CoastData) => hovered?.type === "coast" && hovered.id === coast.id,
+    [hovered],
+  );
+
   const isSettlementHovered = useCallback(
     (settlement: SettlementData) =>
       hovered?.type === "settlement" && hovered.id === settlement.id,
+    [hovered],
+  );
+
+  const isReserveHovered = useCallback(
+    (reserve: ReserveData) =>
+      hovered?.type === "reserve" && hovered.id === reserve.id,
     [hovered],
   );
 
@@ -74,9 +105,13 @@ export const useGameBoardHover = () => {
     hovered,
     handleTileHover,
     handleRoadHover,
+    handleCoastHover,
     handleSettlementHover,
+    handleReserveHover,
     isTileHovered,
     isRoadHovered,
     isSettlementHovered,
+    isCoastHovered,
+    isReserveHovered,
   };
 };

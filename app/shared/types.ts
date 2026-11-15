@@ -12,7 +12,7 @@ export type Id = z.infer<typeof IdSchema>;
 export const EmailSchema = z.email("Invalid email !");
 export type Email = z.infer<typeof EmailSchema>;
 
-export const UsernameSchema = z.string().min(4, "Username too short !").max(20, "Username too long !");
+export const UsernameSchema = z.string().min(4, "Username too short !").max(30, "Username too long !");
 export type Username = z.infer<typeof UsernameSchema>;
 
 export const NameSchema = z.string().nonempty("Can't be empty").max(20, "Name too long !");
@@ -35,3 +35,16 @@ export type JwtToken = z.infer<typeof JwtTokenSchema>;
 
 export const AvatarUrlSchema = z.string().optional();
 export type avatarURL = z.infer<typeof AvatarUrlSchema>;
+
+export type ChatMessage = {
+  id: number;
+  date: number;
+  content: string;
+  username: string;
+}
+
+export type GameList = {
+  gameId: string,
+  playerCount: number, 
+  state: string, //FIX: CHANGE THIS FOR A `Phase` TYPE LATER
+}

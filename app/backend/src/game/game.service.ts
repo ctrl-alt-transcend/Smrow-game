@@ -4,13 +4,25 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { PlayerProfile } from 'shared';
+import { ZGEG_DEV, type PlayerProfile, type GameList } from 'shared';
 import { GameStateContext, WhoStartsPhase } from './GameStateContext';
+import { SocialGateway } from '../social/social.gateway';
 
 @Injectable()
 export class GameService {
   private gameInstances: Map<string, GameStateContext> = new Map();
   private playersMap = new Map<string, string>(); //INFO: link playerId with a gameId
+
+  constructor(private readonly socialGateway: SocialGateway) {}
+
+  getGamesList(): GameList[] {
+    const arrayOfGames = Array.from(this.gameInstances.values());
+    return arrayOfGames.map((game: GameStateContext) => ({
+      gameId: game.getGameId(),
+      playerCount: game.getPlayers().size,
+      state: 'pending players',
+    }));
+  }
 
   /**
    * @brief Create a new game and add the player to it
@@ -23,11 +35,9 @@ export class GameService {
       );
     }
     const gameId = randomUUID();
+    const game = new GameStateContext(gameId, new WhoStartsPhase());
 
-    this.gameInstances.set(
-      gameId,
-      new GameStateContext(gameId, new WhoStartsPhase()),
-    ); // v.2
+    this.gameInstances.set(gameId, game);
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
   }
@@ -86,5 +96,17 @@ export class GameService {
     game
       .getPlayers()
       .set(playerProfile.username, game.initPlayer(playerProfile.username));
+    this.socialGateway.handleGameList(this.getGamesList());
+
+    //⚠️REMOVE in PROD -------------------
+    console.log(`---------------------------------------
+⚠️ The following is currently set in 'app/backend/src/game/game.service.ts':
+- 'DEVMOD' (allow playing for others): enabled for '${playerProfile.username}'
+- added mocked player '${ZGEG_DEV}' that will send requests in game,
+disable his calls in 'app/backend/src/game/game.gateway.ts'
+---------------------------------------`);
+    game.setDEVMOD(playerProfile.username);
+    game.getPlayers().set(`${ZGEG_DEV}`, game.initPlayer(`${ZGEG_DEV}`));
+    // -----------------------------------
   }
 }

@@ -61,6 +61,13 @@ export function LoginPanel(props: PaperProps) {
     }
   });
 
+  // For OAuth integration we can move this to other file, not sure where was rthe best location
+  // the use of hardcoded api, was just for the implementation, we can change it as well
+
+  function handleGoogleLogin() {
+    window.location.assign("http://localhost:3000/auth/google/login");
+  }
+
   return (
     <Paper p="xs" withBorder {...props}>
       <Text p="xs" size="lg" fw="500" c="Red">
@@ -129,7 +136,6 @@ export function LoginPanel(props: PaperProps) {
               error={loginForm.errors.password}
             />
           </Stack>
-
           <Group justify="space-between" mt="xl">
             <Button type="submit">{upperFirst(type)}</Button>
           </Group>
@@ -150,6 +156,10 @@ export function LoginPanel(props: PaperProps) {
           ? "Already have an account? Login"
           : "Don't have an account? Register"}
       </Anchor>
+
+      <Group>
+        <Button onClick={handleGoogleLogin}>Continue with google</Button>
+      </Group>
     </Paper>
   );
 }

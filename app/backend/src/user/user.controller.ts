@@ -1,6 +1,6 @@
 import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UpdateProfile } from 'shared';
+import { type UpdateProfile } from 'shared';
 
 @Controller('user')
 export class UserController {
