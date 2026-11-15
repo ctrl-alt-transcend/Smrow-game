@@ -17,7 +17,8 @@ export const useSelectionDisplay = (
     });
     if (selected.selectedTile.hasRobber)
       items.push({
-        label: `Robert the Robber will rob all the ${LAND_RESOURCE[selected.selectedTile.land]} you produce from this ${selected.selectedTile.land}`,
+        label: `Robber`,
+        //label: `Robber will rob all the ${LAND_RESOURCE[selected.selectedTile.land]} you produce from this ${selected.selectedTile.land}`,
       });
   }
   if (selected.selectedSettlement) {

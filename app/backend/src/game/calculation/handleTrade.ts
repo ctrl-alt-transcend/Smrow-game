@@ -113,7 +113,7 @@ export const tradeCheck = (
       }
       return {
         valid: false,
-        message: `Not enough ${payload.offer.resource} to trade ${payload.target.amount}x ${payload.target.resource} with ${payload.trader}}`,
+        message: `Not enough ${payload.offer.resource} to trade ${payload.target.amount}x ${payload.target.resource} with ${payload.trader}`,
       };
     default:
       break;

@@ -411,7 +411,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
         return (
           <TradeOfferPanel
             ratio={settings.genericPortOfferRate}
-            sourceId={port.coastId}
+            sourceId={port.id}
             sourceKind={TraderType.GENERIC_PORT}
             {...turnFlag}
           />
@@ -422,7 +422,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
         <TradeOfferPanel
           ratio={settings.specialPortOfferRate}
           offerLockedResource={port.type as ResourceType}
-          sourceId={port.coastId}
+          sourceId={port.id}
           sourceKind={TraderType.SPECIALIZED_PORT}
           {...turnFlag}
         />

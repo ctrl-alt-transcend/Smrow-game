@@ -25,17 +25,10 @@ import {
   PORT,
 } from 'shared';
 
-/* ================================================================== *
- * initGameBoard
- * ================================================================== */
-
 /** @description calculate and render an SVG board game based on the given layout */
 export const initGameBoard = (tiles: TileData[]): GameBoard => {
   const allVertices = new Map<string, Vertex>();
   const allEdges = new Map<string, Edge>();
-
-  /** Randomize tiles */
-  //randomizeRobber(tiles); // Robber must start on the desert
 
   tiles.forEach((tile) => {
     getHexCorners(tile.q, tile.r, HEX_SIZE).forEach((v) => {
@@ -123,9 +116,6 @@ export const initGameBoard = (tiles: TileData[]): GameBoard => {
   };
 };
 
-/* ------------------------------------------------------------------ *
- * Coast generation
- * ------------------------------------------------------------------ */
 const AXIAL_DIRECTIONS: ReadonlyArray<readonly [number, number]> = [
   [1, 0],
   [1, -1],
@@ -137,17 +127,9 @@ const AXIAL_DIRECTIONS: ReadonlyArray<readonly [number, number]> = [
 
 const axialKey = (q: number, r: number): string => `${q},${r}`;
 
-/** canonical key of an edge, independent of the p1/p2 order */
 const edgeKey = (a: Vertex, b: Vertex): string =>
   a.id < b.id ? `${a.id}|${b.id}` : `${b.id}|${a.id}`;
 
-/**
- * @description Generates a CoastData object for each outer edge (bordering the ocean).
- * Detection: an edge is considered coastal if it is not shared by any OTHER
- * land tile. The normals point away from the tile (toward the sea).
- * Ports are then assigned: some coasts stay empty, some get a generic port
- * (3:1), some get a specialized port (2:1).
- */
 const generateCoasts = (tiles: TileData[]): CoastData[] => {
   const sharedEdgeKeys = new Set<string>();
   const edgeKeyCount = new Map<string, number>();
@@ -174,7 +156,7 @@ const generateCoasts = (tiles: TileData[]): CoastData[] => {
     );
 
     for (const e of getHexEdges(tile.q, tile.r, HEX_SIZE)) {
-      if (sharedEdgeKeys.has(edgeKey(e.p1, e.p2))) continue; // inner edge
+      if (sharedEdgeKeys.has(edgeKey(e.p1, e.p2))) continue;
 
       const midX = (e.p1.x + e.p2.x) / 2;
       const midY = (e.p1.y + e.p2.y) / 2;
@@ -191,9 +173,7 @@ const generateCoasts = (tiles: TileData[]): CoastData[] => {
       });
     }
   }
-
   placePorts(coasts, tiles);
-
   return coasts;
 };
 
@@ -209,11 +189,6 @@ const SPECIALTIES: ResourceType[] = [
   ResourceType.ORE,
 ];
 
-/**
- * Standard Fisher-Yates shuffle using Math.random: the board layout itself
- * stays deterministic (tiles), but ports are intentionally scattered
- * differently on every new game.
- */
 const shuffle = <T>(arr: T[]): T[] => {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
@@ -223,17 +198,11 @@ const shuffle = <T>(arr: T[]): T[] => {
   return out;
 };
 
-/**
- * Randomly ordered port types: the 5 first picks receive the shuffled
- * specialties (2:1), the 4 last ones a generic type (3:1).
- * Shuffling the whole sequence would blur the specialized/generic split.
- */
 const buildPortTypeOrder = (): (ResourceType | 'generic')[] => [
   ...shuffle(SPECIALTIES),
   ...Array.from({ length: GENERIC_PORT_COUNT }, () => 'generic' as const),
 ];
 
-/** attach a port to a RANDOM coastal edge of the given tile */
 const attachPortToTile = (
   coastsByTile: Map<string, CoastData[]>,
   tile: TileData,
@@ -261,7 +230,6 @@ const attachPortToTile = (
  * Result: empty coasts (no port), generic ports (3:1) and specialized ports (2:1).
  */
 const placePorts = (coasts: CoastData[], tiles: TileData[]) => {
-  // group coastal edges by tile
   const coastsByTile = new Map<string, CoastData[]>();
   for (const c of coasts) {
     const key = axialKey(c.tile.q, c.tile.r);
@@ -270,7 +238,6 @@ const placePorts = (coasts: CoastData[], tiles: TileData[]) => {
     else coastsByTile.set(key, [c]);
   }
 
-  // candidate tiles: possess at least one coastal edge, random order
   const candidates = shuffle(
     tiles.filter((t) => coastsByTile.has(axialKey(t.q, t.r))),
   );
@@ -278,7 +245,6 @@ const placePorts = (coasts: CoastData[], tiles: TileData[]) => {
   const chosenKeys = new Set<string>();
   const chosenTiles: TileData[] = [];
 
-  // PASS 1: pick tiles, never adjacent to an already-chosen one
   for (const tile of candidates) {
     if (chosenTiles.length >= TOTAL_PORTS) break;
 
@@ -291,7 +257,6 @@ const placePorts = (coasts: CoastData[], tiles: TileData[]) => {
     chosenKeys.add(axialKey(tile.q, tile.r));
   }
 
-  // PASS 2: fallback — relax adjacency to guarantee the exact port count
   if (chosenTiles.length < TOTAL_PORTS) {
     for (const tile of candidates) {
       if (chosenTiles.length >= TOTAL_PORTS) break;
@@ -308,9 +273,6 @@ const placePorts = (coasts: CoastData[], tiles: TileData[]) => {
   });
 };
 
-/* ------------------------------------------------------------------ *
- * Graph
- * ------------------------------------------------------------------ */
 /** @description reserves an entry in the graph and detects ID collisions */
 const register = (
   graph: GameBoardGraph,
@@ -318,7 +280,7 @@ const register = (
   core: CoreElement,
 ): ConnectedElements => {
   if (graph.has(id)) {
-    throw new Error(`[linkGameBoard] dupplicate id found: "${id}"`);
+    throw new Error(`linkGameBoard: dupplicate id found: "${id}"`);
   }
   const entry: ConnectedElements = {
     core,
