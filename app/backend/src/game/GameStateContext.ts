@@ -85,6 +85,7 @@ class GameStateContext {
       whosTurn: '',
       winner: null,
       winCondition: null,
+      gameTerminated: false,
     };
     this.transitionTo(state);
   }
@@ -217,6 +218,9 @@ class GameStateContext {
       this.data.turnOrder[this.data.currentTurnIndex],
     );
   }
+  public isGameTerminated(): boolean {
+    return this.data.gameTerminated;
+  }
   public hasRolledBothDices(p: Player): boolean {
     if (p.firstDice !== 0 && p.secondDice !== 0) {
       return true;
@@ -259,6 +263,7 @@ class GameStateContext {
       board: gameData.board,
       whosTurn: gameData.whosTurn,
       currentPhase: gameData.currentPhase,
+      gameTerminated: gameData.gameTerminated,
       settings: this.settings,
     };
   }
@@ -308,6 +313,9 @@ class GameStateContext {
   }
   public setGuideLog(p: Player, message: string) {
     p.guideLog = message;
+  }
+  public setGameTerminated(isTerminated: boolean) {
+    this.data.gameTerminated = isTerminated;
   }
   public setAllGuideLogs(message: string) {
     this.getGameData().players.forEach((player) => {
@@ -382,15 +390,14 @@ class GameStateContext {
   }
 
   public isVictory(): boolean {
-    let endGame: boolean = false;
-
+    if (this.isGameTerminated()) return true;
     this.data.players.forEach((player) => {
-      if (this.data.players.size === 1) {
+      if (this.data.players.size <= 1) {
         this.setVictory(
           player.playerId,
           `is the only player left in game ! You won congrats !`,
         );
-        endGame = true;
+        this.setGameTerminated(true);
         return;
       }
       if (player.victoryPoints >= this.getSettings().pointsToWin) {
@@ -398,11 +405,12 @@ class GameStateContext {
           player.playerId,
           `won by earning ${player.victoryPoints} victory points !`,
         );
-        endGame = true;
+        this.setAllGuideLogs(`${this.data.winner} ${this.data.winCondition}`);
+        this.setGameTerminated(true);
         return;
       }
     });
-    return endGame;
+    return this.isGameTerminated();
   }
 
   public resourcesProduction(placementPhase: boolean) {

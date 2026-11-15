@@ -405,6 +405,7 @@ export type GameDataBase = {
   board: GameBoard;
   whosTurn: string;
   currentPhase: Phase;
+  gameTerminated: boolean;
 }
 
 export type GameDataDto  = GameDataBase & {

@@ -4,8 +4,8 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
 import {
   type PlayerProfile,
+  type SettingsData,
   SettingsDataSchema,
-  SettingsData,
   UserPublic,
   GameList,
 } from 'shared';
