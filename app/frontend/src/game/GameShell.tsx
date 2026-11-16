@@ -56,6 +56,7 @@ function GameShell({ game }: { game: GameDataDto }) {
         <Group grow gap="md" w="100%" align="center" justify="center">
           <SelectionMenu
             selected={GameBoardProps.selected}
+            settings={game.settings}
             masterLog={game.masterLog}
             isMyTurn={isMyTurn}
           />

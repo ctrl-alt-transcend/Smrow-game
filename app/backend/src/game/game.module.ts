@@ -5,12 +5,14 @@ import { GameService } from './game.service';
 import { GameGateway } from './game.gateway';
 import { UserModule } from '../user/user.module';
 import { StatsModule } from '../stats/stats.module';
+import { SocialModule } from '../social/social.module';
 
 @Module({
   imports: [
     JwtModule.register({ secret: process.env.JWT_SECRET }),
     UserModule,
     StatsModule,
+    SocialModule,
   ],
   controllers: [GameController],
   providers: [GameService, GameGateway],

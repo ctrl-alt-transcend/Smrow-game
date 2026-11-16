@@ -1,9 +1,43 @@
+import { useEffect, useState } from "react";
+import { socialSocket as socket } from "../../sockets/socialSocket";
+import { http } from "../../services/http";
 import { Title, Text, Paper, Table } from "@mantine/core";
-import { games } from "../../mocks/games.mock";
+import type { GameList } from "shared";
 import GameRow from "./GameRow";
 
-export default function GameList() {
-  const noGame = games.length === 0;
+export default function ListGames() {
+  const [loaded, setLoaded] = useState(false);
+  const [games, setGames] = useState<GameList[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const getGamesList = async () => {
+      try {
+        const response = await http.get<GameList[]>("/game");
+        if (cancelled) return;
+
+        const gameList = response.data;
+        setGames(gameList);
+        setLoaded(true);
+      } catch (error) {
+        console.error("Failed to fetch games - ", error);
+      }
+    };
+
+    const onGameListUpdate = (gameList: GameList[]) => {
+      setGames(gameList);
+    };
+
+    socket.emit("joinGameList");
+    socket.on("game list update", onGameListUpdate);
+    getGamesList();
+
+    return () => {
+      cancelled = true;
+      socket.off("game list update", onGameListUpdate);
+      socket.emit("leaveGameList");
+    };
+  }, []);
 
   return (
     <Paper withBorder p="md" mih={600} h="100%">
@@ -11,7 +45,11 @@ export default function GameList() {
         Game in progress
       </Title>
 
-      {noGame ? (
+      {!loaded ? (
+        <Text c="dimmed" ta="center" py="xl">
+          No game in progress ..
+        </Text>
+      ) : games.length === 0 ? (
         <Text c="dimmed" ta="center" py="xl">
           No game in progress ..
         </Text>
@@ -29,7 +67,7 @@ export default function GameList() {
 
           <Table.Tbody>
             {games.map((game) => (
-              <GameRow key={game.id} game={game} />
+              <GameRow key={game.gameId} game={game} />
             ))}
           </Table.Tbody>
         </Table>

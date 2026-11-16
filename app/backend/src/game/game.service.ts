@@ -5,10 +5,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { ZGEG_DEV, type PlayerProfile } from 'shared';
-import { GameStateContext, WhoStartsPhase } from './GameStateContext';
+
 import { StatsService } from '../stats/stats.service';
 import { buildGameResult } from './game.result';
+import {
+  ZGEG_DEV,
+  type SettingsData,
+  type PlayerProfile,
+  type GameList,
+} from 'shared';
+import { GameStateContext, StartPhase } from './GameStateContext';
+import { SocialGateway } from '../social/social.gateway';
 
 @Injectable()
 export class GameService {
@@ -18,7 +25,10 @@ export class GameService {
   private userIds = new Map<string, string>(); //INFO: link in game playerId (username) with the user ID
   private recordedGames = new Set<string>();
 
-  constructor(private readonly statsService: StatsService) {}
+  constructor(
+    private readonly statsService: StatsService,
+    private readonly socialGateway: SocialGateway,
+  ) {}
 
   /**
    * @brief Save the result of a finished game, only once per game.
@@ -46,11 +56,20 @@ export class GameService {
     }
   }
 
+  getGamesList(): GameList[] {
+    const arrayOfGames = Array.from(this.gameInstances.values());
+    return arrayOfGames.map((game: GameStateContext) => ({
+      gameId: game.getGameId(),
+      playerCount: game.getPlayers().size,
+      state: game.getCurrentPhase(),
+    }));
+  }
+
   /**
    * @brief Create a new game and add the player to it
    * @param playerId - The user ID of the player to be added to the game
    */
-  createGame(playerProfile: PlayerProfile) {
+  createGame(playerProfile: PlayerProfile, settings: SettingsData) {
     if (this.playersMap.has(playerProfile.id)) {
       throw new ConflictException(
         `Player with id ${playerProfile.username} is already in a game`,
@@ -60,8 +79,8 @@ export class GameService {
 
     this.gameInstances.set(
       gameId,
-      new GameStateContext(gameId, new WhoStartsPhase()),
-    ); // v.2
+      new GameStateContext(gameId, settings, new StartPhase()),
+    );
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
   }
@@ -121,6 +140,7 @@ export class GameService {
     game
       .getPlayers()
       .set(playerProfile.username, game.initPlayer(playerProfile.username));
+    this.socialGateway.handleGameList(this.getGamesList());
 
     //⚠️REMOVE in PROD -------------------
     console.log(`---------------------------------------

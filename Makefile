@@ -11,6 +11,7 @@ MIGRATION_NAME ?= init
 FRONTEND_DIR=./app/frontend
 BACKEND_DIR=./app/backend
 SHARED_DIR=./app/shared
+DIST_DIR=./app/shared/dist
 APP_DIR=./app
 
 all: up
@@ -82,14 +83,16 @@ secrets:
 
 fclean: down
 	docker compose -f $(DOCKER_COMPOSE_FILE) down --rmi all --volumes --remove-orphans
+	rm -rf $(DIST_DIR)
 
-re: fclean
+re: fclean shared
 	docker compose -f $(DOCKER_COMPOSE_FILE) build --no-cache
 	$(MAKE) up
 	$(MAKE) initdb
 
 initdb:
 	docker compose -f $(DOCKER_COMPOSE_FILE) exec backend npx prisma migrate deploy
+	cd $(BACKEND_DIR) && npx prisma generate
 
 # how to use: make migrate MIGRATION_NAME="Your_migration_name_between_double_quotes"
 migrate:

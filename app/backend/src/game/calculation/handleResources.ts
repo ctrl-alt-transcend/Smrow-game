@@ -1,21 +1,21 @@
 import type { Resources, TradeForm } from 'shared';
-import { LandType, BuildingType, BUILD_COSTS } from 'shared';
+import { LandType, BuildingType, BUILD_COSTS, ResourceType } from 'shared';
 
 export function earnTradeResources(resources: Resources, target: TradeForm) {
   switch (target.resource) {
-    case 'wood':
+    case ResourceType.WOOD:
       resources.wood += target.amount;
       break;
-    case 'sheep':
+    case ResourceType.SHEEP:
       resources.sheep += target.amount;
       break;
-    case 'brick':
+    case ResourceType.BRICK:
       resources.brick += target.amount;
       break;
-    case 'ore':
+    case ResourceType.ORE:
       resources.ore += target.amount;
       break;
-    case 'wheat':
+    case ResourceType.WHEAT:
       resources.wheat += target.amount;
       break;
     default:
@@ -25,19 +25,19 @@ export function earnTradeResources(resources: Resources, target: TradeForm) {
 
 export function payTradeResources(resources: Resources, offer: TradeForm) {
   switch (offer.resource) {
-    case 'wood':
+    case ResourceType.WOOD:
       resources.wood -= offer.amount;
       break;
-    case 'sheep':
+    case ResourceType.SHEEP:
       resources.sheep -= offer.amount;
       break;
-    case 'brick':
+    case ResourceType.BRICK:
       resources.brick -= offer.amount;
       break;
-    case 'ore':
+    case ResourceType.ORE:
       resources.ore -= offer.amount;
       break;
-    case 'wheat':
+    case ResourceType.WHEAT:
       resources.wheat -= offer.amount;
       break;
     default:
@@ -50,19 +50,19 @@ export function hasEnoughResourcesToTrade(
   offer: TradeForm,
 ): boolean {
   switch (offer.resource) {
-    case 'wood':
+    case ResourceType.WOOD:
       if (resources.wood >= offer.amount) return true;
       break;
-    case 'sheep':
+    case ResourceType.SHEEP:
       if (resources.sheep >= offer.amount) return true;
       break;
-    case 'brick':
+    case ResourceType.BRICK:
       if (resources.brick >= offer.amount) return true;
       break;
-    case 'ore':
+    case ResourceType.ORE:
       if (resources.ore >= offer.amount) return true;
       break;
-    case 'wheat':
+    case ResourceType.WHEAT:
       if (resources.wheat >= offer.amount) return true;
       break;
     default:
@@ -73,19 +73,19 @@ export function hasEnoughResourcesToTrade(
 
 export function payBuildResources(resources: Resources, build: BuildingType) {
   switch (build) {
-    case 'road':
-      resources.brick -= BUILD_COSTS.road.brick;
-      resources.wood -= BUILD_COSTS.road.wood;
+    case BuildingType.ROAD:
+      resources.brick -= BUILD_COSTS.Road.brick;
+      resources.wood -= BUILD_COSTS.Road.wood;
       break;
-    case 'settlement':
-      resources.brick -= BUILD_COSTS.settlement.brick;
-      resources.wood -= BUILD_COSTS.settlement.wood;
-      resources.sheep -= BUILD_COSTS.settlement.sheep;
-      resources.wheat -= BUILD_COSTS.settlement.wheat;
+    case BuildingType.SETTLEMENT:
+      resources.brick -= BUILD_COSTS.Settlement.brick;
+      resources.wood -= BUILD_COSTS.Settlement.wood;
+      resources.sheep -= BUILD_COSTS.Settlement.sheep;
+      resources.wheat -= BUILD_COSTS.Settlement.wheat;
       break;
-    case 'city':
-      resources.wheat -= BUILD_COSTS.city.wheat;
-      resources.ore -= BUILD_COSTS.city.ore;
+    case BuildingType.CITY:
+      resources.wheat -= BUILD_COSTS.City.wheat;
+      resources.ore -= BUILD_COSTS.City.ore;
       break;
     default:
       break;
@@ -97,26 +97,26 @@ export function hasEnoughResourcesToBuild(
   build: BuildingType,
 ): boolean {
   switch (build) {
-    case 'road':
+    case BuildingType.ROAD:
       if (
-        resources.brick >= BUILD_COSTS.road.brick &&
-        resources.wood >= BUILD_COSTS.road.wood
+        resources.brick >= BUILD_COSTS.Road.brick &&
+        resources.wood >= BUILD_COSTS.Road.wood
       )
         return true;
       break;
-    case 'settlement':
+    case BuildingType.SETTLEMENT:
       if (
-        resources.brick >= BUILD_COSTS.settlement.brick &&
-        resources.wood >= BUILD_COSTS.settlement.wood &&
-        resources.sheep >= BUILD_COSTS.settlement.sheep &&
-        resources.wheat >= BUILD_COSTS.settlement.wheat
+        resources.brick >= BUILD_COSTS.Settlement.brick &&
+        resources.wood >= BUILD_COSTS.Settlement.wood &&
+        resources.sheep >= BUILD_COSTS.Settlement.sheep &&
+        resources.wheat >= BUILD_COSTS.Settlement.wheat
       )
         return true;
       break;
-    case 'city':
+    case BuildingType.CITY:
       if (
-        resources.wheat >= BUILD_COSTS.city.wheat &&
-        resources.ore >= BUILD_COSTS.city.ore
+        resources.wheat >= BUILD_COSTS.City.wheat &&
+        resources.ore >= BUILD_COSTS.City.ore
       )
         return true;
       break;
@@ -129,34 +129,35 @@ export function hasEnoughResourcesToBuild(
 export function produceResources(
   land: LandType,
   resources: Resources,
+  multiplier: number,
   isCity?: boolean,
 ): number {
   switch (land) {
-    case 'desert': {
+    case LandType.DESERT: {
       return 0;
     }
-    case 'field':
-      if (isCity) resources.wheat += 2;
-      else resources.wheat += 1;
+    case LandType.FIELD:
+      if (isCity) resources.wheat += 2 * multiplier;
+      else resources.wheat += 1 * multiplier;
       break;
-    case 'forest':
-      if (isCity) resources.wood += 2;
-      else resources.wood += 1;
+    case LandType.FOREST:
+      if (isCity) resources.wood += 2 * multiplier;
+      else resources.wood += 1 * multiplier;
       break;
-    case 'hill':
-      if (isCity) resources.brick += 2;
-      else resources.brick += 1;
+    case LandType.HILL:
+      if (isCity) resources.brick += 2 * multiplier;
+      else resources.brick += 1 * multiplier;
       break;
-    case 'mountain':
-      if (isCity) resources.ore += 2;
-      else resources.ore += 1;
+    case LandType.MOUNTAIN:
+      if (isCity) resources.ore += 2 * multiplier;
+      else resources.ore += 1 * multiplier;
       break;
-    case 'pasture':
-      if (isCity) resources.sheep += 2;
-      else resources.sheep += 1;
+    case LandType.PASTURE:
+      if (isCity) resources.sheep += 2 * multiplier;
+      else resources.sheep += 1 * multiplier;
       break;
     default:
       return 0;
   }
-  return isCity ? 2 : 1;
+  return isCity ? 2 * multiplier : 1 * multiplier;
 }
