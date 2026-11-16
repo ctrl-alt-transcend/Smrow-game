@@ -74,6 +74,8 @@ model Games {
 	duration	Int?
 	playedAt	DateTime @default(now())
 	players		GamesPlayer[]
+
+	@@index([playedAt])
 }
 
 model GamesPlayer {
@@ -94,6 +96,7 @@ model GamesPlayer {
 	games				Games @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
 	@@id([gameId, userId])
+	@@index([userId])
 
 	@@unique([gameId, turnOrder])
 }

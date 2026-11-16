@@ -1,9 +1,13 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+
+import { StatsService } from '../stats/stats.service';
+import { buildGameResult } from './game.result';
 import {
   ZGEG_DEV,
   type SettingsData,
@@ -15,10 +19,42 @@ import { SocialGateway } from '../social/social.gateway';
 
 @Injectable()
 export class GameService {
+  private readonly logger = new Logger(GameService.name);
   private gameInstances: Map<string, GameStateContext> = new Map();
   private playersMap = new Map<string, string>(); //INFO: link playerId with a gameId
+  private userIds = new Map<string, string>(); //INFO: link in game playerId (username) with the user ID
+  private recordedGames = new Set<string>();
 
-  constructor(private readonly socialGateway: SocialGateway) {}
+  constructor(
+    private readonly statsService: StatsService,
+    private readonly socialGateway: SocialGateway,
+  ) {}
+
+  /**
+   * @brief Save the result of a finished game, only once per game.
+   * @details Does nothing while the game has no winner. A failure is logged
+   *          and never interrupts the game.
+   */
+  async recordResultIfOver(game: GameStateContext): Promise<void> {
+    const gameData = game.getGameData();
+    if (!gameData.winner || this.recordedGames.has(gameData.gameId)) return;
+    this.recordedGames.add(gameData.gameId);
+
+    const result = buildGameResult(
+      gameData,
+      this.userIds,
+      game.getRoundCount(),
+    );
+    if (result.players.length === 0) return;
+    try {
+      await this.statsService.recordGameResult(result);
+    } catch (e) {
+      this.logger.error(
+        `Could not record the result of game ${gameData.gameId}`,
+        e instanceof Error ? e.stack : String(e),
+      );
+    }
+  }
 
   getGamesList(): GameList[] {
     const arrayOfGames = Array.from(this.gameInstances.values());
@@ -100,6 +136,7 @@ export class GameService {
   private addPlayerToGame(gameId: string, playerProfile: PlayerProfile) {
     const game = this.getGameInstance(gameId);
     this.playersMap.set(playerProfile.id, gameId);
+    this.userIds.set(playerProfile.username, playerProfile.id);
     game
       .getPlayers()
       .set(playerProfile.username, game.initPlayer(playerProfile.username));
