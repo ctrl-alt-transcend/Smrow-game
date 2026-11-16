@@ -10,8 +10,8 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { UpdateProfileSchema, type UpdateProfile } from "shared";
-import { useAuth } from "../../hooks/useAuth"; // adapte le chemin
-import ErrorMessages from "../utils/ErrorMessages"; // adapte le chemin
+import { useAuth } from "../../hooks/useAuth";
+import ErrorMessages from "../utils/ErrorMessages";
 import { updateProfile } from "../../services/user.service";
 
 type FieldConfig = {
@@ -24,7 +24,6 @@ const fields: FieldConfig[] = [
   { name: "name", label: "Name" },
   { name: "username", label: "Username" },
   { name: "email", label: "Email" },
-  { name: "avatarURL", label: "Avatar" },
   { name: "bio", label: "bio", component: Textarea },
 ];
 
@@ -38,7 +37,6 @@ export function ProfileSettings(props: PaperProps) {
       username: user?.username ?? "",
       name: user?.name ?? "",
       email: user?.email ?? "",
-      avatarURL: user?.avatarURL ?? "",
       bio: user?.bio ?? "",
     },
     validate: schemaResolver(UpdateProfileSchema, { sync: true }),

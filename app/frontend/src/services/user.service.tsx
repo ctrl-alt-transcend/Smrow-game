@@ -1,7 +1,7 @@
 import { http } from "./http";
-import { UpdateProfileSchema } from "shared";
+import { UpdateProfileSchema, UploadImageSchema } from "shared";
 import type { AxiosResponse } from "axios";
-import type { UserProfile, UpdateProfile } from "shared";
+import type { UploadImage, UserProfile, UpdateProfile } from "shared";
 
 export const getCurrentUser = async (): Promise<UserProfile> => {
   try {
@@ -38,5 +38,25 @@ export async function updateProfile(
       );
     }
     throw error instanceof Error ? error : new Error("Unexpected error");
+  }
+}
+
+export async function uploadAvatar(
+  identifier: string,
+  data: UploadImage,
+): Promise<AxiosResponse> {
+  try {
+    const payload: UploadImage = UploadImageSchema.parse(data);
+    const res = await http.patch(`/user/update/${encodeURIComponent(identifier)}/picture`,
+  payload);
+  return res;
+  } catch (e: any) {
+    const apiMessage = e?.response?.data?.message;
+    if (apiMessage) {
+      throw new Error(
+        Array.isArray(apiMessage) ? apiMessage.join(", ") : apiMessage,
+      );
+    }
+    throw e instanceof Error ? e : new Error("Unexpected error");
   }
 }

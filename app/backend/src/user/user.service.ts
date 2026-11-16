@@ -1,8 +1,19 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { randomUUID } from 'node:crypto';
+import { mkdir, writeFile, unlink } from 'node:fs/promises';
+import { join } from 'node:path';
 import { DatabaseService } from '../database/database.service';
 import { PlayerProfile } from 'shared';
 import type { UserProfile, RegisterPost, UpdateProfile, Id } from 'shared';
+
+const UPLOAD_DIR = join(process.cwd(), 'uploads', 'avatars');
+const EXT: Record<string, string> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpeg',
+  'image/jpg': 'jpg',
+  'image/gif': 'gif',
+};
 
 @Injectable()
 export class UserService {
@@ -123,6 +134,36 @@ export class UserService {
           : undefined,
       },
     });
+  }
+
+  async updatePicture(id: string, file: Express.Multer.File) {
+    const user = await this.databaseService.profile.findUnique({
+      where: {
+        id
+      }
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+    
+    const filename = `${randomUUID()}.${EXT[file.mimetype]}`;
+    await mkdir (UPLOAD_DIR, { recursive: true });
+    await writeFile(join(UPLOAD_DIR, filename), file.buffer);
+
+    const updated = await this.databaseService.user.update({
+      where: { id },
+      data: {
+        profile: {
+          update: { avatarURL: `/uploads/avatars/${filename}`},
+        },
+      },
+      include: { profile: true },
+    });
+
+    if (user.avatarURL?.startsWith('/uploads/avatars/')) {
+      await unlink(join(process.cwd(), user.avatarURL)).catch(() => {});
+    }
+
+    return updated;
   }
 
   async removeUser(username: string) {

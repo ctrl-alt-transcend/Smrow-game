@@ -1,7 +1,8 @@
-import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
+import { UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseInterceptors ,Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { type UpdateProfile } from 'shared';
-
+import 'multer'
 @Controller('user')
 export class UserController {
   constructor(readonly userService: UserService) {}
@@ -35,16 +36,31 @@ export class UserController {
     return {
       message: `User updated correctly`,
       user: {
-        id: updatedUser.id,
+        // id: updatedUser.id,
         email: updatedUser.email,
         username: updatedUser.username,
         name: updatedUser.name,
-        // updatedAt: updatedUser.updatedAt,
       },
     };
   }
+  @Patch('update/:id/picture')
+  @UseInterceptors(FileInterceptor('file')) // 'file' = nom du champ dans le FormData
+  async uploadPicture(
+    @Param('id') id: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+          new FileTypeValidator({ fileType: /^image\/(png|jpe?g|gif)$/ }),
+        ],
+      }),
+    )
+  file: Express.Multer.File,
+) {
+  const updatedUser = await this.userService.updatePicture(id, file);
+  return { message: 'Picture updated', user: updatedUser };
+}
 
-  // NEED TO ADD EVERYTHIGN FROM USER ABOve
   @Delete('deluser/:username')
   async removeUser(@Param('username') username: string) {
     await this.userService.removeUser(username);

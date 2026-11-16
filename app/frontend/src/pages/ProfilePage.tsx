@@ -9,6 +9,7 @@ import {
 } from "@mantine/core";
 import { useAuth } from "../hooks/useAuth";
 import { ProfileSettings } from "../components/form/ProfileForm";
+import { ProfilePictureUpload } from "../components/form/ProfilePictureUpload";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -20,15 +21,24 @@ export default function ProfilePage() {
 
       <Grid>
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <Paper withBorder p="md" h="100%">
-            <Stack align="center" gap="xs">
+          
+          <Paper withBorder p="md" h="100%" >
+
+            <Title ta={"center"}>{user?.username}</Title>
+
+            <Divider my="md"/>
+
+            <Stack align="center" justify="space-between" gap="xs">
+
               <Avatar
                 src={user?.avatarURL}
                 size={"200"}
                 radius="md"
                 color="Red"
+                mb={"md"}
               />
-              <Title order={3}>{user?.username}</Title>
+
+              <ProfilePictureUpload />
             </Stack>
             <Divider my="md" />
 

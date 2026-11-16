@@ -1,5 +1,0 @@
-#!/usr/bin/env sh
-set -e
-
-cd app
-./node_modules/.bin/lint-staged
