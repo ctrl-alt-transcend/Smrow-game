@@ -12,6 +12,7 @@ import {
   YOU_DIDNT_ROLLED,
   SETTLEMENT,
   ROAD,
+  PERSONNAL_LOG_LIMIT,
 } from 'shared';
 import type {
   GameBoard,
@@ -126,11 +127,8 @@ class GameStateContext {
       settlementsBuilt: new Map<string, SettlementData>(),
       avatarURL: null,
       faction: this.assignFaction(),
-      personalLog: {
-        id: this.logId++,
-        message: `Welcome to ${this.settings.gameboardLayout} ${playerId}`,
-      },
       guideLog: `${GUIDE_LOG[Phase.START]}`,
+      personalLog: [],
       currentRoll: {
         id: this.rollId++,
         val: null,
@@ -144,6 +142,11 @@ class GameStateContext {
         ore: this.settings.oreBonus,
       },
     };
+    this.setPersonalLog(
+      newPlayer,
+      `Welcome to ${this.settings.gameboardLayout} ${playerId}`,
+      true,
+    );
     return newPlayer;
   }
 
@@ -287,7 +290,7 @@ class GameStateContext {
       return null;
     }
     if (player.playerId !== currentPlayer.playerId) {
-      this.setPersonalLog(player, "It's not you turn !");
+      this.setPersonalLog(player, "It's not you turn !", false);
       return null;
     }
     return player;
@@ -324,11 +327,15 @@ class GameStateContext {
       this.setGuideLog(player, message);
     });
   }
-  public setPersonalLog(p: Player, message: string) {
-    p.personalLog = {
+  public setPersonalLog(p: Player, message: string, valid: boolean) {
+    p.personalLog.push({
       id: this.logId++,
       message: message,
-    };
+      actionValid: valid,
+    });
+    if (p.personalLog.length > PERSONNAL_LOG_LIMIT) {
+      p.personalLog.splice(0, p.personalLog.length - PERSONNAL_LOG_LIMIT);
+    }
   }
   public resetAllDices() {
     this.data.players.forEach((player) => {
@@ -368,15 +375,13 @@ class GameStateContext {
     roll.id = this.rollId++;
     if (p.firstDice === 0) {
       p.firstDice = roll.val;
-      this.setPersonalLog(p, `${YOU_ROLLED} ${roll.val}`);
-      //console.log(`${p.playerId} #1 rolll: ${roll.val}`);
+      this.setPersonalLog(p, `${YOU_ROLLED} ${roll.val}`, true);
     } else if (p.secondDice === 0) {
       p.secondDice = roll.val;
-      this.setPersonalLog(p, `${YOU_ROLLED} ${roll.val}`);
-      //console.log(`${p.playerId} #2 rolll: ${roll.val}`);
+      this.setPersonalLog(p, `${YOU_ROLLED} ${roll.val}`, true);
     } else {
       roll.val = null;
-      this.setPersonalLog(p, `${YOU_DIDNT_ROLLED}`);
+      this.setPersonalLog(p, `${YOU_DIDNT_ROLLED}`, false);
     }
     return roll;
   }
@@ -441,22 +446,23 @@ class GameStateContext {
           this.setPersonalLog(
             player,
             `You produced ${prod} ${LAND_RESOURCE[tile.land]}`,
+            true,
           );
           //console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESOURCE[tile.land]}`);
         } else if (tile.hasRobber && !placementPhase) {
           this.setPersonalLog(
             player,
             `Robert the Robber stole your ${LAND_RESOURCE[tile.land]} production !`,
+            true,
           );
           //console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by Robert the Robber !`);
         } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
             player,
             `You didn't produce anything with your ${LAND_RESOURCE[tile.land]} ...`,
+            true,
           );
           //console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything in the ${LandType.DESERT}`);
-        } else if (placementPhase) {
-          this.setPersonalLog(player, `You produced your first resources !`);
         }
       });
     }
@@ -483,6 +489,7 @@ class GameStateContext {
       this.setPersonalLog(
         player,
         `Robert the Robber robbed you ${toDiscard} resources !`,
+        true,
       );
     });
     randomizeRobber(this.data.board.layout);
@@ -501,6 +508,7 @@ class StartPhase extends State {
       this.state.setPersonalLog(
         p,
         `You ${funnyRollLog(p.firstDice + p.secondDice)}`,
+        true,
       );
       this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
     }
@@ -512,6 +520,7 @@ class StartPhase extends State {
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.BUILD, Phase.START),
+      false,
     );
   }
 
@@ -521,6 +530,7 @@ class StartPhase extends State {
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.TRADE, Phase.START),
+      false,
     );
   }
 
@@ -530,6 +540,7 @@ class StartPhase extends State {
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.SKIP, Phase.START),
+      false,
     );
   }
 
@@ -560,6 +571,7 @@ class PlacementPhase extends State {
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.DICE, Phase.PLACEMENT),
+      false,
     );
   }
 
@@ -570,10 +582,15 @@ class PlacementPhase extends State {
       this.state.setPersonalLog(
         p,
         'You already built a settlement, build a road now ...',
+        false,
       );
       return;
     } else if (payload.kind === ROAD && !this.settlementBuilt) {
-      this.state.setPersonalLog(p, 'You must build a settlement first ...');
+      this.state.setPersonalLog(
+        p,
+        'You must build a settlement first ...',
+        false,
+      );
       return;
     }
     const response = buildCheck(
@@ -585,15 +602,14 @@ class PlacementPhase extends State {
       this.state.getSettings(),
       true,
     );
-    if (response.valid === false) {
-      this.state.setPersonalLog(p, `${response.message}`);
-      return;
-    }
+    this.state.setPersonalLog(p, `${response.message}`, response.valid);
+    if (response.valid === false) return;
     if (payload.kind == SETTLEMENT && this.settlementBuilt == false) {
       this.settlementBuilt = true;
       this.state.setPersonalLog(
         p,
         'You built your first settlement, pick a road now.',
+        true,
       );
       return;
     }
@@ -605,6 +621,7 @@ class PlacementPhase extends State {
     this.state.setPersonalLog(
       p,
       'You finshied your placement, wait for the other players to play ...',
+      true,
     );
   }
 
@@ -614,6 +631,7 @@ class PlacementPhase extends State {
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.TRADE, Phase.PLACEMENT),
+      false,
     );
   }
 
@@ -623,6 +641,7 @@ class PlacementPhase extends State {
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.SKIP, Phase.PLACEMENT),
+      false,
     );
   }
 
@@ -666,6 +685,7 @@ class ResourcesPhase extends State {
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.BUILD, Phase.RESOURCES),
+      false,
     );
   }
 
@@ -675,6 +695,7 @@ class ResourcesPhase extends State {
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.TRADE, Phase.RESOURCES),
+      false,
     );
   }
 
@@ -684,6 +705,7 @@ class ResourcesPhase extends State {
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.SKIP, Phase.RESOURCES),
+      false,
     );
   }
 
@@ -726,6 +748,7 @@ class TradeAndBuildPhase extends State {
     this.state.setPersonalLog(
       p,
       `You built and traded everything you could during this ${Phase.TRADE_BUILD}`,
+      false,
     );
     this.resetTradeBuildCount();
     return true;
@@ -738,6 +761,7 @@ class TradeAndBuildPhase extends State {
       this.state.setPersonalLog(
         p,
         this.state.forbiddenActionLog(Action.BUILD_LIMIT, Phase.PLACEMENT),
+        false,
       );
       return;
     }
@@ -749,7 +773,7 @@ class TradeAndBuildPhase extends State {
       this.state.getBuildings(),
       this.state.getSettings(),
     );
-    this.state.setPersonalLog(p, `${response.message}`);
+    this.state.setPersonalLog(p, `${response.message}`, response.valid);
     if (response.valid === false) return;
     this.buildCount++;
     if (this.isTradeBuildLimit(p)) this.state.setCurrentTurnIndex();
@@ -763,6 +787,7 @@ class TradeAndBuildPhase extends State {
       this.state.setPersonalLog(
         p,
         this.state.forbiddenActionLog(Action.TRADE_LIMIT, Phase.PLACEMENT),
+        false,
       );
       return;
     }
@@ -772,7 +797,7 @@ class TradeAndBuildPhase extends State {
       this.state.getGraph(),
       this.state.getSettings(),
     );
-    this.state.setPersonalLog(p, `${response.message}`);
+    this.state.setPersonalLog(p, `${response.message}`, response.valid);
     if (response.valid === false) return;
     this.tradeCount++;
     if (this.isTradeBuildLimit(p)) this.state.setCurrentTurnIndex();
@@ -787,6 +812,7 @@ class TradeAndBuildPhase extends State {
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.DICE, Phase.TRADE_BUILD),
+      false,
     );
   }
 
@@ -794,7 +820,7 @@ class TradeAndBuildPhase extends State {
     const p = this.state.isPlayersTurn(playerId);
     if (!p) return;
     this.state.setCurrentTurnIndex();
-    this.state.setPersonalLog(p, `You ended your turn !`);
+    this.state.setPersonalLog(p, `You ended your turn !`, true);
     this.state.setMasterLog(`${playerId} ended his/her turn !`);
     this.resetTradeBuildCount();
   }

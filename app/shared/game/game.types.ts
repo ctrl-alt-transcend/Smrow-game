@@ -174,6 +174,7 @@ export const BUILD_COSTS: Record<BuildingType, Resources> = {
 /***********************************
  * Actions and Logs
  **********************************/
+export const PERSONNAL_LOG_LIMIT = 10;
 export const YOU_ROLLED = 'You rolled a';
 export const YOU_DIDNT_ROLLED = "You couldn't roll the dice";
 
@@ -456,7 +457,7 @@ export type DiceRoll = {
 export type GameLog = {
   id: number,
   message: string,
-  actionValid?: boolean
+  actionValid: boolean
 }
 
 export type PlayerBase = {
@@ -471,7 +472,7 @@ export type PlayerBase = {
   currentRoll: DiceRoll,
   faction: Faction;
   avatarURL: string | null;
-  personalLog: GameLog;
+  personalLog: GameLog[];
   guideLog: string;
   DEVMOD: boolean;
 }
