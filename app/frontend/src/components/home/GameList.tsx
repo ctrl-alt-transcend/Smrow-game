@@ -5,7 +5,7 @@ import { Title, Text, Paper, Table } from "@mantine/core";
 import type { GameList } from "shared";
 import GameRow from "./GameRow";
 
-export default function GameList() {
+export default function ListGames() {
   const [loaded, setLoaded] = useState(false);
   const [games, setGames] = useState<GameList[]>([]);
 

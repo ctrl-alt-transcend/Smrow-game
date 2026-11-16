@@ -293,6 +293,10 @@ class GameStateContext {
     return player;
   }
 
+  public getCurrentPhase(): Phase {
+    return this.data.currentPhase;
+  }
+
   /***********************************
    * Setters
    **********************************/
