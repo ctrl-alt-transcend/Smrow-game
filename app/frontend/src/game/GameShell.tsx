@@ -1,4 +1,4 @@
-import { AppShell, Burger, Group, Title } from "@mantine/core";
+import { AppShell, Burger, Group /*, Title*/ } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import GameBoard from "./components/gameboard/GameBoard.tsx";
 import { useGameBoardFactory } from "./hooks/useGameBoardFactory.ts";
@@ -6,11 +6,13 @@ import { SelectionMenu } from "./components/ui/SelectionMenu.tsx";
 import { DiceRoller } from "./components/ui/DiceRoller.tsx";
 import GameMasterLog from "./components/ui/GameMasterLog.tsx";
 import { useGameState } from "./hooks/useGameState.ts";
-import { type GameDataDto, Phase } from "shared";
 import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import { ResourcesPanel } from "./components/ui/ResourcesPanel.tsx";
+import { EndGameModal } from "./components/ui/EndGameModal.tsx";
 import { usePersonalNotification } from "./hooks/usePersonalNotification.ts";
+import { useEndGame } from "./hooks/useEndGame.ts";
+import { type GameDataDto, Phase } from "shared";
 
 export default function Game() {
   const { game } = useGameState();
@@ -23,6 +25,7 @@ function GameShell({ game }: { game: GameDataDto }) {
   const [opened, { toggle }] = useDisclosure();
   const GameBoardProps = useGameBoardFactory(game.board);
   usePersonalNotification(game.currentPlayer.personalLog);
+  useEndGame(game.gameTerminated);
 
   let isMyTurn = game.currentPlayer.playerId === game.whosTurn;
   if (game.currentPlayer.DEVMOD || game.currentPhase === Phase.START)
@@ -45,6 +48,7 @@ function GameShell({ game }: { game: GameDataDto }) {
       }}
       padding="xs"
     >
+      <EndGameModal gameOver={game.gameTerminated} />
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} size="sm" />
@@ -70,13 +74,14 @@ function GameShell({ game }: { game: GameDataDto }) {
 
       <AppShell.Main>
         <Group justify="center" align="center">
-          {!game.winner && <GameBoard {...GameBoardProps} />}
-          {game.winner && (
-            <Title>
-              {" "}
-              {game.winner} {game.winCondition}{" "}
-            </Title>
-          )}
+          {<GameBoard {...GameBoardProps} />}
+          {/* {!game.winner && <GameBoard {...GameBoardProps} />} */}
+          {/* {game.winner && ( */}
+          {/*   <Title> */}
+          {/*     {" "} */}
+          {/*     {game.winner} {game.winCondition}{" "} */}
+          {/*   </Title> */}
+          {/* )} */}
         </Group>
       </AppShell.Main>
 
