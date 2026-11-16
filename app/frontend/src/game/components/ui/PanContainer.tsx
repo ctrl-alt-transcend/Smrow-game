@@ -19,17 +19,17 @@ type PanContainerProps = {
 export function PanContainer({
   children,
   maxPan = 400,
-  minScale = 0.5,
+  minScale = 1,
   maxScale = 3,
   zoomStep = 1.25,
 }: PanContainerProps) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const startOffsetRef = useRef({ x: 0, y: 0 });
   const draggingRef = useRef(false);
   const pointerRef = useRef({ x: 0, y: 0 });
-  const startOffsetRef = useRef({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
 
   const pinchDistRef = useRef(0);
   const pinchStartScaleRef = useRef(1);
@@ -202,7 +202,7 @@ export function PanContainer({
         wrap="nowrap"
         style={{
           position: "absolute",
-          bottom: 8,
+          top: 4,
           left: 0,
           right: 0,
           margin: "0 auto",

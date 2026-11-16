@@ -1,9 +1,3 @@
-// =====================================================================
-// FILE: src/components/ui/SelectionMenu.tsx  (updated)
-// Fix: no more dead space when only a Road/Settlement is selected.
-// The Card and its action zone now size themselves to their content,
-// exactly like when a trade form is rendered.
-// =====================================================================
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
@@ -280,8 +274,8 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   );
 };
 
-const ITEMS_FONT_MIN = 14;
-const ITEMS_FONT_MAX = 18;
+const ITEMS_FONT_MIN = 18;
+const ITEMS_FONT_MAX = 28;
 const ITEMS_AVG_CHAR = 5.2;
 const ITEMS_FALLBACK_WIDTH = 220;
 
