@@ -17,7 +17,6 @@ export function PlayerCard({ name, level, score, avatarURL }: PlayerCardProps) {
   ) : (
     <Avatar name={name} radius={0} size={AVATAR_SIZE} color="initials" />
   );
-  //const avatarSrc = avatarURL || defaultAvatar
 
   return (
     <Card padding={0} withBorder orientation="horizontal">
