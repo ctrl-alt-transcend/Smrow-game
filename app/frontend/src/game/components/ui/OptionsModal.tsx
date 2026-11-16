@@ -1,16 +1,7 @@
-import {
-  Accordion,
-  Button,
-  Divider,
-  Modal,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
-import { modals } from "@mantine/modals";
-import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
+import { Accordion, Divider, Modal, Stack, Text, Title } from "@mantine/core";
 import { type GameDataDto, type SettingsData } from "shared";
 import { PlayerPanel } from "./PlayerPanel.tsx";
+import QuitGameButton from "./QuitGameButton.tsx";
 
 type OptionsModalProps = {
   game: GameDataDto;
@@ -60,18 +51,6 @@ export function OptionsModal({ game, opened, onClose }: OptionsModalProps) {
     },
   ];
 
-  const confirmQuit = () =>
-    modals.openConfirmModal({
-      title: "Quit game",
-      children: <Text size="sm">Are you sure you want to leave the game?</Text>,
-      labels: { confirm: "Quit", cancel: "Stay" },
-      onConfirm: () => {
-        socket.emit("quitGame");
-        onClose();
-      },
-      centered: true,
-    });
-
   return (
     <Modal
       opened={opened}
@@ -116,9 +95,7 @@ export function OptionsModal({ game, opened, onClose }: OptionsModalProps) {
         </Accordion>
 
         <Divider />
-        <Button variant="light" color="red" fullWidth onClick={confirmQuit}>
-          Quit Game
-        </Button>
+        <QuitGameButton />
       </Stack>
     </Modal>
   );

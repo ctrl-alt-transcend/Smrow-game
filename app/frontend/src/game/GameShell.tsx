@@ -28,6 +28,7 @@ import GameMasterLog from "./components/ui/GameMasterLog.tsx";
 import TurnProgressBar from "./components/ui/TurnProgressBar.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import PanContainer from "./components/ui/PanContainer.tsx";
+import QuitGameButton from "./components/ui/QuitGameButton.tsx";
 
 export default function Game() {
   const { game } = useGameState();
@@ -164,6 +165,7 @@ function GameShell({ game }: { game: GameDataDto }) {
                 {game.winner} wins!
               </Title>
               <Text c="dimmed">{game.winCondition}</Text>
+              <QuitGameButton />
             </Stack>
           </Center>
         ) : waitingForPlayers ? (
