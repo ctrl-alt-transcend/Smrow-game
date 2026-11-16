@@ -30,7 +30,6 @@ import GameMasterLog from "./components/ui/GameMasterLog.tsx";
 import TurnProgressBar from "./components/ui/TurnProgressBar.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import PanContainer from "./components/ui/PanContainer.tsx";
-import QuitGameButton from "./components/ui/QuitGameButton.tsx";
 
 export default function Game() {
   const { game } = useGameState();
@@ -69,7 +68,12 @@ function GameShell({ game }: { game: GameDataDto }) {
       padding={0}
       style={{ height: "100dvh", overflow: "hidden" }}
     >
-      <EndGameModal gameOver={game.gameTerminated} />
+      <EndGameModal
+        gameOver={game.gameTerminated}
+        players={game.players}
+        winner={game.winner}
+        winCondition={game.winCondition}
+      />
       <AppShell.Header>
         <Group h="100%" px="md" gap="lg" wrap="nowrap" align="stretch">
           <Stack gap={20} justify="center">
@@ -159,20 +163,7 @@ function GameShell({ game }: { game: GameDataDto }) {
           overflow: "hidden",
         }}
       >
-        {game.winner ? (
-          <Center flex={1} w="100%">
-            <Stack align="center" gap="xs">
-              <Text fz={64} lh={1}>
-                🏆
-              </Text>
-              <Title order={2} ta="center">
-                {game.winner} wins!
-              </Title>
-              <Text c="dimmed">{game.winCondition}</Text>
-              <QuitGameButton />
-            </Stack>
-          </Center>
-        ) : waitingForPlayers ? (
+        {waitingForPlayers ? (
           <Center flex={1} w="100%">
             <Stack align="center" gap="xs">
               <Text fz={48} lh={1}>
