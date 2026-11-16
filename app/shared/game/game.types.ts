@@ -107,7 +107,6 @@ export const BuildingType = {
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
 export const BuildingTypeSchema = z.enum(BuildingType);
 
-
 export const TraderType = {
   SPECIALIZED_PORT: 'Specialized Port',
   GENERIC_PORT: 'Generic Port',
@@ -174,7 +173,7 @@ export const BUILD_COSTS: Record<BuildingType, Resources> = {
 /***********************************
  * Actions and Logs
  **********************************/
-export const PERSONNAL_LOG_LIMIT = 10;
+export const PERSONNAL_LOG_LIMIT = 5;
 export const YOU_ROLLED = 'You rolled a';
 export const YOU_DIDNT_ROLLED = "You couldn't roll the dice";
 
