@@ -31,10 +31,6 @@ const RESOURCE_OPTIONS = [
   ResourceType.ORE,
 ].map((r) => ({ value: r, label: r }));
 
-/* ------------------------------------------------------------------ *
- * Responsive helper: measure the container width so font sizes and
- * layouts adapt to the available space (same approach as DiceRoller).
- * ------------------------------------------------------------------ */
 function useElementWidth<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [width, setWidth] = useState(0);
@@ -52,13 +48,6 @@ function useElementWidth<T extends HTMLElement>() {
 
   return { ref, width };
 }
-
-/* ------------------------------------------------------------------ *
- * Action zone sizing: every mode renders its controls inside a
- * fixed-height footer so buttons and trade fields always appear at
- * the SAME position, whichever mode is active.
- * ------------------------------------------------------------------ */
-const ACTION_ZONE_MIN_HEIGHT = 170;
 
 /* ================================================================== *
  * TradeOfferPanel : reusable trade panel
@@ -96,15 +85,12 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
   targetOwnerId = null,
   isMyTurn,
 }) => {
-  // Offer resource — pre-set to the specialized resource when locked
   const [chosenOfferResource, setChosenOfferResource] =
     useState<ResourceType | null>(offerLockedResource ?? null);
-  // Target side — always editable (when it's the player's turn)
   const [targetResource, setTargetResource] = useState<ResourceType | null>(
     null,
   );
   const [targetAmount, setTargetAmount] = useState<number>(1);
-  // Offer amount — free only for player-to-player trades
   const [freeOfferAmount, setFreeOfferAmount] = useState<number>(1);
   const isBankTrade = ratio !== null;
 
@@ -144,8 +130,6 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
 
   return (
     <Stack gap="xs" w="100%">
-      {/* Row 1 — offer side (Select in EVERY mode; disabled + pre-filled
-          for specialized ports, editable elsewhere: same slot either way) */}
       <Group justify="space-between" gap="xs" grow wrap="wrap">
         <Select
           size="xs"
@@ -168,7 +152,6 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
         )}
       </Group>
 
-      {/* Row 2 — target side (always freely choosable) */}
       <Group justify="space-between" gap="xs" grow wrap="wrap">
         <Select
           size="xs"
@@ -189,14 +172,12 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
         />
       </Group>
 
-      {/* Row 3 — rate hint */}
       <Text size="xs" c="dimmed" style={{ minHeight: 16 }}>
         {isBankTrade
           ? `Rate: ${ratio} : 1 — giving ${offerAmount} ${offerResource ?? "?"} for ${targetAmount} ${targetResource ?? "?"}`
           : "Free rate — agreed between players"}
       </Text>
 
-      {/* Row 4 — send button, always last, always bottom-aligned */}
       <Button size="xs" onClick={handleSend} disabled={!isValid || !isMyTurn}>
         Send trade offer
       </Button>
@@ -204,14 +185,6 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
   );
 };
 
-/* ================================================================== *
- * BuildSelectionButton : road / settlement construction
- *  - SINGLE click sends the build request straight to the server
- *    (no modal, no double-click confirmation).
- *  - The busy/request-tracking flow is unchanged: the response is
- *    detected via masterLog, with a safety timeout.
- *  - `isMyTurn = false` disables the button entirely.
- * ================================================================== */
 interface PendingBuild {
   target: BuildPayload;
   logAtSend: string | null;
@@ -252,7 +225,6 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     return null;
   }, [selected.selectedRoad, selected.selectedSettlement]);
 
-  // Single click → emit the build request immediately
   const handleBuildRequest = useCallback(() => {
     if (busy || !target || !isMyTurn) return;
     pendingRef.current = { target, logAtSend: masterLog };
@@ -264,7 +236,6 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     });
   }, [busy, target, masterLog, isMyTurn]);
 
-  // Resolve the pending request when the server answers (masterLog moved)
   useEffect(() => {
     const pending = pendingRef.current;
     if (!pending) return;
@@ -277,14 +248,12 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     onBuilt?.(pending.target);
   }, [masterLog, onBuilt]);
 
-  // Safety timeout if the server never answers
   useEffect(() => {
     if (!busy) return;
     const timer = window.setTimeout(() => {
       if (!pendingRef.current) return;
       pendingRef.current = null;
       setBusy(false);
-      console.warn("Build: no event during elapsed time");
     }, BUILD_TIMEOUT_MS);
 
     return () => window.clearTimeout(timer);
@@ -305,12 +274,8 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   );
 };
 
-/* ================================================================== *
- * Item list rendering: one line per item, font size adapts to the
- * longest label AND to the actual card width (responsive).
- * ================================================================== */
-const ITEMS_FONT_MIN = 14;
-const ITEMS_FONT_MAX = 18;
+const ITEMS_FONT_MIN = 18;
+const ITEMS_FONT_MAX = 28;
 const ITEMS_AVG_CHAR = 5.2;
 const ITEMS_FALLBACK_WIDTH = 220;
 
@@ -334,7 +299,7 @@ const SelectionItems: React.FC<SelectionItemsProps> = ({
   availableWidth,
 }) => {
   if (items.length === 0) {
-    return <Text c="dimmed">No selection</Text>;
+    return <Text c="dimmed">...</Text>;
   }
 
   const fontSize = computeItemsFontSize(
@@ -363,9 +328,6 @@ const SelectionItems: React.FC<SelectionItemsProps> = ({
   );
 };
 
-/* ================================================================== *
- * SelectionMenu : main component, dispatch by selection kind
- * ================================================================== */
 interface SelectionMenuProps {
   isMyTurn: boolean;
   selected: GameBoardSelection;
@@ -389,11 +351,6 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
   const itemsAvailableWidth =
     cardBodyWidth > 0 ? cardBodyWidth - 40 : ITEMS_FALLBACK_WIDTH;
 
-  /* ------------------------------------------------------------ *
-   * Modular content depending on the selected kind.
-   * Every branch renders INSIDE the same fixed-height action zone,
-   * so controls stay at the same position across modes.
-   * ------------------------------------------------------------ */
   const renderActionArea = () => {
     const turnFlag = { isMyTurn };
 
@@ -463,10 +420,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
   return (
     <Box
       style={{
-        flex: 1,
-        minWidth: 220,
         width: "100%",
-        alignContent: "center",
         cursor: !isMyTurn ? "not-allowed" : "pointer",
       }}
     >
@@ -474,12 +428,12 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
         withBorder
         radius="md"
         shadow="sm"
-        mih={290}
+        padding="sm"
         style={{ display: "flex", flexDirection: "column" }}
       >
-        <Stack gap="xs" justify="center" align="center" w="100%">
+        <Stack gap="xs" align="center" w="100%">
+          <Title order={4}>Selection Menu</Title>
           <Group justify="space-between" w="100%" wrap="nowrap">
-            <Title order={4}>Selection</Title>
             {!isMyTurn && (
               <Text size="xs" c="dimmed" style={{ whiteSpace: "nowrap" }}>
                 Not your turn
@@ -492,21 +446,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
               availableWidth={itemsAvailableWidth}
             />
           </Box>
-
-          {/* Fixed-height action zone: whichever mode is active, its
-              controls (button or trade panel) always start at the same
-              y-position, so nothing "jumps" between modes. */}
-          <Box
-            w="100%"
-            style={{
-              minHeight: ACTION_ZONE_MIN_HEIGHT,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
-            }}
-          >
-            {renderActionArea()}
-          </Box>
+          <Box w="100%">{renderActionArea()}</Box>
         </Stack>
       </Card>
     </Box>

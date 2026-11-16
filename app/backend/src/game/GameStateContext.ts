@@ -67,6 +67,7 @@ class GameStateContext {
   private logId: number = 0;
   private rollId: number = 0;
   private factionSwitch: number = 0;
+  private roundCount: number = 0;
 
   constructor(gameId: string, settings: SettingsData, state: State) {
     this.settings = settings;
@@ -207,6 +208,13 @@ class GameStateContext {
   public getCurrentTurnIndex(): number {
     return this.data.currentTurnIndex;
   }
+  /** Number of resources + trade and build rounds started */
+  public getRoundCount(): number {
+    return this.roundCount;
+  }
+  public getCurrentPhase(): Phase {
+    return this.data.currentPhase;
+  }
   public getMasterLog(): string {
     return this.data.masterLog;
   }
@@ -289,7 +297,6 @@ class GameStateContext {
     }
     return player;
   }
-
   /***********************************
    * Setters
    **********************************/
@@ -380,6 +387,7 @@ class GameStateContext {
   }
 
   public setupNextPhase(nextPhase: Phase) {
+    if (nextPhase === Phase.RESOURCES) this.roundCount++;
     this.setCurrentTurnIndex(0);
     this.setCurrentPhase(nextPhase);
     this.setMasterLog(

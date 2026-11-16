@@ -1,12 +1,27 @@
-import { Box, Card, Text, Title, Stack } from "@mantine/core";
+import { Box, Card, Stack, Text, Title } from "@mantine/core";
 
 function GameMasterLogs({ log }: { log: string | null }) {
   return (
-    <Box style={{ flex: 1, minWidth: 80, alignContent: "center" }}>
-      <Card withBorder radius="md" shadow="sm" h={80}>
-        <Stack gap="xs" align="center" justify="center">
-          <Title order={6}>Game Master Logs</Title>
-          <Text>{log}</Text>
+    <Box
+      style={{
+        flex: 1,
+        minWidth: 0,
+      }}
+    >
+      <Card withBorder radius="md" shadow="sm" padding="6px" w="100%" h="100%">
+        <Stack
+          gap={0}
+          align="center"
+          justify="center"
+          h="100%"
+          style={{ overflow: "hidden" }}
+        >
+          <Title order={6} ta="center">
+            Game Master Logs
+          </Title>
+          <Text size="sm" ta="center" lineClamp={2}>
+            {log ?? "…"}
+          </Text>
         </Stack>
       </Card>
     </Box>

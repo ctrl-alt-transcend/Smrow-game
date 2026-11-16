@@ -74,6 +74,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     if (game.isGameTerminated()) {
       this.endGame(game);
     }
+    // every action ends here, so a finished game is recorded right away
+    void this.gameService.recordResultIfOver(game);
   }
 
   /**

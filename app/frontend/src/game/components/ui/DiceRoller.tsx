@@ -106,21 +106,20 @@ export function DiceRoller({
   return (
     <Box
       ref={containerRef}
-      style={{ flex: 1, minWidth: 220, width: "100%", position: "relative" }}
+      style={{
+        width: "100%",
+        position: "relative",
+      }}
     >
       <Card
         withBorder
         radius="md"
         shadow="sm"
-        mih={150}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        padding="sm"
+        style={{ display: "flex", flexDirection: "column" }}
       >
         <Stack gap="xs" align="center" justify="center" w="100%">
-          <Title order={4}>Dice box</Title>
+          <Title order={4}>Dice Roller</Title>
           <Dice3D
             ref={diceRef}
             size={diceSize}
@@ -130,6 +129,7 @@ export function DiceRoller({
           />
         </Stack>
       </Card>
+
       <button
         type="button"
         onClick={handleDiceRequest}
