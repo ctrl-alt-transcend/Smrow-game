@@ -71,6 +71,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       return;
     }
     this.server.to(game.getGameId()).emit('gameState', gameData);
+    if (game.isGameTerminated()) {
+      this.endGame(game);
+    }
   }
 
   /**
@@ -153,6 +156,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       console.log('joinRoom failed', e);
       return { ok: false, error: 'not in game' };
     }
+  }
+
+  private endGame(game: GameStateContext) {
+    const gameId = game.getGameId();
+    this.server.in(gameId).socketsLeave(gameId);
+    this.gameService.removeGameInstance(gameId);
   }
 
   async afterInit(server: SocketServer) {

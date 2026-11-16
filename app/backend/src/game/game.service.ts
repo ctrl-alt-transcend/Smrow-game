@@ -58,6 +58,13 @@ export class GameService {
     this.addPlayerToGame(gameId, playerProfile);
   }
 
+  removeGameInstance(gameId: string) {
+    this.playersMap.forEach((id, userId) => {
+      if (id === gameId) this.playersMap.delete(userId);
+    });
+    this.gameInstances.delete(gameId);
+  }
+
   private getGameInstance(gameId: string): GameStateContext {
     const game = this.gameInstances.get(gameId);
     if (!game) {
