@@ -1,7 +1,7 @@
 import { Grid, Title } from "@mantine/core";
 import { useAuth } from "../hooks/useAuth";
 import GameActions from "../components/home/GameActions";
-import GameList from "../components/home/GameList";
+import ListGames from "../components/home/GameList";
 import Chat from "../components/home/Chat";
 
 export default function HomePage() {
@@ -19,7 +19,7 @@ export default function HomePage() {
           <GameActions />
         </Grid.Col>
         <Grid.Col span={{ base: 12, md: 5 }}>
-          <GameList />
+          <ListGames />
         </Grid.Col>
         <Grid.Col span={{ base: 12, md: 7 }}>
           <Chat />

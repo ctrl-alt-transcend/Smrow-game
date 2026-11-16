@@ -9,7 +9,7 @@ const maxPlayers = 4;
 
 export default function GameRow({ game }: GameRowProps) {
   const isFull = game.playerCount >= maxPlayers;
-  const gameStart = game.state !== "pending players";
+  const gameStart = game.state !== "pending";
   const variant = gameStart ? "default" : "filled";
 
   return (
