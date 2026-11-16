@@ -1,8 +1,20 @@
-import { UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseInterceptors ,Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+  UseInterceptors,
+  Controller,
+  Get,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { type UpdateProfile } from 'shared';
-import 'multer'
+import 'multer';
 @Controller('user')
 export class UserController {
   constructor(readonly userService: UserService) {}
@@ -55,11 +67,11 @@ export class UserController {
         ],
       }),
     )
-  file: Express.Multer.File,
-) {
-  const updatedUser = await this.userService.updatePicture(id, file);
-  return { message: 'Picture updated', user: updatedUser };
-}
+    file: Express.Multer.File,
+  ) {
+    const updatedUser = await this.userService.updatePicture(id, file);
+    return { message: 'Picture updated', user: updatedUser };
+  }
 
   @Delete('deluser/:username')
   async removeUser(@Param('username') username: string) {

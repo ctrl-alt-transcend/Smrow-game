@@ -21,15 +21,12 @@ export default function ProfilePage() {
 
       <Grid>
         <Grid.Col span={{ base: 12, md: 4 }}>
-          
-          <Paper withBorder p="md" h="100%" >
-
+          <Paper withBorder p="md" h="100%">
             <Title ta={"center"}>{user?.username}</Title>
 
-            <Divider my="md"/>
+            <Divider my="md" />
 
             <Stack align="center" justify="space-between" gap="xs">
-
               <Avatar
                 src={user?.avatarURL}
                 size={"200"}

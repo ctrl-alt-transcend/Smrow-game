@@ -30,8 +30,8 @@ export function ProfilePictureUpload() {
     setLoading(true);
     setError(null);
     try {
-        await uploadAvatar(user.id, file);
-    //   setUser(updated);
+      await uploadAvatar(user.id, file);
+      //   setUser(updated);
       setFile(null);
       notifications.show({ message: "Photo de profil mise à jour" });
     } catch (e) {
@@ -53,7 +53,11 @@ export function ProfilePictureUpload() {
         onChange={handleChange}
         error={error}
       />
-      <Button onClick={handleSubmit} disabled={!file || !user} loading={loading}>
+      <Button
+        onClick={handleSubmit}
+        disabled={!file || !user}
+        loading={loading}
+      >
         Send
       </Button>
     </Stack>
