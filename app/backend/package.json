@@ -20,8 +20,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:ws": "node websocket-client/socket.io.mjs",
-    "test:ws_room": "node websocket-client/create-room.io.mjs",
-    "seed:stats": "ts-node src/stats/seed/seed-stats.ts"
+    "test:ws_room": "node websocket-client/create-room.io.mjs"
   },
   "lint-staged": {
     "*.{ts,js}": [
