@@ -34,11 +34,15 @@ import {
   MAX_MULTIPLIER,
   Phase,
   ResourceType,
+  TIME_DFLT,
+  TIME_MIN,
+  TIME_MAX,
 } from "shared";
 import { useCreateLobby } from "../../game/utils/game.utils";
 
 const DEFAULTS: SettingsData = {
   gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
+  turnDurationSeconds: TIME_DFLT,
   tradeLimit: TRADE_LIMIT_DFLT,
   buildLimit: BUILD_LIMIT_DFLT,
   specialPortOfferRate: SPECIAL_PORT_OFFER_RATE_DFLT,
@@ -68,8 +72,14 @@ type SliderConfig = {
 const SECTIONS: { id: string; title: string; sliders: SliderConfig[] }[] = [
   {
     id: "limits",
-    title: "Actions limits",
+    title: "Actions & Time limits",
     sliders: [
+      {
+        key: "turnDurationSeconds",
+        label: "Time limit per turn",
+        min: TIME_MIN,
+        max: TIME_MAX,
+      },
       {
         key: "tradeLimit",
         label: "Trades authorized",

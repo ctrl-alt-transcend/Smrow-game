@@ -1,16 +1,33 @@
-import { AppShell, Burger, Group, Title } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import GameBoard from "./components/gameboard/GameBoard.tsx";
+import {
+  Accordion,
+  ActionIcon,
+  AppShell,
+  Box,
+  Burger,
+  Center,
+  Group,
+  ScrollArea,
+  Stack,
+  Text,
+  Title,
+  Tooltip,
+} from "@mantine/core";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { IconSettings } from "@tabler/icons-react";
 import { useGameBoardFactory } from "./hooks/useGameBoardFactory.ts";
 import { SelectionMenu } from "./components/ui/SelectionMenu.tsx";
 import { DiceRoller } from "./components/ui/DiceRoller.tsx";
-import GameMasterLog from "./components/ui/GameMasterLog.tsx";
+import { OptionsModal } from "./components/ui/OptionsModal.tsx";
 import { useGameState } from "./hooks/useGameState.ts";
-import { type GameDataDto, Phase } from "shared";
+import { type GameDataDto, Phase, TIME_DFLT } from "shared";
 import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
-import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import { ResourcesPanel } from "./components/ui/ResourcesPanel.tsx";
 import { usePersonalNotification } from "./hooks/usePersonalNotification.ts";
+import GameBoard from "./components/gameboard/GameBoard.tsx";
+import GameMasterLog from "./components/ui/GameMasterLog.tsx";
+import TurnProgressBar from "./components/ui/TurnProgressBar.tsx";
+import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
+import PanContainer from "./components/ui/PanContainer.tsx";
 
 export default function Game() {
   const { game } = useGameState();
@@ -20,74 +37,155 @@ export default function Game() {
 }
 
 function GameShell({ game }: { game: GameDataDto }) {
-  const [opened, { toggle }] = useDisclosure();
+  const [navbarOpened, { toggle: toggleNavbar }] = useDisclosure();
+  const [optionsOpened, { open: openOptions, close: closeOptions }] =
+    useDisclosure();
+
   const GameBoardProps = useGameBoardFactory(game.board);
   usePersonalNotification(game.currentPlayer.personalLog);
+
+  const waitingForPlayers = game.currentPhase === Phase.PENDING;
 
   let isMyTurn = game.currentPlayer.playerId === game.whosTurn;
   if (game.currentPlayer.DEVMOD || game.currentPhase === Phase.START)
     isMyTurn = true;
   const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
 
+  const navEnabled = isMyTurn && !waitingForPlayers;
+  const isDesktop = useMediaQuery("(min-width: 36em)");
+
   return (
     <AppShell
-      header={{ height: 60 }}
-      footer={{ height: 95 }}
+      header={{ height: 120 }}
       navbar={{
-        width: 300,
+        width: isDesktop ? 300 : 200,
         breakpoint: "xs",
-        collapsed: { desktop: !opened, mobile: !opened },
+        collapsed: { desktop: !navbarOpened, mobile: !navbarOpened },
       }}
-      aside={{
-        width: 300,
-        breakpoint: "md",
-        collapsed: { desktop: false, mobile: true },
-      }}
-      padding="xs"
+      padding={0}
+      style={{ height: "100dvh", overflow: "hidden" }}
     >
       <AppShell.Header>
-        <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} size="sm" />
-          Header gameId: {game.gameId}
+        <Group h="100%" px="md" gap="lg" wrap="nowrap" align="stretch">
+          <Stack gap={20} justify="center">
+            <Tooltip label="Options" position="bottom">
+              <ActionIcon
+                variant="default"
+                size="sm"
+                onClick={openOptions}
+                aria-label="Options"
+              >
+                <IconSettings size={16} stroke={1.8} />
+              </ActionIcon>
+            </Tooltip>
+            <Burger
+              opened={navbarOpened}
+              onClick={toggleNavbar}
+              size="sm"
+              disabled={waitingForPlayers}
+              aria-label="Toggle navigation"
+            />
+          </Stack>
+
+          <Box flex={1} miw={120} py={4}>
+            <Stack gap={0} justify="center" h="100%">
+              <GameMasterLog log={masterLog} />
+              <TurnProgressBar
+                durationSeconds={game.settings.turnDurationSeconds ?? TIME_DFLT}
+                resetKey={game.whosTurn}
+              />
+            </Stack>
+          </Box>
         </Group>
       </AppShell.Header>
-
       <AppShell.Navbar p="md">
-        <Group grow gap="md" w="100%" align="center" justify="center">
-          <SelectionMenu
-            selected={GameBoardProps.selected}
-            settings={game.settings}
-            masterLog={game.masterLog}
-            isMyTurn={isMyTurn}
-          />
-          <DiceRoller
-            currentRoll={game.currentPlayer.currentRoll}
-            isMyTurn={isMyTurn}
-          />
-          <SkipTurnButton isMyTurn={isMyTurn} />
-        </Group>
-      </AppShell.Navbar>
+        <AppShell.Section grow component={ScrollArea}>
+          <Stack
+            gap="sm"
+            style={
+              waitingForPlayers
+                ? { pointerEvents: "none", opacity: 0.55 }
+                : undefined
+            }
+          >
+            <Accordion
+              variant="separated"
+              multiple
+              defaultValue={["resources"]}
+            >
+              <Accordion.Item value="resources">
+                <Accordion.Control>Resources</Accordion.Control>
+                <Accordion.Panel>
+                  <ResourcesPanel currentPlayer={game.currentPlayer} />
+                </Accordion.Panel>
+              </Accordion.Item>
+            </Accordion>
 
-      <AppShell.Main>
-        <Group justify="center" align="center">
-          {!game.winner && <GameBoard {...GameBoardProps} />}
-          {game.winner && (
-            <Title>
-              {" "}
-              {game.winner} {game.winCondition}{" "}
-            </Title>
-          )}
-        </Group>
+            <SelectionMenu
+              selected={GameBoardProps.selected}
+              settings={game.settings}
+              masterLog={game.masterLog}
+              isMyTurn={navEnabled}
+            />
+
+            <DiceRoller
+              currentRoll={game.currentPlayer.currentRoll}
+              isMyTurn={navEnabled}
+            />
+
+            <SkipTurnButton isMyTurn={navEnabled} />
+
+            <Accordion variant="separated" multiple defaultValue={["players"]}>
+              <Accordion.Item value="players">
+                <Accordion.Control>Players</Accordion.Control>
+                <Accordion.Panel>
+                  <PlayerPanel players={game.players} />
+                </Accordion.Panel>
+              </Accordion.Item>
+            </Accordion>
+          </Stack>
+        </AppShell.Section>
+      </AppShell.Navbar>
+      <AppShell.Main
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+          overflow: "hidden",
+        }}
+      >
+        {game.winner ? (
+          <Center flex={1} w="100%">
+            <Stack align="center" gap="xs">
+              <Text fz={64} lh={1}>
+                🏆
+              </Text>
+              <Title order={2} ta="center">
+                {game.winner} wins!
+              </Title>
+              <Text c="dimmed">{game.winCondition}</Text>
+            </Stack>
+          </Center>
+        ) : waitingForPlayers ? (
+          <Center flex={1} w="100%">
+            <Stack align="center" gap="xs">
+              <Text fz={48} lh={1}>
+                ⏳
+              </Text>
+              <Title order={4}>Waiting for players...</Title>
+              <Text c="dimmed">The game starts once everyone has joined.</Text>
+            </Stack>
+          </Center>
+        ) : (
+          <Center flex={1} w="100%" h="100%" mih={0} p={0}>
+            <PanContainer maxPan={400}>
+              <GameBoard {...GameBoardProps} />
+            </PanContainer>
+          </Center>
+        )}
       </AppShell.Main>
 
-      <AppShell.Aside p="md">
-        Aside
-        <PlayerPanel players={game.players} />
-        <ResourcesPanel currentPlayer={game.currentPlayer} />
-      </AppShell.Aside>
-      <AppShell.Footer p="xs">
-        <GameMasterLog log={masterLog} />
-      </AppShell.Footer>
+      <OptionsModal game={game} opened={optionsOpened} onClose={closeOptions} />
     </AppShell>
   );
 }

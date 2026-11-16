@@ -46,11 +46,17 @@ export const MAX_BONUS = 30;
 export const MAX_MULTIPLIER = 5;
 export const MIN_MULTIPLIER = 1;
 export const MULTIPLIER_DFLT = 2;
+export const TIME_MAX = 180;
+export const TIME_MIN = 10;
+export const TIME_DFLT = 45;
 
 export const SettingsDataSchema = z.object({
+  // Layout setting
   gameboardLayout: GameboardLayoutSchema,
 
   // Limits settings
+  /** Time countdown before autoplay */
+  turnDurationSeconds: z.number().int().nonnegative().min(TIME_MIN).max(TIME_MAX),
   /** Number of trades authorized during 'Trade and Buil' phase */
   tradeLimit: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_LIMIT),
   /** Number of builds authorized during 'Trade and Buil' phase */
@@ -182,6 +188,7 @@ export const Action = {
 export type Action = (typeof Action)[keyof typeof Action];
 
 export const Phase = {
+  PENDING: 'Pending Player',
   START: 'Start Phase',
   PLACEMENT: 'Placement Phase',
   RESOURCES: 'Resources Phase',
@@ -190,6 +197,7 @@ export const Phase = {
 export type Phase = (typeof Phase)[keyof typeof Phase];
 
 export const GUIDE_LOG: Record<Phase, string> = {
+  [Phase.PENDING]: "Waiting for other players ...",
   [Phase.START]: `${Phase.START}: ${Action.DICE}`,
   [Phase.PLACEMENT]: `${Phase.PLACEMENT}: build a settllement and a road`,
   [Phase.RESOURCES]: `${Phase.RESOURCES}: ${Action.DICE} to collect you resources`,

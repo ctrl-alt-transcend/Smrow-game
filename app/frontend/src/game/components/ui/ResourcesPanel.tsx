@@ -1,6 +1,5 @@
 import {
   Box,
-  Card,
   Group,
   Stack,
   Table,
@@ -35,7 +34,6 @@ const RESOURCE_META: ResourceMeta[] = [
 type ResourcesPanelProps = {
   currentPlayer: PlayerDto;
   title?: string;
-  /** Affiche ou non la ligne de total */
   withTotal?: boolean;
 };
 
@@ -71,36 +69,34 @@ export function ResourcesPanel({
 
   return (
     <Box style={{ flex: 1, minWidth: 160, alignContent: "center" }}>
-      <Card withBorder radius="md" shadow="sm" padding="sm">
-        <Stack gap="xs" justify="center" align="center">
-          <Title order={4}>{title}</Title>
-          <Table
-            fs="sm"
-            verticalSpacing="4px"
-            horizontalSpacing="sm"
-            w="100%"
-            maw={240}
-          >
-            <Table.Tbody>{rows}</Table.Tbody>
-            {withTotal && (
-              <Table.Tfoot>
-                <Table.Tr>
-                  <Table.Td>
-                    <Text size="sm" fw={500} c="dimmed">
-                      Total
-                    </Text>
-                  </Table.Td>
-                  <Table.Td style={{ textAlign: "right" }}>
-                    <Text size="sm" fw={700}>
-                      {total}
-                    </Text>
-                  </Table.Td>
-                </Table.Tr>
-              </Table.Tfoot>
-            )}
-          </Table>
-        </Stack>
-      </Card>
+      <Stack gap="xs" justify="center" align="center">
+        <Title order={4}>{title}</Title>
+        <Table
+          fs="sm"
+          verticalSpacing="4px"
+          horizontalSpacing="sm"
+          w="100%"
+          maw={240}
+        >
+          <Table.Tbody>{rows}</Table.Tbody>
+          {withTotal && (
+            <Table.Tfoot>
+              <Table.Tr>
+                <Table.Td>
+                  <Text size="sm" fw={500} c="dimmed">
+                    Total
+                  </Text>
+                </Table.Td>
+                <Table.Td style={{ textAlign: "right" }}>
+                  <Text size="sm" fw={700}>
+                    {total}
+                  </Text>
+                </Table.Td>
+              </Table.Tr>
+            </Table.Tfoot>
+          )}
+        </Table>
+      </Stack>
     </Box>
   );
 }
