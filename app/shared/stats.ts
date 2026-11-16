@@ -1,24 +1,59 @@
+import { z } from "zod";
+import { DatetimeSchema, IdSchema } from "./types.js";
+
 // ----- Write contract -----
 // What the game must provide once a game is over.
 // See StatsService.recordGameResult in the backend.
 
-export type GameResultPlayer = {
-  userId: string;
-  turnOrder: number;
-  winPoints: number;
-  isWinner: boolean;
-  playerRank: number;
-  settlementBuilt: number;
-  citiesBuilt: number;
-  devCardsBought: number;
-};
+const CountSchema = z.number().int().nonnegative();
 
-export type GameResult = {
-  totalTurns: number;
-  duration?: number; // seconds
-  playedAt?: string; // ISO date, defaults to now
-  players: GameResultPlayer[];
-};
+export const GameResultPlayerSchema = z.object({
+  userId: IdSchema,
+  turnOrder: CountSchema,
+  winPoints: CountSchema,
+  isWinner: z.boolean(),
+  playerRank: z.number().int().min(1, "playerRank starts at 1"),
+  settlementBuilt: CountSchema,
+  citiesBuilt: CountSchema,
+  devCardsBought: CountSchema,
+});
+export type GameResultPlayer = z.infer<typeof GameResultPlayerSchema>;
+
+const isUnique = (values: unknown[]) => new Set(values).size === values.length;
+
+export const GameResultSchema = z
+  .object({
+    totalTurns: CountSchema,
+    duration: CountSchema.optional(), // seconds
+    playedAt: DatetimeSchema.optional(), // ISO date, defaults to now
+    players: z
+      .array(GameResultPlayerSchema)
+      .min(1, "A game result needs at least one player"),
+  })
+  .superRefine(({ players }, ctx) => {
+    if (!isUnique(players.map((p) => p.userId)))
+      ctx.addIssue({
+        code: "custom",
+        path: ["players"],
+        message: "A player can only appear once per game",
+      });
+    if (!isUnique(players.map((p) => p.turnOrder)))
+      ctx.addIssue({
+        code: "custom",
+        path: ["players"],
+        message: "turnOrder must be unique per game",
+      });
+    players.forEach((p, i) => {
+      // the winner may be missing if a non-recorded player (bot) won
+      if (p.isWinner !== (p.playerRank === 1))
+        ctx.addIssue({
+          code: "custom",
+          path: ["players", i, "isWinner"],
+          message: "Only the rank 1 player is the winner",
+        });
+    });
+  });
+export type GameResult = z.infer<typeof GameResultSchema>;
 
 // ----- Read responses -----
 

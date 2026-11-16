@@ -81,6 +81,8 @@ describe('StatsService', () => {
       ['rank 0', (r) => (r.players[1].playerRank = 0)],
       ['winner not ranked 1', (r) => (r.players[0].playerRank = 3)],
       ['invalid date', (r) => (r.playedAt = 'yesterday')],
+      ['date without time', (r) => (r.playedAt = '2026-11-16')],
+      ['non integer counter', (r) => (r.totalTurns = 1.5)],
     ])('rejects %s', async (_, mutate) => {
       const result = validResult();
       mutate(result);
