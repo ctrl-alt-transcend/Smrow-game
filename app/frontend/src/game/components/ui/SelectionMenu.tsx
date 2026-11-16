@@ -438,8 +438,8 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
         style={{ display: "flex", flexDirection: "column" }}
       >
         <Stack gap="xs" align="center" w="100%">
+          <Title order={4}>Selection Menu</Title>
           <Group justify="space-between" w="100%" wrap="nowrap">
-            <Title order={4}>Selection</Title>
             {!isMyTurn && (
               <Text size="xs" c="dimmed" style={{ whiteSpace: "nowrap" }}>
                 Not your turn

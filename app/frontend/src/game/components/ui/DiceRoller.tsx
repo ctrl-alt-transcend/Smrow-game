@@ -119,7 +119,7 @@ export function DiceRoller({
         style={{ display: "flex", flexDirection: "column" }}
       >
         <Stack gap="xs" align="center" justify="center" w="100%">
-          <Title order={4}>Dice box</Title>
+          <Title order={4}>Dice Roller</Title>
           <Dice3D
             ref={diceRef}
             size={diceSize}
