@@ -1,5 +1,5 @@
 import { http } from "./http";
-import { UpdateProfileSchema, UserProfileSchema } from "shared";
+import { UpdateProfileSchema } from "shared";
 import type { AxiosResponse } from "axios";
 import type { UserProfile, UpdateProfile } from "shared";
 
@@ -22,14 +22,14 @@ export function getUserToken(): string {
 export async function updateProfile(
   identifier: string,
   data: UpdateProfile,
-): Promise<UserProfile> {
+): Promise<UpdateProfile> {
   try {
     const payload: UpdateProfile = UpdateProfileSchema.parse(data);
     const res = await http.patch(
       `/user/update/${encodeURIComponent(identifier)}`,
       payload,
     );
-    return UserProfileSchema.parse(res.data.user);
+    return UpdateProfileSchema.parse(res.data.user);
   } catch (error: any) {
     const apiMessage = error?.response?.data?.message;
     if (apiMessage) {

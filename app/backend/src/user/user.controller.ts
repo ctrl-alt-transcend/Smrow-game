@@ -37,7 +37,9 @@ export class UserController {
       user: {
         id: updatedUser.id,
         email: updatedUser.email,
-        updatedAt: updatedUser.updatedAt,
+        username: updatedUser.username,
+        name: updatedUser.name,
+        // updatedAt: updatedUser.updatedAt,
       },
     };
   }
