@@ -207,6 +207,9 @@ class GameStateContext {
   public getCurrentTurnIndex(): number {
     return this.data.currentTurnIndex;
   }
+  public getCurrentPhase(): Phase {
+    return this.data.currentPhase;
+  }
   public getMasterLog(): string {
     return this.data.masterLog;
   }
@@ -289,11 +292,6 @@ class GameStateContext {
     }
     return player;
   }
-
-  public getCurrentPhase(): Phase {
-    return this.data.currentPhase;
-  }
-
   /***********************************
    * Setters
    **********************************/
