@@ -47,8 +47,10 @@ export async function uploadAvatar(
 ): Promise<AxiosResponse> {
   try {
     const payload: UploadImage = UploadImageSchema.parse(data);
+    const formData = new FormData();
+    formData.append('file', payload);
     const res = await http.patch(`/user/update/${encodeURIComponent(identifier)}/picture`,
-  payload);
+  formData);
   return res;
   } catch (e: any) {
     const apiMessage = e?.response?.data?.message;

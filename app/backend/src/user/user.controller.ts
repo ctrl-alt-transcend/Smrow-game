@@ -44,7 +44,7 @@ export class UserController {
     };
   }
   @Patch('update/:id/picture')
-  @UseInterceptors(FileInterceptor('file')) // 'file' = nom du champ dans le FormData
+  @UseInterceptors(FileInterceptor('file'))
   async uploadPicture(
     @Param('id') id: string,
     @UploadedFile(

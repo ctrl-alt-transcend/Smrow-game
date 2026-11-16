@@ -11,7 +11,6 @@ export function ProfilePictureUpload() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // validation dès la sélection, avant tout envoi
   const handleChange = (selected: File | null) => {
     setError(null);
     if (selected) {
@@ -27,13 +26,13 @@ export function ProfilePictureUpload() {
 
   const handleSubmit = async () => {
     if (!file || !user) return;
-
+    console.log("front has file");
     setLoading(true);
     setError(null);
     try {
         await uploadAvatar(user.id, file);
     //   setUser(updated);
-      setFile(null); // reset après succès
+      setFile(null);
       notifications.show({ message: "Photo de profil mise à jour" });
     } catch (e) {
       setError((e as Error).message);

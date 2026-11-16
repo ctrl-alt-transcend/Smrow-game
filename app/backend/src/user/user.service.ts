@@ -139,12 +139,11 @@ export class UserService {
   async updatePicture(id: string, file: Express.Multer.File) {
     const user = await this.databaseService.profile.findUnique({
       where: {
-        id
-      }
+        userId: id,
+      },
     });
 
     if (!user) throw new NotFoundException('User not found');
-    
     const filename = `${randomUUID()}.${EXT[file.mimetype]}`;
     await mkdir (UPLOAD_DIR, { recursive: true });
     await writeFile(join(UPLOAD_DIR, filename), file.buffer);
