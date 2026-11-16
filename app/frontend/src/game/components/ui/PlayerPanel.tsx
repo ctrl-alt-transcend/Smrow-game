@@ -1,7 +1,7 @@
 import { Card, Stack, Text, Avatar } from "@mantine/core";
 import type { Player } from "shared";
-import defaultAvatar from "../../../../public/default-pp.png";
 
+//TODO: Make this responsive
 const AVATAR_SIZE = 50;
 
 type PlayerCardProps = {
@@ -12,13 +12,16 @@ type PlayerCardProps = {
 };
 
 export function PlayerCard({ name, level, score, avatarURL }: PlayerCardProps) {
-  const avatarSrc = avatarURL || defaultAvatar;
+  const avatarSrc = avatarURL ? (
+    <Avatar src={avatarURL} radius={0} size={AVATAR_SIZE} />
+  ) : (
+    <Avatar name={name} radius={0} size={AVATAR_SIZE} color="initials" />
+  );
+  //const avatarSrc = avatarURL || defaultAvatar
 
   return (
     <Card padding={0} withBorder orientation="horizontal">
-      <Card.Section withBorder>
-        <Avatar radius={0} src={avatarSrc} size={AVATAR_SIZE} />
-      </Card.Section>
+      <Card.Section withBorder>{avatarSrc}</Card.Section>
       <Card.Section px="xs">
         <Stack gap={0} h={AVATAR_SIZE}>
           <Text fz="lg" fw="700" lh={1.1}>
