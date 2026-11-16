@@ -63,6 +63,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       return;
     }
     this.server.to(game.getGameId()).emit('gameState', gameData);
+    // every action ends here, so a finished game is recorded right away
+    void this.gameService.recordResultIfOver(game);
   }
 
   /**

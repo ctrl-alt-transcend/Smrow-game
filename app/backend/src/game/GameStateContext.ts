@@ -71,6 +71,7 @@ class GameStateContext {
   private logId: number = 0;
   private rollId: number = 0;
   private factionSwitch: number = 0;
+  private roundCount: number = 0;
 
   constructor(gameId: string, state: State) {
     const { board, graph } = createGameBoard(classicLayout);
@@ -218,6 +219,10 @@ class GameStateContext {
   }
   public getCurrentTurnIndex(): number {
     return this.data.currentTurnIndex;
+  }
+  /** Number of resources + trade and build rounds started */
+  public getRoundCount(): number {
+    return this.roundCount;
   }
   public getMasterLog(): string {
     return this.data.masterLog;
@@ -381,6 +386,7 @@ class GameStateContext {
   }
 
   public setupNextPhase(nextPhase: Phase) {
+    if (nextPhase === Phase.RESOURCES) this.roundCount++;
     this.setCurrentTurnIndex(0);
     this.setCurrentPhase(nextPhase);
     this.setMasterLog(
