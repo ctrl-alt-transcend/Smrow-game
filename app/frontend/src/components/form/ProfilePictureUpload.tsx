@@ -26,14 +26,12 @@ export function ProfilePictureUpload() {
 
   const handleSubmit = async () => {
     if (!file || !user) return;
-    console.log("front has file");
     setLoading(true);
     setError(null);
     try {
       await uploadAvatar(user.id, file);
-      //   setUser(updated);
       setFile(null);
-      notifications.show({ message: "Photo de profil mise à jour" });
+      notifications.show({ message: "Profile picture updated !" });
     } catch (e) {
       setError((e as Error).message);
     } finally {

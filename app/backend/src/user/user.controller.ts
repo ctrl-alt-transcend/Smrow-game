@@ -48,7 +48,7 @@ export class UserController {
     return {
       message: `User updated correctly`,
       user: {
-        // id: updatedUser.id,
+        id: updatedUser.id,
         email: updatedUser.email,
         username: updatedUser.username,
         name: updatedUser.name,

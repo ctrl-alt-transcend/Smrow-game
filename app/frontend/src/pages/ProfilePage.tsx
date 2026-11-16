@@ -10,6 +10,7 @@ import {
 import { useAuth } from "../hooks/useAuth";
 import { ProfileSettings } from "../components/form/ProfileForm";
 import { ProfilePictureUpload } from "../components/form/ProfilePictureUpload";
+import { getAvatarSrc } from "../components/utils/avatar";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -25,16 +26,14 @@ export default function ProfilePage() {
             <Title ta={"center"}>{user?.username}</Title>
 
             <Divider my="md" />
-
             <Stack align="center" justify="space-between" gap="xs">
               <Avatar
-                src={user?.avatarURL}
+                src={getAvatarSrc(user?.avatarURL)}
                 size={"200"}
                 radius="md"
                 color="Red"
                 mb={"md"}
               />
-
               <ProfilePictureUpload />
             </Stack>
             <Divider my="md" />
