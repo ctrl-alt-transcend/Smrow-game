@@ -212,6 +212,9 @@ class GameStateContext {
   public getRoundCount(): number {
     return this.roundCount;
   }
+  public getCurrentPhase(): Phase {
+    return this.data.currentPhase;
+  }
   public getMasterLog(): string {
     return this.data.masterLog;
   }
@@ -294,11 +297,6 @@ class GameStateContext {
     }
     return player;
   }
-
-  public getCurrentPhase(): Phase {
-    return this.data.currentPhase;
-  }
-
   /***********************************
    * Setters
    **********************************/
