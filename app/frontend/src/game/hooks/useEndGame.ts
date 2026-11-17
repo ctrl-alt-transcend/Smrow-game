@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
-const DELAY = 3000;
+const DELAY = 10000;
 
 /**
  * @brief Custom hook to handle the end of the game and navigate to the homepage after 10 secondes.

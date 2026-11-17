@@ -78,7 +78,7 @@ class GameStateContext {
       board: board,
       players: new Map<string, Player>(),
       startingRolls: new Map<string, number>(),
-      currentPhase: Phase.START,
+      currentPhase: Phase.PENDING,
       currentTurnIndex: 0,
       turnOrder: [],
       masterLog: `${Phase.START}: roll the dices`,

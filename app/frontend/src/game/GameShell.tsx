@@ -8,8 +8,6 @@ import {
   Group,
   ScrollArea,
   Stack,
-  Text,
-  Title,
   Tooltip,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
@@ -23,6 +21,7 @@ import { type GameDataDto, Phase, TIME_DFLT } from "shared";
 import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
 import { ResourcesPanel } from "./components/ui/ResourcesPanel.tsx";
 import { EndGameModal } from "./components/ui/EndGameModal.tsx";
+import { WaitingPlayersModal } from "./components/ui/WaitingPlayersModal.tsx";
 import { usePersonalNotification } from "./hooks/usePersonalNotification.ts";
 import { useEndGame } from "./hooks/useEndGame.ts";
 import GameBoard from "./components/gameboard/GameBoard.tsx";
@@ -163,23 +162,15 @@ function GameShell({ game }: { game: GameDataDto }) {
           overflow: "hidden",
         }}
       >
-        {waitingForPlayers ? (
-          <Center flex={1} w="100%">
-            <Stack align="center" gap="xs">
-              <Text fz={48} lh={1}>
-                ⏳
-              </Text>
-              <Title order={4}>Waiting for players...</Title>
-              <Text c="dimmed">The game starts once everyone has joined.</Text>
-            </Stack>
-          </Center>
-        ) : (
-          <Center flex={1} w="100%" h="100%" mih={0} p={0}>
-            <PanContainer maxPan={400}>
-              <GameBoard {...GameBoardProps} />
-            </PanContainer>
-          </Center>
-        )}
+        <WaitingPlayersModal
+          waitingForPlayers={waitingForPlayers}
+          players={game.players}
+        />
+        <Center flex={1} w="100%" h="100%" mih={0} p={0}>
+          <PanContainer maxPan={400}>
+            <GameBoard {...GameBoardProps} />
+          </PanContainer>
+        </Center>
       </AppShell.Main>
 
       <OptionsModal game={game} opened={optionsOpened} onClose={closeOptions} />

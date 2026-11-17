@@ -15,6 +15,7 @@ import {
   GameDataDto,
   ZGEG_DEV,
   type JwtPayload,
+  Phase,
 } from 'shared';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
@@ -72,10 +73,32 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     }
     this.server.to(game.getGameId()).emit('gameState', gameData);
     if (game.isGameTerminated()) {
+      //TODO:Reactivate this when the game is finished, the game instance is removed from memory and the clients are disconnected
       this.endGame(game);
     }
     // every action ends here, so a finished game is recorded right away
     void this.gameService.recordResultIfOver(game);
+  }
+
+  @SubscribeMessage('startGame')
+  startGame(@ConnectedSocket() client: SocketClient) {
+    console.log('startGame event received from client:', client.id);
+    const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (game.getCurrentPhase() !== Phase.PENDING) {
+      return;
+    }
+    if (game.getPlayers().size < 2) {
+      const player = game.getPlayerById(client.data.user.username);
+      if (player) {
+        game.setPersonalLog(player, 'Not enough players to start the game.');
+      }
+      this.emitGameDataDto(game, client.data.user.username);
+    }
+    console.log(
+      `Starting game ${game.getGameId()} with ${game.getPlayers().size} players.`,
+    );
+    game.setCurrentPhase(Phase.START);
+    this.emitGameDataDto(game, client.data.user.username);
   }
 
   /**
