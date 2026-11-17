@@ -12,19 +12,21 @@ datasource db {
 }
 
 model User {
-	id			      String @default(cuid()) @id
+	id				String @default(cuid()) @id
 	username	    String @unique
-	name		      String
-	email		      String @unique
+	name			String
+	email			String @unique
 	createdAt	    DateTime @default(now())
 	updatedAt	    DateTime @updatedAt
 
 	// relations
-	profile			  Profile?
-	localAuth		  UserAuth?
-	accounts		  Account[]
-	gamesHistory	GamesPlayer[]
-  chat          Chat[]
+	profile					Profile?
+	localAuth				UserAuth?
+	accounts				Account[]
+	gamesHistory			GamesPlayer[]
+  	chat          			Chat[]
+  	sentFriendRequests		FriendRequest[] @relation("SentFriendRequests")
+  	receivedFriendRequests	FriendRequest[] @relation("ReceivedFriendRequests")
 }
 
 model Profile {
@@ -110,3 +112,22 @@ model Chat {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model FriendRequest {
+	id			String				@default(cuid()) @id
+	sender_id	String
+	receiver_id String
+	status		FriendRequestStatus	@default(PENDING)
+	createdAt	DateTime			@default(now())
+
+	sender		User				@relation("SentFriendRequests", fields: [sender_id], references: [id], onDelete: Cascade)
+	receiver	User				@relation("ReceivedFriendRequests", fields: [receiver_id], references: [id], onDelete: Cascade)
+
+	@@unique([sender_id, receiver_id])
+	@@index([receiver_id])
+}
+
+enum	FriendRequestStatus {
+	PENDING
+	ACCEPTED
+	DECLINED
+}
