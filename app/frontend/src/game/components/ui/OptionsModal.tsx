@@ -56,25 +56,25 @@ export function OptionsModal({ game, opened, onClose }: OptionsModalProps) {
       body:
         `Gameboard layout: ${s.gameboardLayout}\n\n` +
         "Time & Actions limits\n" +
-        `· Time per player turn: ${s.turnDurationSeconds}\n` +
-        `· Trade limit during « ${Phase.TRADE_BUILD} »: ${s.tradeLimit}\n` +
-        `· Build limit during « ${Phase.TRADE_BUILD} »: ${s.buildLimit}\n\n` +
+        `• Time per player turn: ${s.turnDurationSeconds}\n` +
+        `• Trade limit during « ${Phase.TRADE_BUILD} »: ${s.tradeLimit}\n` +
+        `• Build limit during « ${Phase.TRADE_BUILD} »: ${s.buildLimit}\n\n` +
         "Trading Rates\n" +
-        `· Specialized Port rate: ${s.specialPortOfferRate}\n` +
-        `· Generic Port rate: ${s.genericPortOfferRate}\n` +
-        `· Reserve rate: ${s.reserveOfferRate}\n\n` +
+        `• Specialized Port rate: ${s.specialPortOfferRate}\n` +
+        `• Generic Port rate: ${s.genericPortOfferRate}\n` +
+        `• Reserve rate: ${s.reserveOfferRate}\n\n` +
         "Points Earned\n" +
-        `· Point(s) per ${BuildingType.ROAD}: ${s.roadPoints}\n` +
-        `· Point(s) per ${BuildingType.SETTLEMENT}: ${s.settlementPoints}\n` +
-        `· Point(s) per ${BuildingType.CITY}: ${s.cityPoints}\n` +
-        `· Points to win: ${s.pointsToWin}\n\n` +
+        `• Point(s) per ${BuildingType.ROAD}: ${s.roadPoints}\n` +
+        `• Point(s) per ${BuildingType.SETTLEMENT}: ${s.settlementPoints}\n` +
+        `• Point(s) per ${BuildingType.CITY}: ${s.cityPoints}\n` +
+        `• Points to win: ${s.pointsToWin}\n\n` +
         "Bonus\n" +
-        `· Resources multiplier: ${s.resourcesMultiplier}\n` +
-        `· ${ResourceType.WOOD} bonus: ${s.woodBonus}\n` +
-        `· ${ResourceType.SHEEP} bonus: ${s.sheepBonus}\n` +
-        `· ${ResourceType.BRICK} bonus: ${s.brickBonus}\n` +
-        `· ${ResourceType.ORE} bonus: ${s.oreBonus}\n` +
-        `· ${ResourceType.WHEAT} bonus: ${s.wheatBonus}\n`,
+        `• Resources multiplier: ${s.resourcesMultiplier}\n` +
+        `• ${ResourceType.WOOD} bonus: ${s.woodBonus}\n` +
+        `• ${ResourceType.SHEEP} bonus: ${s.sheepBonus}\n` +
+        `• ${ResourceType.BRICK} bonus: ${s.brickBonus}\n` +
+        `• ${ResourceType.ORE} bonus: ${s.oreBonus}\n` +
+        `• ${ResourceType.WHEAT} bonus: ${s.wheatBonus}\n`,
     },
   ];
 

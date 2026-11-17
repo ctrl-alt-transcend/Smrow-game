@@ -235,11 +235,11 @@ export const END_GAME_INFO =
 
 export const SPECIAL_RULES = "Special Rules";
 export const SPECIAL_RULES_INFO =
-"· Robber Rule: when a 7 is rolled, every player loses half of their " +
+"• Robber Rule: when a 7 is rolled, every player loses half of their " +
 "total resources if that total is greater than 7. The robber then " +
 "moves randomly to another tile, blocking the resources the tiles " +
 "would normally produce\n" +
-"· Crossroad Rule: build the 3 roads surrounding one of your " +
+"• Crossroad Rule: build the 3 roads surrounding one of your " +
 "settlements to earn a victory point.\n"
 
 export const CURRENT_GAME_SETTINGS = "Current Game Settings"

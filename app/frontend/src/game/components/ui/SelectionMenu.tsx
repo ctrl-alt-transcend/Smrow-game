@@ -315,13 +315,12 @@ const SelectionItems: React.FC<SelectionItemsProps> = ({
           style={{
             fontSize,
             lineHeight: 1.25,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
+            whiteSpace: "normal",
+            overflowWrap: "break-word",
             maxWidth: "100%",
           }}
         >
-          • {item.label}
+          {item.label}
         </Text>
       ))}
     </Stack>
@@ -388,7 +387,10 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
 
     if (selected.selectedTile) return null;
 
-    if (selected.selectedRoad || selected.selectedSettlement) {
+    if (
+      (selected.selectedRoad && !selected.selectedRoad.ownerId) ||
+      (selected.selectedSettlement && !selected.selectedSettlement.isCity)
+    ) {
       return (
         <BuildSelectionButton
           selected={selected}
@@ -409,12 +411,6 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
         />
       );
     }
-
-    return (
-      <Text size="sm" c="dimmed">
-        No selection
-      </Text>
-    );
   };
 
   return (

@@ -4,6 +4,7 @@ import {
   ROBBER_NAME,
   RESERVE_NAME,
   type SettingsData,
+  ResourceType,
 } from "shared";
 import type { GameBoardSelection } from "../types/gameboard.types";
 
@@ -18,46 +19,64 @@ export const useSelectionDisplay = (
   const items: SelectionItem[] = [];
 
   if (selected.selectedTile) {
-    items.push({ label: `Land: ${selected.selectedTile.land}` });
+    items.push({ label: `${selected.selectedTile.land}` });
     items.push({
-      label: `Resource: ${LAND_RESOURCE[selected.selectedTile.land]}`,
+      label: `• produces ${LAND_RESOURCE[selected.selectedTile.land]}`,
     });
-    if (selected.selectedTile.hasRobber)
-      items.push({
-        label: `${ROBBER_NAME}`,
-      });
+    if (selected.selectedTile.hasRobber) {
+      items.push({ label: "Robber:" });
+      items.push({ label: `• ${ROBBER_NAME} is here, watchout!` });
+    }
   }
   if (selected.selectedSettlement) {
     if (selected.selectedSettlement.ownerId) {
-      items.push({ label: `Landlord: ${selected.selectedSettlement.ownerId}` });
       if (!selected.selectedSettlement.isCity) {
-        items.push({ label: `Cost to upgrade:` });
-        items.push({ label: `Wheat: ${BUILD_COSTS.City.wheat}` });
-        items.push({ label: `Ore: ${BUILD_COSTS.City.ore}` });
         items.push({
-          label: `Generates ${settings.cityPoints} victory point on upgrade.`,
+          label: `Settlement owned by : ${selected.selectedSettlement.ownerId}`,
+        });
+        items.push({ label: `Cost to upgrade :` });
+        items.push({
+          label: `• ${BUILD_COSTS.City.wheat} ${ResourceType.WHEAT}`,
+        });
+        items.push({ label: `• ${BUILD_COSTS.City.ore} ${ResourceType.ORE}` });
+        items.push({
+          label: `Generates ${settings.cityPoints} victory point`,
+        });
+      } else {
+        items.push({
+          label: `City owned by : ${selected.selectedSettlement.ownerId}`,
         });
       }
     } else {
-      items.push({ label: `Cost to build:` });
-      items.push({ label: `Wood: ${BUILD_COSTS.Settlement.wood}` });
-      items.push({ label: `Brick: ${BUILD_COSTS.Settlement.brick}` });
-      items.push({ label: `Wheat: ${BUILD_COSTS.Settlement.wheat}` });
-      items.push({ label: `Sheep: ${BUILD_COSTS.Settlement.sheep}` });
+      items.push({ label: `Settlement - cost to build :` });
       items.push({
-        label: `Generates ${settings.settlementPoints} victory point on build.`,
+        label: `• ${BUILD_COSTS.Settlement.wood} ${ResourceType.WOOD}`,
+      });
+      items.push({
+        label: `• ${BUILD_COSTS.Settlement.brick} ${ResourceType.BRICK}`,
+      });
+      items.push({
+        label: `• ${BUILD_COSTS.Settlement.wheat} ${ResourceType.WHEAT}`,
+      });
+      items.push({
+        label: `• ${BUILD_COSTS.Settlement.sheep} ${ResourceType.SHEEP}`,
+      });
+      items.push({
+        label: `Generates ${settings.settlementPoints} victory point`,
       });
     }
   }
   if (selected.selectedRoad) {
     if (selected.selectedRoad.ownerId) {
-      items.push({ label: `Landlord: ${selected.selectedRoad.ownerId}` });
+      items.push({ label: `Road owned by : ${selected.selectedRoad.ownerId}` });
     } else {
-      items.push({ label: `Cost to build:` });
-      items.push({ label: `Wood: ${BUILD_COSTS.Road.wood}` });
-      items.push({ label: `Brick: ${BUILD_COSTS.Road.brick}` });
+      items.push({ label: `Road - cost to build :` });
+      items.push({ label: `• ${BUILD_COSTS.Road.wood} ${ResourceType.WOOD}` });
       items.push({
-        label: `Generates ${settings.roadPoints} victory point on build.`,
+        label: `• ${BUILD_COSTS.Road.brick} ${ResourceType.BRICK}`,
+      });
+      items.push({
+        label: `Generates ${settings.roadPoints} victory point`,
       });
     }
   }
