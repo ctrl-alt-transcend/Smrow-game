@@ -4,6 +4,7 @@ import {
   TraderType,
   type GameBoardGraph,
   SettingsData,
+  RESERVE_NAME,
 } from 'shared';
 import {
   earnTradeResources,
@@ -108,7 +109,7 @@ export const tradeCheck = (
         earnTradeResources(player.resources, payload.target);
         return {
           valid: true,
-          message: `Successfully traded with ${payload.trader}: ${payload.offer.amount}x ${payload.offer.resource} for ${payload.target.amount}x ${payload.target.resource}`,
+          message: `Successfully traded with ${RESERVE_NAME}: ${payload.offer.amount}x ${payload.offer.resource} for ${payload.target.amount}x ${payload.target.resource}`,
         };
       }
       return {

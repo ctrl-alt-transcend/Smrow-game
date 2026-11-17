@@ -16,6 +16,8 @@ export const COAST = 'Coast';
 export const TILE = 'Tile';
 export const RESERVE = 'Reserve';
 export const NONE = 'none';
+export const RESERVE_NAME = 'Shnek the Trader';
+export const ROBBER_NAME = 'Robert the Robber';
 
 export const GameboardLayout = {
   CLASSIC_LAYOUT: 'Catan Island',

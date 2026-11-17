@@ -13,6 +13,7 @@ import {
   SETTLEMENT,
   ROAD,
   PERSONNAL_LOG_LIMIT,
+  ROBBER_NAME,
 } from 'shared';
 import type {
   GameBoard,
@@ -452,10 +453,10 @@ class GameStateContext {
         } else if (tile.hasRobber && !placementPhase) {
           this.setPersonalLog(
             player,
-            `Robert the Robber stole your ${LAND_RESOURCE[tile.land]} production !`,
+            `${ROBBER_NAME} stole your ${LAND_RESOURCE[tile.land]} production !`,
             true,
           );
-          //console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by Robert the Robber !`);
+          //console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by ${ROBBER_NAME} !`);
         } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
             player,
@@ -488,7 +489,7 @@ class GameStateContext {
       }
       this.setPersonalLog(
         player,
-        `Robert the Robber robbed you ${toDiscard} resources !`,
+        `${ROBBER_NAME} robbed you ${toDiscard} resources !`,
         true,
       );
     });

@@ -344,7 +344,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
   onBuilt,
   isMyTurn,
 }) => {
-  const items = useSelectionDisplay(selected);
+  const items = useSelectionDisplay(selected, settings);
   const { ref: cardBodyRef, width: cardBodyWidth } =
     useElementWidth<HTMLDivElement>();
 
