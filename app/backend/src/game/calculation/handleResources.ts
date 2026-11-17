@@ -1,6 +1,15 @@
 import type { Resources, TradeForm } from 'shared';
 import { LandType, BuildingType, BUILD_COSTS, ResourceType } from 'shared';
 
+export function addStartingResources(resources: Resources) {
+  resources.brick += BUILD_COSTS.Road.brick;
+  resources.wood += BUILD_COSTS.Road.wood;
+  resources.brick += BUILD_COSTS.Settlement.brick;
+  resources.wood += BUILD_COSTS.Settlement.wood;
+  resources.sheep += BUILD_COSTS.Settlement.sheep;
+  resources.wheat += BUILD_COSTS.Settlement.wheat;
+}
+
 export function earnTradeResources(resources: Resources, target: TradeForm) {
   switch (target.resource) {
     case ResourceType.WOOD:

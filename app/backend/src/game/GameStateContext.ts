@@ -33,7 +33,10 @@ import { buildCheck, BuildingsInGame } from './calculation/handleBuilds';
 import { createGameBoard } from './calculation/createGameBoard';
 import { tradeCheck } from './calculation/handleTrade';
 import { NotFoundException } from '@nestjs/common';
-import { produceResources } from './calculation/handleResources';
+import {
+  addStartingResources,
+  produceResources,
+} from './calculation/handleResources';
 import { randomizeRobber } from './calculation/randomizeGameBoard';
 
 /**
@@ -76,6 +79,8 @@ class GameStateContext {
   private rollId: number = 0;
   private factionSwitch: number = 0;
   private turnCount: number = 0;
+  private turnStart: number = 0;
+  private turnTimeoutId: NodeJS.Timeout | null = null;
 
   constructor(gameId: string, settings: SettingsData, state: State) {
     this.settings = settings;
@@ -224,7 +229,7 @@ class GameStateContext {
       playerId: p.playerId,
       stats: p.stats,
       victoryPoints: p.victoryPoints,
-      timeToPlay: p.timeToPlay,
+      timeToPlay: this.getTimeLeft(p.playerId),
       firstDice: p.firstDice,
       secondDice: p.secondDice,
       level: p.level,
@@ -351,25 +356,29 @@ class GameStateContext {
     );
     this.data.whosTurn = this.data.turnOrder[this.data.turnIndex];
   }
+
   /** Set next player turn, ignore the players that quit the game */
   public setNextPlayer(index?: number) {
+    this.stopWatch();
     this.setTurnCount();
     for (let i = 0; i <= this.getPlayers().size; i++) {
       if (index === undefined) {
         this.setTurnIndex(index);
-      } else {
+      } else if (i < this.getPlayers().size) {
         this.setTurnIndex(i);
       }
       const p = this.getPlayerById(this.data.whosTurn);
       if (p) {
         break;
-      } else {
-        console.log(
-          `Game: [${this.data.gameId}]: skipping ${this.data.whosTurn}'s turn, not in 'Players[]' anymore`,
-        );
       }
     }
+    console.log(`setNextPlayer: ${this.data.whosTurn} is now playing`);
+    this.setMasterLog(
+      `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.playerId} is playing ...`,
+    );
+    this.startWatch();
   }
+
   /** @argument winCondition: explain why the player won  */
   public setVictory(winner: string, winCondition: string) {
     this.data.winner = winner;
@@ -441,9 +450,6 @@ class GameStateContext {
     this.setNextPlayer(0);
     this.setTurnCount(0);
     this.setCurrentPhase(nextPhase);
-    this.setMasterLog(
-      `${nextPhase}: ${this.getCurrentPlayer()?.playerId} is playing ...`,
-    );
     this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
     this.resetAllDices();
   }
@@ -545,6 +551,67 @@ class GameStateContext {
       );
     });
     randomizeRobber(this.data.board.layout);
+  }
+  public afkDuringPlacement(playerId: string) {
+    const p = this.getPlayerById(playerId);
+    if (!p) return;
+    addStartingResources(p.resources);
+    this.setNextPlayer();
+  }
+
+  /***********************************
+   * Turn Watcher
+   **********************************/
+  private onExpire(): void {
+    console.log(
+      `TurnWatcher: no actions within the elapsed time ` +
+        `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
+        `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
+    );
+    if (this.turnTimeoutId === null) return;
+    this.turnTimeoutId = null;
+    switch (this.getCurrentPhase()) {
+      case Phase.PLACEMENT:
+        this.afkDuringPlacement(this.data.whosTurn);
+        break;
+      case Phase.RESOURCES:
+        this.diceRequest(this.data.whosTurn);
+        this.diceRequest(this.data.whosTurn);
+        break;
+      case Phase.TRADE_BUILD:
+        this.skipRequest(this.data.whosTurn);
+        break;
+      default:
+        break;
+    }
+    this.phaseCheckRequest();
+  }
+
+  private elapsedMs(): number {
+    return Date.now() - this.turnStart;
+  }
+
+  public startWatch(): void {
+    this.turnStart = Date.now();
+    this.turnTimeoutId = setTimeout(
+      () => this.onExpire(),
+      this.settings.turnDurationSeconds * 1000,
+    );
+  }
+
+  public stopWatch(): void {
+    if (this.turnTimeoutId !== null) {
+      clearTimeout(this.turnTimeoutId);
+      this.turnTimeoutId = null;
+    }
+  }
+
+  /** Seconds remaining before the forced play, rounded up. */
+  public getTimeLeft(playerId: string): number {
+    if (playerId !== this.data.whosTurn) return 0;
+    const remaining =
+      this.settings.turnDurationSeconds * 1000 - this.elapsedMs();
+    return Math.max(0, Math.ceil(remaining / 1000));
   }
 }
 
@@ -691,9 +758,6 @@ class PlacementPhase extends State {
     }
     this.settlementBuilt = false;
     this.state.setNextPlayer();
-    this.state.setMasterLog(
-      `${Phase.PLACEMENT}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`,
-    );
     this.state.setPersonalLog(
       p,
       'You finshied your placement, wait for the other players to play ...',
@@ -748,9 +812,6 @@ class ResourcesPhase extends State {
           break;
       }
       this.state.setNextPlayer();
-      this.state.setMasterLog(
-        `${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`,
-      );
     }
   }
 
@@ -854,7 +915,6 @@ class TradeAndBuildPhase extends State {
     this.state.setPersonalLog(p, `${response.message}`, NotifColor.GREEN);
     this.buildCount++;
     if (this.isTradeBuildLimit(p)) this.state.setNextPlayer();
-    this.state.setMasterLog(`${playerId} built something ...`);
   }
 
   public trade(playerId: string, payload: TradePayload) {
@@ -881,9 +941,6 @@ class TradeAndBuildPhase extends State {
     this.state.setPersonalLog(p, `${response.message}`, NotifColor.GREEN);
     this.tradeCount++;
     if (this.isTradeBuildLimit(p)) this.state.setNextPlayer();
-    this.state.setMasterLog(
-      `${playerId} traded something with a ${payload.trader} ...`,
-    );
   }
 
   public dice(playerId: string) {
@@ -901,7 +958,6 @@ class TradeAndBuildPhase extends State {
     if (!p) return;
     this.state.setNextPlayer();
     this.state.setPersonalLog(p, `You ended your turn !`, NotifColor.GREEN);
-    this.state.setMasterLog(`${playerId} ended his/her turn !`);
     this.resetTradeBuildCount();
   }
 
