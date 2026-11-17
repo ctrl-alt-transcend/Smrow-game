@@ -175,8 +175,15 @@ export const BUILD_COSTS: Record<BuildingType, Resources> = {
 /***********************************
  * Actions and Logs
  **********************************/
+export const NotifColor = {
+  GREEN: 'green',
+  RED: 'red',
+  PURPLE: 'grape'
+} as const;
+export type NotifColor = (typeof NotifColor)[keyof typeof NotifColor];
+
 export const PERSONNAL_LOG_LIMIT = 5;
-export const YOU_ROLLED = 'You rolled a';
+export const ROLLED_A = 'rolled a';
 export const YOU_DIDNT_ROLLED = "You couldn't roll the dice";
 
 export const Action = {
@@ -466,7 +473,7 @@ export type GameData = GameDataBase & {
   players: Map<string, Player>;
   startingRolls: Map<string, number>;
   turnOrder: string[];
-  currentTurnIndex: number;
+  turnIndex: number;
 }
 
 /***********************************
@@ -496,7 +503,7 @@ export type DiceRoll = {
 export type GameLog = {
   id: number,
   message: string,
-  actionValid: boolean
+  color: NotifColor
 }
 
 export type PlayerBase = {
@@ -505,6 +512,7 @@ export type PlayerBase = {
   level: number;
   stats: StatsData;
   victoryPoints: number;
+  timeToPlay: number;
   resources: Resources;
   firstDice: number,
   secondDice: number,

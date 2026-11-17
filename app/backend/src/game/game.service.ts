@@ -44,6 +44,11 @@ export class GameService {
     this.gameInstances.set(
       gameId,
       new GameStateContext(gameId, settings, new StartPhase()),
+      // TODO: replace the line above with the one below
+      //new GameStateContext(gameId, settings, new PendingPhase()),
+      // ... and then call 'launchGame()' in the targeted 'GameStateContext'
+      // instance to switch to 'StartPhase' and allow players to play.
+      // Call it when host player decides to launch the game (or other condition).
     );
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);

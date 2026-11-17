@@ -12,7 +12,7 @@ export function usePersonalNotification(logs: GameLog[]) {
     for (const log of pending) {
       notifications.show({
         message: log.message,
-        color: log.actionValid ? "green" : "red",
+        color: log.color,
       });
     }
   }, [logs]);
