@@ -192,7 +192,7 @@ export const Phase = {
   START: 'Start Phase',
   PLACEMENT: 'Placement Phase',
   RESOURCES: 'Resources Phase',
-  TRADE_BUILD: 'Trade and Build Phase'
+  TRADE_BUILD: 'Trade & Build Phase'
 } as const;
 export type Phase = (typeof Phase)[keyof typeof Phase];
 
@@ -203,6 +203,44 @@ export const GUIDE_LOG: Record<Phase, string> = {
   [Phase.RESOURCES]: `${Phase.RESOURCES}: ${Action.DICE} to collect you resources`,
   [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade! End your turn when you're done`,
 } as const;
+
+export const START_PHASE_INFO =
+"Every player rolls the dice. The starting order is decided by the " +
+"dice result, ranked from the highest to the lowest roll."
+
+export const PLACEMENT_PHASE_INFO =
+"Each player places one settlement and one adjacent road to set up " +
+"their first positions. They then collect their starting resources " +
+"from the three tiles touching their settlement."
+
+export const RESOURCE_PHASE_INFO =
+"On their turn, a player rolls the dice. If the total matches a " +
+"tile touching one of their settlements, they collect the " +
+"corresponding resources. Rolling a 7 triggers the robber rule " +
+"instead of any production."
+
+export const TRADE_BUILD_INFO =
+"During this phase the player gets a limited amount of trade and build " +
+"actions to trade with the reserve (unlimited stock, no bankruptcy), " +
+"generic or specialized ports, and to build roads, place new settlements, " +
+"or upgrade existing settlements into cities to earn victory points.\n"
+
+export const END_GAME_PHASE = "End of the game";
+export const END_GAME_INFO =
+`After the « ${Phase.PLACEMENT} », the game alternates between the ` +
+`« ${Phase.RESOURCES} » and « ${Phase.TRADE_BUILD} » until a player ` +
+"reaches the amount of victory points to win."
+
+export const SPECIAL_RULES = "Special Rules";
+export const SPECIAL_RULES_INFO =
+"· Robber Rule: when a 7 is rolled, every player loses half of their " +
+"total resources if that total is greater than 7. The robber then " +
+"moves randomly to another tile, blocking the resources the tiles " +
+"would normally produce\n" +
+"· Crossroad Rule: build the 3 roads surrounding one of your " +
+"settlements to earn a victory point.\n"
+
+export const CURRENT_GAME_SETTINGS = "Current Game Settings"
 
 /***********************************
  * Gameboard Elements
@@ -381,9 +419,9 @@ export const gorpIsland: TileData[] = [
  * Graph
  **********************************/
 export type CoreElement =
-{ type: 'Road'; data: RoadData} |
-{ type: 'Settlement'; data: SettlementData} |
-{ type: 'Port'; data: PortData} |
+{ type: typeof BuildingType.ROAD; data: RoadData} |
+{ type: typeof BuildingType.SETTLEMENT; data: SettlementData} |
+{ type: typeof PORT; data: PortData} |
 { type: 'none'; data: null};
 
 /** @description keeps relations between each gameboard's elements*/
