@@ -67,9 +67,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (reason) setAuthMessage(reason);
     }
   }, []);
-
-  const refreshUser = useCallback(async () => {
-    setUser(await getCurrentUser());
+  
+  const updateUser = useCallback((patch: Partial<UserProfile>) => {
+    setUser((prev) => (prev ? { ...prev, ...patch } : prev));
   }, []);
 
   const clearAuthMessage = useCallback(() => setAuthMessage(null), []);
@@ -91,9 +91,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login,
         register,
         logout,
-        refreshUser,
         authMessage,
         clearAuthMessage,
+        updateUser,
       }}
     >
       {children}

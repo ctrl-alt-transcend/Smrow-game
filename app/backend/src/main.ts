@@ -16,8 +16,6 @@ async function bootstrap() {
     dotfiles: 'deny',
   });
   app.useStaticAssets(join(process.cwd(), 'public'));
-  const staticDir = join(process.cwd(), 'uploads', 'avatars');
-  console.log('STATIC DIR =', staticDir);
   app.use(cookieParser());
   const { httpAdapter } = app.get(HttpAdapterHost);
 

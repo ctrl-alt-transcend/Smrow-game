@@ -4,6 +4,7 @@ import { notifications } from "@mantine/notifications";
 import { UploadImageSchema } from "shared";
 import { useAuth } from "../../hooks/useAuth";
 import { uploadAvatar } from "../../services/user.service";
+import { useForceUpdate } from "@mantine/hooks";
 
 export function ProfilePictureUpload() {
   const { user } = useAuth();
@@ -56,7 +57,7 @@ export function ProfilePictureUpload() {
         disabled={!file || !user}
         loading={loading}
       >
-        Send
+        Update profile picture
       </Button>
     </Stack>
   );

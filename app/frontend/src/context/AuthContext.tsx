@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import  { createContext } from "react";
 import type { LoginPost, RegisterPost, UserProfile } from "shared";
 
 export interface AuthContextValue {
@@ -8,9 +8,8 @@ export interface AuthContextValue {
   clearAuthMessage: () => void;
   login: (data: LoginPost) => Promise<void>;
   register: (data: RegisterPost) => Promise<void>;
-
-  refreshUser: () => Promise<void>;
   logout: () => void;
+  updateUser: (patch: Partial<UserProfile>) => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(

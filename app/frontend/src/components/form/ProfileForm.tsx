@@ -28,7 +28,7 @@ const fields: FieldConfig[] = [
 ];
 
 export function ProfileSettings(props: PaperProps) {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [error, setError] = useState<string | string[] | string | null>(null);
 
   const form = useForm({
@@ -46,8 +46,11 @@ export function ProfileSettings(props: PaperProps) {
     setError(null);
     try {
       if (!user) return;
-      await updateProfile(user.id, data);
+      const res = await updateProfile(user.id, data);
       notifications.show({ message: "Profile updated" });
+      updateUser(res);
+      form.setInitialValues(data);
+      form.resetDirty(data);
     } catch (error: any) {
       setError(error?.message ?? "Something weird happened");
     }
