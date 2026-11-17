@@ -65,6 +65,13 @@ abstract class State {
 }
 
 /**
+ * @brief define the fonction signature
+ *
+ * GameNotifier is a callback function that is called when the player turn expires
+ */
+export type GameNotifier = (game: GameStateContext, playerId: string) => void;
+
+/**
  * The Context defines the interface of interest to clients. It also maintains a
  * reference to an instance of a State subclass, which represents the current
  * state of the Context.
@@ -81,8 +88,15 @@ class GameStateContext {
   private turnCount: number = 0;
   private turnStart: number = 0;
   private turnTimeoutId: NodeJS.Timeout | null = null;
+  private readonly notify: GameNotifier;
 
-  constructor(gameId: string, settings: SettingsData, state: State) {
+  constructor(
+    gameId: string,
+    settings: SettingsData,
+    state: State,
+    notify: GameNotifier,
+  ) {
+    this.notify = notify;
     this.settings = settings;
     const { board, graph } = createGameBoard(this.settings.gameboardLayout);
     this.graph = graph;
@@ -585,6 +599,7 @@ class GameStateContext {
         break;
     }
     this.phaseCheckRequest();
+    this.notify(this, this.data.whosTurn);
   }
 
   private elapsedMs(): number {

@@ -10,15 +10,30 @@ import {
   type PlayerProfile,
   type GameList,
 } from 'shared';
-import { GameStateContext, StartPhase } from './GameStateContext';
+import {
+  GameStateContext,
+  StartPhase,
+  type GameNotifier,
+} from './GameStateContext';
 import { SocialGateway } from '../social/social.gateway';
 
 @Injectable()
 export class GameService {
   private gameInstances: Map<string, GameStateContext> = new Map();
   private playersMap = new Map<string, string>(); //INFO: link playerId with a gameId
+  private notifier: GameNotifier = () => {};
 
   constructor(private readonly socialGateway: SocialGateway) {}
+
+  /**
+   * @brief Register the callback used by games to notify when a player turn expires
+   * @param notifier - Function called by a GameStateContext when its state changes.
+   * The game doesn't know who is notified or how, it only decide when.
+   * @details Called by GameGateway in afterInit
+   */
+  setNotifier(notifier: GameNotifier) {
+    this.notifier = notifier;
+  }
 
   getGamesList(): GameList[] {
     const arrayOfGames = Array.from(this.gameInstances.values());
@@ -43,7 +58,12 @@ export class GameService {
 
     this.gameInstances.set(
       gameId,
-      new GameStateContext(gameId, settings, new StartPhase()),
+      new GameStateContext(
+        gameId,
+        settings,
+        new StartPhase(),
+        (game, playerId) => this.notifier(game, playerId),
+      ),
       // TODO: replace the line above with the one below
       //new GameStateContext(gameId, settings, new PendingPhase()),
       // ... and then call 'launchGame()' in the targeted 'GameStateContext'

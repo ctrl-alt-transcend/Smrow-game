@@ -156,6 +156,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   }
 
   async afterInit(server: SocketServer) {
+    this.gameService.setNotifier((game, playerId) => {
+      this.emitGameDataDto(game, playerId);
+    });
+
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
       const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
