@@ -24,7 +24,6 @@ export const useSelectionDisplay = (
       label: `• produces ${LAND_RESOURCE[selected.selectedTile.land]}`,
     });
     if (selected.selectedTile.hasRobber) {
-      items.push({ label: "Robber:" });
       items.push({ label: `• ${ROBBER_NAME} is here, watchout!` });
     }
   }

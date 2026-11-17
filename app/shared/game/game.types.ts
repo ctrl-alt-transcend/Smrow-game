@@ -50,7 +50,7 @@ export const MIN_MULTIPLIER = 1;
 export const MULTIPLIER_DFLT = 2;
 export const TIME_MAX = 180;
 export const TIME_MIN = 10;
-export const TIME_DFLT = 45;
+export const TIME_DFLT = 60;
 
 export const SettingsDataSchema = z.object({
   // Layout setting
@@ -134,7 +134,7 @@ export const ResourceType = {
   BRICK: 'Brick',
   ORE: 'Ore',
   WHEAT: 'Wheat',
-  DUST: "Dust",
+  NOTHING: 'nothing',
 } as const;
 export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType];
 export const ResourceTypeSchema = z.enum(ResourceType);
@@ -145,7 +145,7 @@ export const LAND_RESOURCE: Record<LandType, string> = {
   [LandType.HILL]: ResourceType.BRICK,
   [LandType.MOUNTAIN]: ResourceType.ORE,
   [LandType.FIELD]: ResourceType.WHEAT,
-  [LandType.DESERT]: ResourceType.DUST
+  [LandType.DESERT]: ResourceType.NOTHING
 };
 
 export const BUILD_COSTS: Record<BuildingType, Resources> = {
@@ -182,7 +182,7 @@ export const NotifColor = {
 } as const;
 export type NotifColor = (typeof NotifColor)[keyof typeof NotifColor];
 
-export const PERSONNAL_LOG_LIMIT = 5;
+export const PERSONNAL_LOG_LIMIT = 3;
 export const ROLLED_A = 'rolled a';
 export const YOU_DIDNT_ROLLED = "You couldn't roll the dice";
 

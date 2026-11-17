@@ -9,6 +9,7 @@ import {
   Slider,
   Stack,
   Text,
+  Tooltip,
 } from "@mantine/core";
 import {
   BUILD_LIMIT_DFLT,
@@ -58,6 +59,26 @@ const DEFAULTS: SettingsData = {
   brickBonus: 0,
   oreBonus: 0,
   wheatBonus: 0,
+};
+
+const CATAN_MAXXING: SettingsData = {
+  gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
+  turnDurationSeconds: 20,
+  tradeLimit: MAX_LIMIT,
+  buildLimit: MAX_LIMIT,
+  specialPortOfferRate: 1,
+  genericPortOfferRate: 2,
+  reserveOfferRate: 3,
+  roadPoints: 1,
+  settlementPoints: 5,
+  cityPoints: 10,
+  pointsToWin: MAX_POINTS_TO_WIN,
+  resourcesMultiplier: MAX_MULTIPLIER,
+  woodBonus: MAX_BONUS,
+  sheepBonus: MAX_BONUS,
+  brickBonus: MAX_BONUS,
+  oreBonus: MAX_BONUS,
+  wheatBonus: MAX_BONUS,
 };
 
 type SliderConfig = {
@@ -260,6 +281,7 @@ export default function GameLaunchMenu() {
   ) => setValues((prev) => ({ ...prev, [key]: val }));
 
   const reset = () => setValues({ ...DEFAULTS });
+  const maxxing = () => setValues({ ...CATAN_MAXXING });
 
   return (
     <Paper shadow="xs" radius="md" p={{ base: "sm", sm: "md" }} w="100%">
@@ -310,9 +332,22 @@ export default function GameLaunchMenu() {
             ))}
           </Accordion>
           <Group justify="space-between" mt="md" gap="sm" wrap="wrap">
-            <Button variant="subtle" color="gray" onClick={reset}>
-              Default
-            </Button>
+            <Tooltip
+              label={
+                "Original rules, for chill players that have a lot of time"
+              }
+            >
+              <Button variant="subtle" color="gray" onClick={reset}>
+                Vanilla Catan
+              </Button>
+            </Tooltip>
+            <Tooltip
+              label={"Fast paced variant of the game, for hangry players"}
+            >
+              <Button variant="subtle" color="red" onClick={maxxing}>
+                Catan Maxxing
+              </Button>
+            </Tooltip>
             <Button onClick={() => createLobby(values)}>
               Validate and create game
             </Button>

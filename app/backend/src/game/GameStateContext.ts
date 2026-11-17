@@ -354,7 +354,7 @@ class GameStateContext {
   /** Set next player turn, ignore the players that quit the game */
   public setNextPlayer(index?: number) {
     this.setTurnCount();
-    for (let i = 0; i < this.getPlayers().size; i++) {
+    for (let i = 0; i <= this.getPlayers().size; i++) {
       if (index === undefined) {
         this.setTurnIndex(index);
       } else {
@@ -494,20 +494,13 @@ class GameStateContext {
               settlement.isCity,
             );
         }
-        if (prod > 0 && !placementPhase) {
+        if (prod > 0) {
           this.setPersonalLog(
             player,
             `You produced ${prod} ${LAND_RESOURCE[tile.land]}`,
             NotifColor.GREEN,
           );
           //console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESOURCE[tile.land]}`);
-        } else if (tile.hasRobber && !placementPhase) {
-          this.setPersonalLog(
-            player,
-            `${ROBBER_NAME} stole your ${LAND_RESOURCE[tile.land]} production !`,
-            NotifColor.PURPLE,
-          );
-          //console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by ${ROBBER_NAME} !`);
         } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
             player,
@@ -515,6 +508,13 @@ class GameStateContext {
             NotifColor.PURPLE,
           );
           //console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything in the ${LandType.DESERT}`);
+        } else if (tile.hasRobber && !placementPhase) {
+          this.setPersonalLog(
+            player,
+            `${ROBBER_NAME} stole your ${LAND_RESOURCE[tile.land]} production !`,
+            NotifColor.PURPLE,
+          );
+          //console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by ${ROBBER_NAME} !`);
         }
       });
     }
