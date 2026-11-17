@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (reason) setAuthMessage(reason);
     }
   }, []);
-  
+
   const updateUser = useCallback((patch: Partial<UserProfile>) => {
     setUser((prev) => (prev ? { ...prev, ...patch } : prev));
   }, []);

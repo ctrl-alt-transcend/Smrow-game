@@ -1,4 +1,4 @@
-import  { createContext } from "react";
+import { createContext } from "react";
 import type { LoginPost, RegisterPost, UserProfile } from "shared";
 
 export interface AuthContextValue {
