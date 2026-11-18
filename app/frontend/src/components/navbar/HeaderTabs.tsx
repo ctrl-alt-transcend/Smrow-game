@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   IconChevronDown,
   IconFileText,
-  IconHelp,
   IconLock,
   IconLogout,
 } from "@tabler/icons-react";
@@ -100,18 +99,6 @@ export function HeaderTabs() {
               </UnstyledButton>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Label>Game</Menu.Label>
-              <Menu.Item
-                leftSection={
-                  <IconHelp
-                    size={16}
-                    color={theme.colors.dark[6]}
-                    stroke={1.5}
-                  />
-                }
-              >
-                Rules
-              </Menu.Item>
               <Menu.Label>Privacy</Menu.Label>
 
               <Menu.Item
