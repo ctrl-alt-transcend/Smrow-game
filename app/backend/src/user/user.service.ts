@@ -166,10 +166,22 @@ export class UserService {
 
       return FriendSchema.parse({
         id: other.id,
-        // username: other.profile?.username,
+        username: other.username,
         avatar: other.profile?.avatarURL ?? undefined,
         bio: other.profile?.bio ?? undefined,
       });
+    });
+  }
+
+  async removeFriend(userId: string, friendId: string) {
+    return this.databaseService.friendRequest.deleteMany({
+      where: {
+        status: 'ACCEPTED',
+        OR: [
+          { receiver_id: friendId, sender_id: userId },
+          { receiver_id: userId, sender_id: friendId },
+        ],
+      },
     });
   }
 }

@@ -88,4 +88,13 @@ export class UserController {
   getFriendList(@Req() req: { user: UserProfile }) {
     return this.userService.getFriendList(req.user.id);
   }
+
+  @Delete('friends/:friendId')
+  @UseGuards(JwtAuthGuard)
+  async removeFriend(
+    @Req() req: { user: { id: string } },
+    @Param('friendId') friendId: string,
+  ) {
+    return this.userService.removeFriend(req.user.id, friendId);
+  }
 }

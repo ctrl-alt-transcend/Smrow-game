@@ -1,12 +1,31 @@
+import { useState } from "react";
 import { IconMinus } from "@tabler/icons-react";
-import { ActionIcon, Avatar, Group, Table, Text, Loader } from "@mantine/core";
+import {
+  ActionIcon,
+  Avatar,
+  Group,
+  Table,
+  Text,
+  Loader,
+  Paper,
+} from "@mantine/core";
 import { useFetch } from "../../hooks/useFetch";
-import { getFriendList } from "../../services/user.service";
+import { getFriendList, removeFriend } from "../../services/social.service";
 import ErrorMessages from "../utils/ErrorMessages";
-// import { fireEvent } from "@testing-library/react";
 
 export function FriendList() {
   const friendlist = useFetch(getFriendList);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const handleRemoveFriend = async (friendId: string) => {
+    try {
+      setActionError(null);
+      await removeFriend(friendId);
+      friendlist.refetch();
+    } catch {
+      setActionError("Could not remove friend, try again later.");
+    }
+  };
 
   if (friendlist.loading) {
     return (
@@ -23,7 +42,7 @@ export function FriendList() {
   if (!friendlist.data || friendlist.data.length === 0) {
     return (
       <Text c="dimmed" ta="center" py="xl">
-        Empty
+        You don't have any friend :(
       </Text>
     );
   }
@@ -33,7 +52,7 @@ export function FriendList() {
       <Table.Td>
         <Group gap="sm">
           <Avatar size={40} src={item.avatar} radius={40} alt="" />
-          <Text fz="sm" fw={500}>
+          <Text fz="lg" fw={500}>
             {item.username}
           </Text>
         </Group>
@@ -46,7 +65,12 @@ export function FriendList() {
       </Table.Td>
       <Table.Td>
         <Group gap={0} justify="flex-end">
-          <ActionIcon variant="subtle" color="red" aria-label="Remove friend">
+          <ActionIcon
+            variant="subtle"
+            color="red"
+            aria-label="Remove friend"
+            onClick={() => handleRemoveFriend(item.id)}
+          >
             <IconMinus size={16} stroke={1.5} />
           </ActionIcon>
         </Group>
@@ -55,10 +79,17 @@ export function FriendList() {
   ));
 
   return (
-    <Table.ScrollContainer minWidth={800}>
-      <Table verticalSpacing="md">
-        <Table.Tbody>{rows}</Table.Tbody>
-      </Table>
-    </Table.ScrollContainer>
+    <Paper withBorder>
+      {actionError && (
+        <Text c="red" fz="sm" p="sm">
+          {actionError}
+        </Text>
+      )}
+      <Table.ScrollContainer minWidth={800}>
+        <Table verticalSpacing="md">
+          <Table.Tbody>{rows}</Table.Tbody>
+        </Table>
+      </Table.ScrollContainer>
+    </Paper>
   );
 }

@@ -1,7 +1,6 @@
 import { http } from "./http";
 import type { AxiosResponse } from "axios";
-import { type UserPublic, type Friend, FriendSchema } from "shared";
-import { z } from "zod";
+import { type UserPublic } from "shared";
 
 export const getCurrentUser = async (): Promise<UserPublic> => {
   try {
@@ -18,8 +17,3 @@ export function getUserToken(): string {
   if (!token) throw new Error("Not authenticated");
   return token;
 }
-
-export const getFriendList = async (): Promise<Friend[]> => {
-  const res = await http.get("/user/friendlist");
-  return z.array(FriendSchema).parse(res.data);
-};
