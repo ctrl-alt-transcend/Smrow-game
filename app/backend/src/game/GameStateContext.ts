@@ -605,10 +605,8 @@ class GameStateContext {
         break;
       case Phase.START:
       case Phase.RESOURCES:
-        if (p.firstDice === 0)
-          this.rollDice(p)
-        if (p.secondDice === 0)
-          this.rollDice(p)
+        if (p.firstDice === 0) this.rollDice(p);
+        if (p.secondDice === 0) this.rollDice(p);
         break;
       default:
         break;

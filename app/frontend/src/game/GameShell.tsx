@@ -49,8 +49,7 @@ function GameShell({ game }: { game: GameDataDto }) {
   const waitingForPlayers = game.currentPhase === Phase.PENDING;
 
   let isMyTurn = game.currentPlayer.username === game.whosTurn;
-  if (game.currentPhase === Phase.START)
-    isMyTurn = true;
+  if (game.currentPhase === Phase.START) isMyTurn = true;
   const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
 
   const navEnabled = isMyTurn && !waitingForPlayers;
@@ -193,7 +192,6 @@ function GameShell({ game }: { game: GameDataDto }) {
 
       <OptionsModal game={game} opened={optionsOpened} onClose={closeOptions} />
       <Notifications limit={2} />
-
     </AppShell>
   );
 }
