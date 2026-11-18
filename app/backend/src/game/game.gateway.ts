@@ -26,7 +26,7 @@ import { GameStateContext } from './GameStateContext';
 import { parseCookie } from 'cookie';
 import { ZodValidationPipe } from 'nestjs-zod';
 
-interface SocketUser {
+export interface SocketUser {
   id: string;
   username: string;
 }
@@ -73,7 +73,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     }
     this.server.to(game.getGameId()).emit('gameState', gameData);
     if (game.isGameTerminated()) {
-      //TODO:Reactivate this when the game is finished, the game instance is removed from memory and the clients are disconnected
       this.endGame(game);
     }
     // every action ends here, so a finished game is recorded right away
@@ -99,6 +98,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     );
     game.setCurrentPhase(Phase.START);
     this.emitGameDataDto(game, client.data.user.username);
+  }
+
+  @SubscribeMessage('quitGame')
+  handleQuitGame(@ConnectedSocket() client: SocketClient) {
+    const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
+    client.disconnect(true);
   }
 
   /**

@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-
+import type { SocketUser } from './game.gateway';
 import { StatsService } from '../stats/stats.service';
 import { buildGameResult } from './game.result';
 import {
@@ -99,6 +99,11 @@ export class GameService {
       if (id === gameId) this.playersMap.delete(userId);
     });
     this.gameInstances.delete(gameId);
+  }
+
+  removePlayerFromGame(user: SocketUser, game: string) {
+    this.playersMap.delete(user.id);
+    this.gameInstances.get(game)?.getPlayers().delete(user.username);
   }
 
   private getGameInstance(gameId: string): GameStateContext {

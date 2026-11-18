@@ -1,5 +1,5 @@
 import { Modal, Text, Title } from "@mantine/core";
-import QuitGameButton from "./QuitGameButton.tsx";
+import EndGameButton from "./EndGameButton.tsx";
 import { PlayerPanel } from "./PlayerPanel.tsx";
 import type { Player } from "shared";
 
@@ -28,7 +28,7 @@ export function EndGameModal(endGameProps: EndGameProps) {
       </Title>
       <Text c="dark">{endGameProps.winCondition}</Text>
       <PlayerPanel players={endGameProps.players} />
-      <QuitGameButton />
+      <EndGameButton />
     </Modal>
   );
 }
