@@ -102,6 +102,8 @@ export function HeaderTabs() {
               <Menu.Label>Privacy</Menu.Label>
 
               <Menu.Item
+                component={Link}
+                to="/privacy"
                 leftSection={
                   <IconLock
                     size={16}
@@ -113,6 +115,8 @@ export function HeaderTabs() {
                 Privacy Policy
               </Menu.Item>
               <Menu.Item
+                component={Link}
+                to="/terms"
                 leftSection={
                   <IconFileText
                     size={16}
