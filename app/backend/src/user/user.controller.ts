@@ -1,4 +1,9 @@
 import {
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+  UseInterceptors,
   Controller,
   Get,
   Body,
@@ -8,11 +13,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
-import { Prisma } from '@prisma/client';
+import { type UpdateProfile } from 'shared';
+import 'multer';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import type { UserProfile } from 'shared';
-
 @Controller('user')
 export class UserController {
   constructor(readonly userService: UserService) {}
@@ -40,18 +46,35 @@ export class UserController {
   @Patch('update/:id')
   async update(
     @Param('id') username: string,
-    @Body() updateUserDto: Prisma.UserUpdateInput,
+    @Body() updateUserDto: UpdateProfile,
   ) {
     const updatedUser = await this.userService.update(username, updateUserDto);
-
     return {
       message: `User updated correctly`,
       user: {
         id: updatedUser.id,
         email: updatedUser.email,
-        updatedAt: updatedUser.updatedAt,
+        username: updatedUser.username,
+        name: updatedUser.name,
       },
     };
+  }
+  @Patch('update/:id/picture')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPicture(
+    @Param('id') id: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+          new FileTypeValidator({ fileType: /^image\/(png|jpe?g|gif)$/ }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    const updatedUser = await this.userService.updatePicture(id, file);
+    return { message: 'Picture updated', user: updatedUser };
   }
 
   @Delete('deluser/:username')

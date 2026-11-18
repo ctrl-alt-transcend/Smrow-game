@@ -63,6 +63,31 @@ export const JwtPayloadSchema = z.object({
 });
 export type JwtPayload = z.infer<typeof JwtPayloadSchema>;
 
+export const UpdateProfileSchema = UserProfileSchema
+  .omit({ id: true, createdAt: true, avatarURL: true })
+  .partial()
+  .refine((d) => Object.keys(d).length > 0, "Nothing to update");
+
+export type UpdateProfile = z.infer<typeof UpdateProfileSchema>;
+
+const imageSizeLimit = 2 * 1024 * 1024 // 2MB
+
+export const UploadImageSchema = z
+.instanceof(File)
+.refine(
+  (file) =>
+  [
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/gif"
+  ].includes(file.type),
+  { message: "Invalid image file type" }
+)
+.refine((file) => file.size <= imageSizeLimit, {
+  message: "Image size should not exceed 5MB",
+});
+export type UploadImage = z.infer<typeof UploadImageSchema>;
 export const FriendSchema = z.object({
   id: IdSchema,
   username: UsernameSchema,
