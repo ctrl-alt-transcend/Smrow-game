@@ -2,8 +2,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { PlayerProfile } from 'shared';
-import type { UserProfile } from 'shared';
+import { PlayerProfile, FriendSchema } from 'shared';
+import type { UserProfile, Friend } from 'shared';
 
 @Injectable()
 export class UserService {
@@ -137,6 +137,38 @@ export class UserService {
       where: {
         id,
       },
+    });
+  }
+
+  async getFriendList(id: string): Promise<Friend[]> {
+    const profileSelect = {
+      id: true,
+      profile: {
+        select: { username: true, avatarURL: true, bio: true },
+      },
+    } as const;
+
+    const requests = await this.databaseService.friendRequest.findMany({
+      where: {
+        status: 'ACCEPTED',
+        OR: [{ sender_id: id }, { receiver_id: id }],
+      },
+      select: {
+        sender: { select: profileSelect },
+        receiver: { select: profileSelect },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return requests.map(({ sender, receiver }) => {
+      const other = sender.id === id ? receiver : sender;
+
+      return FriendSchema.parse({
+        id: other.id,
+        username: other.profile?.username,
+        avatar: other.profile?.avatarURL ?? undefined,
+        bio: other.profile?.bio ?? undefined,
+      });
     });
   }
 }

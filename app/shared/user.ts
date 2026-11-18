@@ -62,3 +62,11 @@ export const JwtPayloadSchema = z.object({
   username: UsernameSchema,
 });
 export type JwtPayload = z.infer<typeof JwtPayloadSchema>;
+
+export const FriendSchema = z.object({
+  id: IdSchema,
+  username: UsernameSchema,
+  avatar: AvatarUrlSchema,
+  bio: BioSchema,
+})
+export type Friend = z.infer<typeof FriendSchema>;

@@ -1,6 +1,7 @@
 import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Prisma } from '@prisma/client';
+import { Friend } from 'shared';
 
 @Controller('user')
 export class UserController {
@@ -70,5 +71,10 @@ export class UserController {
   @Delete('id/:id')
   async remove(@Param('id') id: string) {
     return this.userService.remove(id);
+  }
+
+  @Get('friendlist/:id')
+  async getFriendList(@Param('id') id: string): Promise<Friend[]> {
+    return this.userService.getFriendList(id);
   }
 }
