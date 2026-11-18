@@ -4,7 +4,6 @@ import {
   Grid,
   Paper,
   Stack,
-  Text,
   Title,
 } from "@mantine/core";
 import { FriendList } from "../components/social/FriendList";
@@ -12,6 +11,7 @@ import { useAuth } from "../hooks/useAuth";
 import { ProfileSettings } from "../components/form/ProfileForm";
 import { ProfilePictureUpload } from "../components/form/ProfilePictureUpload";
 import { getAvatarSrc } from "../components/utils/avatar";
+import { AddFriend } from "../components/form/AddFriend";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -44,6 +44,12 @@ export default function ProfilePage() {
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 8 }}>
+          <Paper>
+            <Title>
+              Add Friends !
+            </Title>
+            <AddFriend/>
+          </Paper>
           <Paper withBorder p="md" mih={400} h="100%">
             <Title order={3} mb="md">
               Friends

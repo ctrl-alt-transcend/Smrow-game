@@ -8,6 +8,7 @@ import {
   Get,
   Body,
   Patch,
+  Post,
   Param,
   Delete,
   Req,
@@ -112,12 +113,21 @@ export class UserController {
     return this.userService.getFriendList(req.user.id);
   }
 
-  @Delete('friends/:friendId')
+  @Delete('friends/remove/:friendId')
   @UseGuards(JwtAuthGuard)
   async removeFriend(
     @Req() req: { user: { id: string } },
     @Param('friendId') friendId: string,
   ) {
     return this.userService.removeFriend(req.user.id, friendId);
+  }
+
+  @Post('friends/add/:username')
+  @UseGuards(JwtAuthGuard)
+  async addFriend(
+    @Req() req: { user: { id: string }},
+    @Param('username') friendUsername: string,
+  ) {
+    return this.userService.addFriend(req.user.id, friendUsername);
   }
 }

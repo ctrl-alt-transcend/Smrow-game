@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile, unlink } from 'node:fs/promises';
@@ -224,5 +224,67 @@ export class UserService {
         ],
       },
     });
+  }
+
+  /**
+   * 
+   * @param userId Id of the current user
+   * @param friendUsername Username of the target user
+   * @returns Prisma object of the newly created or modified friendRequest
+   * Create a new friend request in the FriendRequest table.
+   * The function performs multiple checks to ensure that no duplicate can be created.
+   * 
+   */
+  async addFriend(userId: string, friendUsername: string) {
+    
+    const friend = await this.databaseService.user.findUnique({
+      where: {
+        username: friendUsername,
+      },
+    });
+
+    if (!friend) throw new NotFoundException('User not found.');
+
+    if (friend.id === userId) throw new  BadRequestException;
+
+    const existing = await this.databaseService.friendRequest.findFirst({
+      where: {
+        OR: [
+          { sender_id: userId, receiver_id: friend.id },
+          { sender_id: friend.id, receiver_id: userId },
+        ],
+      },
+    });
+
+    if (!existing) {
+      return this.databaseService.friendRequest.create({
+        data: {
+          sender_id: userId,
+          receiver_id: friend.id,
+        },
+      });
+    }
+
+    if (existing.status === 'PENDING' && existing.sender_id === friend.id) {
+      return this.databaseService.friendRequest.update({
+        where: { id: existing.id },
+        data: { status: 'ACCEPTED' },
+      });
+    }
+
+    if (existing.status === 'PENDING'
+      || existing.status === 'ACCEPTED')
+      throw new ConflictException('You are either alrready friends or a request is pending.');
+
+    if (existing.status === 'DECLINED') {
+      return this.databaseService.friendRequest.update({
+        where: { id: existing.id },
+        data: {
+          status: 'PENDING',
+          sender_id: userId,
+          receiver_id: friend.id,
+        },
+      });
+    }
   }
 }
