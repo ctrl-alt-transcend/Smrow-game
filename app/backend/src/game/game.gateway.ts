@@ -98,12 +98,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.skipRequest(client.data.user.username);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.skipRequest(`${ZGEG_DEV}`);
-    game.phaseCheckRequest();
-    // -------------
-
     this.emitGameDataDto(game, client.data.user.username);
   }
 
@@ -116,12 +110,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.buildRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.buildRequest(`${ZGEG_DEV}`, payload);
-    game.phaseCheckRequest();
-    // -------------
-
     this.emitGameDataDto(game, client.data.user.username);
   }
 
@@ -134,12 +122,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.tradeRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.tradeRequest(`${ZGEG_DEV}`, payload);
-    game.phaseCheckRequest();
-    // -------------
-
     this.emitGameDataDto(game, client.data.user.username);
   }
 

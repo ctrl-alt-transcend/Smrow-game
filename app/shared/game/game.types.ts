@@ -520,7 +520,6 @@ export type PlayerBase = {
   avatarURL: string | null;
   personalLog: GameLog[];
   guideLog: string;
-  DEVMOD: boolean;
 }
 
 export type Player = PlayerBase & {

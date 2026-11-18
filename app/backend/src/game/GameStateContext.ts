@@ -149,7 +149,6 @@ class GameStateContext {
         ore: this.settings.oreBonus,
       },
       firstSettlementPlaced: false,
-      DEVMOD: false,
     };
     this.setPersonalLog(
       newPlayer,
@@ -262,7 +261,6 @@ class GameStateContext {
       guideLog: p.guideLog,
       resources: p.resources,
       currentRoll: p.currentRoll,
-      DEVMOD: p.DEVMOD,
     };
   }
   public getGameDataDto(username: string): GameDataDto {
@@ -288,29 +286,17 @@ class GameStateContext {
     };
   }
   public isPlayersTurn(username: string): Player | null {
-    const player = this.getPlayerByUsername(username);
-    if (!player) {
-      throw new Error(`Unknown username: ${username}`);
-    }
-    const currentPlayer = this.getCurrentPlayer();
-    if (!currentPlayer) {
+    const p = this.getPlayerByUsername(username);
+    if (!p) return null;
+    if (p.username !== this.data.whosTurn) {
+      this.setPersonalLog(p, "It's not you turn !", NotifColor.RED);
       return null;
     }
-    if (player.username !== currentPlayer.username) {
-      this.setPersonalLog(player, "It's not you turn !", NotifColor.RED);
-      return null;
-    }
-    return player;
+    return p;
   }
   /***********************************
    * Setters
    **********************************/
-  /** @description used in DEV: allow player to play for others */
-  public setDEVMOD(username: string) {
-    const p = this.getPlayerByUsername(username);
-    if (!p) return;
-    p.DEVMOD = true;
-  }
   public setDicesSum(roll: number) {
     this.data.dicesSum = roll;
   }
@@ -473,8 +459,11 @@ class GameStateContext {
     if (nextPhase === Phase.RESOURCES) this.roundCount++;
     this.setNextPlayer(0);
     this.setTurnCount(0);
-    console.log(`setupNextPhase: currentPhase: ${this.getCurrentPhase()} | nextPhase: ${nextPhase} | starting player: ${this.data.whosTurn}`);
+    //console.log(`setupNextPhase: currentPhase: ${this.getCurrentPhase()} | nextPhase: ${nextPhase} | starting player: ${this.data.whosTurn}`);
     this.setCurrentPhase(nextPhase);
+    this.setMasterLog(
+      `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
+    );
     this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
     this.resetAllDices();
   }
@@ -577,9 +566,7 @@ class GameStateContext {
     });
     randomizeRobber(this.data.board.layout);
   }
-  public afkDuringPlacement(username: string) {
-    const p = this.getPlayerByUsername(username);
-    if (!p) return;
+  public afkDuringPlacement(p: Player) {
     addStartingResources(p.resources);
     if (p.firstSettlementPlaced) return;
     let response = { valid: false, message: '' };
@@ -597,13 +584,14 @@ class GameStateContext {
       );
     }
     p.firstSettlementPlaced = true;
-    this.setNextPlayer();
   }
 
   /***********************************
    * Turn Watcher
    **********************************/
   private onExpire(): void {
+    const p = this.getPlayerByUsername(this.data.whosTurn);
+    if (!p) return;
     console.log(
       `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
         `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
@@ -613,19 +601,19 @@ class GameStateContext {
     this.turnTimeoutId = null;
     switch (this.getCurrentPhase()) {
       case Phase.PLACEMENT:
-        this.afkDuringPlacement(this.data.whosTurn);
+        this.afkDuringPlacement(p);
         break;
       case Phase.START:
       case Phase.RESOURCES:
-        this.diceRequest(this.data.whosTurn);
-        this.diceRequest(this.data.whosTurn);
-        break;
-      case Phase.TRADE_BUILD:
-        this.skipRequest(this.data.whosTurn);
+        if (p.firstDice === 0)
+          this.rollDice(p)
+        if (p.secondDice === 0)
+          this.rollDice(p)
         break;
       default:
         break;
     }
+    this.setNextPlayer();
     this.phaseCheckRequest();
     this.data.players.forEach((player) => {
       if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
@@ -689,7 +677,7 @@ class StartPhase extends State {
     const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     p.currentRoll = this.state.rollDice(p);
-    if (this.state.hasRolledBothDices(p) && p.currentRoll) {
+    if (this.state.hasRolledBothDices(p) && p.currentRoll !== null) {
       this.state.setPersonalLog(
         p,
         `You ${funnyRollLog(p.firstDice + p.secondDice)}`,

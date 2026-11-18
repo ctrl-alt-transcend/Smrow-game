@@ -49,7 +49,7 @@ function GameShell({ game }: { game: GameDataDto }) {
   const waitingForPlayers = game.currentPhase === Phase.PENDING;
 
   let isMyTurn = game.currentPlayer.username === game.whosTurn;
-  if (game.currentPlayer.DEVMOD || game.currentPhase === Phase.START)
+  if (game.currentPhase === Phase.START)
     isMyTurn = true;
   const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
 
