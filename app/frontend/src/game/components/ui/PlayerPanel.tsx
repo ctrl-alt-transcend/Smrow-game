@@ -45,7 +45,7 @@ export function PlayerPanel({ players }: { players: Player[] }) {
     <Stack gap={1}>
       {players.map((player) => (
         <PlayerCard
-          key={player.playerId}
+          key={player.username}
           name={player.username}
           level={1}
           score={player.victoryPoints}

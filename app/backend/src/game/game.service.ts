@@ -58,11 +58,8 @@ export class GameService {
 
     this.gameInstances.set(
       gameId,
-      new GameStateContext(
-        gameId,
-        settings,
-        new StartPhase(),
-        (game, playerId) => this.notifier(game, playerId),
+      new GameStateContext(gameId, settings, new StartPhase(), (id, username) =>
+        this.notifier(id, username),
       ),
       // TODO: replace the line above with the one below
       //new GameStateContext(gameId, settings, new PendingPhase()),
@@ -127,7 +124,10 @@ export class GameService {
     this.playersMap.set(playerProfile.id, gameId);
     game
       .getPlayers()
-      .set(playerProfile.username, game.initPlayer(playerProfile.username));
+      .set(
+        playerProfile.username,
+        game.initPlayer(playerProfile.id, playerProfile.username),
+      );
     this.socialGateway.handleGameList(this.getGamesList());
 
     //⚠️REMOVE in PROD -------------------
@@ -137,8 +137,10 @@ export class GameService {
 - added mocked player '${ZGEG_DEV}' that will send requests in game,
 disable his calls in 'app/backend/src/game/game.gateway.ts'
 ---------------------------------------`);
-    game.setDEVMOD(playerProfile.username);
-    game.getPlayers().set(`${ZGEG_DEV}`, game.initPlayer(`${ZGEG_DEV}`));
+    //game.setDEVMOD(playerProfile.username);
+    game
+      .getPlayers()
+      .set(`${ZGEG_DEV}`, game.initPlayer('1010101010101010', `${ZGEG_DEV}`));
     // -----------------------------------
   }
 }

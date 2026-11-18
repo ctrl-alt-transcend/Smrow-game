@@ -79,7 +79,7 @@ export const tradeCheck = (
         validation.message = `Unknown ${payload.trader}`;
       } else {
         const hasOwnConnectedSettlement = target.connectedSettlements.some(
-          (s) => s.ownerId === player.playerId,
+          (s) => s.ownerId === player.username,
         );
         if (!hasOwnConnectedSettlement) {
           return {

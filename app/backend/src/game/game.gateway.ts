@@ -156,8 +156,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   }
 
   async afterInit(server: SocketServer) {
-    this.gameService.setNotifier((game, playerId) => {
-      this.emitGameDataDto(game, playerId);
+    this.gameService.setNotifier((id, username) => {
+      const game = this.gameService.getGameInstanceByUserId(id);
+      this.emitGameDataDto(game, username);
     });
 
     /** @warning development only */

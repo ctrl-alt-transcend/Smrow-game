@@ -49,7 +49,7 @@ export const MAX_MULTIPLIER = 5;
 export const MIN_MULTIPLIER = 1;
 export const MULTIPLIER_DFLT = 2;
 export const TIME_MAX = 180;
-export const TIME_MIN = 10;
+export const TIME_MIN = 5;
 export const TIME_DFLT = 60;
 
 export const SettingsDataSchema = z.object({
@@ -208,9 +208,9 @@ export type Phase = (typeof Phase)[keyof typeof Phase];
 export const GUIDE_LOG: Record<Phase, string> = {
   [Phase.PENDING]: "Waiting for other players ...",
   [Phase.START]: `${Phase.START}: ${Action.DICE}`,
-  [Phase.PLACEMENT]: `${Phase.PLACEMENT}: build a settllement and a road`,
-  [Phase.RESOURCES]: `${Phase.RESOURCES}: ${Action.DICE} to collect you resources`,
-  [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade! End your turn when you're done`,
+  [Phase.PLACEMENT]: `${Phase.PLACEMENT}: build a settllement and a road.`,
+  [Phase.RESOURCES]: `${Phase.RESOURCES}: ${Action.DICE} to collect your resources.`,
+  [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade! End your turn when you're done.`,
 } as const;
 
 export const START_PHASE_INFO =
@@ -507,7 +507,7 @@ export type GameLog = {
 }
 
 export type PlayerBase = {
-  playerId: string;
+  id: string;
   username: string;
   level: number;
   stats: StatsData;
