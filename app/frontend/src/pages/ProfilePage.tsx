@@ -1,11 +1,4 @@
-import {
-  Avatar,
-  Divider,
-  Grid,
-  Paper,
-  Stack,
-  Title,
-} from "@mantine/core";
+import { Avatar, Divider, Grid, Paper, Stack, Title } from "@mantine/core";
 import { FriendList } from "../components/social/FriendList";
 import { useAuth } from "../hooks/useAuth";
 import { ProfileSettings } from "../components/form/ProfileForm";
@@ -45,10 +38,8 @@ export default function ProfilePage() {
 
         <Grid.Col span={{ base: 12, md: 8 }}>
           <Paper>
-            <Title>
-              Add Friends !
-            </Title>
-            <AddFriend/>
+            <Title>Add Friends !</Title>
+            <AddFriend />
           </Paper>
           <Paper withBorder p="md" mih={400} h="100%">
             <Title order={3} mb="md">

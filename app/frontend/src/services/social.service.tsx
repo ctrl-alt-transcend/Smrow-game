@@ -8,11 +8,15 @@ export const getFriendList = async (): Promise<Friend[]> => {
 };
 
 export async function removeFriend(friendId: string): Promise<void> {
-  const res = await http.delete(`user/friends/remove/${encodeURIComponent(friendId)}`);
+  const res = await http.delete(
+    `user/friends/remove/${encodeURIComponent(friendId)}`,
+  );
   return res.data;
 }
 
 export async function addFriend(username: Username): Promise<void> {
-  const res = await http.post(`user/friends/add/${encodeURIComponent(username)}`);
+  const res = await http.post(
+    `user/friends/add/${encodeURIComponent(username)}`,
+  );
   return res.data;
 }

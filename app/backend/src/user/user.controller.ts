@@ -125,7 +125,7 @@ export class UserController {
   @Post('friends/add/:username')
   @UseGuards(JwtAuthGuard)
   async addFriend(
-    @Req() req: { user: { id: string }},
+    @Req() req: { user: { id: string } },
     @Param('username') friendUsername: string,
   ) {
     return this.userService.addFriend(req.user.id, friendUsername);
