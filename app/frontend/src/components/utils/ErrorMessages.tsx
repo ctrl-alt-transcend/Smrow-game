@@ -8,7 +8,6 @@ export default function ErrorMessages({
 }) {
   if (!error) return null;
   const messages = Array.isArray(error) ? error : [error];
-
   return (
     <List mt="xs" spacing="xs" c="red" size="sm">
       {messages.map((msg, i) => (
