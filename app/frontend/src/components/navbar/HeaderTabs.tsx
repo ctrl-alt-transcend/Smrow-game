@@ -99,7 +99,7 @@ export function HeaderTabs() {
               </UnstyledButton>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Label>Privacy</Menu.Label>
+              <Menu.Label>Legal</Menu.Label>
 
               <Menu.Item
                 component={Link}
