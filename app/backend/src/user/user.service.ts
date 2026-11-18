@@ -143,8 +143,9 @@ export class UserService {
   async getFriendList(id: string): Promise<Friend[]> {
     const profileSelect = {
       id: true,
+      username: true,
       profile: {
-        select: { username: true, avatarURL: true, bio: true },
+        select: { avatarURL: true, bio: true },
       },
     } as const;
 
@@ -165,7 +166,7 @@ export class UserService {
 
       return FriendSchema.parse({
         id: other.id,
-        username: other.profile?.username,
+        // username: other.profile?.username,
         avatar: other.profile?.avatarURL ?? undefined,
         bio: other.profile?.bio ?? undefined,
       });

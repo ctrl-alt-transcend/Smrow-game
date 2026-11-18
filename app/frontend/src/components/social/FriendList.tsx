@@ -1,13 +1,11 @@
 import { IconMinus } from "@tabler/icons-react";
 import { ActionIcon, Avatar, Group, Table, Text, Loader } from "@mantine/core";
-// import { useAuth } from "../../hooks/useAuth";
 import { useFetch } from "../../hooks/useFetch";
 import { getFriendList } from "../../services/user.service";
 import ErrorMessages from "../utils/ErrorMessages";
 // import { fireEvent } from "@testing-library/react";
 
 export function FriendList() {
-  // const { user } = useAuth();
   const friendlist = useFetch(getFriendList);
 
   if (friendlist.loading) {

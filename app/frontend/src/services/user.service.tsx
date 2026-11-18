@@ -1,6 +1,7 @@
 import { http } from "./http";
 import type { AxiosResponse } from "axios";
-import { type UserPublic, type Friend } from "shared";
+import { type UserPublic, type Friend, FriendSchema } from "shared";
+import { z } from "zod";
 
 export const getCurrentUser = async (): Promise<UserPublic> => {
   try {
@@ -19,10 +20,6 @@ export function getUserToken(): string {
 }
 
 export const getFriendList = async (): Promise<Friend[]> => {
-  try {
-    const res = await http.get<Friend[]>("/");
-    return res.data;
-  } catch (e: any) {
-    throw e?.message;
-  }
+  const res = await http.get("/user/friendlist");
+  return z.array(FriendSchema).parse(res.data);
 };
