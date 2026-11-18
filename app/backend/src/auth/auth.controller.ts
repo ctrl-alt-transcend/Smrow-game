@@ -1,4 +1,4 @@
-import { Controller, Body, Post, Get, UseGuards } from '@nestjs/common';
+import { Controller, Body, Post, Get, UseGuards, Patch } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Req, Res } from '@nestjs/common';
@@ -9,6 +9,7 @@ import {
   LoginResponseDto,
   RegisterDto,
   RegisterResponseDto,
+  UpdateProfileDto,
   UserProfileDto,
 } from './dto/auth.dto';
 import { GoogleAuthGuard } from '../guards/google-auth/google-auth.guard';
@@ -35,6 +36,16 @@ export class AuthController {
   @ZodSerializerDto(UserProfileDto)
   async me(@Req() req: { user: UserPublic }) {
     return this.AuthService.getProfile(req.user.id);
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @ZodSerializerDto(UserProfileDto)
+  async updateMe(
+    @Req() req: { user: UserPublic },
+    @Body() body: UpdateProfileDto,
+  ) {
+    return this.AuthService.updateProfile(req.user.id, body);
   }
 
   /**

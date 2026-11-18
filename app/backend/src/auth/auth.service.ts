@@ -17,6 +17,7 @@ import {
   Password,
   PasswordSchema,
   LoginResponse,
+  UpdateProfile,
 } from 'shared';
 import { DatabaseService } from '../database/database.service';
 
@@ -77,9 +78,16 @@ export class AuthService {
     return PasswordSchema.parse(hash);
   }
 
-  /**
-   * @brief :   Create a JWT token for the given user
-   * @details : the payload is the visible part of the token, it contains the userId and username
+  async updateProfile(
+    userId: string,
+    data: UpdateProfile,
+  ): Promise<UserProfile> {
+    await this.userService.update(userId, data);
+    return this.getProfile(userId);
+  }
+  /*
+   * @brief:   Create a JWT token for the given user
+   * @details: the payload is the visible part of the token, it contains the userId and username
    */
   async createJWTToken(
     user: Pick<UserPublic, 'id' | 'username'>,
