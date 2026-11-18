@@ -1,5 +1,5 @@
 import CardImage from "./Card";
-import { LoginPanel } from "./authentification/LoginPanel";
+import { LoginPanel } from "./form/LoginPanel";
 import { AppShell, BackgroundImage, Group, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 

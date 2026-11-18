@@ -29,6 +29,7 @@ import TurnProgressBar from "./components/ui/TurnProgressBar.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import PanContainer from "./components/ui/PanContainer.tsx";
 import QuitGameButton from "./components/ui/QuitGameButton.tsx";
+import { Notifications } from "@mantine/notifications";
 
 export default function Game() {
   const { game } = useGameState();
@@ -191,6 +192,8 @@ function GameShell({ game }: { game: GameDataDto }) {
       </AppShell.Main>
 
       <OptionsModal game={game} opened={optionsOpened} onClose={closeOptions} />
+      <Notifications limit={2} />
+
     </AppShell>
   );
 }

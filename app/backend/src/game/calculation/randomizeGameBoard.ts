@@ -9,7 +9,7 @@ import { BuildingType, type BuildPayload } from 'shared';
  *
  * @returns the payload, or null if there is no settlement to pick.
  */
-export function randomizePlacement(graph: GameBoardGraph): BuildPayload | null {
+export function randomizeFirstSettlement(graph: GameBoardGraph): BuildPayload | null {
   const settlements = [...graph.values()].filter(
     (elements) =>
       elements.core.type === BuildingType.SETTLEMENT &&

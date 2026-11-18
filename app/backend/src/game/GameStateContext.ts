@@ -39,7 +39,7 @@ import {
   produceResources,
 } from './calculation/handleResources';
 import {
-  randomizePlacement,
+  randomizeFirstSettlement,
   randomizeRobber,
 } from './calculation/randomizeGameBoard';
 
@@ -93,6 +93,7 @@ class GameStateContext {
   private turnStart: number = 0;
   private turnTimeoutId: NodeJS.Timeout | null = null;
   private readonly notify: GameNotifier;
+  private roundCount: number = 0;
 
   constructor(
     gameId: string,
@@ -129,10 +130,6 @@ class GameStateContext {
       victoryPoints: 0,
       timeToPlay: this.settings.turnDurationSeconds,
       level: 1, //⚠️ For testing only
-      stats: {
-        roadsBuilt: 0,
-        // ....
-      },
       firstDice: 0,
       secondDice: 0,
       settlementsBuilt: new Map<string, SettlementData>(),
@@ -144,7 +141,6 @@ class GameStateContext {
         id: this.rollId++,
         val: null,
       },
-      DEVMOD: false,
       resources: {
         wood: this.settings.woodBonus,
         brick: this.settings.brickBonus,
@@ -152,6 +148,8 @@ class GameStateContext {
         sheep: this.settings.sheepBonus,
         ore: this.settings.oreBonus,
       },
+      firstSettlementPlaced: false,
+      DEVMOD: false,
     };
     this.setPersonalLog(
       newPlayer,
@@ -221,6 +219,13 @@ class GameStateContext {
   public getSettings(): SettingsData {
     return this.settings;
   }
+  public getCurrentTurnIndex(): number {
+    return this.data.turnIndex;
+  }
+  /** Number of resources + trade and build rounds started */
+  public getRoundCount(): number {
+    return this.roundCount;
+  }
   public getCurrentPhase(): Phase {
     return this.data.currentPhase;
   }
@@ -246,7 +251,6 @@ class GameStateContext {
     return {
       id: p.id,
       username: p.username,
-      stats: p.stats,
       victoryPoints: p.victoryPoints,
       timeToPlay: this.getTimeLeft(p.username),
       firstDice: p.firstDice,
@@ -466,8 +470,10 @@ class GameStateContext {
   }
 
   public setupNextPhase(nextPhase: Phase) {
+    if (nextPhase === Phase.RESOURCES) this.roundCount++;
     this.setNextPlayer(0);
     this.setTurnCount(0);
+    console.log(`setupNextPhase: currentPhase: ${this.getCurrentPhase()} | nextPhase: ${nextPhase} | starting player: ${this.data.whosTurn}`);
     this.setCurrentPhase(nextPhase);
     this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
     this.resetAllDices();
@@ -529,7 +535,7 @@ class GameStateContext {
         } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
             player,
-            `You didn't produce anything with your ${LAND_RESOURCE[tile.land]} ...`,
+            `You didn't produce anything with your ${LandType.DESERT} ...`,
             NotifColor.PURPLE,
           );
           //console.log(`⚖️ressoucesProduction: ${player.username} can't produce anything in the ${LandType.DESERT}`);
@@ -575,12 +581,13 @@ class GameStateContext {
     const p = this.getPlayerByUsername(username);
     if (!p) return;
     addStartingResources(p.resources);
+    if (p.firstSettlementPlaced) return;
     let response = { valid: false, message: '' };
     while (response.valid === false) {
-      const build = randomizePlacement(this.graph);
-      if (!build) break;
+      const buildPayload = randomizeFirstSettlement(this.graph);
+      if (!buildPayload) break;
       response = buildCheck(
-        build,
+        buildPayload,
         p,
         this.getBoard(),
         this.getGraph(),
@@ -589,6 +596,7 @@ class GameStateContext {
         true,
       );
     }
+    p.firstSettlementPlaced = true;
     this.setNextPlayer();
   }
 
@@ -597,7 +605,7 @@ class GameStateContext {
    **********************************/
   private onExpire(): void {
     console.log(
-      `TurnWatcher: no actions within the elapsed time ` +
+      `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
         `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
         `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
     );
@@ -740,8 +748,6 @@ class StartPhase extends State {
  * Placement Phase
  **********************************/
 class PlacementPhase extends State {
-  private settlementBuilt: boolean = false;
-
   public dice(username: string) {
     const p = this.state.getPlayerByUsername(username);
     if (!p) return;
@@ -755,14 +761,14 @@ class PlacementPhase extends State {
   public build(username: string, payload: BuildPayload) {
     const p = this.state.isPlayersTurn(username);
     if (!p) return;
-    if (payload.kind === SETTLEMENT && this.settlementBuilt) {
+    if (payload.kind === SETTLEMENT && p.firstSettlementPlaced) {
       this.state.setPersonalLog(
         p,
         'You already built a settlement, build a road now ...',
         NotifColor.RED,
       );
       return;
-    } else if (payload.kind === ROAD && !this.settlementBuilt) {
+    } else if (payload.kind === ROAD && !p.firstSettlementPlaced) {
       this.state.setPersonalLog(
         p,
         'You must build a settlement first ...',
@@ -784,8 +790,8 @@ class PlacementPhase extends State {
       return;
     }
     this.state.setPersonalLog(p, `${response.message}`, NotifColor.GREEN);
-    if (payload.kind == SETTLEMENT && this.settlementBuilt == false) {
-      this.settlementBuilt = true;
+    if (payload.kind == SETTLEMENT && p.firstSettlementPlaced == false) {
+      p.firstSettlementPlaced = true;
       this.state.setPersonalLog(
         p,
         'You built your first settlement, pick a road now.',
@@ -793,7 +799,6 @@ class PlacementPhase extends State {
       );
       return;
     }
-    this.settlementBuilt = false;
     this.state.setNextPlayer();
     this.state.setPersonalLog(
       p,

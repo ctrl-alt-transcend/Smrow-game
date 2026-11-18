@@ -510,7 +510,6 @@ export type PlayerBase = {
   id: string;
   username: string;
   level: number;
-  stats: StatsData;
   victoryPoints: number;
   timeToPlay: number;
   resources: Resources;
@@ -526,38 +525,10 @@ export type PlayerBase = {
 
 export type Player = PlayerBase & {
   settlementsBuilt: Map<string, SettlementData>
+  firstSettlementPlaced: boolean;
 }
 
 export type PlayerDto = PlayerBase
-
-export type StatsData = {
-  // Build
-  roadsBuilt: number;
-  //settlementsBuilt: number;
-  //citiesBuilt: number;
-
-  // Resources
-  //resourcesGained: number;
-  //resourcesSpent: number;
-  //tradesMade: number;
-  //tradeRequestsRefused: number;
-
-  // Dices
-  //diceRolls: number;
-  //sevenRolledCount: number;
-
-  // Gameboard events
-  //robberSteals: number;
-  //crossroadsAchieved: number;
-
-  // Progression
-  //victoryPoints: number;
-  //gamesPlayed: number;
-  //gamesWon: number;
-  //turnsPlayed: number;
-
-  //...
-};
 
 /***********************************
  * Game Payloads

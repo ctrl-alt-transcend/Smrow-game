@@ -30,7 +30,7 @@ model User {
 model Profile {
 	id			String @default(cuid()) @id
 	bio			String?
-	avatarURL	String?
+	avatarURL	String? @default("/avatars/default.jpg")
 	user User	@relation(fields: [userId], references: [id], onDelete: Cascade)
 	userId		String @unique
 	createdAt	DateTime @default(now())
@@ -74,6 +74,8 @@ model Games {
 	duration	Int?
 	playedAt	DateTime @default(now())
 	players		GamesPlayer[]
+
+	@@index([playedAt])
 }
 
 model GamesPlayer {
@@ -94,6 +96,7 @@ model GamesPlayer {
 	games				Games @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
 	@@id([gameId, userId])
+	@@index([userId])
 
 	@@unique([gameId, turnOrder])
 }
