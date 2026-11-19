@@ -49,6 +49,15 @@ export default function ProfilePage() {
 
         <Grid.Col span={{ base: 12, md: 8 }}>
           <Stack gap="lg" h="100%">
+            <SimpleGrid cols={{ base: 1, sm: 1 }} spacing="lg">
+              <Paper withBorder shadow="xs" radius="md" p="lg">
+                <Title order={4} mb="md">
+                  Friends
+                </Title>
+                <FriendList />
+              </Paper>
+            </SimpleGrid>
+
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
               <Paper withBorder shadow="xs" radius="md" p="lg">
                 <Title order={4} mb="xs">
@@ -65,15 +74,6 @@ export default function ProfilePage() {
                   Pending requests
                 </Title>
                 <PendingList />
-              </Paper>
-            </SimpleGrid>
-
-            <SimpleGrid cols={{ base: 1, sm: 1 }} spacing="lg">
-              <Paper withBorder shadow="xs" radius="md" p="lg">
-                <Title order={4} mb="md">
-                  Friends
-                </Title>
-                <FriendList />
               </Paper>
             </SimpleGrid>
           </Stack>

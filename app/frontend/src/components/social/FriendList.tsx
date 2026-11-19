@@ -16,11 +16,14 @@ import ErrorMessages from "../utils/ErrorMessages";
 export function FriendList() {
   const friendlist = useFetch(getFriendList);
   const [actionError, setActionError] = useState<string | null>(null);
+  // const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   const handleRemoveFriend = async (friendId: string) => {
     try {
       setActionError(null);
+      // setActionSuccess(null);
       await removeFriend(friendId);
+      // setActionSuccess("Friend removed successfully.");
       friendlist.refetch();
     } catch {
       setActionError("Could not remove friend, try again later.");
@@ -85,6 +88,11 @@ export function FriendList() {
           {actionError}
         </Text>
       )}
+      {/* {actionSuccess && (
+        <Text c="green" fz="sm" p="sm">
+          {actionSuccess}
+        </Text>
+      )} */}
       <Table.ScrollContainer minWidth={800}></Table.ScrollContainer>
       <Table
         verticalSpacing="md"
