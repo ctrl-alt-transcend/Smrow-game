@@ -136,4 +136,22 @@ export class UserController {
   ) {
     return this.userService.addFriend(req.user.id, friendUsername);
   }
+
+  @Patch('friends/deny/:friendId')
+  @UseGuards(JwtAuthGuard)
+  async denyRequest(
+    @Req() req: { user: { id: string } },
+    @Param('friendId') friendId: string,
+  ) {
+    return this.userService.denyFriend(req.user.id, friendId);
+  }
+
+  @Patch('friends/accept/:friendId')
+  @UseGuards(JwtAuthGuard)
+  async acceptRequest(
+    @Req() req: { user: { id: string } },
+    @Param('friendId') friendId: string,
+  ) {
+    return this.userService.acceptFriend(req.user.id, friendId);
+  }
 }

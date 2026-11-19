@@ -49,29 +49,31 @@ export default function ProfilePage() {
 
         <Grid.Col span={{ base: 12, md: 8 }}>
           <Stack gap="lg" h="100%">
-            <Paper withBorder shadow="xs" radius="md" p="lg">
-              <Title order={3} mb="xs">
-                Add friends
-              </Title>
-              <Text c="dimmed" size="sm" mb="md">
-                Search for a user and send them a friend request.
-              </Text>
-              <AddFriend />
-            </Paper>
-
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
               <Paper withBorder shadow="xs" radius="md" p="lg">
-                <Title order={3} mb="md">
-                  Friends
+                <Title order={4} mb="xs">
+                  Add friends
                 </Title>
-                <FriendList />
+                <Text c="dimmed" size="sm" mb="md">
+                  Search for a user and send them a friend request.
+                </Text>
+                <AddFriend />
               </Paper>
 
               <Paper withBorder shadow="xs" radius="md" p="lg">
-                <Title order={3} mb="md">
+                <Title order={4} mb="md">
                   Pending requests
                 </Title>
                 <PendingList />
+              </Paper>
+            </SimpleGrid>
+
+            <SimpleGrid cols={{ base: 1, sm: 1 }} spacing="lg">
+              <Paper withBorder shadow="xs" radius="md" p="lg">
+                <Title order={4} mb="md">
+                  Friends
+                </Title>
+                <FriendList />
               </Paper>
             </SimpleGrid>
           </Stack>

@@ -85,11 +85,13 @@ export function FriendList() {
           {actionError}
         </Text>
       )}
-      <Table.ScrollContainer minWidth={800}>
-        <Table verticalSpacing="md">
-          <Table.Tbody>{rows}</Table.Tbody>
-        </Table>
-      </Table.ScrollContainer>
+      <Table.ScrollContainer minWidth={800}></Table.ScrollContainer>
+      <Table
+        verticalSpacing="md"
+        style={{ tableLayout: "fixed", width: "100%" }}
+      >
+        <Table.Tbody>{rows}</Table.Tbody>
+      </Table>
     </Paper>
   );
 }

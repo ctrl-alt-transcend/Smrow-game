@@ -2,24 +2,29 @@ import { useState } from "react";
 import { IconX, IconCheck } from "@tabler/icons-react";
 import { ActionIcon, Group, Table, Text, Loader, Paper } from "@mantine/core";
 import { useFetch } from "../../hooks/useFetch";
-import { getPendingList, removeFriend } from "../../services/social.service";
+import { getPendingList } from "../../services/social.service";
 import ErrorMessages from "../utils/ErrorMessages";
+import { denyRequest, acceptRequest } from "../../services/social.service";
 
 export function PendingList() {
-  const friendlist = useFetch(getPendingList);
+  const pendingList = useFetch(getPendingList);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const handleRemoveFriend = async (friendId: string) => {
+  const handleAction = async (
+    action: (id: string) => Promise<unknown>,
+    friendId: string,
+    errorMessage = "Something went wrong, try again later.",
+  ) => {
     try {
       setActionError(null);
-      await removeFriend(friendId);
-      friendlist.refetch();
+      await action(friendId);
+      pendingList.refetch();
     } catch {
-      setActionError("Could not remove friend, try again later.");
+      setActionError(errorMessage);
     }
   };
 
-  if (friendlist.loading) {
+  if (pendingList.loading) {
     return (
       <Group justify="center" py="xl">
         <Loader />
@@ -27,11 +32,11 @@ export function PendingList() {
     );
   }
 
-  if (friendlist.error) {
-    return <ErrorMessages error={friendlist.error} />;
+  if (pendingList.error) {
+    return <ErrorMessages error={pendingList.error} />;
   }
 
-  if (!friendlist.data || friendlist.data.length === 0) {
+  if (!pendingList.data || pendingList.data.length === 0) {
     return (
       <Text c="dimmed" ta="center" py="xl">
         No pending request !
@@ -39,7 +44,7 @@ export function PendingList() {
     );
   }
 
-  const rows = friendlist.data.map((item) => (
+  const rows = pendingList.data.map((item) => (
     <Table.Tr key={item.id}>
       <Table.Td style={{ overflow: "hidden" }}>
         <Text fz="lg" fw={500} truncate="end">
@@ -52,11 +57,27 @@ export function PendingList() {
             variant="subtle"
             color="red"
             aria-label="Remove friend"
-            onClick={() => handleRemoveFriend(item.id)}
+            onClick={() =>
+              handleAction(
+                denyRequest,
+                item.id,
+                "Could not deny request, try again later.",
+              )
+            }
           >
             <IconX size={16} stroke={1.5} />
           </ActionIcon>
-          <ActionIcon variant="subtle" aria-label="Accept friend">
+          <ActionIcon
+            variant="subtle"
+            aria-label="Accept friend"
+            onClick={() =>
+              handleAction(
+                acceptRequest,
+                item.id,
+                "Could not accept request, try again later.",
+              )
+            }
+          >
             <IconCheck size={16} stroke={1.5} />
           </ActionIcon>
         </Group>

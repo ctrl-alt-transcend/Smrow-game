@@ -25,3 +25,13 @@ export async function addFriend(username: Username): Promise<void> {
   );
   return res.data;
 }
+
+export async function denyRequest(id: string): Promise<void> {
+  const res = await http.patch(`user/friends/deny/${encodeURIComponent(id)}`);
+  return res.data;
+}
+
+export async function acceptRequest(id: string): Promise<void> {
+  const res = await http.patch(`user/friends/accept/${encodeURIComponent(id)}`);
+  return res.data;
+}

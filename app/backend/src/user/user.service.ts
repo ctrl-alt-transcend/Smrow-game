@@ -327,4 +327,38 @@ export class UserService {
       });
     }
   }
+
+  async denyFriend(userId: string, friendId: string) {
+    const req = await this.databaseService.friendRequest.findFirst({
+      where: {
+        status: 'PENDING',
+        sender_id: friendId,
+        receiver_id: userId,
+      },
+    });
+
+    if (!req) throw new NotFoundException('Friend request not found');
+
+    return this.databaseService.friendRequest.update({
+      where: { id: req.id },
+      data: { status: 'DECLINED' },
+    });
+  }
+
+  async acceptFriend(userId: string, friendId: string) {
+    const req = await this.databaseService.friendRequest.findFirst({
+      where: {
+        status: 'PENDING',
+        sender_id: friendId,
+        receiver_id: userId,
+      },
+    });
+
+    if (!req) throw new NotFoundException('Friend request not found');
+
+    return this.databaseService.friendRequest.update({
+      where: { id: req.id },
+      data: { status: 'ACCEPTED' },
+    });
+  }
 }
