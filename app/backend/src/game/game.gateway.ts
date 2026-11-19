@@ -16,6 +16,7 @@ import {
   ZGEG_DEV,
   type JwtPayload,
   Phase,
+  NotifColor,
 } from 'shared';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
@@ -87,16 +88,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       return;
     }
     if (game.getPlayers().size < 2) {
-      const player = game.getPlayerById(client.data.user.username);
+      const player = game.getPlayerByUsername(client.data.user.username);
       if (player) {
-        game.setPersonalLog(player, 'Not enough players to start the game.');
+        game.setPersonalLog(
+          player,
+          'Not enough players to start the game.',
+          NotifColor.PURPLE,
+        );
       }
       this.emitGameDataDto(game, client.data.user.username);
     }
     console.log(
       `Starting game ${game.getGameId()} with ${game.getPlayers().size} players.`,
     );
-    game.setCurrentPhase(Phase.START);
+    game.launchGame();
     this.emitGameDataDto(game, client.data.user.username);
   }
 
@@ -131,12 +136,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.skipRequest(client.data.user.username);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.skipRequest(`${ZGEG_DEV}`);
-    game.phaseCheckRequest();
-    // -------------
-
     this.emitGameDataDto(game, client.data.user.username);
   }
 
@@ -149,12 +148,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.buildRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.buildRequest(`${ZGEG_DEV}`, payload);
-    game.phaseCheckRequest();
-    // -------------
-
     this.emitGameDataDto(game, client.data.user.username);
   }
 
@@ -167,12 +160,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.tradeRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.tradeRequest(`${ZGEG_DEV}`, payload);
-    game.phaseCheckRequest();
-    // -------------
-
     this.emitGameDataDto(game, client.data.user.username);
   }
 
@@ -197,6 +184,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   }
 
   async afterInit(server: SocketServer) {
+    this.gameService.setNotifier((id, username) => {
+      const game = this.gameService.getGameInstanceByUserId(id);
+      this.emitGameDataDto(game, username);
+    });
+
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
       const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
