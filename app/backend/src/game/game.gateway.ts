@@ -105,6 +105,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
     client.disconnect(true);
+    console.log('player', client.data.user.username, 'disconnected');
   }
 
   /**

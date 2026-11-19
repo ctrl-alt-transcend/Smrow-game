@@ -99,11 +99,13 @@ export class GameService {
       if (id === gameId) this.playersMap.delete(userId);
     });
     this.gameInstances.delete(gameId);
+    this.broadcastGameList();
   }
 
   removePlayerFromGame(user: SocketUser, game: string) {
     this.playersMap.delete(user.id);
     this.gameInstances.get(game)?.getPlayers().delete(user.username);
+    this.broadcastGameList();
   }
 
   private getGameInstance(gameId: string): GameStateContext {
@@ -151,9 +153,11 @@ export class GameService {
     this.userIds.set(playerProfile.username, playerProfile.id);
     game
       .getPlayers()
-      .set(playerProfile.username, game.initPlayer(playerProfile.username));
-    this.socialGateway.handleGameList(this.getGamesList());
-
+      .set(
+        playerProfile.username,
+        game.initPlayer(playerProfile.id, playerProfile.username),
+      );
+    this.broadcastGameList();
     //⚠️REMOVE in PROD -------------------
     console.log(`---------------------------------------
 ⚠️ The following is currently set in 'app/backend/src/game/game.service.ts':
@@ -164,5 +168,9 @@ disable his calls in 'app/backend/src/game/game.gateway.ts'
     game.setDEVMOD(playerProfile.username);
     game.getPlayers().set(`${ZGEG_DEV}`, game.initPlayer(`${ZGEG_DEV}`));
     // -----------------------------------
+  }
+
+  private broadcastGameList() {
+    this.socialGateway.handleGameList(this.getGamesList());
   }
 }
