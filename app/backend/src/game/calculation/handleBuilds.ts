@@ -221,7 +221,7 @@ function settlementCheck(
   }
   player.victoryPoints += settlementPoints;
   target.faction = player.faction;
-  target.ownerId = player.playerId;
+  target.ownerId = player.username;
   if (!placementPhase) {
     payBuildResources(player.resources, BuildingType.SETTLEMENT);
   }
@@ -258,7 +258,7 @@ function roadCheck(
   }
   player.victoryPoints += roadPoints;
   target.faction = player.faction;
-  target.ownerId = player.playerId;
+  target.ownerId = player.username;
   if (!placementPhase) {
     payBuildResources(player.resources, BuildingType.ROAD);
   }
@@ -315,7 +315,7 @@ export const buildCheck = (
             placementPhase,
           );
           if (check.valid) player.settlementsBuilt.set(target.id, target);
-        } else if (target.ownerId == player.playerId) {
+        } else if (target.ownerId == player.username) {
           check = cityUpgradeCheck(target, player, settings.cityPoints);
         } else {
           check.message = 'This settlement is owned by another player.';

@@ -5,15 +5,17 @@ import {
   LandType,
   ResourceType,
   ROBBER_ROLL,
-  FACTION_COLORS,
   GUIDE_LOG,
   LAND_RESOURCE,
-  YOU_ROLLED,
   YOU_DIDNT_ROLLED,
   SETTLEMENT,
   ROAD,
+  PERSONNAL_LOG_LIMIT,
+  ROBBER_NAME,
+  ROLLED_A,
+  ZGEG_DEV,
 } from 'shared';
-import type {
+import {
   GameBoard,
   GameBoardGraph,
   GameData,
@@ -25,14 +27,21 @@ import type {
   PlayerDto,
   SettingsData,
   DiceRoll,
+  NotifColor,
 } from 'shared';
 import { updateValue, funnyRollLog } from './game.utils';
 import { buildCheck, BuildingsInGame } from './calculation/handleBuilds';
 import { createGameBoard } from './calculation/createGameBoard';
 import { tradeCheck } from './calculation/handleTrade';
 import { NotFoundException } from '@nestjs/common';
-import { produceResources } from './calculation/handleResources';
-import { randomizeRobber } from './calculation/randomizeGameBoard';
+import {
+  addStartingResources,
+  produceResources,
+} from './calculation/handleResources';
+import {
+  randomizeFirstSettlement,
+  randomizeRobber,
+} from './calculation/randomizeGameBoard';
 
 /**
  * The base State class declares methods that all Concrete State should
@@ -46,12 +55,25 @@ abstract class State {
   public setGameState(newGameState: GameStateContext) {
     this.state = newGameState;
   }
-  public abstract dice(playerId: string): void;
-  public abstract skip(playerId: string): void;
+  public abstract dice(username: string | void): void;
+  public abstract skip(username: string | void): void;
+  public abstract build(
+    username: string | void,
+    payload: BuildPayload | void,
+  ): void;
+  public abstract trade(
+    username: string | void,
+    payload: TradePayload | void,
+  ): void;
   public abstract phaseCheck(): void;
-  public abstract build(playerId: string, payload: BuildPayload | null): void;
-  public abstract trade(playerId: string, payload: TradePayload | null): void;
 }
+
+/**
+ * @brief define the fonction signature
+ *
+ * GameNotifier is a callback function that is called when the player turn expires
+ */
+export type GameNotifier = (id: string, username: string) => void;
 
 /**
  * The Context defines the interface of interest to clients. It also maintains a
@@ -67,9 +89,19 @@ class GameStateContext {
   private logId: number = 0;
   private rollId: number = 0;
   private factionSwitch: number = 0;
+  private turnCount: number = 0;
+  private turnStart: number = 0;
+  private turnTimeoutId: NodeJS.Timeout | null = null;
+  private readonly notify: GameNotifier;
   private roundCount: number = 0;
 
-  constructor(gameId: string, settings: SettingsData, state: State) {
+  constructor(
+    gameId: string,
+    settings: SettingsData,
+    state: State,
+    notify: GameNotifier,
+  ) {
+    this.notify = notify;
     this.settings = settings;
     const { board, graph } = createGameBoard(this.settings.gameboardLayout);
     this.graph = graph;
@@ -79,7 +111,7 @@ class GameStateContext {
       players: new Map<string, Player>(),
       startingRolls: new Map<string, number>(),
       currentPhase: Phase.START,
-      currentTurnIndex: 0,
+      turnIndex: 0,
       turnOrder: [],
       masterLog: `${Phase.START}: roll the dices`,
       dicesSum: 0,
@@ -91,52 +123,24 @@ class GameStateContext {
     this.transitionTo(state);
   }
 
-  /**
-   * TODO
-   * assignFaction();
-   * Watchout for client disconnection! Must handle that properly later!
-   */
-  private assignFaction(): Faction {
-    switch (this.factionSwitch++) {
-      case 0:
-        return Faction.BOURSES_BLEUES;
-      case 1:
-        return Faction.POURPRES_CHYBRES;
-      case 2:
-        return Faction.ROSES_FIACS;
-      case 3:
-        return Faction.UREE_JAUNE;
-      default:
-        return Faction.DEFAULT;
-    }
-  }
-
-  public initPlayer(playerId: string): Player {
+  public initPlayer(id: string, username: string): Player {
     const newPlayer: Player = {
-      playerId: playerId,
-      username: playerId,
+      id: id,
+      username: username,
       victoryPoints: 0,
-      //victoryPoints: 6, //⚠️ For testing only
+      timeToPlay: this.settings.turnDurationSeconds,
       level: 1, //⚠️ For testing only
-      stats: {
-        roadsBuilt: 0,
-        // ....
-      },
       firstDice: 0,
       secondDice: 0,
       settlementsBuilt: new Map<string, SettlementData>(),
       avatarURL: null,
-      faction: this.assignFaction(),
-      personalLog: {
-        id: this.logId++,
-        message: `Welcome to ${this.settings.gameboardLayout} ${playerId}`,
-      },
+      faction: this.pickFaction(),
       guideLog: `${GUIDE_LOG[Phase.START]}`,
+      personalLog: [],
       currentRoll: {
         id: this.rollId++,
         val: null,
       },
-      DEVMOD: false,
       resources: {
         wood: this.settings.woodBonus,
         brick: this.settings.brickBonus,
@@ -144,7 +148,13 @@ class GameStateContext {
         sheep: this.settings.sheepBonus,
         ore: this.settings.oreBonus,
       },
+      firstSettlementPlaced: false,
     };
+    this.setPersonalLog(
+      newPlayer,
+      `Welcome to ${this.settings.gameboardLayout} ${username}`,
+      NotifColor.GREEN,
+    );
     return newPlayer;
   }
 
@@ -156,20 +166,20 @@ class GameStateContext {
   /***********************************
    * Requests
    **********************************/
-  public diceRequest(playerId: string) {
-    return this.state.dice(playerId);
+  public diceRequest(username: string) {
+    return this.state.dice(username);
   }
-  public skipRequest(playerId: string) {
-    this.state.skip(playerId);
+  public skipRequest(username: string) {
+    this.state.skip(username);
   }
   public phaseCheckRequest(): void {
     return this.state.phaseCheck();
   }
-  public tradeRequest(playerId: string, payload: TradePayload | null) {
-    return this.state.trade(playerId, payload);
+  public tradeRequest(username: string, payload: TradePayload | void) {
+    return this.state.trade(username, payload);
   }
-  public buildRequest(playerId: string, payload: BuildPayload | null) {
-    this.state.build(playerId, payload);
+  public buildRequest(username: string, payload: BuildPayload | void) {
+    this.state.build(username, payload);
   }
 
   /***********************************
@@ -202,11 +212,14 @@ class GameStateContext {
   public getTurnOrder(): Array<string> {
     return this.data.turnOrder;
   }
+  public getTurnCount(): number {
+    return this.turnCount;
+  }
   public getSettings(): SettingsData {
     return this.settings;
   }
   public getCurrentTurnIndex(): number {
-    return this.data.currentTurnIndex;
+    return this.data.turnIndex;
   }
   /** Number of resources + trade and build rounds started */
   public getRoundCount(): number {
@@ -218,13 +231,11 @@ class GameStateContext {
   public getMasterLog(): string {
     return this.data.masterLog;
   }
-  public getPlayerById(playerId: string): Player | undefined {
-    return this.data.players.get(playerId);
+  public getPlayerByUsername(username: string): Player | undefined {
+    return this.data.players.get(username);
   }
   public getCurrentPlayer(): Player | undefined {
-    return this.data.players.get(
-      this.data.turnOrder[this.data.currentTurnIndex],
-    );
+    return this.data.players.get(this.data.turnOrder[this.data.turnIndex]);
   }
   public isGameTerminated(): boolean {
     return this.data.gameTerminated;
@@ -237,28 +248,27 @@ class GameStateContext {
   }
   public getPlayerDto(p: Player): PlayerDto {
     return {
-      playerId: p.playerId,
-      stats: p.stats,
+      id: p.id,
+      username: p.username,
       victoryPoints: p.victoryPoints,
+      timeToPlay: this.getTimeLeft(p.username),
       firstDice: p.firstDice,
       secondDice: p.secondDice,
       level: p.level,
-      username: p.username,
       avatarURL: p.avatarURL,
       faction: p.faction,
       personalLog: p.personalLog,
       guideLog: p.guideLog,
       resources: p.resources,
       currentRoll: p.currentRoll,
-      DEVMOD: p.DEVMOD,
     };
   }
-  public getGameDataDto(playerId: string): GameDataDto {
+  public getGameDataDto(username: string): GameDataDto {
     const gameData = this.getGameData();
 
-    const p = this.getPlayerById(playerId);
+    const p = this.getPlayerByUsername(username);
     if (!p) {
-      throw new NotFoundException(`Unknown playerId: ${playerId}`);
+      throw new NotFoundException(`Unknown username: ${username}`);
     }
     return {
       currentPlayer: this.getPlayerDto(p),
@@ -275,37 +285,18 @@ class GameStateContext {
       settings: this.settings,
     };
   }
-  public getFactionColor(playerId: string): string {
-    const player = this.getPlayerById(playerId);
-    if (!player) {
-      throw new Error(`getFactionColor: Unknown playerId: ${playerId}`);
-    }
-    return FACTION_COLORS[player.faction];
-  }
-  public isPlayersTurn(playerId: string): Player | null {
-    const player = this.getPlayerById(playerId);
-    if (!player) {
-      throw new Error(`Unknown playerId: ${playerId}`);
-    }
-    const currentPlayer = this.getCurrentPlayer();
-    if (!currentPlayer) {
+  public isPlayersTurn(username: string): Player | null {
+    const p = this.getPlayerByUsername(username);
+    if (!p) return null;
+    if (p.username !== this.data.whosTurn) {
+      this.setPersonalLog(p, "It's not you turn !", NotifColor.RED);
       return null;
     }
-    if (player.playerId !== currentPlayer.playerId) {
-      this.setPersonalLog(player, "It's not you turn !");
-      return null;
-    }
-    return player;
+    return p;
   }
   /***********************************
    * Setters
    **********************************/
-  /** @description used in DEV: allow player to play for others */
-  public setDEVMOD(playerId: string) {
-    const p = this.getPlayerById(playerId);
-    if (!p) return;
-    p.DEVMOD = true;
-  }
   public setDicesSum(roll: number) {
     this.data.dicesSum = roll;
   }
@@ -329,11 +320,32 @@ class GameStateContext {
       this.setGuideLog(player, message);
     });
   }
-  public setPersonalLog(p: Player, message: string) {
-    p.personalLog = {
+  public setTurnCount(count?: number) {
+    if (count !== undefined) {
+      this.turnCount = count;
+    } else {
+      this.turnCount++;
+    }
+  }
+  public setPersonalLog(p: Player, message: string, type: NotifColor) {
+    p.personalLog.push({
       id: this.logId++,
       message: message,
-    };
+      color: type,
+    });
+    if (p.personalLog.length > PERSONNAL_LOG_LIMIT) {
+      p.personalLog.splice(0, p.personalLog.length - PERSONNAL_LOG_LIMIT);
+    }
+  }
+  public setAllPersonnalLog(
+    currentusername: string,
+    message: string,
+    type: NotifColor,
+  ) {
+    this.data.players.forEach((player) => {
+      if (player.username !== currentusername)
+        this.setPersonalLog(player, message, type);
+    });
   }
   public resetAllDices() {
     this.data.players.forEach((player) => {
@@ -344,13 +356,35 @@ class GameStateContext {
     p.firstDice = 0;
     p.secondDice = 0;
   }
-  public setCurrentTurnIndex(index?: number) {
-    this.data.currentTurnIndex = updateValue(
-      this.data.currentTurnIndex,
+  public setTurnIndex(index?: number) {
+    this.data.turnIndex = updateValue(
+      this.data.turnIndex,
       this.data.players.size + 1,
       index,
     );
-    this.data.whosTurn = this.data.turnOrder[this.data.currentTurnIndex];
+    this.data.whosTurn = this.data.turnOrder[this.data.turnIndex];
+  }
+
+  /** Set next player turn, ignore the players that quit the game */
+  public setNextPlayer(index?: number) {
+    this.stopWatch();
+    this.setTurnCount();
+    for (let i = 0; i <= this.getPlayers().size; i++) {
+      if (index === undefined) {
+        this.setTurnIndex(index);
+      } else if (i < this.getPlayers().size) {
+        this.setTurnIndex(i);
+      }
+      const p = this.getPlayerByUsername(this.data.whosTurn);
+      if (p) {
+        break;
+      }
+    }
+    //console.log(`setNextPlayer: ${this.data.whosTurn} is now playing`);
+    this.setMasterLog(
+      `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
+    );
+    this.startWatch();
   }
 
   /** @argument winCondition: explain why the player won  */
@@ -358,10 +392,37 @@ class GameStateContext {
     this.data.winner = winner;
     this.data.winCondition = winCondition;
   }
+  private pickFaction(): Faction {
+    switch (this.factionSwitch++) {
+      case 0:
+        return Faction.BOURSES_BLEUES;
+      case 1:
+        return Faction.POURPRES_CHYBRES;
+      case 2:
+        return Faction.ROSES_FIACS;
+      case 3:
+        return Faction.UREE_JAUNE;
+      default:
+        return Faction.DEFAULT;
+    }
+  }
+  public assignFactions() {
+    this.factionSwitch = 0;
+    this.data.players.forEach((player) => {
+      player.faction = this.pickFaction();
+    });
+  }
 
   /***********************************
    * Methods
    **********************************/
+  /** To call when the game is ready to start */
+  public launchGame() {
+    this.assignFactions();
+    this.transitionTo(new StartPhase());
+    this.startWatch();
+  }
+
   /** @description Generates: "You can't ${Action} during ${Phase}" */
   public forbiddenActionLog(action: Action, phase: Phase): string {
     return `You can't ${action} during ${phase}`;
@@ -373,25 +434,35 @@ class GameStateContext {
     roll.id = this.rollId++;
     if (p.firstDice === 0) {
       p.firstDice = roll.val;
-      this.setPersonalLog(p, `${YOU_ROLLED} ${roll.val}`);
-      //console.log(`${p.playerId} #1 rolll: ${roll.val}`);
+      this.setPersonalLog(p, `You ${ROLLED_A} ${roll.val}`, NotifColor.GREEN);
+      this.setAllPersonnalLog(
+        p.username,
+        `${p.username} ${ROLLED_A} ${roll.val}`,
+        NotifColor.PURPLE,
+      );
     } else if (p.secondDice === 0) {
       p.secondDice = roll.val;
-      this.setPersonalLog(p, `${YOU_ROLLED} ${roll.val}`);
-      //console.log(`${p.playerId} #2 rolll: ${roll.val}`);
+      this.setPersonalLog(p, `You ${ROLLED_A} ${roll.val}`, NotifColor.GREEN);
+      this.setAllPersonnalLog(
+        p.username,
+        `${p.username} ${ROLLED_A} ${roll.val}`,
+        NotifColor.PURPLE,
+      );
     } else {
       roll.val = null;
-      this.setPersonalLog(p, `${YOU_DIDNT_ROLLED}`);
+      this.setPersonalLog(p, `${YOU_DIDNT_ROLLED}`, NotifColor.RED);
     }
     return roll;
   }
 
   public setupNextPhase(nextPhase: Phase) {
     if (nextPhase === Phase.RESOURCES) this.roundCount++;
-    this.setCurrentTurnIndex(0);
+    this.setNextPlayer(0);
+    this.setTurnCount(0);
+    //console.log(`setupNextPhase: currentPhase: ${this.getCurrentPhase()} | nextPhase: ${nextPhase} | starting player: ${this.data.whosTurn}`);
     this.setCurrentPhase(nextPhase);
     this.setMasterLog(
-      `${nextPhase}: ${this.getCurrentPlayer()?.playerId} is playing ...`,
+      `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
     );
     this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
     this.resetAllDices();
@@ -402,7 +473,7 @@ class GameStateContext {
     this.data.players.forEach((player) => {
       if (this.data.players.size <= 1) {
         this.setVictory(
-          player.playerId,
+          player.username,
           `is the only player left in game ! You won congrats !`,
         );
         this.setGameTerminated(true);
@@ -410,7 +481,7 @@ class GameStateContext {
       }
       if (player.victoryPoints >= this.getSettings().pointsToWin) {
         this.setVictory(
-          player.playerId,
+          player.username,
           `won by earning ${player.victoryPoints} victory points !`,
         );
         this.setAllGuideLogs(`${this.data.winner} ${this.data.winCondition}`);
@@ -443,26 +514,27 @@ class GameStateContext {
               settlement.isCity,
             );
         }
-        if (prod > 0 && !placementPhase) {
+        if (prod > 0) {
           this.setPersonalLog(
             player,
             `You produced ${prod} ${LAND_RESOURCE[tile.land]}`,
+            NotifColor.GREEN,
           );
-          //console.log(`⚖️ressoucesProduction: ${player.playerId} produced ${prod} ${LAND_RESOURCE[tile.land]}`);
-        } else if (tile.hasRobber && !placementPhase) {
-          this.setPersonalLog(
-            player,
-            `Robert the Robber stole your ${LAND_RESOURCE[tile.land]} production !`,
-          );
-          //console.log(`⚖️ressoucesProduction: ${player.playerId} has been stolen by Robert the Robber !`);
+          //console.log(`⚖️ressoucesProduction: ${player.username} produced ${prod} ${LAND_RESOURCE[tile.land]}`);
         } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
             player,
-            `You didn't produce anything with your ${LAND_RESOURCE[tile.land]} ...`,
+            `You didn't produce anything with your ${LandType.DESERT} ...`,
+            NotifColor.PURPLE,
           );
-          //console.log(`⚖️ressoucesProduction: ${player.playerId} can't produce anything in the ${LandType.DESERT}`);
-        } else if (placementPhase) {
-          this.setPersonalLog(player, `You produced your first resources !`);
+          //console.log(`⚖️ressoucesProduction: ${player.username} can't produce anything in the ${LandType.DESERT}`);
+        } else if (tile.hasRobber && !placementPhase) {
+          this.setPersonalLog(
+            player,
+            `${ROBBER_NAME} stole your ${LAND_RESOURCE[tile.land]} production !`,
+            NotifColor.PURPLE,
+          );
+          //console.log(`⚖️ressoucesProduction: ${player.username} has been stolen by ${ROBBER_NAME} !`);
         }
       });
     }
@@ -488,10 +560,110 @@ class GameStateContext {
       }
       this.setPersonalLog(
         player,
-        `Robert the Robber robbed you ${toDiscard} resources !`,
+        `${ROBBER_NAME} robbed you ${toDiscard} resources !`,
+        NotifColor.PURPLE,
       );
     });
     randomizeRobber(this.data.board.layout);
+  }
+  public afkDuringPlacement(p: Player) {
+    addStartingResources(p.resources);
+    if (p.firstSettlementPlaced) return;
+    let response = { valid: false, message: '' };
+    while (response.valid === false) {
+      const buildPayload = randomizeFirstSettlement(this.graph);
+      if (!buildPayload) break;
+      response = buildCheck(
+        buildPayload,
+        p,
+        this.getBoard(),
+        this.getGraph(),
+        this.getBuildings(),
+        this.getSettings(),
+        true,
+      );
+    }
+    p.firstSettlementPlaced = true;
+  }
+
+  /***********************************
+   * Turn Watcher
+   **********************************/
+  private onExpire(): void {
+    const p = this.getPlayerByUsername(this.data.whosTurn);
+    if (!p) return;
+    console.log(
+      `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
+        `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
+        `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
+    );
+    if (this.turnTimeoutId === null) return;
+    this.turnTimeoutId = null;
+    switch (this.getCurrentPhase()) {
+      case Phase.PLACEMENT:
+        this.afkDuringPlacement(p);
+        break;
+      case Phase.START:
+      case Phase.RESOURCES:
+        if (p.firstDice === 0) this.rollDice(p);
+        if (p.secondDice === 0) this.rollDice(p);
+        break;
+      default:
+        break;
+    }
+    this.setNextPlayer();
+    this.phaseCheckRequest();
+    this.data.players.forEach((player) => {
+      if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
+    });
+  }
+
+  private elapsedMs(): number {
+    return Date.now() - this.turnStart;
+  }
+
+  public startWatch(): void {
+    this.turnStart = Date.now();
+    this.turnTimeoutId = setTimeout(
+      () => this.onExpire(),
+      this.settings.turnDurationSeconds * 1000,
+    );
+  }
+
+  public stopWatch(): void {
+    if (this.turnTimeoutId !== null) {
+      clearTimeout(this.turnTimeoutId);
+      this.turnTimeoutId = null;
+    }
+  }
+
+  /** Seconds remaining before the forced play, rounded up. */
+  public getTimeLeft(username: string): number {
+    if (username !== this.data.whosTurn) return 0;
+    const remaining =
+      this.settings.turnDurationSeconds * 1000 - this.elapsedMs();
+    return Math.max(0, Math.ceil(remaining / 1000));
+  }
+}
+
+/***********************************
+ * Pending Phase
+ **********************************/
+class PendingPhase extends State {
+  public dice() {
+    return;
+  }
+  public build() {
+    return;
+  }
+  public trade() {
+    return;
+  }
+  public skip() {
+    return;
+  }
+  public phaseCheck(): void {
+    return;
   }
 }
 
@@ -499,50 +671,54 @@ class GameStateContext {
  * Start Phase
  **********************************/
 class StartPhase extends State {
-  public dice(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public dice(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     p.currentRoll = this.state.rollDice(p);
-    if (this.state.hasRolledBothDices(p) && p.currentRoll) {
+    if (this.state.hasRolledBothDices(p) && p.currentRoll !== null) {
       this.state.setPersonalLog(
         p,
         `You ${funnyRollLog(p.firstDice + p.secondDice)}`,
+        NotifColor.GREEN,
       );
-      this.state.getStartingRolls().set(playerId, p.firstDice + p.secondDice);
+      this.state.getStartingRolls().set(username, p.firstDice + p.secondDice);
     }
   }
 
-  public build(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public build(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.BUILD, Phase.START),
+      NotifColor.RED,
     );
   }
 
-  public trade(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public trade(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.TRADE, Phase.START),
+      NotifColor.RED,
     );
   }
 
-  public skip(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public skip(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.SKIP, Phase.START),
+      NotifColor.RED,
     );
   }
 
   public computeTurnOrder() {
     const entries = Array.from(this.state.getStartingRolls().entries());
     entries.sort(([, a], [, b]) => b - a);
-    this.state.setTurnOrder(entries.map(([playerId]) => playerId));
+    this.state.setTurnOrder(entries.map(([username]) => username));
   }
 
   public phaseCheck(): void {
@@ -558,28 +734,32 @@ class StartPhase extends State {
  * Placement Phase
  **********************************/
 class PlacementPhase extends State {
-  private settlementBuilt: boolean = false;
-
-  public dice(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public dice(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.DICE, Phase.PLACEMENT),
+      NotifColor.RED,
     );
   }
 
-  public build(playerId: string, payload: BuildPayload) {
-    const p = this.state.isPlayersTurn(playerId);
+  public build(username: string, payload: BuildPayload) {
+    const p = this.state.isPlayersTurn(username);
     if (!p) return;
-    if (payload.kind === SETTLEMENT && this.settlementBuilt) {
+    if (payload.kind === SETTLEMENT && p.firstSettlementPlaced) {
       this.state.setPersonalLog(
         p,
         'You already built a settlement, build a road now ...',
+        NotifColor.RED,
       );
       return;
-    } else if (payload.kind === ROAD && !this.settlementBuilt) {
-      this.state.setPersonalLog(p, 'You must build a settlement first ...');
+    } else if (payload.kind === ROAD && !p.firstSettlementPlaced) {
+      this.state.setPersonalLog(
+        p,
+        'You must build a settlement first ...',
+        NotifColor.RED,
+      );
       return;
     }
     const response = buildCheck(
@@ -592,49 +772,49 @@ class PlacementPhase extends State {
       true,
     );
     if (response.valid === false) {
-      this.state.setPersonalLog(p, `${response.message}`);
+      this.state.setPersonalLog(p, `${response.message}`, NotifColor.RED);
       return;
     }
-    if (payload.kind == SETTLEMENT && this.settlementBuilt == false) {
-      this.settlementBuilt = true;
+    this.state.setPersonalLog(p, `${response.message}`, NotifColor.GREEN);
+    if (payload.kind == SETTLEMENT && p.firstSettlementPlaced == false) {
+      p.firstSettlementPlaced = true;
       this.state.setPersonalLog(
         p,
         'You built your first settlement, pick a road now.',
+        NotifColor.GREEN,
       );
       return;
     }
-    this.settlementBuilt = false;
-    this.state.setCurrentTurnIndex();
-    this.state.setMasterLog(
-      `${Phase.PLACEMENT}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`,
-    );
+    this.state.setNextPlayer();
     this.state.setPersonalLog(
       p,
       'You finshied your placement, wait for the other players to play ...',
+      NotifColor.GREEN,
     );
   }
 
-  public trade(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public trade(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.TRADE, Phase.PLACEMENT),
+      NotifColor.RED,
     );
   }
 
-  public skip(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public skip(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.SKIP, Phase.PLACEMENT),
+      NotifColor.RED,
     );
   }
 
   public phaseCheck(): void {
-    if (this.state.getCurrentTurnIndex() !== this.state.getPlayers().size)
-      return;
+    if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
     this.state.resourcesProduction(true);
     this.state.setupNextPhase(Phase.RESOURCES);
     this.state.transitionTo(new ResourcesPhase());
@@ -645,8 +825,8 @@ class PlacementPhase extends State {
  * Resources Phase
  **********************************/
 class ResourcesPhase extends State {
-  public dice(playerId: string) {
-    const p = this.state.isPlayersTurn(playerId);
+  public dice(username: string) {
+    const p = this.state.isPlayersTurn(username);
     if (!p) return;
     p.currentRoll = this.state.rollDice(p);
     if (this.state.hasRolledBothDices(p) && p.currentRoll) {
@@ -659,43 +839,42 @@ class ResourcesPhase extends State {
           this.state.resourcesProduction(false);
           break;
       }
-      this.state.setCurrentTurnIndex();
-      this.state.setMasterLog(
-        `${Phase.RESOURCES}: ${this.state.getCurrentPlayer()?.playerId} is playing ...`,
-      );
+      this.state.setNextPlayer();
     }
   }
 
-  public build(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public build(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.BUILD, Phase.RESOURCES),
+      NotifColor.RED,
     );
   }
 
-  public trade(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public trade(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.TRADE, Phase.RESOURCES),
+      NotifColor.RED,
     );
   }
 
-  public skip(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public skip(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.SKIP, Phase.RESOURCES),
+      NotifColor.RED,
     );
   }
 
   public phaseCheck(): void {
-    if (this.state.getCurrentTurnIndex() !== this.state.getPlayers().size)
-      return;
+    if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
     this.state.setupNextPhase(Phase.TRADE_BUILD);
     this.state.transitionTo(new TradeAndBuildPhase());
   }
@@ -732,18 +911,20 @@ class TradeAndBuildPhase extends State {
     this.state.setPersonalLog(
       p,
       `You built and traded everything you could during this ${Phase.TRADE_BUILD}`,
+      NotifColor.PURPLE,
     );
     this.resetTradeBuildCount();
     return true;
   }
 
-  public build(playerId: string, payload: BuildPayload) {
-    const p = this.state.isPlayersTurn(playerId);
+  public build(username: string, payload: BuildPayload) {
+    const p = this.state.isPlayersTurn(username);
     if (!p) return;
     if (this.buildCount === this.state.getSettings().buildLimit) {
       this.state.setPersonalLog(
         p,
         this.state.forbiddenActionLog(Action.BUILD_LIMIT, Phase.PLACEMENT),
+        NotifColor.RED,
       );
       return;
     }
@@ -755,20 +936,23 @@ class TradeAndBuildPhase extends State {
       this.state.getBuildings(),
       this.state.getSettings(),
     );
-    this.state.setPersonalLog(p, `${response.message}`);
-    if (response.valid === false) return;
+    if (response.valid === false) {
+      this.state.setPersonalLog(p, `${response.message}`, NotifColor.RED);
+      return;
+    }
+    this.state.setPersonalLog(p, `${response.message}`, NotifColor.GREEN);
     this.buildCount++;
-    if (this.isTradeBuildLimit(p)) this.state.setCurrentTurnIndex();
-    this.state.setMasterLog(`${playerId} built something ...`);
+    if (this.isTradeBuildLimit(p)) this.state.setNextPlayer();
   }
 
-  public trade(playerId: string, payload: TradePayload) {
-    const p = this.state.isPlayersTurn(playerId);
+  public trade(username: string, payload: TradePayload) {
+    const p = this.state.isPlayersTurn(username);
     if (!p) return;
     if (this.tradeCount === this.state.getSettings().tradeLimit) {
       this.state.setPersonalLog(
         p,
         this.state.forbiddenActionLog(Action.TRADE_LIMIT, Phase.PLACEMENT),
+        NotifColor.RED,
       );
       return;
     }
@@ -778,40 +962,39 @@ class TradeAndBuildPhase extends State {
       this.state.getGraph(),
       this.state.getSettings(),
     );
-    this.state.setPersonalLog(p, `${response.message}`);
-    if (response.valid === false) return;
+    if (response.valid === false) {
+      this.state.setPersonalLog(p, `${response.message}`, NotifColor.RED);
+      return;
+    }
+    this.state.setPersonalLog(p, `${response.message}`, NotifColor.GREEN);
     this.tradeCount++;
-    if (this.isTradeBuildLimit(p)) this.state.setCurrentTurnIndex();
-    this.state.setMasterLog(
-      `${playerId} traded something with a ${payload.trader} ...`,
-    );
+    if (this.isTradeBuildLimit(p)) this.state.setNextPlayer();
   }
 
-  public dice(playerId: string) {
-    const p = this.state.getPlayerById(playerId);
+  public dice(username: string) {
+    const p = this.state.getPlayerByUsername(username);
     if (!p) return;
     this.state.setPersonalLog(
       p,
       this.state.forbiddenActionLog(Action.DICE, Phase.TRADE_BUILD),
+      NotifColor.RED,
     );
   }
 
-  public skip(playerId: string) {
-    const p = this.state.isPlayersTurn(playerId);
+  public skip(username: string) {
+    const p = this.state.isPlayersTurn(username);
     if (!p) return;
-    this.state.setCurrentTurnIndex();
-    this.state.setPersonalLog(p, `You ended your turn !`);
-    this.state.setMasterLog(`${playerId} ended his/her turn !`);
+    this.state.setNextPlayer();
+    this.state.setPersonalLog(p, `You ended your turn !`, NotifColor.GREEN);
     this.resetTradeBuildCount();
   }
 
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
-    if (this.state.getCurrentTurnIndex() !== this.state.getPlayers().size)
-      return;
+    if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
     this.state.setupNextPhase(Phase.RESOURCES);
     this.state.transitionTo(new ResourcesPhase());
   }
 }
 
-export { GameStateContext, StartPhase };
+export { GameStateContext, PendingPhase, StartPhase };
