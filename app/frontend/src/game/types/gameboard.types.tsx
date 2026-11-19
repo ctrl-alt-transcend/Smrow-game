@@ -32,7 +32,6 @@ export interface GameBoardSelection {
   selectedReserve: ReserveData | null;
 }
 
-// Hover effects
 export interface TileHover {
   type: "Tile";
   q: number;
