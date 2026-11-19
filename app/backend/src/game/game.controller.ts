@@ -10,7 +10,6 @@ import {
   GameList,
 } from 'shared';
 import { ZodValidationPipe } from 'nestjs-zod';
-//import type { BuildDto } from './dto/build.dto';
 
 @Controller('game')
 export class GameController {
@@ -23,6 +22,16 @@ export class GameController {
   @UseGuards(JwtAuthGuard)
   getGamesList(): GameList[] {
     return this.gameService.getGamesList();
+  }
+
+  @Get('/me')
+  @UseGuards(JwtAuthGuard)
+  getMyGame(@Req() req: { user: UserPublic }): { gameId: string | null } {
+    try {
+      return { gameId: this.gameService.getGameId(req.user.id) };
+    } catch {
+      return { gameId: null };
+    }
   }
 
   @Post('/create')
@@ -46,5 +55,23 @@ export class GameController {
     const playerProfile: PlayerProfile =
       await this.userService.findPlayerProfile(req.user.id);
     return this.gameService.joinGame(playerProfile, gameId);
+  }
+
+  @Post('/quit')
+  @UseGuards(JwtAuthGuard)
+  quitGame(@Req() req: { user: UserPublic }) {
+    console.log(
+      'Username: ',
+      req.user.name,
+      'id: ',
+      req.user.id,
+      'is quitting the game.',
+    );
+    console.log('User quitting game:', req.user.id);
+    const game = this.gameService.getGameInstanceByUserId(req.user.id);
+    this.gameService.removePlayerFromGame(
+      { id: req.user.id, username: req.user.name },
+      game.getGameId(),
+    );
   }
 }
