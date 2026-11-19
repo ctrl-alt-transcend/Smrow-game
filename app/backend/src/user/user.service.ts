@@ -226,6 +226,34 @@ export class UserService {
     });
   }
 
+  async getPendingList(id: string): Promise<Friend[]> {
+    const profileSelect = {
+      id: true,
+      username: true,
+    } as const;
+
+    const requests = await this.databaseService.friendRequest.findMany({
+      where: {
+        status: 'PENDING',
+        receiver_id: id,
+      },
+      select: {
+        sender: { select: profileSelect },
+        receiver: { select: profileSelect },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return requests.map(({ sender, receiver }) => {
+      const other = sender.id === id ? receiver : sender;
+
+      return FriendSchema.parse({
+        id: other.id,
+        username: other.username,
+      });
+    });
+  }
+
   async removeFriend(userId: string, friendId: string) {
     return this.databaseService.friendRequest.deleteMany({
       where: {

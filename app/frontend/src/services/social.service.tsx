@@ -7,6 +7,11 @@ export const getFriendList = async (): Promise<Friend[]> => {
   return z.array(FriendSchema).parse(res.data);
 };
 
+export const getPendingList = async (): Promise<Friend[]> => {
+  const res = await http.get("user/pendinglist");
+  return z.array(FriendSchema).parse(res.data);
+};
+
 export async function removeFriend(friendId: string): Promise<void> {
   const res = await http.delete(
     `user/friends/remove/${encodeURIComponent(friendId)}`,

@@ -113,6 +113,12 @@ export class UserController {
     return this.userService.getFriendList(req.user.id);
   }
 
+  @Get('pendinglist')
+  @UseGuards(JwtAuthGuard)
+  getPendingList(@Req() req: { user: UserProfile }) {
+    return this.userService.getPendingList(req.user.id);
+  }
+
   @Delete('friends/remove/:friendId')
   @UseGuards(JwtAuthGuard)
   async removeFriend(

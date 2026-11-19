@@ -88,6 +88,7 @@ export const UploadImageSchema = z
   message: "Image size should not exceed 5MB",
 });
 export type UploadImage = z.infer<typeof UploadImageSchema>;
+
 export const FriendSchema = z.object({
   id: IdSchema,
   username: UsernameSchema,
