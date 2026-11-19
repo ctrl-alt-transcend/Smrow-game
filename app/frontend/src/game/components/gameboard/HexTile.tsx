@@ -30,7 +30,7 @@ export const HexTile: React.FC<TileProps> = ({
   const fillColor = getFillColor(
     data.land,
     null,
-    isSelected,
+    isSelected = false,
     effectiveIsHovered,
   );
   const strokeColor = getTileStrokeColor(effectiveIsHovered);
@@ -51,7 +51,7 @@ export const HexTile: React.FC<TileProps> = ({
       onMouseLeave={onMouseLeave}
       onClick={(e) => {
         e.stopPropagation();
-        onClick(data);
+        onClick?.(data);
       }}
       style={{ cursor: "pointer" }}
     >

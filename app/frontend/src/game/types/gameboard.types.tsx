@@ -10,10 +10,10 @@ import {
 /** @description common definition for all interactive game features */
 export interface InteractiveProps<T> {
   data: T;
-  isSelected: boolean;
+  isSelected?: boolean;
   isHovered?: boolean;
   onHoverChange?: (isHovered: boolean) => void;
-  onClick: (data: T) => void;
+  onClick?: (data: T) => void;
   hasOwner?: boolean | null;
 }
 

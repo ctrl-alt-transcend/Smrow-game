@@ -23,22 +23,21 @@ export const useHover = (
   onMouseLeave: () => void;
 } => {
   const [localHovered, setLocalHovered] = useState(false);
-  const isHovered =
-    controlledHover !== undefined ? controlledHover : localHovered;
+  const isHovered = controlledHover ?? localHovered;
 
   const onMouseEnter = useCallback(() => {
-    if (controlledHover !== undefined) {
-      onControlledHoverChange?.(true);
-    } else {
+    if (controlledHover === undefined) {
       setLocalHovered(true);
+    } else {
+      onControlledHoverChange?.(true);
     }
   }, [controlledHover, onControlledHoverChange]);
 
   const onMouseLeave = useCallback(() => {
-    if (controlledHover !== undefined) {
-      onControlledHoverChange?.(false);
-    } else {
+    if (controlledHover === undefined) {
       setLocalHovered(false);
+    } else {
+      onControlledHoverChange?.(false);
     }
   }, [controlledHover, onControlledHoverChange]);
 

@@ -18,7 +18,7 @@ export const Road: React.FC<RoadProps> = ({
   const fillColor = getFillColor(
     null,
     data.faction,
-    isSelected,
+    isSelected = false,
     effectiveIsHovered,
   );
 
@@ -35,7 +35,7 @@ export const Road: React.FC<RoadProps> = ({
       onMouseLeave={onMouseLeave}
       onClick={(e) => {
         e.stopPropagation();
-        onClick(data);
+        onClick?.(data);
       }}
       style={{ cursor: "pointer" }}
     />
