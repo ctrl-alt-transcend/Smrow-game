@@ -88,3 +88,11 @@ export const UploadImageSchema = z
   message: "Image size should not exceed 5MB",
 });
 export type UploadImage = z.infer<typeof UploadImageSchema>;
+
+export const PublicProfile = z.object({
+  username: UsernameSchema,
+  name: NameSchema,
+  bio: BioSchema,
+  avatar: AvatarUrlSchema,
+  createdAt: DatetimeSchema,
+})
