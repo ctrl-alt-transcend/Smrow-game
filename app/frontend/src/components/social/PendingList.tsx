@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IconMinus, IconCheck } from "@tabler/icons-react";
+import { IconX, IconCheck } from "@tabler/icons-react";
 import { ActionIcon, Group, Table, Text, Loader, Paper } from "@mantine/core";
 import { useFetch } from "../../hooks/useFetch";
 import { getPendingList, removeFriend } from "../../services/social.service";
@@ -41,24 +41,22 @@ export function PendingList() {
 
   const rows = friendlist.data.map((item) => (
     <Table.Tr key={item.id}>
-      <Table.Td>
-        <Group gap="sm">
-          <Text fz="lg" fw={500}>
-            {item.username}
-          </Text>
-        </Group>
+      <Table.Td style={{ overflow: "hidden" }}>
+        <Text fz="lg" fw={500} truncate="end">
+          {item.username}
+        </Text>
       </Table.Td>
-      <Table.Td>
-        <Group gap={0} justify="flex-end">
+      <Table.Td w={90} p={0}>
+        <Group gap={4} wrap="nowrap" justify="center">
           <ActionIcon
             variant="subtle"
             color="red"
             aria-label="Remove friend"
             onClick={() => handleRemoveFriend(item.id)}
           >
-            <IconMinus size={16} stroke={1.5} />
+            <IconX size={16} stroke={1.5} />
           </ActionIcon>
-          <ActionIcon>
+          <ActionIcon variant="subtle" aria-label="Accept friend">
             <IconCheck size={16} stroke={1.5} />
           </ActionIcon>
         </Group>
@@ -73,11 +71,12 @@ export function PendingList() {
           {actionError}
         </Text>
       )}
-      <Table.ScrollContainer minWidth={800}>
-        <Table verticalSpacing="md">
-          <Table.Tbody>{rows}</Table.Tbody>
-        </Table>
-      </Table.ScrollContainer>
+      <Table
+        verticalSpacing="md"
+        style={{ tableLayout: "fixed", width: "100%" }}
+      >
+        <Table.Tbody>{rows}</Table.Tbody>
+      </Table>
     </Paper>
   );
 }
