@@ -110,7 +110,7 @@ class GameStateContext {
       board: board,
       players: new Map<string, Player>(),
       startingRolls: new Map<string, number>(),
-      currentPhase: Phase.START,
+      currentPhase: Phase.PENDING,
       turnIndex: 0,
       turnOrder: [],
       masterLog: `${Phase.START}: roll the dices`,
@@ -418,9 +418,13 @@ class GameStateContext {
    **********************************/
   /** To call when the game is ready to start */
   public launchGame() {
+    console.log('Launch game');
     this.assignFactions();
+    this.setCurrentPhase(Phase.START);
     this.transitionTo(new StartPhase());
     this.startWatch();
+
+    console.log('current phase :', this.getCurrentPhase());
   }
 
   /** @description Generates: "You can't ${Action} during ${Phase}" */
