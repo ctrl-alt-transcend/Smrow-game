@@ -19,7 +19,7 @@ import { SelectionMenu } from "./components/ui/SelectionMenu.tsx";
 import { DiceRoller } from "./components/ui/DiceRoller.tsx";
 import { OptionsModal } from "./components/ui/OptionsModal.tsx";
 import { useGameState } from "./hooks/useGameState.ts";
-import { type GameDataDto, Phase, TIME_DFLT } from "shared";
+import { type GameDataDto, Phase } from "shared";
 import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
 import { ResourcesPanel } from "./components/ui/ResourcesPanel.tsx";
 import { usePersonalNotification } from "./hooks/usePersonalNotification.ts";
@@ -29,6 +29,7 @@ import TurnProgressBar from "./components/ui/TurnProgressBar.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import PanContainer from "./components/ui/PanContainer.tsx";
 import QuitGameButton from "./components/ui/QuitGameButton.tsx";
+import { Notifications } from "@mantine/notifications";
 
 export default function Game() {
   const { game } = useGameState();
@@ -47,9 +48,8 @@ function GameShell({ game }: { game: GameDataDto }) {
 
   const waitingForPlayers = game.currentPhase === Phase.PENDING;
 
-  let isMyTurn = game.currentPlayer.playerId === game.whosTurn;
-  if (game.currentPlayer.DEVMOD || game.currentPhase === Phase.START)
-    isMyTurn = true;
+  let isMyTurn = game.currentPlayer.username === game.whosTurn;
+  if (game.currentPhase === Phase.START) isMyTurn = true;
   const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
 
   const navEnabled = isMyTurn && !waitingForPlayers;
@@ -92,8 +92,11 @@ function GameShell({ game }: { game: GameDataDto }) {
             <Stack gap={0} justify="center" h="100%">
               <GameMasterLog log={masterLog} />
               <TurnProgressBar
-                durationSeconds={game.settings.turnDurationSeconds ?? TIME_DFLT}
-                resetKey={game.whosTurn}
+                durationSeconds={
+                  game.currentPlayer.timeToPlay ??
+                  game.settings.turnDurationSeconds
+                }
+                resetKey={game.currentPlayer.timeToPlay}
               />
             </Stack>
           </Box>
@@ -188,6 +191,7 @@ function GameShell({ game }: { game: GameDataDto }) {
       </AppShell.Main>
 
       <OptionsModal game={game} opened={optionsOpened} onClose={closeOptions} />
+      <Notifications limit={2} />
     </AppShell>
   );
 }

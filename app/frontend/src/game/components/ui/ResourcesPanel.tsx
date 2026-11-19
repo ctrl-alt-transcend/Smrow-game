@@ -39,7 +39,7 @@ type ResourcesPanelProps = {
 
 export function ResourcesPanel({
   currentPlayer,
-  title = currentPlayer.playerId,
+  title = currentPlayer.username,
   withTotal = true,
 }: ResourcesPanelProps) {
   const total = RESOURCE_META.reduce(

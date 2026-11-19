@@ -3,11 +3,11 @@ import { AuthContext } from "./AuthContext";
 import { getCurrentUser } from "../services/user.service";
 import { registerUser, loginUser, logoutUser } from "../services/auth.service";
 import { authEvents } from "./AuthEvents";
-import type { LoginPost, RegisterPost, UserPublic } from "shared";
+import type { LoginPost, RegisterPost, UserProfile } from "shared";
 import { isAxiosError } from "axios";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<UserPublic | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
 
@@ -68,6 +68,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
+  const updateUser = useCallback((patch: Partial<UserProfile>) => {
+    setUser((prev) => (prev ? { ...prev, ...patch } : prev));
+  }, []);
+
   const clearAuthMessage = useCallback(() => setAuthMessage(null), []);
 
   useEffect(() => {
@@ -89,6 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout,
         authMessage,
         clearAuthMessage,
+        updateUser,
       }}
     >
       {children}

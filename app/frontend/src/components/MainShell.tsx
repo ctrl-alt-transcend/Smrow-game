@@ -1,5 +1,5 @@
 import CardImage from "./Card";
-import { LoginPanel } from "./authentification/LoginPanel";
+import { LoginPanel } from "./form/LoginPanel";
 import {
   Anchor,
   AppShell,
@@ -7,7 +7,9 @@ import {
   Group,
   Text,
   Title,
-} from "@mantine/core";
+}
+from "@mantine/core";
+
 import { notifications } from "@mantine/notifications";
 
 import { useEffect } from "react";

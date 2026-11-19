@@ -49,7 +49,7 @@ export function funnyRollLog(value: number): string {
 }
 
 export function printPlayer(p: Player) {
-  console.log(`🖨️ printPlayer: ${p.playerId}:`);
+  console.log(`🖨️ printPlayer: ${p.username}:`);
   console.log(`- wood: ${p.resources.wood}`);
   console.log(`- sheep: ${p.resources.sheep}`);
   console.log(`- brick: ${p.resources.brick}`);

@@ -202,7 +202,7 @@ export function PanContainer({
         wrap="nowrap"
         style={{
           position: "absolute",
-          top: 4,
+          bottom: 4,
           left: 0,
           right: 0,
           margin: "0 auto",
