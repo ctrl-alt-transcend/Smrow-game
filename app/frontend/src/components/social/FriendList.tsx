@@ -8,6 +8,7 @@ import {
   Text,
   Loader,
   Paper,
+  ScrollArea,
 } from "@mantine/core";
 import { useFetch } from "../../hooks/useFetch";
 import { getFriendList, removeFriend } from "../../services/social.service";
@@ -93,13 +94,14 @@ export function FriendList() {
           {actionSuccess}
         </Text>
       )} */}
-      <Table.ScrollContainer minWidth={800}></Table.ScrollContainer>
-      <Table
-        verticalSpacing="md"
-        style={{ tableLayout: "fixed", width: "100%" }}
-      >
-        <Table.Tbody>{rows}</Table.Tbody>
-      </Table>
+      <ScrollArea.Autosize mah={400} type="auto" offsetScrollbars="y">
+        <Table
+          verticalSpacing="md"
+          style={{ tableLayout: "fixed", width: "100%" }}
+        >
+          <Table.Tbody>{rows}</Table.Tbody>
+        </Table>
+      </ScrollArea.Autosize>
     </Paper>
   );
 }

@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { IconX, IconCheck } from "@tabler/icons-react";
-import { ActionIcon, Group, Table, Text, Loader, Paper } from "@mantine/core";
+import {
+  ScrollArea,
+  ActionIcon,
+  Group,
+  Table,
+  Text,
+  Loader,
+  Paper,
+} from "@mantine/core";
 import { useFetch } from "../../hooks/useFetch";
 import { getPendingList } from "../../services/social.service";
 import ErrorMessages from "../utils/ErrorMessages";
@@ -92,12 +100,14 @@ export function PendingList() {
           {actionError}
         </Text>
       )}
-      <Table
-        verticalSpacing="md"
-        style={{ tableLayout: "fixed", width: "100%" }}
-      >
-        <Table.Tbody>{rows}</Table.Tbody>
-      </Table>
+      <ScrollArea.Autosize mah={300} type="auto" offsetScrollbars="y">
+        <Table
+          verticalSpacing="md"
+          style={{ tableLayout: "fixed", width: "100%" }}
+        >
+          <Table.Tbody>{rows}</Table.Tbody>
+        </Table>
+      </ScrollArea.Autosize>
     </Paper>
   );
 }
