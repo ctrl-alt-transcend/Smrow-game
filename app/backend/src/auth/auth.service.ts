@@ -153,7 +153,7 @@ export class AuthService {
       // this executes the user and account creation safely, if one fails it rolls back all.
       // $transaction( async (tx) => {...} )
 
-      await this.databaseService.$transaction(async (tx) => {
+      return await this.databaseService.$transaction(async (tx) => {
         const user = tx.user.create({
           data: {
             email: googleUser.email,
