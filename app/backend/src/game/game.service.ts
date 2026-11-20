@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-
+import type { SocketUser } from './game.gateway';
 import { StatsService } from '../stats/stats.service';
 import { buildGameResult } from './game.result';
 import {
@@ -14,7 +14,11 @@ import {
   type PlayerProfile,
   type GameList,
 } from 'shared';
-import { GameStateContext, StartPhase } from './GameStateContext';
+import {
+  GameStateContext,
+  PendingPhase,
+  type GameNotifier,
+} from './GameStateContext';
 import { SocialGateway } from '../social/social.gateway';
 
 @Injectable()
@@ -22,6 +26,7 @@ export class GameService {
   private readonly logger = new Logger(GameService.name);
   private gameInstances: Map<string, GameStateContext> = new Map();
   private playersMap = new Map<string, string>(); //INFO: link playerId with a gameId
+  private notifier: GameNotifier = () => {};
   private userIds = new Map<string, string>(); //INFO: link in game playerId (username) with the user ID
   private recordedGames = new Set<string>();
 
@@ -56,6 +61,16 @@ export class GameService {
     }
   }
 
+  /**
+   * @brief Register the callback used by games to notify when a player turn expires
+   * @param notifier - Function called by a GameStateContext when its state changes.
+   * The game doesn't know who is notified or how, it only decide when.
+   * @details Called by GameGateway in afterInit
+   */
+  setNotifier(notifier: GameNotifier) {
+    this.notifier = notifier;
+  }
+
   getGamesList(): GameList[] {
     const arrayOfGames = Array.from(this.gameInstances.values());
     return arrayOfGames.map((game: GameStateContext) => ({
@@ -79,7 +94,12 @@ export class GameService {
 
     this.gameInstances.set(
       gameId,
-      new GameStateContext(gameId, settings, new StartPhase()),
+      new GameStateContext(
+        gameId,
+        settings,
+        new PendingPhase(),
+        (id, username) => this.notifier(id, username),
+      ),
     );
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
@@ -92,6 +112,20 @@ export class GameService {
       );
     }
     this.addPlayerToGame(gameId, playerProfile);
+  }
+
+  removeGameInstance(gameId: string) {
+    this.playersMap.forEach((id, userId) => {
+      if (id === gameId) this.playersMap.delete(userId);
+    });
+    this.gameInstances.delete(gameId);
+    this.broadcastGameList();
+  }
+
+  removePlayerFromGame(user: SocketUser, game: string) {
+    this.playersMap.delete(user.id);
+    this.gameInstances.get(game)?.getPlayers().delete(user.username);
+    this.broadcastGameList();
   }
 
   private getGameInstance(gameId: string): GameStateContext {
@@ -139,18 +173,23 @@ export class GameService {
     this.userIds.set(playerProfile.username, playerProfile.id);
     game
       .getPlayers()
-      .set(playerProfile.username, game.initPlayer(playerProfile.username));
-    this.socialGateway.handleGameList(this.getGamesList());
-
+      .set(
+        playerProfile.username,
+        game.initPlayer(playerProfile.id, playerProfile.username),
+      );
+    this.broadcastGameList();
     //⚠️REMOVE in PROD -------------------
     console.log(`---------------------------------------
 ⚠️ The following is currently set in 'app/backend/src/game/game.service.ts':
-- 'DEVMOD' (allow playing for others): enabled for '${playerProfile.username}'
-- added mocked player '${ZGEG_DEV}' that will send requests in game,
-disable his calls in 'app/backend/src/game/game.gateway.ts'
+- added mocked player '${ZGEG_DEV}', remove his 'diceRequest' in 'game.gateway.ts' for prod
 ---------------------------------------`);
-    game.setDEVMOD(playerProfile.username);
-    game.getPlayers().set(`${ZGEG_DEV}`, game.initPlayer(`${ZGEG_DEV}`));
+    game
+      .getPlayers()
+      .set(`${ZGEG_DEV}`, game.initPlayer('1010101010101010', `${ZGEG_DEV}`));
     // -----------------------------------
+  }
+
+  private broadcastGameList() {
+    this.socialGateway.handleGameList(this.getGamesList());
   }
 }

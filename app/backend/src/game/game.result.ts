@@ -13,10 +13,10 @@ export function buildGameResult(
   userIds: ReadonlyMap<string, string>,
   totalTurns: number,
 ): GameResult {
-  const isWinner = (playerId: string) => playerId === game.winner;
+  const isWinner = (username: string) => username === game.winner;
   const ordered = [...game.players.values()].sort(
     (a, b) =>
-      Number(isWinner(b.playerId)) - Number(isWinner(a.playerId)) ||
+      Number(isWinner(b.username)) - Number(isWinner(a.username)) ||
       b.victoryPoints - a.victoryPoints,
   );
 
@@ -28,8 +28,8 @@ export function buildGameResult(
     const tied = i > 1 && prev.victoryPoints === p.victoryPoints;
     if (!tied) rank = i + 1;
 
-    const userId = userIds.get(p.playerId);
-    const turnOrder = game.turnOrder.indexOf(p.playerId);
+    const userId = userIds.get(p.username);
+    const turnOrder = game.turnOrder.indexOf(p.username);
     if (!userId || turnOrder === -1) return;
 
     const settlements = [...p.settlementsBuilt.values()];
@@ -37,7 +37,7 @@ export function buildGameResult(
       userId,
       turnOrder,
       winPoints: p.victoryPoints,
-      isWinner: isWinner(p.playerId),
+      isWinner: isWinner(p.username),
       playerRank: rank,
       settlementBuilt: settlements.length,
       citiesBuilt: settlements.filter((s) => s.isCity).length,

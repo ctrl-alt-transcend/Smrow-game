@@ -15,6 +15,8 @@ import {
   GameDataDto,
   ZGEG_DEV,
   type JwtPayload,
+  Phase,
+  NotifColor,
 } from 'shared';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
@@ -25,7 +27,7 @@ import { GameStateContext } from './GameStateContext';
 import { parseCookie } from 'cookie';
 import { ZodValidationPipe } from 'nestjs-zod';
 
-interface SocketUser {
+export interface SocketUser {
   id: string;
   username: string;
 }
@@ -71,8 +73,44 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       return;
     }
     this.server.to(game.getGameId()).emit('gameState', gameData);
+    if (game.isGameTerminated()) {
+      this.endGame(game);
+    }
     // every action ends here, so a finished game is recorded right away
     void this.gameService.recordResultIfOver(game);
+  }
+
+  @SubscribeMessage('startGame')
+  startGame(@ConnectedSocket() client: SocketClient) {
+    console.log('startGame event received from client:', client.id);
+    const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (game.getCurrentPhase() !== Phase.PENDING) {
+      return;
+    }
+    if (game.getPlayers().size < 2) {
+      const player = game.getPlayerByUsername(client.data.user.username);
+      if (player) {
+        game.setPersonalLog(
+          player,
+          'Not enough players to start the game.',
+          NotifColor.PURPLE,
+        );
+      }
+      this.emitGameDataDto(game, client.data.user.username);
+    }
+    console.log(
+      `Starting game ${game.getGameId()} with ${game.getPlayers().size} players.`,
+    );
+    game.launchGame();
+    this.emitGameDataDto(game, client.data.user.username);
+  }
+
+  @SubscribeMessage('quitGame')
+  handleQuitGame(@ConnectedSocket() client: SocketClient) {
+    const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
+    client.disconnect(true);
+    console.log('player', client.data.user.username, 'disconnected');
   }
 
   /**
@@ -98,12 +136,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.skipRequest(client.data.user.username);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.skipRequest(`${ZGEG_DEV}`);
-    game.phaseCheckRequest();
-    // -------------
-
     this.emitGameDataDto(game, client.data.user.username);
   }
 
@@ -116,12 +148,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.buildRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.buildRequest(`${ZGEG_DEV}`, payload);
-    game.phaseCheckRequest();
-    // -------------
-
     this.emitGameDataDto(game, client.data.user.username);
   }
 
@@ -134,12 +160,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.tradeRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.tradeRequest(`${ZGEG_DEV}`, payload);
-    game.phaseCheckRequest();
-    // -------------
-
     this.emitGameDataDto(game, client.data.user.username);
   }
 
@@ -157,7 +177,18 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     }
   }
 
+  private endGame(game: GameStateContext) {
+    const gameId = game.getGameId();
+    this.server.in(gameId).socketsLeave(gameId);
+    this.gameService.removeGameInstance(gameId);
+  }
+
   async afterInit(server: SocketServer) {
+    this.gameService.setNotifier((id, username) => {
+      const game = this.gameService.getGameInstanceByUserId(id);
+      this.emitGameDataDto(game, username);
+    });
+
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
       const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only

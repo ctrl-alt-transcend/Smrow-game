@@ -16,6 +16,8 @@ export const COAST = 'Coast';
 export const TILE = 'Tile';
 export const RESERVE = 'Reserve';
 export const NONE = 'none';
+export const RESERVE_NAME = 'Shnek the Trader';
+export const ROBBER_NAME = 'Robert the Robber';
 
 export const GameboardLayout = {
   CLASSIC_LAYOUT: 'Catan Island',
@@ -47,8 +49,8 @@ export const MAX_MULTIPLIER = 5;
 export const MIN_MULTIPLIER = 1;
 export const MULTIPLIER_DFLT = 2;
 export const TIME_MAX = 180;
-export const TIME_MIN = 10;
-export const TIME_DFLT = 45;
+export const TIME_MIN = 5;
+export const TIME_DFLT = 60;
 
 export const SettingsDataSchema = z.object({
   // Layout setting
@@ -107,7 +109,6 @@ export const BuildingType = {
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
 export const BuildingTypeSchema = z.enum(BuildingType);
 
-
 export const TraderType = {
   SPECIALIZED_PORT: 'Specialized Port',
   GENERIC_PORT: 'Generic Port',
@@ -133,7 +134,7 @@ export const ResourceType = {
   BRICK: 'Brick',
   ORE: 'Ore',
   WHEAT: 'Wheat',
-  DUST: "Dust",
+  NOTHING: 'nothing',
 } as const;
 export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType];
 export const ResourceTypeSchema = z.enum(ResourceType);
@@ -144,7 +145,7 @@ export const LAND_RESOURCE: Record<LandType, string> = {
   [LandType.HILL]: ResourceType.BRICK,
   [LandType.MOUNTAIN]: ResourceType.ORE,
   [LandType.FIELD]: ResourceType.WHEAT,
-  [LandType.DESERT]: ResourceType.DUST
+  [LandType.DESERT]: ResourceType.NOTHING
 };
 
 export const BUILD_COSTS: Record<BuildingType, Resources> = {
@@ -174,7 +175,15 @@ export const BUILD_COSTS: Record<BuildingType, Resources> = {
 /***********************************
  * Actions and Logs
  **********************************/
-export const YOU_ROLLED = 'You rolled a';
+export const NotifColor = {
+  GREEN: 'green',
+  RED: 'red',
+  PURPLE: 'grape'
+} as const;
+export type NotifColor = (typeof NotifColor)[keyof typeof NotifColor];
+
+export const PERSONNAL_LOG_LIMIT = 3;
+export const ROLLED_A = 'rolled a';
 export const YOU_DIDNT_ROLLED = "You couldn't roll the dice";
 
 export const Action = {
@@ -192,17 +201,55 @@ export const Phase = {
   START: 'Start Phase',
   PLACEMENT: 'Placement Phase',
   RESOURCES: 'Resources Phase',
-  TRADE_BUILD: 'Trade and Build Phase'
+  TRADE_BUILD: 'Trade & Build Phase'
 } as const;
 export type Phase = (typeof Phase)[keyof typeof Phase];
 
 export const GUIDE_LOG: Record<Phase, string> = {
   [Phase.PENDING]: "Waiting for other players ...",
   [Phase.START]: `${Phase.START}: ${Action.DICE}`,
-  [Phase.PLACEMENT]: `${Phase.PLACEMENT}: build a settllement and a road`,
-  [Phase.RESOURCES]: `${Phase.RESOURCES}: ${Action.DICE} to collect you resources`,
-  [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade! End your turn when you're done`,
+  [Phase.PLACEMENT]: `${Phase.PLACEMENT}: build a settllement and a road.`,
+  [Phase.RESOURCES]: `${Phase.RESOURCES}: ${Action.DICE} to collect your resources.`,
+  [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade! End your turn when you're done.`,
 } as const;
+
+export const START_PHASE_INFO =
+"Every player rolls the dice. The starting order is decided by the " +
+"dice result, ranked from the highest to the lowest roll."
+
+export const PLACEMENT_PHASE_INFO =
+"Each player places one settlement and one adjacent road to set up " +
+"their first positions. They then collect their starting resources " +
+"from the three tiles touching their settlement."
+
+export const RESOURCE_PHASE_INFO =
+"On their turn, a player rolls the dice. If the total matches a " +
+"tile touching one of their settlements, they collect the " +
+"corresponding resources. Rolling a 7 triggers the robber rule " +
+"instead of any production."
+
+export const TRADE_BUILD_INFO =
+"During this phase the player gets a limited amount of trade and build " +
+"actions to trade with the reserve (unlimited stock, no bankruptcy), " +
+"generic or specialized ports, and to build roads, place new settlements, " +
+"or upgrade existing settlements into cities to earn victory points.\n"
+
+export const END_GAME_PHASE = "End of the game";
+export const END_GAME_INFO =
+`After the « ${Phase.PLACEMENT} », the game alternates between the ` +
+`« ${Phase.RESOURCES} » and « ${Phase.TRADE_BUILD} » until a player ` +
+"reaches the amount of victory points to win."
+
+export const SPECIAL_RULES = "Special Rules";
+export const SPECIAL_RULES_INFO =
+"• Robber Rule: when a 7 is rolled, every player loses half of their " +
+"total resources if that total is greater than 7. The robber then " +
+"moves randomly to another tile, blocking the resources the tiles " +
+"would normally produce\n" +
+"• Crossroad Rule: build the 3 roads surrounding one of your " +
+"settlements to earn a victory point.\n"
+
+export const CURRENT_GAME_SETTINGS = "Current Game Settings"
 
 /***********************************
  * Gameboard Elements
@@ -381,9 +428,9 @@ export const gorpIsland: TileData[] = [
  * Graph
  **********************************/
 export type CoreElement =
-{ type: 'Road'; data: RoadData} |
-{ type: 'Settlement'; data: SettlementData} |
-{ type: 'Port'; data: PortData} |
+{ type: typeof BuildingType.ROAD; data: RoadData} |
+{ type: typeof BuildingType.SETTLEMENT; data: SettlementData} |
+{ type: typeof PORT; data: PortData} |
 { type: 'none'; data: null};
 
 /** @description keeps relations between each gameboard's elements*/
@@ -426,7 +473,7 @@ export type GameData = GameDataBase & {
   players: Map<string, Player>;
   startingRolls: Map<string, number>;
   turnOrder: string[];
-  currentTurnIndex: number;
+  turnIndex: number;
 }
 
 /***********************************
@@ -456,60 +503,31 @@ export type DiceRoll = {
 export type GameLog = {
   id: number,
   message: string,
-  actionValid?: boolean
+  color: NotifColor
 }
 
 export type PlayerBase = {
-  playerId: string;
+  id: string;
   username: string;
   level: number;
-  stats: StatsData;
   victoryPoints: number;
+  timeToPlay: number;
   resources: Resources;
   firstDice: number,
   secondDice: number,
   currentRoll: DiceRoll,
   faction: Faction;
   avatarURL: string | null;
-  personalLog: GameLog;
+  personalLog: GameLog[];
   guideLog: string;
-  DEVMOD: boolean;
 }
 
 export type Player = PlayerBase & {
   settlementsBuilt: Map<string, SettlementData>
+  firstSettlementPlaced: boolean;
 }
 
 export type PlayerDto = PlayerBase
-
-export type StatsData = {
-  // Build
-  roadsBuilt: number;
-  //settlementsBuilt: number;
-  //citiesBuilt: number;
-
-  // Resources
-  //resourcesGained: number;
-  //resourcesSpent: number;
-  //tradesMade: number;
-  //tradeRequestsRefused: number;
-
-  // Dices
-  //diceRolls: number;
-  //sevenRolledCount: number;
-
-  // Gameboard events
-  //robberSteals: number;
-  //crossroadsAchieved: number;
-
-  // Progression
-  //victoryPoints: number;
-  //gamesPlayed: number;
-  //gamesWon: number;
-  //turnsPlayed: number;
-
-  //...
-};
 
 /***********************************
  * Game Payloads
