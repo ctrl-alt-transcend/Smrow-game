@@ -13,6 +13,7 @@ import {
   PERSONNAL_LOG_LIMIT,
   ROBBER_NAME,
   ROLLED_A,
+  ZGEG_DEV,
 } from 'shared';
 import {
   GameBoard,
@@ -367,18 +368,8 @@ class GameStateContext {
   /** Set next player turn, ignore the players that quit the game */
   public setNextPlayer(index?: number) {
     this.stopWatch();
-    this.setTurnCount();
-    for (let i = 0; i <= this.getPlayers().size; i++) {
-      if (index === undefined) {
-        this.setTurnIndex(index);
-      } else if (i < this.getPlayers().size) {
-        this.setTurnIndex(i);
-      }
-      const p = this.getPlayerByUsername(this.data.whosTurn);
-      if (p) {
-        break;
-      }
-    }
+    this.setTurnCount(index);
+    this.setTurnIndex(index);
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
     );
@@ -411,6 +402,24 @@ class GameStateContext {
     });
   }
 
+  public removePlayer(username: string) {
+    this.data.players.delete(username);
+    const idx = this.data.turnOrder.indexOf(username);
+    if (idx === -1) return;
+    this.data.turnOrder.splice(idx, 1);
+
+    if (this.data.whosTurn === username) {
+      // le joueur actif part : passation immédiate
+      this.data.whosTurn = '';
+      if (this.data.turnOrder.length === 0) return; // fin de partie, isVictory s'en charge
+      // idx % len : si le partant était dernier (idx === len), ça repart à 0 — ton cas est couvert ici
+      this.setNextPlayer(idx % this.data.turnOrder.length);
+    } else if (idx < this.data.turnIndex) {
+      // un joueur avant l'actif est parti : l'index de l'actif recule d'un cran
+      this.data.turnIndex--;
+    }
+  }
+
   /***********************************
    * Methods
    **********************************/
@@ -429,21 +438,13 @@ class GameStateContext {
   }
   private everybodyRollDices() {
     this.data.players.forEach((p) => {
-      if (p.firstDice === 0) this.rollDice(p);
-      if (p.secondDice === 0) this.rollDice(p);
+      if (p.firstDice === 0) this.diceRequest(p.username);
+      if (p.secondDice === 0) this.diceRequest(p.username);
       console.log(
         `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
           `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
-          `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
+          `${p.username} during « ${this.getCurrentPhase()} »`,
       );
-      if (this.hasRolledBothDices(p) && p.currentRoll !== null) {
-        this.setPersonalLog(
-          p,
-          `You ${funnyRollLog(p.firstDice + p.secondDice)}`,
-          NotifColor.GREEN,
-        );
-        this.getStartingRolls().set(p.username, p.firstDice + p.secondDice);
-      }
     });
   }
   public rollDice(p: Player): DiceRoll {
@@ -608,37 +609,36 @@ class GameStateContext {
    * Turn Watcher
    **********************************/
   private onExpire(): void {
-    //if (this.getCurrentPhase() === Phase.START) {
-    //  this.everybodyRollDices();
-    //  return;
-    //} else {
-    const p = this.getPlayerByUsername(this.data.whosTurn);
-    if (!p) return;
-    console.log(
-      `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
-        `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
-        `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
-    );
+    if (this.getCurrentPhase() === Phase.START) {
+      this.everybodyRollDices();
+    } else {
+      const p = this.getPlayerByUsername(this.data.whosTurn);
+      if (!p) return;
+      console.log(
+        `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
+          `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
+          `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
+      );
+      switch (this.getCurrentPhase()) {
+        case Phase.PLACEMENT:
+          this.afkDuringPlacement(p);
+          break;
+        case Phase.START:
+        case Phase.RESOURCES:
+          if (p.firstDice === 0) this.rollDice(p);
+          if (p.secondDice === 0) this.rollDice(p);
+          break;
+        default:
+          break;
+      }
+    }
     if (this.turnTimeoutId === null) return;
     this.turnTimeoutId = null;
-    switch (this.getCurrentPhase()) {
-      case Phase.PLACEMENT:
-        this.afkDuringPlacement(p);
-        break;
-      case Phase.START:
-      case Phase.RESOURCES:
-        if (p.firstDice === 0) this.rollDice(p);
-        if (p.secondDice === 0) this.rollDice(p);
-        break;
-      default:
-        break;
-    }
-    //}
     this.setNextPlayer();
     this.phaseCheckRequest();
-    //this.data.players.forEach((player) => {
-    //  if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
-    //});
+    this.data.players.forEach((player) => {
+      if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
+    });
   }
 
   private elapsedMs(): number {

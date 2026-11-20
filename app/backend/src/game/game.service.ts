@@ -135,7 +135,7 @@ export class GameService {
 
   removePlayerFromGame(user: SocketUser, game: string) {
     this.playersMap.delete(user.id);
-    this.gameInstances.get(game)?.getPlayers().delete(user.username);
+    this.gameInstances.get(game)?.removePlayer(user.username);
     this.broadcastGameList();
   }
 
