@@ -70,15 +70,20 @@ export class AuthController {
   ) {
     const access_token = await this.AuthService.createJWTToken(req.user);
 
+    const isProd = process.env.NODE_ENV === 'production';
+
+    console.log(`PROD?: ${process.env.NODE_ENV}`);
     res.cookie('access_token', access_token, {
       httpOnly: true,
-      secure: false, // for dev
+      secure: isProd, // for dev
       sameSite: 'lax',
       path: '/',
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res.redirect('http://localhost:5173');
+    const redir = isProd ? '/' : 'http://localhost:5173';
+
+    return res.redirect(redir);
   }
 
   /**
@@ -93,9 +98,10 @@ export class AuthController {
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
     console.log('Logout request received');
+    const isProd = process.env.NODE_ENV === 'production';
     res.clearCookie('access_token', {
       httpOnly: true,
-      secure: false, // for dev,
+      secure: isProd, // for dev,
       sameSite: 'lax',
       path: '/',
     });

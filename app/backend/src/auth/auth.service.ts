@@ -149,7 +149,7 @@ export class AuthService {
         return existingUser;
       }
 
-      // when no registers exist, create the account and user with an Interactive Transaction
+      // when no registers exists, create the account and user with an Interactive Transaction
       // this executes the user and account creation safely, if one fails it rolls back all.
       // $transaction( async (tx) => {...} )
 
@@ -159,6 +159,9 @@ export class AuthService {
             email: googleUser.email,
             username: `google_${googleUser.googleId}`,
             name: googleUser.name,
+            profile: {
+              create: {},
+            },
           },
         });
 

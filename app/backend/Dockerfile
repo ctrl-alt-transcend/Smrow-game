@@ -5,20 +5,15 @@
 FROM node:26-alpine AS dev
 
 WORKDIR /app
-
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/
 COPY frontend/package.json ./frontend/
 COPY shared/package.json ./shared/
-
 RUN npm ci
-
 COPY backend/ ./backend/
 COPY shared/ ./shared/
-
 # Compile shared
 RUN npm run build -w shared
-
 WORKDIR /app/backend
 RUN npx prisma generate
 
@@ -45,23 +40,24 @@ FROM node:26-alpine AS pruner
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/
-COPY frontend/package.json ./frontend/
 COPY shared/package.json ./shared/
 COPY backend/prisma ./backend/prisma
-RUN npm ci --omit=dev \
-    && npm cache clean --force && npx prisma generate
+RUN npm ci --omit=dev --ignore-scripts \
+    && npm cache clean --force && npx prisma generate --schema=./backend/prisma/schema.prisma
 
 #INFO: the image gonne be used to run the application
 #
 FROM node:22-alpine AS runner
-WORKDIR /app/backend
+WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nestjs && adduser -S nestjs -u 1001
 COPY --from=pruner /app/node_modules ./node_modules
-COPY --from=pruner /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/backend/dist ./dist
+COPY --from=builder /app/shared/package.json ./shared/package.json
+COPY --from=builder /app/shared/dist ./shared/dist
+COPY --from=builder /app/backend ./backend
+WORKDIR /app/backend
 USER nestjs
-CMD ["node", "dist/main.js"]
 EXPOSE 3000
 EXPOSE 3001
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
 
