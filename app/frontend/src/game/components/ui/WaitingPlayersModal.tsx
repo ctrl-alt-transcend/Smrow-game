@@ -1,9 +1,10 @@
-import { Modal, Title } from "@mantine/core";
+import { Modal, Title, Text } from "@mantine/core";
 import { PlayerPanel } from "./PlayerPanel.tsx";
 import type { Player } from "shared";
 import StartGameButton from "./StartGameButton.tsx";
 
 type WaitingPlayersProps = {
+  gameId: string;
   waitingForPlayers: boolean;
   players: Player[];
 };
@@ -24,6 +25,7 @@ export function WaitingPlayersModal(waitingPlayersProps: WaitingPlayersProps) {
       <Title order={3} size="h1">
         Waiting players !
       </Title>
+      <Text>The party code is: {waitingPlayersProps.gameId}</Text>
       <PlayerPanel players={waitingPlayersProps.players} />
       <StartGameButton />
     </Modal>
