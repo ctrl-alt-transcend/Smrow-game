@@ -1,0 +1,3 @@
+Makefile merge=ours
+app/docker-compose.prod.yml merge=ours
+app/nginx.conf merge=ours
