@@ -3,9 +3,10 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-
+import type { SocketUser } from './game.gateway';
 import { StatsService } from '../stats/stats.service';
 import { buildGameResult } from './game.result';
 import {
@@ -16,7 +17,7 @@ import {
 } from 'shared';
 import {
   GameStateContext,
-  StartPhase,
+  PendingPhase,
   type PlayerNotifier,
 } from './GameStateContext';
 import { SocialGateway } from '../social/social.gateway';
@@ -94,26 +95,48 @@ export class GameService {
 
     this.gameInstances.set(
       gameId,
-      new GameStateContext(gameId, settings, new StartPhase(), (id, username) =>
-        this.notifier(id, username),
+      new GameStateContext(
+        gameId,
+        settings,
+        new PendingPhase(),
+        (id, username) => this.notifier(id, username),
       ),
-      // TODO: replace the line above with the one below
-      //new GameStateContext(gameId, settings, new PendingPhase()),
-      // ... and then call 'launchGame()' in the targeted 'GameStateContext'
-      // instance to switch to 'StartPhase' and allow players to play.
-      // Call it when host player decides to launch the game (or other condition).
     );
     this.addPlayerToGame(gameId, playerProfile);
     console.log(`Game created with id ${gameId}`);
   }
 
   joinGame(playerProfile: PlayerProfile, gameId: string) {
+    const game = this.getGameInstance(gameId);
+
     if (this.playersMap.has(playerProfile.id)) {
       throw new ConflictException(
         `Player with id ${playerProfile.username} is already in a game`,
       );
     }
+    if (game.getPlayers().size >= 4) {
+      throw new ForbiddenException(`Game with id ${gameId} is full`);
+    }
+    if (game.getCurrentPhase() !== 'Pending Player') {
+      throw new ForbiddenException(
+        `Game with id ${gameId} has already started`,
+      );
+    }
     this.addPlayerToGame(gameId, playerProfile);
+  }
+
+  removeGameInstance(gameId: string) {
+    this.playersMap.forEach((id, userId) => {
+      if (id === gameId) this.playersMap.delete(userId);
+    });
+    this.gameInstances.delete(gameId);
+    this.broadcastGameList();
+  }
+
+  removePlayerFromGame(user: SocketUser, game: string) {
+    this.playersMap.delete(user.id);
+    this.gameInstances.get(game)?.getPlayers().delete(user.username);
+    this.broadcastGameList();
   }
 
   private getGameInstance(gameId: string): GameStateContext {
@@ -171,8 +194,7 @@ export class GameService {
         playerProfile.username,
         game.initPlayer(playerProfile.id, playerProfile.username),
       );
-    this.socialGateway.handleGameList(this.getGamesList());
-
+    this.broadcastGameList();
     //⚠️REMOVE in PROD -------------------
     console.log(`---------------------------------------
 ⚠️ The following is currently set in 'app/backend/src/game/game.service.ts':
@@ -182,5 +204,9 @@ export class GameService {
       .getPlayers()
       .set(`${ZGEG_DEV}`, game.initPlayer('1010101010101010', `${ZGEG_DEV}`));
     // -----------------------------------
+  }
+
+  private broadcastGameList() {
+    this.socialGateway.handleGameList(this.getGamesList());
   }
 }

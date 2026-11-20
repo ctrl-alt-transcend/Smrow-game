@@ -34,6 +34,12 @@ function JoinLobbyModal({
             gameForm.setFieldValue("gameId", event.currentTarget.value)
           }
         />
+        <Group justify="flex-end" mt="md">
+          <Button type="button" variant="default" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit">Join</Button>
+        </Group>
       </form>
     </Modal>
   );

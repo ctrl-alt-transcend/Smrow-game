@@ -13,7 +13,6 @@ import {
   PERSONNAL_LOG_LIMIT,
   ROBBER_NAME,
   ROLLED_A,
-  ZGEG_DEV,
 } from 'shared';
 import {
   GameBoard,
@@ -33,7 +32,6 @@ import { updateValue, funnyRollLog } from './game.utils';
 import { buildCheck, BuildingsInGame } from './calculation/handleBuilds';
 import { createGameBoard } from './calculation/createGameBoard';
 import { tradeCheck } from './calculation/handleTrade';
-import { NotFoundException } from '@nestjs/common';
 import {
   addStartingResources,
   produceResources,
@@ -110,7 +108,7 @@ class GameStateContext {
       board: board,
       players: new Map<string, Player>(),
       startingRolls: new Map<string, number>(),
-      currentPhase: Phase.START,
+      currentPhase: Phase.PENDING,
       turnIndex: 0,
       turnOrder: [],
       masterLog: `${Phase.START}: roll the dices`,
@@ -419,7 +417,8 @@ class GameStateContext {
   /** To call when the game is ready to start */
   public launchGame() {
     this.assignFactions();
-    this.data.whosTurn = this.data.players[0];
+    this.setCurrentPhase(Phase.START);
+    //this.data.whosTurn = this.data.players[0];
     this.transitionTo(new StartPhase());
     this.startWatch();
   }
@@ -428,7 +427,25 @@ class GameStateContext {
   public forbiddenActionLog(action: Action, phase: Phase): string {
     return `You can't ${action} during ${phase}`;
   }
-
+  private everybodyRollDices() {
+    this.data.players.forEach((p) => {
+      if (p.firstDice === 0) this.rollDice(p);
+      if (p.secondDice === 0) this.rollDice(p);
+      console.log(
+        `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
+          `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
+          `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
+      );
+      if (this.hasRolledBothDices(p) && p.currentRoll !== null) {
+        this.setPersonalLog(
+          p,
+          `You ${funnyRollLog(p.firstDice + p.secondDice)}`,
+          NotifColor.GREEN,
+        );
+        this.getStartingRolls().set(p.username, p.firstDice + p.secondDice);
+      }
+    });
+  }
   public rollDice(p: Player): DiceRoll {
     const roll: DiceRoll = { val: null, id: 0 };
     roll.val = Math.floor(Math.random() * 6) + 1;
@@ -460,7 +477,6 @@ class GameStateContext {
     if (nextPhase === Phase.RESOURCES) this.roundCount++;
     this.setNextPlayer(0);
     this.setTurnCount(0);
-    //console.log(`setupNextPhase: currentPhase: ${this.getCurrentPhase()} | nextPhase: ${nextPhase} | starting player: ${this.data.whosTurn}`);
     this.setCurrentPhase(nextPhase);
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
@@ -592,6 +608,10 @@ class GameStateContext {
    * Turn Watcher
    **********************************/
   private onExpire(): void {
+    //if (this.getCurrentPhase() === Phase.START) {
+    //  this.everybodyRollDices();
+    //  return;
+    //} else {
     const p = this.getPlayerByUsername(this.data.whosTurn);
     if (!p) return;
     console.log(
@@ -613,11 +633,12 @@ class GameStateContext {
       default:
         break;
     }
+    //}
     this.setNextPlayer();
     this.phaseCheckRequest();
-    this.data.players.forEach((player) => {
-      if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
-    });
+    //this.data.players.forEach((player) => {
+    //  if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
+    //});
   }
 
   private elapsedMs(): number {
