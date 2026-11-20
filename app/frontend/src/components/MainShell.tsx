@@ -7,8 +7,8 @@ import {
   Group,
   Text,
   Title,
-}
-from "@mantine/core";
+  Stack,
+} from "@mantine/core";
 
 import { notifications } from "@mantine/notifications";
 
@@ -38,10 +38,10 @@ export default function MainShell() {
 
   return (
     <AppShell
-      mih="100vh"
+      h="100vh"
       mode="static"
       header={{ height: 200 }}
-      footer={{ height: 0 }}
+      footer={{ height: 60 }}
       aside={{ width: 300, breakpoint: "sm" }}
       padding="xs"
     >
@@ -85,17 +85,19 @@ export default function MainShell() {
       </AppShell.Aside>
 
       <AppShell.Footer>
-        <Text size="md" c="dimmed">
-          Legal
-        </Text>
-        <Group justify="flex">
-          <Anchor component={Link} to="/privacy">
-            Privacy Policy
-          </Anchor>
-          <Anchor component={Link} to="/terms">
-            Term of Use
-          </Anchor>
-        </Group>
+        <Stack h="100%" justify="center" align="flex-start" gap={2} px="md">
+          <Text size="md" c="dimmed">
+            Legal
+          </Text>
+          <Group>
+            <Anchor component={Link} to="/privacy">
+              Privacy Policy
+            </Anchor>
+            <Anchor component={Link} to="/terms">
+              Term of Service
+            </Anchor>
+          </Group>
+        </Stack>
       </AppShell.Footer>
     </AppShell>
   );
