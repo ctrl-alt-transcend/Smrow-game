@@ -10,7 +10,12 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { DatabaseService } from '../database/database.service';
-import { PlayerProfile, FriendSchema } from 'shared';
+import {
+  PlayerProfile,
+  FriendSchema,
+  UserPublic,
+  UserPublicSchema,
+} from 'shared';
 import type {
   UserProfile,
   RegisterPost,
@@ -359,6 +364,26 @@ export class UserService {
     return this.databaseService.friendRequest.update({
       where: { id: req.id },
       data: { status: 'ACCEPTED' },
+    });
+  }
+
+  async getPublicProfile(username: string): Promise<UserPublic> {
+    const profile = await this.databaseService.profile.findFirst({
+      where: { user: { username: username } },
+      select: {
+        avatarURL: true,
+        bio: true,
+        createdAt: true,
+        user: { select: { username: true } },
+      },
+    });
+    if (!profile) throw new NotFoundException('User not found');
+
+    return UserPublicSchema.parse({
+      username: profile.user.username,
+      avatarURL: profile.avatarURL,
+      bio: profile.bio,
+      createdAt: profile.createdAt.toISOString(),
     });
   }
 }

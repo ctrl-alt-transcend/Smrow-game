@@ -70,6 +70,7 @@ export async function uploadAvatar(
 }
 
 export async function fetchPublicProfile(username: string) {
+  console.log(username);
   const { data } = await http.get(`/user/${encodeURIComponent(username)}`);
   return UserPublicSchema.parse(data);
 }
