@@ -8,13 +8,18 @@ import {
   Get,
   Body,
   Patch,
+  Post,
   Param,
   Delete,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { type UpdateProfile } from 'shared';
 import 'multer';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import type { UserProfile } from 'shared';
 @Controller('user')
 export class UserController {
   constructor(readonly userService: UserService) {}
@@ -100,5 +105,53 @@ export class UserController {
   @Delete('id/:id')
   async remove(@Param('id') id: string) {
     return this.userService.remove(id);
+  }
+
+  @Get('friendlist')
+  @UseGuards(JwtAuthGuard)
+  getFriendList(@Req() req: { user: UserProfile }) {
+    return this.userService.getFriendList(req.user.id);
+  }
+
+  @Get('pendinglist')
+  @UseGuards(JwtAuthGuard)
+  getPendingList(@Req() req: { user: UserProfile }) {
+    return this.userService.getPendingList(req.user.id);
+  }
+
+  @Delete('friends/remove/:friendId')
+  @UseGuards(JwtAuthGuard)
+  async removeFriend(
+    @Req() req: { user: { id: string } },
+    @Param('friendId') friendId: string,
+  ) {
+    return this.userService.removeFriend(req.user.id, friendId);
+  }
+
+  @Post('friends/add/:username')
+  @UseGuards(JwtAuthGuard)
+  async addFriend(
+    @Req() req: { user: { id: string } },
+    @Param('username') friendUsername: string,
+  ) {
+    return this.userService.addFriend(req.user.id, friendUsername);
+  }
+
+  @Patch('friends/deny/:friendId')
+  @UseGuards(JwtAuthGuard)
+  async denyRequest(
+    @Req() req: { user: { id: string } },
+    @Param('friendId') friendId: string,
+  ) {
+    return this.userService.denyFriend(req.user.id, friendId);
+  }
+
+  @Patch('friends/accept/:friendId')
+  @UseGuards(JwtAuthGuard)
+  async acceptRequest(
+    @Req() req: { user: { id: string } },
+    @Param('friendId') friendId: string,
+  ) {
+    return this.userService.acceptFriend(req.user.id, friendId);
   }
 }
