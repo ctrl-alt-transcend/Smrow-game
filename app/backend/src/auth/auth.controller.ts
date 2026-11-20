@@ -72,13 +72,13 @@ export class AuthController {
 
     res.cookie('access_token', access_token, {
       httpOnly: true,
-      secure: false, // for dev
+      secure: true, // for dev
       sameSite: 'lax',
       path: '/',
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res.redirect('http://localhost:5173');
+    return res.redirect('/');
   }
 
   /**
@@ -95,7 +95,7 @@ export class AuthController {
     console.log('Logout request received');
     res.clearCookie('access_token', {
       httpOnly: true,
-      secure: false, // for dev,
+      secure: true, // for dev,
       sameSite: 'lax',
       path: '/',
     });

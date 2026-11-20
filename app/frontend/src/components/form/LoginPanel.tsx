@@ -65,7 +65,7 @@ export function LoginPanel(props: PaperProps) {
   // the use of hardcoded api, was just for the implementation, we can change it as well
 
   function handleGoogleLogin() {
-    window.location.assign("http://localhost:3000/auth/google/login");
+    window.location.assign("/api/auth/google/login");
   }
 
   return (
