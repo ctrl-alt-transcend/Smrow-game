@@ -8,8 +8,6 @@ import {
   Group,
   ScrollArea,
   Stack,
-  Text,
-  Title,
   Tooltip,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
@@ -22,13 +20,15 @@ import { useGameState } from "./hooks/useGameState.ts";
 import { type GameDataDto, Phase } from "shared";
 import { PlayerPanel } from "./components/ui/PlayerPanel.tsx";
 import { ResourcesPanel } from "./components/ui/ResourcesPanel.tsx";
+import { EndGameModal } from "./components/ui/EndGameModal.tsx";
+import { WaitingPlayersModal } from "./components/ui/WaitingPlayersModal.tsx";
 import { usePersonalNotification } from "./hooks/usePersonalNotification.ts";
+import { useEndGame } from "./hooks/useEndGame.ts";
 import GameBoard from "./components/gameboard/GameBoard.tsx";
 import GameMasterLog from "./components/ui/GameMasterLog.tsx";
 import TurnProgressBar from "./components/ui/TurnProgressBar.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import PanContainer from "./components/ui/PanContainer.tsx";
-import QuitGameButton from "./components/ui/QuitGameButton.tsx";
 import { Notifications } from "@mantine/notifications";
 
 export default function Game() {
@@ -45,6 +45,7 @@ function GameShell({ game }: { game: GameDataDto }) {
 
   const GameBoardProps = useGameBoardFactory(game.board);
   usePersonalNotification(game.currentPlayer.personalLog);
+  useEndGame(game.gameTerminated);
 
   const waitingForPlayers = game.currentPhase === Phase.PENDING;
 
@@ -66,6 +67,12 @@ function GameShell({ game }: { game: GameDataDto }) {
       padding={0}
       style={{ height: "100dvh", overflow: "hidden" }}
     >
+      <EndGameModal
+        gameOver={game.gameTerminated}
+        players={game.players}
+        winner={game.winner}
+        winCondition={game.winCondition}
+      />
       <AppShell.Header>
         <Group h="100%" px="md" gap="lg" wrap="nowrap" align="stretch">
           <Stack gap={20} justify="center">
@@ -158,36 +165,15 @@ function GameShell({ game }: { game: GameDataDto }) {
           overflow: "hidden",
         }}
       >
-        {game.winner ? (
-          <Center flex={1} w="100%">
-            <Stack align="center" gap="xs">
-              <Text fz={64} lh={1}>
-                🏆
-              </Text>
-              <Title order={2} ta="center">
-                {game.winner} wins!
-              </Title>
-              <Text c="dimmed">{game.winCondition}</Text>
-              <QuitGameButton />
-            </Stack>
-          </Center>
-        ) : waitingForPlayers ? (
-          <Center flex={1} w="100%">
-            <Stack align="center" gap="xs">
-              <Text fz={48} lh={1}>
-                ⏳
-              </Text>
-              <Title order={4}>Waiting for players...</Title>
-              <Text c="dimmed">The game starts once everyone has joined.</Text>
-            </Stack>
-          </Center>
-        ) : (
-          <Center flex={1} w="100%" h="100%" mih={0} p={0}>
-            <PanContainer maxPan={400}>
-              <GameBoard {...GameBoardProps} />
-            </PanContainer>
-          </Center>
-        )}
+        <WaitingPlayersModal
+          waitingForPlayers={waitingForPlayers}
+          players={game.players}
+        />
+        <Center flex={1} w="100%" h="100%" mih={0} p={0}>
+          <PanContainer maxPan={400}>
+            <GameBoard {...GameBoardProps} />
+          </PanContainer>
+        </Center>
       </AppShell.Main>
 
       <OptionsModal game={game} opened={optionsOpened} onClose={closeOptions} />
