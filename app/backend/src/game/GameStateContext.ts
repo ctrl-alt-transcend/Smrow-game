@@ -71,9 +71,9 @@ abstract class State {
 /**
  * @brief define the fonction signature
  *
- * GameNotifier is a callback function that is called when the player turn expires
+ * PlayerNotifier is a callback function that is called when the player turn expires
  */
-export type GameNotifier = (id: string, username: string) => void;
+export type PlayerNotifier = (id: string, username: string) => void;
 
 /**
  * The Context defines the interface of interest to clients. It also maintains a
@@ -86,20 +86,20 @@ class GameStateContext {
   protected graph!: GameBoardGraph;
   protected settings!: SettingsData;
   protected buildings: BuildingsInGame = new Map();
+  private readonly notify: PlayerNotifier;
+  private turnTimeoutId: NodeJS.Timeout | null = null;
   private logId: number = 0;
   private rollId: number = 0;
   private factionSwitch: number = 0;
+  private roundCount: number = 0;
   private turnCount: number = 0;
   private turnStart: number = 0;
-  private turnTimeoutId: NodeJS.Timeout | null = null;
-  private readonly notify: GameNotifier;
-  private roundCount: number = 0;
 
   constructor(
     gameId: string,
     settings: SettingsData,
     state: State,
-    notify: GameNotifier,
+    notify: PlayerNotifier,
   ) {
     this.notify = notify;
     this.settings = settings;
@@ -200,6 +200,9 @@ class GameStateContext {
   public getGameId(): string {
     return this.data.gameId;
   }
+  public getWhosTurn(): string {
+    return this.data.whosTurn;
+  }
   public getLogId(): number {
     return this.rollId;
   }
@@ -263,13 +266,11 @@ class GameStateContext {
       currentRoll: p.currentRoll,
     };
   }
-  public getGameDataDto(username: string): GameDataDto {
+  public getGameDataDto(username: string): GameDataDto | null {
     const gameData = this.getGameData();
 
     const p = this.getPlayerByUsername(username);
-    if (!p) {
-      throw new NotFoundException(`Unknown username: ${username}`);
-    }
+    if (!p) return null;
     return {
       currentPlayer: this.getPlayerDto(p),
       winner: gameData.winner,
@@ -380,7 +381,6 @@ class GameStateContext {
         break;
       }
     }
-    //console.log(`setNextPlayer: ${this.data.whosTurn} is now playing`);
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
     );
@@ -419,6 +419,7 @@ class GameStateContext {
   /** To call when the game is ready to start */
   public launchGame() {
     this.assignFactions();
+    this.data.whosTurn = this.data.players[0];
     this.transitionTo(new StartPhase());
     this.startWatch();
   }
@@ -570,7 +571,7 @@ class GameStateContext {
     addStartingResources(p.resources);
     if (p.firstSettlementPlaced) return;
     let response = { valid: false, message: '' };
-    while (response.valid === false) {
+    for (let tries = 0; tries < 10; tries++) {
       const buildPayload = randomizeFirstSettlement(this.graph);
       if (!buildPayload) break;
       response = buildCheck(
@@ -582,6 +583,7 @@ class GameStateContext {
         this.getSettings(),
         true,
       );
+      if (response.valid === true) break;
     }
     p.firstSettlementPlaced = true;
   }

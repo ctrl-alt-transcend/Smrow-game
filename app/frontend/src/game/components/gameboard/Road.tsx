@@ -5,7 +5,7 @@ import { ROAD_SIZE, HOVER_EFFECT } from "shared";
 
 export const Road: React.FC<RoadProps> = ({
   data,
-  isSelected,
+  isSelected = false,
   isHovered,
   onHoverChange,
   onClick,
@@ -18,7 +18,7 @@ export const Road: React.FC<RoadProps> = ({
   const fillColor = getFillColor(
     null,
     data.faction,
-    isSelected = false,
+    isSelected,
     effectiveIsHovered,
   );
 

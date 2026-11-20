@@ -48,7 +48,7 @@ export default function GameRow({ game }: GameRowProps) {
         title={`Spectating game #${game.gameId.substring(0, 5)}`}
         size="xl"
       >
-      {/*<SpectateGameBoard board={game.board}/>*/}
+      <SpectateGameBoard gameId={game.gameId}/>
       </Modal>
     </>
   );

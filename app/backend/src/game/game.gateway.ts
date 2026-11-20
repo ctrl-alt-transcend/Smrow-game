@@ -24,6 +24,7 @@ import { AUTH } from '../config/config';
 import { GameStateContext } from './GameStateContext';
 import { parseCookie } from 'cookie';
 import { ZodValidationPipe } from 'nestjs-zod';
+import z from 'zod';
 
 interface SocketUser {
   id: string;
@@ -63,15 +64,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   ) {}
 
   private emitGameDataDto(game: GameStateContext, user: string) {
-    let gameData: GameDataDto;
-    try {
-      gameData = game.getGameDataDto(user);
-    } catch (e) {
-      console.log(`Error: ${e}`);
-      return;
-    }
+    const gameData = game.getGameDataDto(user);
+    if (!gameData) return;
     this.server.to(game.getGameId()).emit('gameState', gameData);
-    // every action ends here, so a finished game is recorded right away
     void this.gameService.recordResultIfOver(game);
   }
 
@@ -139,9 +134,28 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     }
   }
 
+
+  @SubscribeMessage('joinSpectate')
+  async handleJoinSpectate(
+    @ConnectedSocket() client: SocketClient,
+    @MessageBody(new ZodValidationPipe(z.string().nonempty()))
+    gameId: string,
+  ) {
+    try {
+      const game = this.gameService.getGameInstanceByGameId(gameId);
+      if (!game) return { ok: false, error: "game doesn't exist" };
+      await client.join(game.getGameId());
+      return { ok: true, data: game.getGameDataDto(game.getWhosTurn()) };
+    } catch (e) {
+      console.log('joinSpectate failed', e);
+      return { ok: false, error: 'joinSpectate failed' };
+    }
+  }
+
   async afterInit(server: SocketServer) {
     this.gameService.setNotifier((id, username) => {
       const game = this.gameService.getGameInstanceByUserId(id);
+      if (!game) return;
       this.emitGameDataDto(game, username);
     });
 

@@ -11,7 +11,7 @@ import {
 
 export const Settlement: React.FC<SettlementProps> = ({
   data,
-  isSelected,
+  isSelected = false,
   isHovered,
   onHoverChange,
   onClick,
@@ -24,7 +24,7 @@ export const Settlement: React.FC<SettlementProps> = ({
   const fillColor = getFillColor(
     null,
     data.faction,
-    isSelected = false,
+    isSelected,
     effectiveIsHovered,
   );
 

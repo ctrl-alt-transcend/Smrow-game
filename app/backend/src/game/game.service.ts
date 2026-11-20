@@ -17,7 +17,7 @@ import {
 import {
   GameStateContext,
   StartPhase,
-  type GameNotifier,
+  type PlayerNotifier,
 } from './GameStateContext';
 import { SocialGateway } from '../social/social.gateway';
 
@@ -26,7 +26,7 @@ export class GameService {
   private readonly logger = new Logger(GameService.name);
   private gameInstances: Map<string, GameStateContext> = new Map();
   private playersMap = new Map<string, string>(); //INFO: link playerId with a gameId
-  private notifier: GameNotifier = () => {};
+  private notifier: PlayerNotifier = () => {};
   private userIds = new Map<string, string>(); //INFO: link in game playerId (username) with the user ID
   private recordedGames = new Set<string>();
 
@@ -67,7 +67,7 @@ export class GameService {
    * The game doesn't know who is notified or how, it only decide when.
    * @details Called by GameGateway in afterInit
    */
-  setNotifier(notifier: GameNotifier) {
+  setNotifier(notifier: PlayerNotifier) {
     this.notifier = notifier;
   }
 
@@ -137,6 +137,12 @@ export class GameService {
       );
     }
     return this.gameInstances.get(gameId) as GameStateContext;
+  }
+
+  getGameInstanceByGameId(gameId: string): GameStateContext | null {
+    const game = this.gameInstances.get(gameId);
+    if (!game) return null;
+    return game;
   }
 
   getGameId(playerId: string): string {

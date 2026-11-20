@@ -54,6 +54,7 @@ export function OptionsModal({ game, opened, onClose }: OptionsModalProps) {
     {
       title: `${CURRENT_GAME_SETTINGS}`,
       body:
+        `Game ID: ${game.gameId}\n` +
         `Gameboard layout: ${s.gameboardLayout}\n\n` +
         "Time & Actions limits\n" +
         `• Time per player turn: ${s.turnDurationSeconds}\n` +

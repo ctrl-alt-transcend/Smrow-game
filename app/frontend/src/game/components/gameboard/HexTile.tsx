@@ -17,7 +17,7 @@ const THIEF_HEIGHT = THIEF_WIDTH;
 
 export const HexTile: React.FC<TileProps> = ({
   data,
-  isSelected,
+  isSelected = false,
   isHovered,
   onHoverChange,
   onClick,
@@ -30,7 +30,7 @@ export const HexTile: React.FC<TileProps> = ({
   const fillColor = getFillColor(
     data.land,
     null,
-    isSelected = false,
+    isSelected,
     effectiveIsHovered,
   );
   const strokeColor = getTileStrokeColor(effectiveIsHovered);

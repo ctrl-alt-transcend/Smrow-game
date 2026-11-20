@@ -31,7 +31,6 @@ export function useGameState(): { game: GameDataDto | null } {
     socket.on("connect", onConnect);
     socket.on("connect_error", onConnectError);
     socket.on("gameState", setGame);
-    socket.on("connect_error", onConnectError);
 
     if (socket.connected) void onConnect();
     else socket.connect();
