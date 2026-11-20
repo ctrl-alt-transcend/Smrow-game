@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import type { SocketUser } from './game.gateway';
@@ -106,9 +107,19 @@ export class GameService {
   }
 
   joinGame(playerProfile: PlayerProfile, gameId: string) {
+    const game = this.getGameInstance(gameId);
+
     if (this.playersMap.has(playerProfile.id)) {
       throw new ConflictException(
         `Player with id ${playerProfile.username} is already in a game`,
+      );
+    }
+    if (game.getPlayers().size >= 4) {
+      throw new ForbiddenException(`Game with id ${gameId} is full`);
+    }
+    if (game.getCurrentPhase() !== 'Pending Player') {
+      throw new ForbiddenException(
+        `Game with id ${gameId} has already started`,
       );
     }
     this.addPlayerToGame(gameId, playerProfile);
