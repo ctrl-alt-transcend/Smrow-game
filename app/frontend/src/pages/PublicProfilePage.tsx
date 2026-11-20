@@ -1,5 +1,5 @@
 import { Alert, Loader, Paper, Title } from "@mantine/core";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 // import { useAuth } from "../hooks/useAuth";
 import { useCallback } from "react";
 import { useFetch } from "../hooks/useFetch";
