@@ -9,6 +9,10 @@ export const useFetch = <T>(fetcher: () => Promise<T>) => {
   useEffect(() => {
     let cancelled = false;
 
+    // setLoading(true);
+    // setError(null);
+    // setData(null);
+
     fetcher()
       .then((res) => {
         if (!cancelled) setData(res);

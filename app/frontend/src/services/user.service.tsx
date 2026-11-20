@@ -1,5 +1,9 @@
 import { http } from "./http";
-import { UpdateProfileSchema, UploadImageSchema } from "shared";
+import {
+  UpdateProfileSchema,
+  UploadImageSchema,
+  UserPublicSchema,
+} from "shared";
 import type { AxiosResponse } from "axios";
 import type { UploadImage, UserProfile, UpdateProfile } from "shared";
 
@@ -63,4 +67,9 @@ export async function uploadAvatar(
     }
     throw e instanceof Error ? e : new Error("Unexpected error");
   }
+}
+
+export async function fetchPublicProfile(username: string) {
+  const { data } = await http.get(`/user/${encodeURIComponent(username)}`);
+  return UserPublicSchema.parse(data);
 }
