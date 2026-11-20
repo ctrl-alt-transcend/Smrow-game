@@ -1,16 +1,25 @@
 import { Table, Button } from "@mantine/core";
 import type { GameList } from "shared";
+import { useJoinLobby } from "../../game/utils/game.utils.tsx";
 
+const maxPlayers = 4;
 type GameRowProps = {
   game: GameList;
 };
 
-const maxPlayers = 4;
-
 export default function GameRow({ game }: GameRowProps) {
+  const joinLobby = useJoinLobby();
   const isFull = game.playerCount >= maxPlayers;
-  const gameStart = game.state !== "pending";
+  const gameStart = game.state !== "Pending Player";
   const variant = gameStart ? "default" : "filled";
+
+  function handleAction(gameStarted: boolean, gameId: string) {
+    if (!gameStarted) {
+      joinLobby(gameId);
+    } else {
+      return null; //TODO: add spectate functionality
+    }
+  }
 
   return (
     <Table.Tr>
@@ -20,7 +29,12 @@ export default function GameRow({ game }: GameRowProps) {
       </Table.Td>
       <Table.Td>{gameStart ? "Game Started" : "Waiting for players"}</Table.Td>
       <Table.Td>
-        <Button disabled={gameStart && isFull} variant={variant} miw={100}>
+        <Button
+          onClick={() => handleAction(gameStart, game.gameId)}
+          disabled={gameStart && isFull}
+          variant={variant}
+          miw={100}
+        >
           {gameStart ? "Spectate" : "Join"}
         </Button>
       </Table.Td>

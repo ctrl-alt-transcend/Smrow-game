@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { notifications } from "@mantine/notifications";
 import axios from "axios";
 import { SettingsDataSchema, type SettingsData } from "shared";
 import { z } from "zod";
@@ -36,8 +37,24 @@ export function useJoinLobby() {
     try {
       await http.post("/game/join", { gameId });
       navigate("/game");
-    } catch {
-      navigate("/error");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        navigate("/");
+        return;
+      } else if (axios.isAxiosError(error) && error.response?.status === 409) {
+        navigate("/game");
+        return;
+      } else {
+        const message = axios.isAxiosError(error)
+          ? error.response?.data?.message
+          : undefined;
+        notifications.show({
+          title: "Could not join the game",
+          message:
+            typeof message === "string" ? message : "Please try again later.",
+          color: "red",
+        });
+      }
     }
   };
 }
