@@ -10,8 +10,9 @@ import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
-import type { JwtPayload, GameList } from 'shared';
+import type { JwtPayload, GameList, FriendStatus } from 'shared';
 import { parseCookie } from 'cookie';
+import { UserService } from '../user/user.service';
 
 interface SocketUser {
   id: string;
@@ -43,17 +44,15 @@ type SocketClient = Socket<
   }, //WARN: dev only
 })
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
+  private readonly onlineUsers = new Map<string, string[]>();
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly chatService: ChatService,
+    private readonly userService: UserService,
   ) {}
 
   @WebSocketServer() server: SocketServer;
-
-  // @SubscribeMessage('message')
-  // handleMessage(client: any, payload: any): string {
-  //   return 'Hello world!';
-  // }
 
   handleGameList(game: GameList[]) {
     this.server.to('gameList').emit('game list update', game);
@@ -97,6 +96,27 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
     await client.leave('chat');
   }
 
+  @SubscribeMessage('friend: remove')
+  async handleFriendRemove(client: SocketClient, friendId: string) {
+    await this.userService.removeFriend(client.data.user.id, friendId);
+    await this.sendFriendList(client);
+  }
+
+  @SubscribeMessage('friend: list')
+  async handleFriendList(client: SocketClient) {
+    await this.sendFriendList(client);
+  }
+
+  private async sendFriendList(client: SocketClient) {
+    const friends = await this.userService.getFriendList(client.data.user.id);
+    const friendsStatus: FriendStatus[] = friends.map((friend) => ({
+      ...friend,
+      isOnline: this.onlineUsers.has(friend.id),
+    }));
+    client.emit('friend: update', friendsStatus);
+    console.log('Sent friend list to', client.data.user.username, friends); //TEST: DEV_ONLY
+  }
+
   async afterInit(server: SocketServer) {
     /** @warning development only */
     if (process.env.NODE_ENV === 'development') {
@@ -136,8 +156,27 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
     });
   }
 
-  handleConnection(client: Socket) {
-    //TODO: handle multiple connections from the same user.
+  handleDisconnect(client: SocketClient) {
+    const userId = client.data.user.id;
+    const sockets = this.onlineUsers.get(userId);
+    if (!sockets) return;
+
+    const index = sockets.indexOf(client.id);
+    if (index !== -1) {
+      sockets.splice(index, 1);
+    }
+
+    if (sockets.length === 0) {
+      this.onlineUsers.delete(userId);
+    }
+  }
+
+  handleConnection(client: SocketClient) {
+    if (this.onlineUsers.has(client.data.user.id)) {
+      this.onlineUsers.get(client.data.user.id)?.push(client.id);
+    } else {
+      this.onlineUsers.set(client.data.user.id, [client.id]);
+    }
     console.log('Client connected:', client.id); //TEST:
   }
 }

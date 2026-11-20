@@ -96,3 +96,8 @@ export const FriendSchema = z.object({
   bio: BioSchema,
 })
 export type Friend = z.infer<typeof FriendSchema>;
+
+export const FriendStatusSchema = FriendSchema.extend({
+  isOnline: z.boolean(),
+});
+export type FriendStatus = z.infer<typeof FriendStatusSchema>;
