@@ -1,11 +1,23 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { DatabaseService } from '../database/database.service';
-import { PlayerProfile } from 'shared';
-import type { UserProfile, RegisterPost, UpdateProfile, Id } from 'shared';
+import { PlayerProfile, FriendSchema } from 'shared';
+import type {
+  UserProfile,
+  RegisterPost,
+  UpdateProfile,
+  Id,
+  Friend,
+} from 'shared';
 
 const UPLOAD_DIR = join(process.cwd(), 'uploads', 'avatars');
 const EXT: Record<string, string> = {
@@ -178,6 +190,175 @@ export class UserService {
       where: {
         id,
       },
+    });
+  }
+
+  async getFriendList(id: string): Promise<Friend[]> {
+    const profileSelect = {
+      id: true,
+      username: true,
+      profile: {
+        select: { avatarURL: true, bio: true },
+      },
+    } as const;
+
+    const requests = await this.databaseService.friendRequest.findMany({
+      where: {
+        status: 'ACCEPTED',
+        OR: [{ sender_id: id }, { receiver_id: id }],
+      },
+      select: {
+        sender: { select: profileSelect },
+        receiver: { select: profileSelect },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return requests.map(({ sender, receiver }) => {
+      const other = sender.id === id ? receiver : sender;
+
+      return FriendSchema.parse({
+        id: other.id,
+        username: other.username,
+        avatar: other.profile?.avatarURL ?? undefined,
+        bio: other.profile?.bio ?? undefined,
+      });
+    });
+  }
+
+  async getPendingList(id: string): Promise<Friend[]> {
+    const profileSelect = {
+      id: true,
+      username: true,
+    } as const;
+
+    const requests = await this.databaseService.friendRequest.findMany({
+      where: {
+        status: 'PENDING',
+        receiver_id: id,
+      },
+      select: {
+        sender: { select: profileSelect },
+        receiver: { select: profileSelect },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return requests.map(({ sender, receiver }) => {
+      const other = sender.id === id ? receiver : sender;
+
+      return FriendSchema.parse({
+        id: other.id,
+        username: other.username,
+      });
+    });
+  }
+
+  async removeFriend(userId: string, friendId: string) {
+    return this.databaseService.friendRequest.deleteMany({
+      where: {
+        status: 'ACCEPTED',
+        OR: [
+          { receiver_id: friendId, sender_id: userId },
+          { receiver_id: userId, sender_id: friendId },
+        ],
+      },
+    });
+  }
+
+  /**
+   *
+   * @param userId Id of the current user
+   * @param friendUsername Username of the target user
+   * @returns Prisma object of the newly created or modified friendRequest
+   * Create a new friend request in the FriendRequest table.
+   * The function performs multiple checks to ensure that no duplicate can be created.
+   *
+   */
+  async addFriend(userId: string, friendUsername: string) {
+    const friend = await this.databaseService.user.findUnique({
+      where: {
+        username: friendUsername,
+      },
+    });
+
+    if (!friend) throw new NotFoundException('User not found.');
+
+    if (friend.id === userId) throw new BadRequestException();
+
+    const existing = await this.databaseService.friendRequest.findFirst({
+      where: {
+        OR: [
+          { sender_id: userId, receiver_id: friend.id },
+          { sender_id: friend.id, receiver_id: userId },
+        ],
+      },
+    });
+
+    if (!existing) {
+      return this.databaseService.friendRequest.create({
+        data: {
+          sender_id: userId,
+          receiver_id: friend.id,
+        },
+      });
+    }
+
+    if (existing.status === 'PENDING' && existing.sender_id === friend.id) {
+      return this.databaseService.friendRequest.update({
+        where: { id: existing.id },
+        data: { status: 'ACCEPTED' },
+      });
+    }
+
+    if (existing.status === 'PENDING' || existing.status === 'ACCEPTED')
+      throw new ConflictException(
+        'You are either alrready friends or a request is pending.',
+      );
+
+    if (existing.status === 'DECLINED') {
+      return this.databaseService.friendRequest.update({
+        where: { id: existing.id },
+        data: {
+          status: 'PENDING',
+          sender_id: userId,
+          receiver_id: friend.id,
+        },
+      });
+    }
+  }
+
+  async denyFriend(userId: string, friendId: string) {
+    const req = await this.databaseService.friendRequest.findFirst({
+      where: {
+        status: 'PENDING',
+        sender_id: friendId,
+        receiver_id: userId,
+      },
+    });
+
+    if (!req) throw new NotFoundException('Friend request not found');
+
+    return this.databaseService.friendRequest.update({
+      where: { id: req.id },
+      data: { status: 'DECLINED' },
+    });
+  }
+
+  async acceptFriend(userId: string, friendId: string) {
+    const req = await this.databaseService.friendRequest.findFirst({
+      where: {
+        status: 'PENDING',
+        sender_id: friendId,
+        receiver_id: userId,
+      },
+    });
+
+    if (!req) throw new NotFoundException('Friend request not found');
+
+    return this.databaseService.friendRequest.update({
+      where: { id: req.id },
+      data: { status: 'ACCEPTED' },
     });
   }
 }

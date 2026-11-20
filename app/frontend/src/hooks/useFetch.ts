@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 // fetcher must be stable (module function or useCallback), it runs once
 export const useFetch = <T>(fetcher: () => Promise<T>) => {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -27,7 +28,9 @@ export const useFetch = <T>(fetcher: () => Promise<T>) => {
     return () => {
       cancelled = true;
     };
-  }, [fetcher]);
+  }, [fetcher, reloadKey]);
 
-  return { data, error, loading };
+  const refetch = useCallback(() => setReloadKey((k) => k + 1), []);
+
+  return { data, error, loading, refetch };
 };

@@ -104,5 +104,14 @@ migrate:
 	DB_PASSWORD_FILE=../secrets/db_password.txt \
 	npx prisma migrate dev --name $(MIGRATION_NAME)
 
+studio:
+	@cd app/backend && \
+	DB_HOST=localhost \
+	DB_PORT=5432 \
+	DB_NAME=mydb \
+	DB_USER=the_boss \
+	DB_PASSWORD_FILE=../secrets/db_password.txt \
+	npx prisma studio
+
 .PHONY: all refresh build up down fclean re secrets migrate initdb install check
 

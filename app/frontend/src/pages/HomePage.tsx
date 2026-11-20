@@ -6,6 +6,7 @@ import Chat from "../components/home/Chat";
 import { http } from "../services/http";
 import { ReconnectionModal } from "../components/modals/ReconnectionModal.tsx";
 import { useState, useEffect } from "react";
+import { Notifications } from "@mantine/notifications";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ export default function HomePage() {
 
   return (
     <>
+      <Notifications />
       <ReconnectionModal
         isInGame={isInGame}
         onQuit={() => setIsInGame(false)}

@@ -89,6 +89,14 @@ export const UploadImageSchema = z
 });
 export type UploadImage = z.infer<typeof UploadImageSchema>;
 
+export const FriendSchema = z.object({
+  id: IdSchema,
+  username: UsernameSchema,
+  avatar: AvatarUrlSchema,
+  bio: BioSchema,
+})
+export type Friend = z.infer<typeof FriendSchema>;
+
 export const PublicProfile = z.object({
   username: UsernameSchema,
   name: NameSchema,
