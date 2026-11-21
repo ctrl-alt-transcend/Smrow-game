@@ -26,6 +26,7 @@ import { AUTH } from '../config/config';
 import { GameStateContext } from './GameStateContext';
 import { parseCookie } from 'cookie';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { Logger } from '@nestjs/common';
 
 export interface SocketUser {
   id: string;
@@ -58,6 +59,7 @@ type SocketClient = Socket<
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @WebSocketServer() server: SocketServer;
+  private readonly logger = new Logger(GameGateway.name);
 
   constructor(
     private readonly jwtService: JwtService,
@@ -69,7 +71,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     try {
       gameData = game.getGameDataDto(user);
     } catch (e) {
-      console.log(`Error: ${e}`);
+      this.logger.error(`getGameDataDto error: ${e}`);
       return;
     }
     this.server.to(game.getGameId()).emit('gameState', gameData);
@@ -82,7 +84,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
 
   @SubscribeMessage('startGame')
   startGame(@ConnectedSocket() client: SocketClient) {
-    console.log('startGame event received from client:', client.id);
+    this.logger.verbose('startGame event received from client:', client.id);
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (game.getCurrentPhase() !== Phase.PENDING) {
       return;
@@ -98,7 +100,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       }
       this.emitGameDataDto(game, client.data.user.username);
     }
-    console.log(
+    this.logger.verbose(
       `Starting game ${game.getGameId()} with ${game.getPlayers().size} players.`,
     );
     game.launchGame();
@@ -110,7 +112,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
     client.disconnect(true);
-    console.log('player', client.data.user.username, 'disconnected');
+    this.logger.log(`player ${client.data.user.username} disconnected`);
   }
 
   /**
@@ -172,7 +174,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       this.emitGameDataDto(game, client.data.user.username);
       return { ok: true, data: game.getGameDataDto(client.data.user.username) };
     } catch (e) {
-      console.log('joinRoom failed', e);
+      this.logger.warn('joinRoom failed', e);
       return { ok: false, error: 'not in game' };
     }
   }
@@ -219,11 +221,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
         client.data.user = { id: payload.sub, username: payload.username };
         next();
       } catch (error) {
-        console.log(
-          'Client connection rejected:',
-          client.id,
-          ' - ',
-          (error as Error).message,
+        this.logger.warn(
+          `Client connection rejected: ${
+            client.id
+          } - ${(error as Error).message}`,
         );
         next(new Error('Authentication error'));
       }
@@ -231,6 +232,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   }
 
   handleConnection(client: SocketClient) {
-    console.log('Client connected:', client.id); //TEST:
+    this.logger.log(
+      `Client connected: ${client.id} - ${client.data.user.username}`,
+    );
   }
 }

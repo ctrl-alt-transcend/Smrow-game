@@ -33,7 +33,7 @@ import { updateValue, funnyRollLog } from './game.utils';
 import { buildCheck, BuildingsInGame } from './calculation/handleBuilds';
 import { createGameBoard } from './calculation/createGameBoard';
 import { tradeCheck } from './calculation/handleTrade';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, Logger } from '@nestjs/common';
 import {
   addStartingResources,
   produceResources,
@@ -94,6 +94,7 @@ class GameStateContext {
   private turnTimeoutId: NodeJS.Timeout | null = null;
   private readonly notify: GameNotifier;
   private roundCount: number = 0;
+  private readonly logger = new Logger(GameStateContext.name);
 
   constructor(
     gameId: string,
@@ -380,7 +381,9 @@ class GameStateContext {
         break;
       }
     }
-    //console.log(`setNextPlayer: ${this.data.whosTurn} is now playing`);
+    this.logger.verbose(
+      `Game: ${this.getGameId()}: setNextPlayer: ${this.data.whosTurn} is now playing`,
+    );
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
     );
@@ -418,13 +421,15 @@ class GameStateContext {
    **********************************/
   /** To call when the game is ready to start */
   public launchGame() {
-    console.log('Launch game');
+    this.logger.verbose(`Launch game ${this.getGameId()}`);
     this.assignFactions();
     this.setCurrentPhase(Phase.START);
     this.transitionTo(new StartPhase());
     this.startWatch();
 
-    console.log('current phase :', this.getCurrentPhase());
+    this.logger.verbose(
+      `Game ${this.getGameId()} current phase :', this.getCurrentPhase()`,
+    );
   }
 
   /** @description Generates: "You can't ${Action} during ${Phase}" */
@@ -463,7 +468,9 @@ class GameStateContext {
     if (nextPhase === Phase.RESOURCES) this.roundCount++;
     this.setNextPlayer(0);
     this.setTurnCount(0);
-    //console.log(`setupNextPhase: currentPhase: ${this.getCurrentPhase()} | nextPhase: ${nextPhase} | starting player: ${this.data.whosTurn}`);
+    this.logger.verbose(
+      `Game ${this.getGameId()} setupNextPhase: currentPhase: ${this.getCurrentPhase()} | nextPhase: ${nextPhase} | starting player: ${this.data.whosTurn}`,
+    );
     this.setCurrentPhase(nextPhase);
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
@@ -524,21 +531,27 @@ class GameStateContext {
             `You produced ${prod} ${LAND_RESOURCE[tile.land]}`,
             NotifColor.GREEN,
           );
-          //console.log(`⚖️ressoucesProduction: ${player.username} produced ${prod} ${LAND_RESOURCE[tile.land]}`);
+          this.logger.verbose(
+            `Game ${this.getGameId()}:  ⚖️ressoucesProduction: ${player.username} produced ${prod} ${LAND_RESOURCE[tile.land]}`,
+          );
         } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
             player,
             `You didn't produce anything with your ${LandType.DESERT} ...`,
             NotifColor.PURPLE,
           );
-          //console.log(`⚖️ressoucesProduction: ${player.username} can't produce anything in the ${LandType.DESERT}`);
+          this.logger.verbose(
+            `Game ${this.getGameId()}: ⚖️ressoucesProduction: ${player.username} can't produce anything in the ${LandType.DESERT}`,
+          );
         } else if (tile.hasRobber && !placementPhase) {
           this.setPersonalLog(
             player,
             `${ROBBER_NAME} stole your ${LAND_RESOURCE[tile.land]} production !`,
             NotifColor.PURPLE,
           );
-          //console.log(`⚖️ressoucesProduction: ${player.username} has been stolen by ${ROBBER_NAME} !`);
+          this.logger.verbose(
+            `Game ${this.getGameId()}: ⚖️ressoucesProduction: ${player.username} has been stolen by ${ROBBER_NAME} !`,
+          );
         }
       });
     }
@@ -596,7 +609,7 @@ class GameStateContext {
   private onExpire(): void {
     const p = this.getPlayerByUsername(this.data.whosTurn);
     if (!p) return;
-    console.log(
+    this.logger.verbose(
       `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
         `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
         `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,

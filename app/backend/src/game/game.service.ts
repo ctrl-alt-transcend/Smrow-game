@@ -87,6 +87,7 @@ export class GameService {
    */
   createGame(playerProfile: PlayerProfile, settings: SettingsData) {
     if (this.playersMap.has(playerProfile.id)) {
+      this.logger.debug(`Player ${playerProfile.id} is already in a game`);
       throw new ConflictException(
         `Player with id ${playerProfile.username} is already in a game`,
       );
@@ -103,21 +104,31 @@ export class GameService {
       ),
     );
     this.addPlayerToGame(gameId, playerProfile);
-    console.log(`Game created with id ${gameId}`);
+    this.logger.log(`Game created with id ${gameId}`);
   }
 
   joinGame(playerProfile: PlayerProfile, gameId: string) {
     const game = this.getGameInstance(gameId);
+    const playerId = playerProfile.id;
 
     if (this.playersMap.has(playerProfile.id)) {
+      this.logger.debug(
+        `Player ${playerId} cannot join game ${gameId}: already in a game`,
+      );
       throw new ConflictException(
         `Player with id ${playerProfile.username} is already in a game`,
       );
     }
     if (game.getPlayers().size >= 4) {
-      throw new ForbiddenException(`Game with id ${gameId} is full`);
+      this.logger.debug(`Game ${gameId} is full`);
+      throw new ForbiddenException(
+        `Player ${playerId} cannot join game with id ${gameId}: is full`,
+      );
     }
     if (game.getCurrentPhase() !== 'Pending Player') {
+      this.logger.debug(
+        `Player ${playerId} cannot join game ${gameId}: already started`,
+      );
       throw new ForbiddenException(
         `Game with id ${gameId} has already started`,
       );
@@ -137,6 +148,7 @@ export class GameService {
     this.playersMap.delete(user.id);
     this.gameInstances.get(game)?.getPlayers().delete(user.username);
     this.broadcastGameList();
+    this.logger.log(`Removed player ${user.username} from game ${game}`);
   }
 
   private getGameInstance(gameId: string): GameStateContext {
@@ -165,6 +177,7 @@ export class GameService {
   getGameId(playerId: string): string {
     const gameId = this.playersMap.get(playerId);
     if (!gameId) {
+      this.logger.debug(`GetGameId: Player ${playerId} is not in a game`);
       throw new NotFoundException(
         `Player with id ${playerId} is not in a game`,
       );
@@ -188,9 +201,10 @@ export class GameService {
         playerProfile.username,
         game.initPlayer(playerProfile.id, playerProfile.username),
       );
+    this.logger.log(`player ${playerProfile.username} join game ${gameId}`);
     this.broadcastGameList();
     //⚠️REMOVE in PROD -------------------
-    console.log(`---------------------------------------
+    this.logger.verbose(`---------------------------------------
 ⚠️ The following is currently set in 'app/backend/src/game/game.service.ts':
 - added mocked player '${ZGEG_DEV}', remove his 'diceRequest' in 'game.gateway.ts' for prod
 ---------------------------------------`);
