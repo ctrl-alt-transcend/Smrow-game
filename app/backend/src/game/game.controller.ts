@@ -60,14 +60,6 @@ export class GameController {
   @Post('/quit')
   @UseGuards(JwtAuthGuard)
   quitGame(@Req() req: { user: UserPublic }) {
-    console.log(
-      'Username: ',
-      req.user.name,
-      'id: ',
-      req.user.id,
-      'is quitting the game.',
-    );
-    console.log('User quitting game:', req.user.id);
     const game = this.gameService.getGameInstanceByUserId(req.user.id);
     this.gameService.removePlayerFromGame(
       { id: req.user.id, username: req.user.name },
