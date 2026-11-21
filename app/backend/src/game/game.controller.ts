@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-  Req,
-  Body,
-  Get,
-  Logger,
-} from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Body, Get } from '@nestjs/common';
 import { GameService } from './game.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
@@ -21,8 +13,6 @@ import { ZodValidationPipe } from 'nestjs-zod';
 
 @Controller('game')
 export class GameController {
-  private readonly logger = new Logger(GameController.name);
-
   constructor(
     private readonly gameService: GameService,
     private readonly userService: UserService,

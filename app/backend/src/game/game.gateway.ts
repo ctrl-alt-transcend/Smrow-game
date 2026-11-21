@@ -190,6 +190,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const gameId = game.getGameId();
     this.server.in(gameId).socketsLeave(gameId);
     this.gameService.removeGameInstance(gameId);
+    this.logger.log(`Game ${gameId}: ended and deleted`);
   }
 
   async afterInit(server: SocketServer) {
@@ -241,6 +242,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   handleConnection(client: SocketClient) {
     this.logger.log(
       `Client connected: ${client.id} - ${client.data.user.username}`,
+    );
+  }
+
+  handleDisconnect(client: SocketClient) {
+    this.logger.log(
+      `Client disconnected: ${client.id} - ${client.data.user.username}`,
     );
   }
 }
