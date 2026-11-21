@@ -45,7 +45,7 @@ COPY backend/prisma ./backend/prisma
 RUN npm ci --omit=dev --ignore-scripts \
     && npm cache clean --force && npx prisma generate --schema=./backend/prisma/schema.prisma
 
-#INFO: the image gonne be used to run the application
+#INFO: the image gonna be used to run the application
 #
 FROM node:22-alpine AS runner
 WORKDIR /app
