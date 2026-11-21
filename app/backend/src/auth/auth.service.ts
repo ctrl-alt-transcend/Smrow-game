@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bycrypt from 'bcrypt';
@@ -23,6 +23,8 @@ import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly userService: UserService,
     private readonly JwtService: JwtService,
@@ -41,6 +43,7 @@ export class AuthService {
       username: user.username,
     });
 
+    this.logger.log(`User ${user.username} created successfully`);
     return RegisterResponseSchema.parse({
       message: 'User created successfully',
       user: UserPublicSchema.parse(user),
@@ -62,6 +65,7 @@ export class AuthService {
       username: user.username,
     });
 
+    this.logger.log(`User ${user.username} logged in successfully`);
     return { access_token };
   }
 

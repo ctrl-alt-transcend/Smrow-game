@@ -29,7 +29,7 @@ build:
 up: install secrets shared
 	docker compose -f $(DOCKER_COMPOSE_FILE) up -d
 
-watch: up
+watch:
 	@if [ "$(ENV)" = "dev" ]; then \
 		docker compose -f $(DOCKER_COMPOSE_FILE) watch; \
 	else \

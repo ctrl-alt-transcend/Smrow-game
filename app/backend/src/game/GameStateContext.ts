@@ -585,21 +585,18 @@ class GameStateContext {
             `You produced ${prod} ${LAND_RESOURCE[tile.land]}`,
             NotifColor.GREEN,
           );
-          //console.log(`⚖️ressoucesProduction: ${player.username} produced ${prod} ${LAND_RESOURCE[tile.land]}`);
         } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
             player,
             `You didn't produce anything with your ${LandType.DESERT} ...`,
             NotifColor.PURPLE,
           );
-          //console.log(`⚖️ressoucesProduction: ${player.username} can't produce anything in the ${LandType.DESERT}`);
         } else if (tile.hasRobber && !placementPhase) {
           this.setPersonalLog(
             player,
             `${ROBBER_NAME} stole your ${LAND_RESOURCE[tile.land]} production !`,
             NotifColor.PURPLE,
           );
-          //console.log(`⚖️ressoucesProduction: ${player.username} has been stolen by ${ROBBER_NAME} !`);
         }
       });
     }
