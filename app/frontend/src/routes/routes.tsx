@@ -4,6 +4,8 @@ import GameShell from "../game/GameShell";
 import AppLayout from "../layouts/AppLayout";
 import MainShell from "../components/MainShell";
 
+import PrivacyPage from "../pages/PrivacyPage";
+import TermsPage from "../pages/TermsPage";
 import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
 import StatsPage from "../pages/StatsPage";
@@ -12,6 +14,8 @@ import { ProtectedRoute } from "./ProtectedRoute";
 
 export const router = createBrowserRouter([
   { path: "/", Component: MainShell },
+  { path: "/privacy", Component: PrivacyPage },
+  { path: "/terms", Component: TermsPage },
   {
     element: <ProtectedRoute />,
     children: [
