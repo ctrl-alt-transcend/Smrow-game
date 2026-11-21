@@ -9,16 +9,11 @@ import { randomUUID } from 'crypto';
 import type { SocketUser } from './game.gateway';
 import { StatsService } from '../stats/stats.service';
 import { buildGameResult } from './game.result';
-import {
-  ZGEG_DEV,
-  type SettingsData,
-  type PlayerProfile,
-  type GameList,
-} from 'shared';
+import { type SettingsData, type PlayerProfile, type GameList } from 'shared';
 import {
   GameStateContext,
   PendingPhase,
-  type GameNotifier,
+  type PlayerNotifier,
 } from './GameStateContext';
 import { SocialGateway } from '../social/social.gateway';
 
@@ -27,7 +22,7 @@ export class GameService {
   private readonly logger = new Logger(GameService.name);
   private gameInstances: Map<string, GameStateContext> = new Map();
   private playersMap = new Map<string, string>(); //INFO: link playerId with a gameId
-  private notifier: GameNotifier = () => {};
+  private notifier: PlayerNotifier = () => {};
   private userIds = new Map<string, string>(); //INFO: link in game playerId (username) with the user ID
   private recordedGames = new Set<string>();
 
@@ -68,7 +63,7 @@ export class GameService {
    * The game doesn't know who is notified or how, it only decide when.
    * @details Called by GameGateway in afterInit
    */
-  setNotifier(notifier: GameNotifier) {
+  setNotifier(notifier: PlayerNotifier) {
     this.notifier = notifier;
   }
 
@@ -146,7 +141,7 @@ export class GameService {
 
   removePlayerFromGame(user: SocketUser, game: string) {
     this.playersMap.delete(user.id);
-    this.gameInstances.get(game)?.getPlayers().delete(user.username);
+    this.gameInstances.get(game)?.removePlayer(user.username);
     this.broadcastGameList();
     this.logger.log(`Game ${game}: player ${user.username} removed`);
   }
@@ -172,6 +167,12 @@ export class GameService {
       );
     }
     return this.gameInstances.get(gameId) as GameStateContext;
+  }
+
+  getGameInstanceByGameId(gameId: string): GameStateContext | null {
+    const game = this.gameInstances.get(gameId);
+    if (!game) return null;
+    return game;
   }
 
   getGameId(playerId: string): string {
@@ -203,17 +204,7 @@ export class GameService {
       );
     this.logger.log(`Game ${gameId}: player ${playerProfile.username} joined`);
     this.broadcastGameList();
-    //⚠️REMOVE in PROD -------------------
-    this.logger.verbose(`---------------------------------------
-⚠️ The following is currently set in 'app/backend/src/game/game.service.ts':
-- added mocked player '${ZGEG_DEV}', remove his 'diceRequest' in 'game.gateway.ts' for prod
----------------------------------------`);
-    game
-      .getPlayers()
-      .set(`${ZGEG_DEV}`, game.initPlayer('1010101010101010', `${ZGEG_DEV}`));
-    // -----------------------------------
   }
-
   private broadcastGameList() {
     this.socialGateway.handleGameList(this.getGamesList());
   }
