@@ -1,12 +1,9 @@
 import { useState } from "react";
 import {
   IconChevronDown,
-  IconHeart,
+  IconFileText,
+  IconLock,
   IconLogout,
-  IconMessage,
-  IconSettings,
-  IconStar,
-  IconSwitchHorizontal,
 } from "@tabler/icons-react";
 import cx from "clsx";
 import {
@@ -55,7 +52,7 @@ export function HeaderTabs() {
     <div className={classes.header}>
       <Container className={classes.mainSection} size="md">
         <Group justify="space-between">
-          <Text>Build by Goblins</Text>
+          <Text>Amazing Catan</Text>
 
           <Group gap="xs" visibleFrom="sm" component="nav">
             {navLinks.map((link) => (
@@ -102,52 +99,45 @@ export function HeaderTabs() {
               </UnstyledButton>
             </Menu.Target>
             <Menu.Dropdown>
+              <Menu.Label>Legal</Menu.Label>
+
               <Menu.Item
+                component={Link}
+                to="/privacy"
                 leftSection={
-                  <IconHeart
+                  <IconLock
                     size={16}
-                    color={theme.colors.red[6]}
+                    color={theme.colors.dark[6]}
                     stroke={1.5}
                   />
                 }
               >
-                Liked posts
+                Privacy Policy
               </Menu.Item>
               <Menu.Item
+                component={Link}
+                to="/terms"
                 leftSection={
-                  <IconStar
+                  <IconFileText
                     size={16}
-                    color={theme.colors.yellow[6]}
+                    color={theme.colors.dark[6]}
                     stroke={1.5}
                   />
                 }
               >
-                Saved posts
-              </Menu.Item>
-              <Menu.Item
-                leftSection={
-                  <IconMessage
-                    size={16}
-                    color={theme.colors.blue[6]}
-                    stroke={1.5}
-                  />
-                }
-              >
-                Your comments
+                Terms of Service
               </Menu.Item>
 
-              <Menu.Label>Settings</Menu.Label>
-              <Menu.Item leftSection={<IconSettings size={16} stroke={1.5} />}>
-                Account settings
-              </Menu.Item>
-              <Menu.Item
-                leftSection={<IconSwitchHorizontal size={16} stroke={1.5} />}
-              >
-                Change account
-              </Menu.Item>
+              <Menu.Divider />
               <Menu.Item
                 onClick={handleLogout}
-                leftSection={<IconLogout size={16} stroke={1.5} />}
+                leftSection={
+                  <IconLogout
+                    size={16}
+                    stroke={1.5}
+                    color={theme.colors.red[6]}
+                  />
+                }
               >
                 Logout
               </Menu.Item>
