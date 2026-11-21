@@ -8,7 +8,9 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 /** @brief: Defines the application gateway. This is where the Nest instance starts up
  */
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose'],
+  });
 
   app.useStaticAssets(join(process.cwd(), 'uploads', 'avatars'), {
     prefix: '/uploads/avatars',
