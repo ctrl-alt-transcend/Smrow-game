@@ -479,12 +479,14 @@ class GameStateContext {
   private everybodyRollDices() {
     this.data.players.forEach((p) => {
       if (p.firstDice === 0) this.diceRequest(p.username);
-      if (p.secondDice === 0) this.diceRequest(p.username);
-      console.log(
-        `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
-          `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
-          `${p.username} during « ${this.getCurrentPhase()} »`,
-      );
+      if (p.secondDice === 0) {
+        this.diceRequest(p.username);
+        console.log(
+          `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
+            `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
+            `${p.username} during « ${this.getCurrentPhase()} »`,
+        );
+      }
     });
   }
   public rollDice(p: Player): DiceRoll {

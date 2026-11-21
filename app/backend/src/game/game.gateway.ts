@@ -92,7 +92,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
         );
       }
       await this.emitGameDataDto(game);
-      return; // NOTE: ajout probable — voir remarque plus bas
+      return;
     }
     console.log(
       `Starting game ${game.getGameId()} with ${game.getPlayers().size} players.`,
