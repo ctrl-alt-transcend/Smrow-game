@@ -17,7 +17,7 @@ import {
   NotifColor,
 } from 'shared';
 import { JwtService } from '@nestjs/jwt';
-import type { Server, Socket, DefaultEventsMap } from 'socket.io';
+import type { Namespace, Socket, DefaultEventsMap } from 'socket.io';
 import { GameService } from './game.service';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
@@ -36,7 +36,7 @@ interface SocketData {
   user: SocketUser;
 }
 
-type SocketServer = Server<
+type SocketServer = Namespace<
   DefaultEventsMap,
   DefaultEventsMap,
   DefaultEventsMap,
@@ -50,7 +50,8 @@ type SocketClient = Socket<
 >;
 
 @WebSocketGateway({
-  path: '/ws/game',
+  path: '/ws',
+  namespace: 'game',
   cors: {
     origin: true,
     credentials: true,
@@ -64,6 +65,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     private readonly jwtService: JwtService,
     private readonly gameService: GameService,
   ) {}
+
+  /*---------- Game ----------*/
 
   private async emitGameDataDto(game: GameStateContext): Promise<void> {
     const sockets = await this.server.in(game.getGameId()).fetchSockets();
@@ -79,7 +82,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
 
   @SubscribeMessage('game:start')
   async startGame(@ConnectedSocket() client: SocketClient) {
-    this.logger.log('startGame event received from client:', client.id);
+    this.logger.log(`:warnstartGame event received from client: client.id`);
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (game.getCurrentPhase() !== Phase.PENDING) {
       return;
@@ -107,7 +110,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   handleQuitGame(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
-    client.disconnect(true);
+    client.disconnect(false);
     this.logger.log(`Player ${client.data.user.username} quit the game`);
   }
 
@@ -178,6 +181,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     this.logger.log(`Game ${gameId}: ended and deleted`);
   }
 
+  /*------------------------------*/
+
+  /*---------- Spectate ----------*/
+
   @SubscribeMessage('spectate:join')
   async handleJoinSpectate(
     @ConnectedSocket() client: SocketClient,
@@ -195,26 +202,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     }
   }
 
-  async afterInit(server: SocketServer) {
+  /*--------------------------------*/
+
+  /*---------- Connection ----------*/
+
+  afterInit(server: SocketServer) {
     this.gameService.setNotifier((id) => {
       const game = this.gameService.getGameInstanceByUserId(id);
       if (!game) return;
       void this.emitGameDataDto(game);
     });
 
-    /** @warning development only */
-    if (process.env.NODE_ENV === 'development') {
-      const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
-      instrument(this.server, {
-        auth: false,
-        mode: 'development',
-      });
-    }
-
     server.use((client: SocketClient, next) => {
       try {
         // Check is the client has a token or a cookie and save the cookie for verification with JWT
-
         const authToken = client.handshake.auth.token as string;
         const cookies = parseCookie(client.handshake.headers.cookie ?? '');
         const cookieToken = cookies.access_token;

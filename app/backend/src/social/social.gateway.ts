@@ -8,7 +8,7 @@ import {
 import { Logger } from '@nestjs/common';
 import { ChatService } from '../chat/chat.service';
 import { JwtService } from '@nestjs/jwt';
-import type { Server, Socket, DefaultEventsMap } from 'socket.io';
+import type { Namespace, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
 import type { JwtPayload, GameList } from 'shared';
@@ -23,7 +23,7 @@ interface SocketData {
   user: SocketUser;
 }
 
-type SocketServer = Server<
+type SocketServer = Namespace<
   DefaultEventsMap,
   DefaultEventsMap,
   DefaultEventsMap,
@@ -37,7 +37,8 @@ type SocketClient = Socket<
 >;
 
 @WebSocketGateway({
-  path: '/ws/social',
+  path: '/ws',
+  namespace: 'social',
   cors: {
     origin: true,
     credentials: true,
@@ -102,15 +103,7 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
     await client.leave('chat');
   }
 
-  async afterInit(server: SocketServer) {
-    /** @warning development only */
-    if (process.env.NODE_ENV === 'development') {
-      const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
-      instrument(server, {
-        auth: false,
-        mode: 'development',
-      });
-    }
+  afterInit(server: SocketServer) {
     server.use((client: SocketClient, next) => {
       try {
         const authToken = client.handshake.auth.token as string;
