@@ -1,5 +1,8 @@
+import { Logger } from '@nestjs/common';
 import type { Player, BuildPayload, TradePayload } from 'shared';
 import { TraderType } from 'shared';
+
+const logger = new Logger('GameUtils');
 
 // TODO: move to DTO??
 export function isBuildPayload(p: unknown): p is BuildPayload {
@@ -49,12 +52,11 @@ export function funnyRollLog(value: number): string {
 }
 
 export function printPlayer(p: Player) {
-  console.log(`🖨️ printPlayer: ${p.username}:`);
-  console.log(`- wood: ${p.resources.wood}`);
-  console.log(`- sheep: ${p.resources.sheep}`);
-  console.log(`- brick: ${p.resources.brick}`);
-  console.log(`- ore: ${p.resources.ore}`);
-  console.log(`- wheat: ${p.resources.wheat}`);
+  logger.debug(
+    `🖨️ printPlayer: ${p.username}: ` +
+      `wood=${p.resources.wood} sheep=${p.resources.sheep} ` +
+      `brick=${p.resources.brick} ore=${p.resources.ore} wheat=${p.resources.wheat}`,
+  );
 }
 
 export function printAllPlayers(p: Map<string, Player>) {

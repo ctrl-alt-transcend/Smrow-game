@@ -5,6 +5,7 @@ import {
   SubscribeMessage,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { ChatService } from '../chat/chat.service';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
@@ -43,6 +44,8 @@ type SocketClient = Socket<
   }, //WARN: dev only
 })
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
+  private readonly logger = new Logger(SocialGateway.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly chatService: ChatService,
@@ -78,7 +81,9 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
     if (content.length === 0 || content.length > 500) {
       return;
     }
-    console.log(client.data.user.username, 'sent a chat message:', content); //TEST: DEV_ONLY
+    this.logger.verbose(
+      `${client.data.user.username} sent a chat message: ${content}`,
+    ); //TEST: DEV_ONLY
 
     const chatMessage = await this.chatService.addChatMessage(
       client.data.user.id,
@@ -125,11 +130,8 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
         client.data.user = { id: payload.sub, username: payload.username };
         next();
       } catch (error) {
-        console.log(
-          'Client connection rejected:',
-          client.id,
-          ' - ',
-          (error as Error).message,
+        this.logger.warn(
+          `Client connection rejected: ${client.id} - ${(error as Error).message}`,
         );
         next(new Error('Authentication error'));
       }
@@ -138,6 +140,6 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
 
   handleConnection(client: Socket) {
     //TODO: handle multiple connections from the same user.
-    console.log('Client connected:', client.id); //TEST:
+    this.logger.verbose(`Client connected: ${client.id}`); //TEST:
   }
 }
