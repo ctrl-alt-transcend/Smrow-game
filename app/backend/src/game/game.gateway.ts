@@ -71,7 +71,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     try {
       gameData = game.getGameDataDto(user);
     } catch (e) {
-      this.logger.error(`getGameDataDto error: ${e}`);
+      this.logger.error(
+        `Game ${game.getGameId()}: getGameDataDto failed for ${user}`,
+        e instanceof Error ? e.stack : String(e),
+      );
       return;
     }
     this.server.to(game.getGameId()).emit('gameState', gameData);
@@ -84,7 +87,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
 
   @SubscribeMessage('startGame')
   startGame(@ConnectedSocket() client: SocketClient) {
-    this.logger.verbose('startGame event received from client:', client.id);
+    this.logger.verbose(
+      `startGame received from ${client.data.user.username} (${client.id})`,
+    );
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (game.getCurrentPhase() !== Phase.PENDING) {
       return;
@@ -101,7 +106,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       this.emitGameDataDto(game, client.data.user.username);
     }
     this.logger.verbose(
-      `Starting game ${game.getGameId()} with ${game.getPlayers().size} players.`,
+      `Game ${game.getGameId()}: starting with ${game.getPlayers().size} players`,
     );
     game.launchGame();
     this.emitGameDataDto(game, client.data.user.username);
@@ -112,7 +117,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
     client.disconnect(true);
-    this.logger.log(`player ${client.data.user.username} disconnected`);
+    this.logger.log(`Player ${client.data.user.username} quit the game`);
   }
 
   /**
@@ -174,7 +179,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       this.emitGameDataDto(game, client.data.user.username);
       return { ok: true, data: game.getGameDataDto(client.data.user.username) };
     } catch (e) {
-      this.logger.warn('joinRoom failed', e);
+      this.logger.warn(
+        `joinRoom failed for ${client.data.user.username}: ${(e as Error).message}`,
+      );
       return { ok: false, error: 'not in game' };
     }
   }

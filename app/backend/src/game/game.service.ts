@@ -104,7 +104,7 @@ export class GameService {
       ),
     );
     this.addPlayerToGame(gameId, playerProfile);
-    this.logger.log(`Game created with id ${gameId}`);
+    this.logger.log(`Game ${gameId}: created`);
   }
 
   joinGame(playerProfile: PlayerProfile, gameId: string) {
@@ -120,7 +120,7 @@ export class GameService {
       );
     }
     if (game.getPlayers().size >= 4) {
-      this.logger.debug(`Game ${gameId} is full`);
+      this.logger.debug(`Game ${gameId}: full`);
       throw new ForbiddenException(
         `Player ${playerId} cannot join game with id ${gameId}: is full`,
       );
@@ -148,7 +148,7 @@ export class GameService {
     this.playersMap.delete(user.id);
     this.gameInstances.get(game)?.getPlayers().delete(user.username);
     this.broadcastGameList();
-    this.logger.log(`Removed player ${user.username} from game ${game}`);
+    this.logger.log(`Game ${game}: player ${user.username} removed`);
   }
 
   private getGameInstance(gameId: string): GameStateContext {
@@ -177,7 +177,7 @@ export class GameService {
   getGameId(playerId: string): string {
     const gameId = this.playersMap.get(playerId);
     if (!gameId) {
-      this.logger.debug(`GetGameId: Player ${playerId} is not in a game`);
+      this.logger.debug(`Player ${playerId} is not in a game`);
       throw new NotFoundException(
         `Player with id ${playerId} is not in a game`,
       );
@@ -201,7 +201,7 @@ export class GameService {
         playerProfile.username,
         game.initPlayer(playerProfile.id, playerProfile.username),
       );
-    this.logger.log(`player ${playerProfile.username} join game ${gameId}`);
+    this.logger.log(`Game ${gameId}: player ${playerProfile.username} joined`);
     this.broadcastGameList();
     //⚠️REMOVE in PROD -------------------
     this.logger.verbose(`---------------------------------------

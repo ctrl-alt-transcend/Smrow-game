@@ -382,7 +382,7 @@ class GameStateContext {
       }
     }
     this.logger.verbose(
-      `Game: ${this.getGameId()}: setNextPlayer: ${this.data.whosTurn} is now playing`,
+      `Game ${this.getGameId()}: ${this.data.whosTurn} is now playing`,
     );
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
@@ -421,14 +421,14 @@ class GameStateContext {
    **********************************/
   /** To call when the game is ready to start */
   public launchGame() {
-    this.logger.verbose(`Launch game ${this.getGameId()}`);
+    this.logger.verbose(`Game ${this.getGameId()}: launching`);
     this.assignFactions();
     this.setCurrentPhase(Phase.START);
     this.transitionTo(new StartPhase());
     this.startWatch();
 
     this.logger.verbose(
-      `Game ${this.getGameId()} current phase :', this.getCurrentPhase()`,
+      `Game ${this.getGameId()}: current phase: ${this.getCurrentPhase()}`,
     );
   }
 
@@ -469,7 +469,7 @@ class GameStateContext {
     this.setNextPlayer(0);
     this.setTurnCount(0);
     this.logger.verbose(
-      `Game ${this.getGameId()} setupNextPhase: currentPhase: ${this.getCurrentPhase()} | nextPhase: ${nextPhase} | starting player: ${this.data.whosTurn}`,
+      `Game ${this.getGameId()}: phase ${this.getCurrentPhase()} -> ${nextPhase} | starting player: ${this.data.whosTurn}`,
     );
     this.setCurrentPhase(nextPhase);
     this.setMasterLog(
@@ -532,7 +532,7 @@ class GameStateContext {
             NotifColor.GREEN,
           );
           this.logger.verbose(
-            `Game ${this.getGameId()}:  ⚖️ressoucesProduction: ${player.username} produced ${prod} ${LAND_RESOURCE[tile.land]}`,
+            `Game ${this.getGameId()}: ⚖️ ${player.username} produced ${prod} ${LAND_RESOURCE[tile.land]}`,
           );
         } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
@@ -541,7 +541,7 @@ class GameStateContext {
             NotifColor.PURPLE,
           );
           this.logger.verbose(
-            `Game ${this.getGameId()}: ⚖️ressoucesProduction: ${player.username} can't produce anything in the ${LandType.DESERT}`,
+            `Game ${this.getGameId()}: ⚖️ ${player.username} can't produce anything in the ${LandType.DESERT}`,
           );
         } else if (tile.hasRobber && !placementPhase) {
           this.setPersonalLog(
@@ -550,7 +550,7 @@ class GameStateContext {
             NotifColor.PURPLE,
           );
           this.logger.verbose(
-            `Game ${this.getGameId()}: ⚖️ressoucesProduction: ${player.username} has been stolen by ${ROBBER_NAME} !`,
+            `Game ${this.getGameId()}: ⚖️ ${player.username}'s production has been stolen by ${ROBBER_NAME}`,
           );
         }
       });
@@ -610,9 +610,9 @@ class GameStateContext {
     const p = this.getPlayerByUsername(this.data.whosTurn);
     if (!p) return;
     this.logger.verbose(
-      `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
+      `Game ${this.getGameId()}: no actions within the elapsed time ` +
         `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
-        `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
+        `${this.data.whosTurn} during ${this.getCurrentPhase()}`,
     );
     if (this.turnTimeoutId === null) return;
     this.turnTimeoutId = null;
