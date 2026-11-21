@@ -5,7 +5,7 @@ import { useCallback } from "react";
 
 export default function SkipTurnButton({ isMyTurn }: { isMyTurn: boolean }) {
   const handleSkipRequest = useCallback(() => {
-    socket.emit("skip");
+    socket.emit("game:skip");
   }, []);
 
   const openModal = () => {

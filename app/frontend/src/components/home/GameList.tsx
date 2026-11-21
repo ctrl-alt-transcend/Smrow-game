@@ -28,14 +28,14 @@ export default function ListGames() {
       setGames(gameList);
     };
 
-    socket.emit("joinGameList");
-    socket.on("game list update", onGameListUpdate);
+    socket.emit("gameList:join");
+    socket.on("gameList:update", onGameListUpdate);
     getGamesList();
 
     return () => {
       cancelled = true;
-      socket.off("game list update", onGameListUpdate);
-      socket.emit("leaveGameList");
+      socket.off("gameList:update", onGameListUpdate);
+      socket.emit("gameList:leave");
     };
   }, []);
 

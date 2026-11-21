@@ -69,7 +69,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const sockets = await this.server.in(game.getGameId()).fetchSockets();
     for (const socket of sockets) {
       const dto = game.getGameDataDto(socket.data.user.username);
-      if (dto) socket.emit('gameState', dto);
+      if (dto) socket.emit('game:state', dto);
     }
     if (game.isGameTerminated()) {
       this.endGame(game);
@@ -77,7 +77,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     void this.gameService.recordResultIfOver(game);
   }
 
-  @SubscribeMessage('startGame')
+  @SubscribeMessage('game:start')
   async startGame(@ConnectedSocket() client: SocketClient) {
     this.logger.log('startGame event received from client:', client.id);
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
@@ -103,7 +103,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     await this.emitGameDataDto(game);
   }
 
-  @SubscribeMessage('quitGame')
+  @SubscribeMessage('game:quit')
   handleQuitGame(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
@@ -115,7 +115,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
    * @brief Handle the 'dice' event from the client.
    * @details Always broadcasts the new gameState to all clients in the room.
    */
-  @SubscribeMessage('dice')
+  @SubscribeMessage('game:dice')
   async dice(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.diceRequest(client.data.user.username);
@@ -123,7 +123,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     await this.emitGameDataDto(game);
   }
 
-  @SubscribeMessage('skip')
+  @SubscribeMessage('game:skip')
   async skip(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.skipRequest(client.data.user.username);
@@ -131,7 +131,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     await this.emitGameDataDto(game);
   }
 
-  @SubscribeMessage('build')
+  @SubscribeMessage('game:build')
   async build(
     @ConnectedSocket() client: SocketClient,
     @MessageBody(new ZodValidationPipe(BuildPayloadSchema))
@@ -143,7 +143,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     await this.emitGameDataDto(game);
   }
 
-  @SubscribeMessage('trade')
+  @SubscribeMessage('game:trade')
   async trade(
     @ConnectedSocket() client: SocketClient,
     @MessageBody(new ZodValidationPipe(TradePayloadSchema))
@@ -155,7 +155,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     await this.emitGameDataDto(game);
   }
 
-  @SubscribeMessage('joinRoom')
+  @SubscribeMessage('game:join')
   async handleJoinRoom(@ConnectedSocket() client: SocketClient) {
     const userId = client.data.user.id;
     try {
@@ -178,7 +178,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     this.logger.log(`Game ${gameId}: ended and deleted`);
   }
 
-  @SubscribeMessage('joinSpectate')
+  @SubscribeMessage('spectate:join')
   async handleJoinSpectate(
     @ConnectedSocket() client: SocketClient,
     @MessageBody(new ZodValidationPipe(z.string().nonempty()))

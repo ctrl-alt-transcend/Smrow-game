@@ -59,20 +59,20 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   // }
 
   handleGameList(game: GameList[]) {
-    this.server.to('gameList').emit('game list update', game);
+    this.server.to('gameList').emit('gameList:update', game);
   }
 
-  @SubscribeMessage('joinGameList')
+  @SubscribeMessage('gameList:join')
   async handleJoimGameList(client: SocketClient) {
     await client.join('gameList');
   }
 
-  @SubscribeMessage('leaveGameList')
+  @SubscribeMessage('gameList:leave')
   async handeLeaveGameList(client: SocketClient) {
     await client.leave('gameList');
   }
 
-  @SubscribeMessage('chatMessage')
+  @SubscribeMessage('chat:send')
   async handleChatMessage(client: SocketClient, payload: { draft: string }) {
     if (typeof payload.draft !== 'string') {
       return;
@@ -89,15 +89,15 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
       client.data.user.id,
       content,
     );
-    this.server.to('chat').emit('new chat message', chatMessage);
+    this.server.to('chat').emit('chat:message', chatMessage);
   }
 
-  @SubscribeMessage('joinChat')
+  @SubscribeMessage('chat:join')
   async handleJoinChat(client: SocketClient) {
     await client.join('chat');
   }
 
-  @SubscribeMessage('leaveChat')
+  @SubscribeMessage('chat:leave')
   async handleLeaveChat(client: SocketClient) {
     await client.leave('chat');
   }

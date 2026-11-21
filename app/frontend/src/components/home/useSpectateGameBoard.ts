@@ -12,7 +12,7 @@ export function useSpectateGameBoard(gameId: string): {
       try {
         const response = await socket
           .timeout(5000)
-          .emitWithAck("joinSpectate", gameId);
+          .emitWithAck("spectate:join", gameId);
         console.log("[joinSpectate] ack =", response);
         if (response?.ok && response.data) setGame(response.data);
         else {
@@ -30,7 +30,7 @@ export function useSpectateGameBoard(gameId: string): {
 
     socket.on("connect", onConnect);
     socket.on("connect_error", onConnectError);
-    socket.on("gameState", setGame);
+    socket.on("game:state", setGame);
 
     if (socket.connected) void onConnect();
     else socket.connect();
@@ -38,7 +38,7 @@ export function useSpectateGameBoard(gameId: string): {
     return () => {
       socket.off("connect", onConnect);
       socket.off("connect_error", onConnectError);
-      socket.off("gameState", setGame);
+      socket.off("game:state", setGame);
       socket.disconnect();
     };
   }, [gameId]);
