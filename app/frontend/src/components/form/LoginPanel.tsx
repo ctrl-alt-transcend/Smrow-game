@@ -1,6 +1,7 @@
 import {
   Button,
   Anchor,
+  Checkbox,
   Group,
   Paper,
   Stack,
@@ -9,6 +10,8 @@ import {
   TextInput,
   type PaperProps,
 } from "@mantine/core";
+
+import { Link } from "react-router";
 
 import { schemaResolver, useForm } from "@mantine/form";
 import { upperFirst, useToggle } from "@mantine/hooks";
@@ -22,6 +25,7 @@ export function LoginPanel(props: PaperProps) {
   const { register, login } = useAuth();
   const [type, toggle] = useToggle(["register", "login"]);
   const [error, setError] = useState<string | string[] | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const registerForm = useForm({
     mode: "uncontrolled",
@@ -45,6 +49,10 @@ export function LoginPanel(props: PaperProps) {
 
   const handleRegister = registerForm.onSubmit(async (data) => {
     setError(null);
+    if (!acceptedTerms) {
+      setError("You must accept the Terms of Service and Privacy Policy");
+      return;
+    }
     try {
       await register(data);
     } catch (error: any) {
@@ -107,10 +115,28 @@ export function LoginPanel(props: PaperProps) {
               {...registerForm.getInputProps("password")}
               error={registerForm.errors.password}
             />
+            <Checkbox
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.currentTarget.checked)}
+              label={
+                <>
+                  I accept the{" "}
+                  <Anchor component={Link} to="/terms" size="sm">
+                    Terms of Service
+                  </Anchor>{" "}
+                  and the{" "}
+                  <Anchor component={Link} to="/privacy" size="sm">
+                    Privacy Policy
+                  </Anchor>
+                </>
+              }
+            />
           </Stack>
 
           <Group justify="space-between" mt="xl">
-            <Button type="submit">{upperFirst(type)}</Button>
+            <Button type="submit" disabled={!acceptedTerms}>
+              {upperFirst(type)}
+            </Button>
           </Group>
         </form>
       )}
@@ -160,6 +186,17 @@ export function LoginPanel(props: PaperProps) {
       <Group>
         <Button onClick={handleGoogleLogin}>Continue with google</Button>
       </Group>
+      <Text size="xs" c="dimmed" mt="xs">
+        By continuing with Google, you accept the{" "}
+        <Anchor component={Link} to="/terms" size="xs">
+          Terms of Service
+        </Anchor>{" "}
+        and the{" "}
+        <Anchor component={Link} to="/privacy" size="xs">
+          Privacy Policy
+        </Anchor>
+        .
+      </Text>
     </Paper>
   );
 }
