@@ -1,5 +1,5 @@
 ENV := dev
-DOCKER_COMPOSE_FILE := ./app/docker-compose.yml
+DOCKER_COMPOSE_FILE := ./app/docker-compose.prod.yml
 
 ifeq ($(ENV), dev)
 	DOCKER_COMPOSE_FILE = ./app/docker-compose.dev.yml
@@ -49,7 +49,7 @@ $(APP_DIR)/node_modules/.package-lock.json: $(APP_DIR)/package.json $(APP_DIR)/p
 	@echo "Installing frontend packages..."
 	cd $(APP_DIR) && npm ci
 
-check: check-back check-front
+check: shared check-back check-front
 
 check-back: install
 	@echo "checking format"
