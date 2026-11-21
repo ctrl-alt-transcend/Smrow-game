@@ -5,7 +5,7 @@ import { ROAD_SIZE, HOVER_EFFECT } from "shared";
 
 export const Road: React.FC<RoadProps> = ({
   data,
-  isSelected,
+  isSelected = false,
   isHovered,
   onHoverChange,
   onClick,
@@ -35,7 +35,7 @@ export const Road: React.FC<RoadProps> = ({
       onMouseLeave={onMouseLeave}
       onClick={(e) => {
         e.stopPropagation();
-        onClick(data);
+        onClick?.(data);
       }}
       style={{ cursor: "pointer" }}
     />

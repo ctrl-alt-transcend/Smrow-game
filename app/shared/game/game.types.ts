@@ -27,8 +27,8 @@ export const GameboardLayout = {
 export type GameboardLayout = (typeof GameboardLayout)[keyof typeof GameboardLayout];
 export const GameboardLayoutSchema = z.enum(GameboardLayout);
 
-export const TRADE_LIMIT_DFLT = 8;
-export const BUILD_LIMIT_DFLT = 4;
+export const TRADE_LIMIT_DFLT = 10;
+export const BUILD_LIMIT_DFLT = 5;
 
 export const SPECIAL_PORT_OFFER_RATE_DFLT = 2;
 export const GENERIC_PORT_OFFER_RATE_DFLT = 3;
@@ -38,6 +38,9 @@ export const ROAD_POINT_DFLT = 0;
 export const SETTLEMENT_POINT_DFLT = 1;
 export const CITY_POINT_DFLT = 1;
 export const POINTS_TO_WIN_DFLT = 10;
+
+export const ROBBER_THRESHOLD_DFLT = 7;
+export const ROBBER_THRESHOLD_MAX = 150;
 
 export const MIN_SETTINGS = 1;
 export const MAX_LIMIT = 40;
@@ -50,7 +53,7 @@ export const MIN_MULTIPLIER = 1;
 export const MULTIPLIER_DFLT = 2;
 export const TIME_MAX = 180;
 export const TIME_MIN = 5;
-export const TIME_DFLT = 60;
+export const TIME_DFLT = 90;
 
 export const SettingsDataSchema = z.object({
   // Layout setting
@@ -83,6 +86,8 @@ export const SettingsDataSchema = z.object({
   pointsToWin: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_POINTS_TO_WIN),
 
   // Bonus settings
+  /** Threshold resources amount for the players to be stolen by the robber */
+  robberThreshold: z.number().int().nonnegative().min(MIN_SETTINGS).max(ROBBER_THRESHOLD_MAX),
   /** Resource multiplication at production */
   resourcesMultiplier: z.number().int().nonnegative().min(MIN_MULTIPLIER).max(MAX_MULTIPLIER),
   /** Amount of wood to start the game with*/
@@ -464,7 +469,7 @@ export type GameDataBase = {
 }
 
 export type GameDataDto  = GameDataBase & {
-  players: Player[];
+  players: PlayerPublicDto[];
   currentPlayer: PlayerDto;
   settings: SettingsData;
 }
@@ -512,22 +517,26 @@ export type PlayerBase = {
   level: number;
   victoryPoints: number;
   timeToPlay: number;
-  resources: Resources;
   firstDice: number,
   secondDice: number,
   currentRoll: DiceRoll,
   faction: Faction;
   avatarURL: string | null;
-  personalLog: GameLog[];
-  guideLog: string;
 }
 
-export type Player = PlayerBase & {
+type PlayerPrivate = {
+  guideLog: string;
+  resources: Resources;
+  personalLog: GameLog[];
+}
+
+export type Player = PlayerBase & PlayerPrivate & {
   settlementsBuilt: Map<string, SettlementData>
   firstSettlementPlaced: boolean;
 }
 
-export type PlayerDto = PlayerBase
+export type PlayerPublicDto = PlayerBase;
+export type PlayerDto = PlayerBase & PlayerPrivate;
 
 /***********************************
  * Game Payloads
@@ -559,3 +568,69 @@ export const BuildPayloadSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 export type BuildPayload = z.infer<typeof BuildPayloadSchema>;
+
+/***********************************
+ * Game Presets
+ **********************************/
+export const DEFAULT_PRESET: SettingsData = {
+  gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
+  turnDurationSeconds: 30,
+  tradeLimit: 4,
+  buildLimit: 2,
+  specialPortOfferRate: 1,
+  genericPortOfferRate: GENERIC_PORT_OFFER_RATE_DFLT,
+  reserveOfferRate: RESERVE_OFFER_RATE_DFLT,
+  settlementPoints: SETTLEMENT_POINT_DFLT,
+  cityPoints: 2,
+  pointsToWin: 15,
+  roadPoints: 1,
+  robberThreshold: 50,
+  resourcesMultiplier: MULTIPLIER_DFLT,
+  woodBonus: 10,
+  sheepBonus: 10,
+  brickBonus: 10,
+  oreBonus: 10,
+  wheatBonus: 10,
+};
+
+export const MAXXING_PRESET: SettingsData = {
+  gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
+  turnDurationSeconds: 5,
+  tradeLimit: MAX_LIMIT,
+  buildLimit: MAX_LIMIT,
+  specialPortOfferRate: 1,
+  genericPortOfferRate: 2,
+  reserveOfferRate: 3,
+  roadPoints: 2,
+  settlementPoints: 10,
+  cityPoints: 5,
+  pointsToWin: 80,
+  robberThreshold: ROBBER_THRESHOLD_MAX,
+  resourcesMultiplier: MAX_MULTIPLIER,
+  woodBonus: MAX_BONUS,
+  sheepBonus: MAX_BONUS,
+  brickBonus: MAX_BONUS,
+  oreBonus: MAX_BONUS,
+  wheatBonus: MAX_BONUS,
+};
+
+export const CLASSIC_PRESET: SettingsData = {
+  gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
+  turnDurationSeconds: TIME_DFLT,
+  tradeLimit: TRADE_LIMIT_DFLT,
+  buildLimit: BUILD_LIMIT_DFLT,
+  specialPortOfferRate: SPECIAL_PORT_OFFER_RATE_DFLT,
+  genericPortOfferRate: GENERIC_PORT_OFFER_RATE_DFLT,
+  reserveOfferRate: RESERVE_OFFER_RATE_DFLT,
+  settlementPoints: SETTLEMENT_POINT_DFLT,
+  cityPoints: CITY_POINT_DFLT,
+  pointsToWin: POINTS_TO_WIN_DFLT,
+  roadPoints: ROAD_POINT_DFLT,
+  robberThreshold: ROBBER_THRESHOLD_DFLT,
+  resourcesMultiplier: MULTIPLIER_DFLT,
+  woodBonus: 0,
+  sheepBonus: 0,
+  brickBonus: 0,
+  oreBonus: 0,
+  wheatBonus: 0,
+};

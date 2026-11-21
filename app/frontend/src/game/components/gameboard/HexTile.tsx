@@ -17,7 +17,7 @@ const THIEF_HEIGHT = THIEF_WIDTH;
 
 export const HexTile: React.FC<TileProps> = ({
   data,
-  isSelected,
+  isSelected = false,
   isHovered,
   onHoverChange,
   onClick,
@@ -51,7 +51,7 @@ export const HexTile: React.FC<TileProps> = ({
       onMouseLeave={onMouseLeave}
       onClick={(e) => {
         e.stopPropagation();
-        onClick(data);
+        onClick?.(data);
       }}
       style={{ cursor: "pointer" }}
     >

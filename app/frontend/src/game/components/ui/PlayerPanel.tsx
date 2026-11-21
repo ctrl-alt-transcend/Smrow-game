@@ -1,5 +1,5 @@
 import { Card, Stack, Text, Avatar } from "@mantine/core";
-import type { Player } from "shared";
+import type { PlayerPublicDto } from "shared";
 
 //TODO: Make this responsive
 const AVATAR_SIZE = 50;
@@ -40,7 +40,7 @@ export function PlayerCard({ name, level, score, avatarURL }: PlayerCardProps) {
   );
 }
 
-export function PlayerPanel({ players }: { players: Player[] }) {
+export function PlayerPanel({ players }: { players: PlayerPublicDto[] }) {
   return (
     <Stack gap={1}>
       {players.map((player) => (

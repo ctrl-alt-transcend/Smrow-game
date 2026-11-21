@@ -12,8 +12,6 @@ import {
   BuildPayloadSchema,
   type TradePayload,
   TradePayloadSchema,
-  GameDataDto,
-  ZGEG_DEV,
   type JwtPayload,
   Phase,
   NotifColor,
@@ -26,6 +24,7 @@ import { AUTH } from '../config/config';
 import { GameStateContext } from './GameStateContext';
 import { parseCookie } from 'cookie';
 import { ZodValidationPipe } from 'nestjs-zod';
+import z from 'zod';
 import { Logger } from '@nestjs/common';
 
 export interface SocketUser {
@@ -66,30 +65,21 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     private readonly gameService: GameService,
   ) {}
 
-  private emitGameDataDto(game: GameStateContext, user: string) {
-    let gameData: GameDataDto;
-    try {
-      gameData = game.getGameDataDto(user);
-    } catch (e) {
-      this.logger.error(
-        `Game ${game.getGameId()}: getGameDataDto failed for ${user}`,
-        e instanceof Error ? e.stack : String(e),
-      );
-      return;
+  private async emitGameDataDto(game: GameStateContext): Promise<void> {
+    const sockets = await this.server.in(game.getGameId()).fetchSockets();
+    for (const socket of sockets) {
+      const dto = game.getGameDataDto(socket.data.user.username);
+      if (dto) socket.emit('gameState', dto);
     }
-    this.server.to(game.getGameId()).emit('gameState', gameData);
     if (game.isGameTerminated()) {
       this.endGame(game);
     }
-    // every action ends here, so a finished game is recorded right away
     void this.gameService.recordResultIfOver(game);
   }
 
   @SubscribeMessage('startGame')
-  startGame(@ConnectedSocket() client: SocketClient) {
-    this.logger.verbose(
-      `startGame received from ${client.data.user.username} (${client.id})`,
-    );
+  async startGame(@ConnectedSocket() client: SocketClient) {
+    this.logger.log('startGame event received from client:', client.id);
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (game.getCurrentPhase() !== Phase.PENDING) {
       return;
@@ -103,13 +93,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
           NotifColor.PURPLE,
         );
       }
-      this.emitGameDataDto(game, client.data.user.username);
+      await this.emitGameDataDto(game);
+      return;
     }
     this.logger.verbose(
       `Game ${game.getGameId()}: starting with ${game.getPlayers().size} players`,
     );
     game.launchGame();
-    this.emitGameDataDto(game, client.data.user.username);
+    await this.emitGameDataDto(game);
   }
 
   @SubscribeMessage('quitGame')
@@ -125,29 +116,23 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
    * @details Always broadcasts the new gameState to all clients in the room.
    */
   @SubscribeMessage('dice')
-  dice(@ConnectedSocket() client: SocketClient) {
+  async dice(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.diceRequest(client.data.user.username);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.diceRequest(`${ZGEG_DEV}`);
-    game.phaseCheckRequest();
-    // -------------
-
-    this.emitGameDataDto(game, client.data.user.username);
+    await this.emitGameDataDto(game);
   }
 
   @SubscribeMessage('skip')
-  skip(@ConnectedSocket() client: SocketClient) {
+  async skip(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.skipRequest(client.data.user.username);
     game.phaseCheckRequest();
-    this.emitGameDataDto(game, client.data.user.username);
+    await this.emitGameDataDto(game);
   }
 
   @SubscribeMessage('build')
-  build(
+  async build(
     @ConnectedSocket() client: SocketClient,
     @MessageBody(new ZodValidationPipe(BuildPayloadSchema))
     payload: BuildPayload,
@@ -155,11 +140,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.buildRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-    this.emitGameDataDto(game, client.data.user.username);
+    await this.emitGameDataDto(game);
   }
 
   @SubscribeMessage('trade')
-  trade(
+  async trade(
     @ConnectedSocket() client: SocketClient,
     @MessageBody(new ZodValidationPipe(TradePayloadSchema))
     payload: TradePayload,
@@ -167,7 +152,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     game.tradeRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-    this.emitGameDataDto(game, client.data.user.username);
+    await this.emitGameDataDto(game);
   }
 
   @SubscribeMessage('joinRoom')
@@ -176,7 +161,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     try {
       const game = this.gameService.getGameInstanceByUserId(userId);
       await client.join(game.getGameId());
-      this.emitGameDataDto(game, client.data.user.username);
+      await this.emitGameDataDto(game);
       return { ok: true, data: game.getGameDataDto(client.data.user.username) };
     } catch (e) {
       this.logger.warn(
@@ -193,10 +178,28 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     this.logger.log(`Game ${gameId}: ended and deleted`);
   }
 
+  @SubscribeMessage('joinSpectate')
+  async handleJoinSpectate(
+    @ConnectedSocket() client: SocketClient,
+    @MessageBody(new ZodValidationPipe(z.string().nonempty()))
+    gameId: string,
+  ) {
+    try {
+      const game = this.gameService.getGameInstanceByGameId(gameId);
+      if (!game) return { ok: false, error: "game doesn't exist" };
+      await client.join(game.getGameId());
+      return { ok: true, data: game.getGameDataDto(game.getWhosTurn()) };
+    } catch (e) {
+      console.log('joinSpectate failed', e);
+      return { ok: false, error: 'joinSpectate failed' };
+    }
+  }
+
   async afterInit(server: SocketServer) {
-    this.gameService.setNotifier((id, username) => {
+    this.gameService.setNotifier((id) => {
       const game = this.gameService.getGameInstanceByUserId(id);
-      this.emitGameDataDto(game, username);
+      if (!game) return;
+      void this.emitGameDataDto(game);
     });
 
     /** @warning development only */

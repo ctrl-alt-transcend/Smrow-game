@@ -14,6 +14,7 @@ import {
   ROBBER_NAME,
   ROLLED_A,
   ZGEG_DEV,
+  PlayerPublicDto,
 } from 'shared';
 import {
   GameBoard,
@@ -33,7 +34,6 @@ import { updateValue, funnyRollLog } from './game.utils';
 import { buildCheck, BuildingsInGame } from './calculation/handleBuilds';
 import { createGameBoard } from './calculation/createGameBoard';
 import { tradeCheck } from './calculation/handleTrade';
-import { NotFoundException, Logger } from '@nestjs/common';
 import {
   addStartingResources,
   produceResources,
@@ -71,9 +71,9 @@ abstract class State {
 /**
  * @brief define the fonction signature
  *
- * GameNotifier is a callback function that is called when the player turn expires
+ * PlayerNotifier is a callback function that is called when the player turn expires
  */
-export type GameNotifier = (id: string, username: string) => void;
+export type PlayerNotifier = (id: string, username: string) => void;
 
 /**
  * The Context defines the interface of interest to clients. It also maintains a
@@ -86,21 +86,20 @@ class GameStateContext {
   protected graph!: GameBoardGraph;
   protected settings!: SettingsData;
   protected buildings: BuildingsInGame = new Map();
+  private readonly notify: PlayerNotifier;
+  private turnTimeoutId: NodeJS.Timeout | null = null;
   private logId: number = 0;
   private rollId: number = 0;
   private factionSwitch: number = 0;
+  private roundCount: number = 0;
   private turnCount: number = 0;
   private turnStart: number = 0;
-  private turnTimeoutId: NodeJS.Timeout | null = null;
-  private readonly notify: GameNotifier;
-  private roundCount: number = 0;
-  private readonly logger = new Logger(GameStateContext.name);
 
   constructor(
     gameId: string,
     settings: SettingsData,
     state: State,
-    notify: GameNotifier,
+    notify: PlayerNotifier,
   ) {
     this.notify = notify;
     this.settings = settings;
@@ -129,7 +128,7 @@ class GameStateContext {
       id: id,
       username: username,
       victoryPoints: 0,
-      timeToPlay: this.settings.turnDurationSeconds,
+      timeToPlay: 0,
       level: 1, //⚠️ For testing only
       firstDice: 0,
       secondDice: 0,
@@ -201,6 +200,9 @@ class GameStateContext {
   public getGameId(): string {
     return this.data.gameId;
   }
+  public getWhosTurn(): string {
+    return this.data.whosTurn;
+  }
   public getLogId(): number {
     return this.rollId;
   }
@@ -247,6 +249,20 @@ class GameStateContext {
     }
     return false;
   }
+  public getPlayerPublicDto(player: Player): PlayerPublicDto {
+    return {
+      id: player.id,
+      username: player.username,
+      level: player.level,
+      victoryPoints: player.victoryPoints,
+      timeToPlay: player.timeToPlay,
+      firstDice: player.firstDice,
+      secondDice: player.secondDice,
+      currentRoll: player.currentRoll,
+      faction: player.faction,
+      avatarURL: player.avatarURL,
+    };
+  }
   public getPlayerDto(p: Player): PlayerDto {
     return {
       id: p.id,
@@ -258,24 +274,27 @@ class GameStateContext {
       level: p.level,
       avatarURL: p.avatarURL,
       faction: p.faction,
+      currentRoll: p.currentRoll,
       personalLog: p.personalLog,
       guideLog: p.guideLog,
       resources: p.resources,
-      currentRoll: p.currentRoll,
     };
   }
-  public getGameDataDto(username: string): GameDataDto {
+  public getGameDataDto(username: string): GameDataDto | null {
     const gameData = this.getGameData();
+    const me =
+      this.getPlayerByUsername(username) ??
+      this.getPlayerByUsername(this.getWhosTurn());
+    if (!me) return null;
 
-    const p = this.getPlayerByUsername(username);
-    if (!p) {
-      throw new NotFoundException(`Unknown username: ${username}`);
-    }
+    const playersPublic: PlayerPublicDto[] = [
+      ...this.getPlayers().values(),
+    ].map((player) => this.getPlayerPublicDto(player));
     return {
-      currentPlayer: this.getPlayerDto(p),
+      currentPlayer: this.getPlayerDto(me),
       winner: gameData.winner,
       winCondition: gameData.winCondition,
-      players: Array.from(gameData.players.values()),
+      players: playersPublic,
       gameId: gameData.gameId,
       dicesSum: gameData.dicesSum,
       masterLog: gameData.masterLog,
@@ -321,13 +340,6 @@ class GameStateContext {
       this.setGuideLog(player, message);
     });
   }
-  public setTurnCount(count?: number) {
-    if (count !== undefined) {
-      this.turnCount = count;
-    } else {
-      this.turnCount++;
-    }
-  }
   public setPersonalLog(p: Player, message: string, type: NotifColor) {
     p.personalLog.push({
       id: this.logId++,
@@ -365,25 +377,24 @@ class GameStateContext {
     );
     this.data.whosTurn = this.data.turnOrder[this.data.turnIndex];
   }
-
+  public setTurnCount(count?: number) {
+    if (count !== undefined) {
+      this.turnCount = count;
+    } else {
+      this.turnCount++;
+    }
+  }
   /** Set next player turn, ignore the players that quit the game */
   public setNextPlayer(index?: number) {
     this.stopWatch();
-    this.setTurnCount();
-    for (let i = 0; i <= this.getPlayers().size; i++) {
-      if (index === undefined) {
-        this.setTurnIndex(index);
-      } else if (i < this.getPlayers().size) {
-        this.setTurnIndex(i);
-      }
-      const p = this.getPlayerByUsername(this.data.whosTurn);
-      if (p) {
-        break;
-      }
+    const p = this.getCurrentPlayer();
+    if (p) p.timeToPlay = 0;
+    let next: Player | undefined = undefined;
+    for (let i = 0; i < this.data.turnOrder.length && next === undefined; i++) {
+      this.setTurnIndex(index);
+      next = this.getCurrentPlayer();
     }
-    this.logger.verbose(
-      `Game ${this.getGameId()}: ${this.data.whosTurn} is now playing`,
-    );
+    this.setTurnCount(index);
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
     );
@@ -416,27 +427,73 @@ class GameStateContext {
     });
   }
 
+  public removePlayer(username: string) {
+    this.data.players.delete(username);
+    const idx = this.data.turnOrder.indexOf(username);
+    if (idx === -1) return;
+    this.data.turnOrder.splice(idx, 1);
+    if (this.data.turnOrder.length === 0) return;
+    if (this.data.whosTurn === username) {
+      this.data.whosTurn = '';
+      if (idx % this.data.turnOrder.length === 0) {
+        this.setNextPlayer(0);
+      } else {
+        this.setNextPlayer();
+      }
+    } else if (idx < this.data.turnIndex) {
+      this.data.turnIndex--;
+    }
+    this.turnCount++;
+  }
+
   /***********************************
    * Methods
    **********************************/
+  private notifyAllPlayers() {
+    this.data.players.forEach((player) => {
+      if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
+    });
+  }
+
   /** To call when the game is ready to start */
   public launchGame() {
-    this.logger.verbose(`Game ${this.getGameId()}: launching`);
+    if (this.getPlayers().size === 0) {
+      this.data.gameTerminated = true;
+      return;
+    }
     this.assignFactions();
     this.setCurrentPhase(Phase.START);
+    const first = this.getPlayers().values().next().value as Player | undefined;
+    if (first) this.data.whosTurn = first.username;
+    this.data.players.forEach((player) => {
+      this.setPersonalLog(
+        player,
+        "Everybody's ready! The game starts!",
+        NotifColor.PURPLE,
+      );
+    });
+    this.notifyAllPlayers();
     this.transitionTo(new StartPhase());
     this.startWatch();
-
-    this.logger.verbose(
-      `Game ${this.getGameId()}: current phase: ${this.getCurrentPhase()}`,
-    );
   }
 
   /** @description Generates: "You can't ${Action} during ${Phase}" */
   public forbiddenActionLog(action: Action, phase: Phase): string {
     return `You can't ${action} during ${phase}`;
   }
-
+  private everybodyRollDices() {
+    this.data.players.forEach((p) => {
+      if (p.firstDice === 0) this.diceRequest(p.username);
+      if (p.secondDice === 0) {
+        this.diceRequest(p.username);
+        console.log(
+          `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
+            `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
+            `${p.username} during « ${this.getCurrentPhase()} »`,
+        );
+      }
+    });
+  }
   public rollDice(p: Player): DiceRoll {
     const roll: DiceRoll = { val: null, id: 0 };
     roll.val = Math.floor(Math.random() * 6) + 1;
@@ -468,9 +525,6 @@ class GameStateContext {
     if (nextPhase === Phase.RESOURCES) this.roundCount++;
     this.setNextPlayer(0);
     this.setTurnCount(0);
-    this.logger.verbose(
-      `Game ${this.getGameId()}: phase ${this.getCurrentPhase()} -> ${nextPhase} | starting player: ${this.data.whosTurn}`,
-    );
     this.setCurrentPhase(nextPhase);
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
@@ -531,17 +585,11 @@ class GameStateContext {
             `You produced ${prod} ${LAND_RESOURCE[tile.land]}`,
             NotifColor.GREEN,
           );
-          this.logger.verbose(
-            `Game ${this.getGameId()}: ⚖️ ${player.username} produced ${prod} ${LAND_RESOURCE[tile.land]}`,
-          );
         } else if (tile.land == LandType.DESERT && !placementPhase) {
           this.setPersonalLog(
             player,
             `You didn't produce anything with your ${LandType.DESERT} ...`,
             NotifColor.PURPLE,
-          );
-          this.logger.verbose(
-            `Game ${this.getGameId()}: ⚖️ ${player.username} can't produce anything in the ${LandType.DESERT}`,
           );
         } else if (tile.hasRobber && !placementPhase) {
           this.setPersonalLog(
@@ -549,22 +597,18 @@ class GameStateContext {
             `${ROBBER_NAME} stole your ${LAND_RESOURCE[tile.land]} production !`,
             NotifColor.PURPLE,
           );
-          this.logger.verbose(
-            `Game ${this.getGameId()}: ⚖️ ${player.username}'s production has been stolen by ${ROBBER_NAME}`,
-          );
         }
       });
     }
   }
 
-  public robberRule(): void {
-    const DISCARD_THRESHOLD = 7;
+  public robberRule(threshold: number): void {
     this.data.players.forEach((player) => {
       const totalCount = Object.values(player.resources).reduce(
         (sum, count) => sum + count,
         0,
       );
-      if (totalCount <= DISCARD_THRESHOLD) return;
+      if (totalCount <= threshold) return;
       const toDiscard = Math.floor(totalCount / 2);
       const pool: ResourceType[] = [];
       for (const [resource, count] of Object.entries(player.resources)) {
@@ -587,7 +631,7 @@ class GameStateContext {
     addStartingResources(p.resources);
     if (p.firstSettlementPlaced) return;
     let response = { valid: false, message: '' };
-    while (response.valid === false) {
+    for (let tries = 0; tries < 10; tries++) {
       const buildPayload = randomizeFirstSettlement(this.graph);
       if (!buildPayload) break;
       response = buildCheck(
@@ -599,6 +643,7 @@ class GameStateContext {
         this.getSettings(),
         true,
       );
+      if (response.valid === true) break;
     }
     p.firstSettlementPlaced = true;
   }
@@ -607,32 +652,34 @@ class GameStateContext {
    * Turn Watcher
    **********************************/
   private onExpire(): void {
-    const p = this.getPlayerByUsername(this.data.whosTurn);
-    if (!p) return;
-    this.logger.verbose(
-      `Game ${this.getGameId()}: no actions within the elapsed time ` +
-        `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
-        `${this.data.whosTurn} during ${this.getCurrentPhase()}`,
-    );
+    if (this.getCurrentPhase() === Phase.START) {
+      this.everybodyRollDices();
+    } else {
+      const p = this.getPlayerByUsername(this.data.whosTurn);
+      if (!p) return;
+      console.log(
+        `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
+          `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
+          `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
+      );
+      switch (this.getCurrentPhase()) {
+        case Phase.PLACEMENT:
+          this.afkDuringPlacement(p);
+          break;
+        case Phase.START:
+        case Phase.RESOURCES:
+          if (p.firstDice === 0) this.rollDice(p);
+          if (p.secondDice === 0) this.rollDice(p);
+          break;
+        default:
+          break;
+      }
+    }
     if (this.turnTimeoutId === null) return;
     this.turnTimeoutId = null;
-    switch (this.getCurrentPhase()) {
-      case Phase.PLACEMENT:
-        this.afkDuringPlacement(p);
-        break;
-      case Phase.START:
-      case Phase.RESOURCES:
-        if (p.firstDice === 0) this.rollDice(p);
-        if (p.secondDice === 0) this.rollDice(p);
-        break;
-      default:
-        break;
-    }
     this.setNextPlayer();
     this.phaseCheckRequest();
-    this.data.players.forEach((player) => {
-      if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
-    });
+    this.notifyAllPlayers();
   }
 
   private elapsedMs(): number {
@@ -656,6 +703,8 @@ class GameStateContext {
 
   /** Seconds remaining before the forced play, rounded up. */
   public getTimeLeft(username: string): number {
+    if (this.getCurrentPhase() === Phase.START)
+      return this.settings.turnDurationSeconds;
     if (username !== this.data.whosTurn) return 0;
     const remaining =
       this.settings.turnDurationSeconds * 1000 - this.elapsedMs();
@@ -850,7 +899,7 @@ class ResourcesPhase extends State {
       this.state.setDicesSum(p.firstDice + p.secondDice);
       switch (this.state.getGameData().dicesSum) {
         case ROBBER_ROLL:
-          this.state.robberRule();
+          this.state.robberRule(this.state.getSettings().robberThreshold);
           break;
         default:
           this.state.resourcesProduction(false);
