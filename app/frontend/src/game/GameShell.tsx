@@ -166,6 +166,7 @@ function GameShell({ game }: { game: GameDataDto }) {
         }}
       >
         <WaitingPlayersModal
+          gameId={game.gameId}
           waitingForPlayers={waitingForPlayers}
           players={game.players}
         />

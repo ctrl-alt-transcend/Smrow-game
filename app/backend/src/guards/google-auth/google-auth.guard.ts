@@ -3,4 +3,10 @@ import { AuthGuard } from '@nestjs/passport';
 
 // Default googleStrategy guard configuration
 @Injectable()
-export class GoogleAuthGuard extends AuthGuard('google') {}
+export class GoogleAuthGuard extends AuthGuard('google') {
+  getAuthenticateOptions() {
+    return {
+      prompt: 'select_account',
+    };
+  }
+}
