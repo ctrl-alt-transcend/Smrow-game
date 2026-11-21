@@ -23,6 +23,8 @@ services:
     secrets:
       - jwt_secret
       - db_password
+    volumes:
+     - ./backend/uploads:/app/backend/uploads
 
   # -- Database -- #
   postgres:
