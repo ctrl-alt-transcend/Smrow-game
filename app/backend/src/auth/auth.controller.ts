@@ -1,7 +1,16 @@
-import { Controller, Body, Post, Get, UseGuards, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Body,
+  Post,
+  Get,
+  UseGuards,
+  Patch,
+  Logger,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { Req, Res } from '@nestjs/common';
 import { type UserProfile, UserPublic } from 'shared';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
@@ -13,10 +22,12 @@ import {
   UserProfileDto,
 } from './dto/auth.dto';
 import { GoogleAuthGuard } from '../guards/google-auth/google-auth.guard';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(private readonly AuthService: AuthService) {}
 
   @Post('register')
@@ -72,7 +83,7 @@ export class AuthController {
 
     const isProd = process.env.NODE_ENV === 'production';
 
-    console.log(`PROD?: ${process.env.NODE_ENV}`);
+    this.logger.debug(`NODE_ENV: ${process.env.NODE_ENV}`);
     res.cookie('access_token', access_token, {
       httpOnly: true,
       secure: isProd, // for dev
@@ -97,7 +108,7 @@ export class AuthController {
    */
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
-    console.log('Logout request received');
+    this.logger.log('Logout request received');
     const isProd = process.env.NODE_ENV === 'production';
     res.clearCookie('access_token', {
       httpOnly: true,
