@@ -457,9 +457,16 @@ class GameStateContext {
 
   /** To call when the game is ready to start */
   public launchGame() {
+    if (this.getPlayers().size === 0) {
+      this.data.gameTerminated = true;
+      return;
+    }
     this.assignFactions();
     this.setCurrentPhase(Phase.START);
-    //this.data.whosTurn = this.data.players[0];
+
+    const first = this.getPlayers().values().next().value as Player | undefined;
+    if (first) this.data.whosTurn = first.username;
+
     this.data.players.forEach((player) => {
       this.setPersonalLog(
         player,
