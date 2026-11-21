@@ -70,6 +70,7 @@ export function OptionsModal({ game, opened, onClose }: OptionsModalProps) {
         `• Point(s) per ${BuildingType.CITY}: ${s.cityPoints}\n` +
         `• Points to win: ${s.pointsToWin}\n\n` +
         "Bonus\n" +
+        `• Robber threshold: ${s.robberThreshold}\n` +
         `• Resources multiplier: ${s.resourcesMultiplier}\n` +
         `• ${ResourceType.WOOD} bonus: ${s.woodBonus}\n` +
         `• ${ResourceType.SHEEP} bonus: ${s.sheepBonus}\n` +

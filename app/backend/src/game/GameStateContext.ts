@@ -14,6 +14,7 @@ import {
   ROBBER_NAME,
   ROLLED_A,
   ZGEG_DEV,
+  PlayerPublicDto,
 } from 'shared';
 import {
   GameBoard,
@@ -127,7 +128,7 @@ class GameStateContext {
       id: id,
       username: username,
       victoryPoints: 0,
-      timeToPlay: this.settings.turnDurationSeconds,
+      timeToPlay: 0,
       level: 1, //⚠️ For testing only
       firstDice: 0,
       secondDice: 0,
@@ -248,6 +249,20 @@ class GameStateContext {
     }
     return false;
   }
+  public getPlayerPublicDto(player: Player): PlayerPublicDto {
+    return {
+      id: player.id,
+      username: player.username,
+      level: player.level,
+      victoryPoints: player.victoryPoints,
+      timeToPlay: player.timeToPlay,
+      firstDice: player.firstDice,
+      secondDice: player.secondDice,
+      currentRoll: player.currentRoll,
+      faction: player.faction,
+      avatarURL: player.avatarURL,
+    };
+  }
   public getPlayerDto(p: Player): PlayerDto {
     return {
       id: p.id,
@@ -259,22 +274,27 @@ class GameStateContext {
       level: p.level,
       avatarURL: p.avatarURL,
       faction: p.faction,
+      currentRoll: p.currentRoll,
       personalLog: p.personalLog,
       guideLog: p.guideLog,
       resources: p.resources,
-      currentRoll: p.currentRoll,
     };
   }
   public getGameDataDto(username: string): GameDataDto | null {
     const gameData = this.getGameData();
+    const me =
+      this.getPlayerByUsername(username) ??
+      this.getPlayerByUsername(this.getWhosTurn());
+    if (!me) return null;
 
-    const p = this.getPlayerByUsername(username);
-    if (!p) return null;
+    const playersPublic: PlayerPublicDto[] = [
+      ...this.getPlayers().values(),
+    ].map((player) => this.getPlayerPublicDto(player));
     return {
-      currentPlayer: this.getPlayerDto(p),
+      currentPlayer: this.getPlayerDto(me),
       winner: gameData.winner,
       winCondition: gameData.winCondition,
-      players: Array.from(gameData.players.values()),
+      players: playersPublic,
       gameId: gameData.gameId,
       dicesSum: gameData.dicesSum,
       masterLog: gameData.masterLog,
@@ -320,13 +340,6 @@ class GameStateContext {
       this.setGuideLog(player, message);
     });
   }
-  public setTurnCount(count?: number) {
-    if (count !== undefined) {
-      this.turnCount = count;
-    } else {
-      this.turnCount++;
-    }
-  }
   public setPersonalLog(p: Player, message: string, type: NotifColor) {
     p.personalLog.push({
       id: this.logId++,
@@ -364,12 +377,24 @@ class GameStateContext {
     );
     this.data.whosTurn = this.data.turnOrder[this.data.turnIndex];
   }
-
+  public setTurnCount(count?: number) {
+    if (count !== undefined) {
+      this.turnCount = count;
+    } else {
+      this.turnCount++;
+    }
+  }
   /** Set next player turn, ignore the players that quit the game */
   public setNextPlayer(index?: number) {
     this.stopWatch();
+    const p = this.getCurrentPlayer();
+    if (p) p.timeToPlay = 0;
+    let next: Player | undefined = undefined;
+    for (let i = 0; i < this.data.turnOrder.length && next === undefined; i++) {
+      this.setTurnIndex(index);
+      next = this.getCurrentPlayer();
+    }
     this.setTurnCount(index);
-    this.setTurnIndex(index);
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
     );
@@ -407,27 +432,42 @@ class GameStateContext {
     const idx = this.data.turnOrder.indexOf(username);
     if (idx === -1) return;
     this.data.turnOrder.splice(idx, 1);
-
+    if (this.data.turnOrder.length === 0) return;
     if (this.data.whosTurn === username) {
-      // le joueur actif part : passation immédiate
       this.data.whosTurn = '';
-      if (this.data.turnOrder.length === 0) return; // fin de partie, isVictory s'en charge
-      // idx % len : si le partant était dernier (idx === len), ça repart à 0 — ton cas est couvert ici
-      this.setNextPlayer(idx % this.data.turnOrder.length);
+      if (idx % this.data.turnOrder.length === 0) {
+        this.setNextPlayer(0);
+      } else {
+        this.setNextPlayer();
+      }
     } else if (idx < this.data.turnIndex) {
-      // un joueur avant l'actif est parti : l'index de l'actif recule d'un cran
       this.data.turnIndex--;
     }
+    this.turnCount++;
   }
 
   /***********************************
    * Methods
    **********************************/
+  private notifyAllPlayers() {
+    this.data.players.forEach((player) => {
+      if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
+    });
+  }
+
   /** To call when the game is ready to start */
   public launchGame() {
     this.assignFactions();
     this.setCurrentPhase(Phase.START);
     //this.data.whosTurn = this.data.players[0];
+    this.data.players.forEach((player) => {
+      this.setPersonalLog(
+        player,
+        "Everybody's ready! The game starts!",
+        NotifColor.PURPLE,
+      );
+    });
+    this.notifyAllPlayers();
     this.transitionTo(new StartPhase());
     this.startWatch();
   }
@@ -558,14 +598,13 @@ class GameStateContext {
     }
   }
 
-  public robberRule(): void {
-    const DISCARD_THRESHOLD = 7;
+  public robberRule(threshold: number): void {
     this.data.players.forEach((player) => {
       const totalCount = Object.values(player.resources).reduce(
         (sum, count) => sum + count,
         0,
       );
-      if (totalCount <= DISCARD_THRESHOLD) return;
+      if (totalCount <= threshold) return;
       const toDiscard = Math.floor(totalCount / 2);
       const pool: ResourceType[] = [];
       for (const [resource, count] of Object.entries(player.resources)) {
@@ -636,9 +675,7 @@ class GameStateContext {
     this.turnTimeoutId = null;
     this.setNextPlayer();
     this.phaseCheckRequest();
-    this.data.players.forEach((player) => {
-      if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
-    });
+    this.notifyAllPlayers();
   }
 
   private elapsedMs(): number {
@@ -662,6 +699,8 @@ class GameStateContext {
 
   /** Seconds remaining before the forced play, rounded up. */
   public getTimeLeft(username: string): number {
+    if (this.getCurrentPhase() === Phase.START)
+      return this.settings.turnDurationSeconds;
     if (username !== this.data.whosTurn) return 0;
     const remaining =
       this.settings.turnDurationSeconds * 1000 - this.elapsedMs();
@@ -856,7 +895,7 @@ class ResourcesPhase extends State {
       this.state.setDicesSum(p.firstDice + p.secondDice);
       switch (this.state.getGameData().dicesSum) {
         case ROBBER_ROLL:
-          this.state.robberRule();
+          this.state.robberRule(this.state.getSettings().robberThreshold);
           break;
         default:
           this.state.resourcesProduction(false);

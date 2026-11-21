@@ -3,22 +3,33 @@ import { Coast } from "../../game/components/gameboard/Coast";
 import { HexTile } from "../../game/components/gameboard/HexTile";
 import { Road } from "../../game/components/gameboard/Road";
 import { Settlement } from "../../game/components/gameboard/Settlement";
-import { useSpectateGameBoard } from "./useSpectateGameBoard"
+import { useSpectateGameBoard } from "./useSpectateGameBoard";
 import { Group, Stack } from "@mantine/core";
 import GameMasterLogs from "../../game/components/ui/GameMasterLog";
 import { ResourcesPanel } from "../../game/components/ui/ResourcesPanel";
-
-export default function SpectateGameBoard({gameId}: {gameId: string}) {
+import { PlayerPanel } from "../../game/components/ui/PlayerPanel";
+export default function SpectateGameBoard({ gameId }: { gameId: string }) {
   const { game } = useSpectateGameBoard(gameId);
   if (!game) return <div>Loading game...</div>;
   if (!game.board) return <div>Loading gameboard...</div>;
   const { layout, roads, settlements, coasts, svgBounds } = game.board;
+  if (game.gameTerminated)
+    return (
+      <div>
+        Game ended: {game.winner} {game.winCondition}
+      </div>
+    );
   return (
     <Group justify="center">
-      <Stack gap={0} justify="center" h="100%">
-        <GameMasterLogs log={game.masterLog}/>
+      <Stack gap={"md"} justify="center" h="100%">
+        <PlayerPanel players={game.players} />
+        <GameMasterLogs log={game.masterLog} />
         <div
-          style={{ width: "100%", maxWidth: svgBounds.svgWidth, margin: "0 auto" }}
+          style={{
+            width: "100%",
+            maxWidth: svgBounds.svgWidth,
+            margin: "0 auto",
+          }}
         >
           <svg
             width={svgBounds.svgWidth}
@@ -27,22 +38,13 @@ export default function SpectateGameBoard({gameId}: {gameId: string}) {
           >
             <WaterLayer data={coasts} />
             {coasts.map((coast) => (
-              <Coast
-                key={coast.id}
-                data={coast}
-              />
+              <Coast key={coast.id} data={coast} />
             ))}
             {layout.map((tile) => (
-              <HexTile
-                key={`tile-${tile.q}-${tile.r}`}
-                data={tile}
-              />
+              <HexTile key={`tile-${tile.q}-${tile.r}`} data={tile} />
             ))}
             {roads.map((road) => (
-              <Road
-                key={`road-${road.id}`}
-                data={road}
-              />
+              <Road key={`road-${road.id}`} data={road} />
             ))}
             {settlements.map((settlement) => (
               <Settlement
@@ -52,7 +54,8 @@ export default function SpectateGameBoard({gameId}: {gameId: string}) {
             ))}
           </svg>
         </div>
+        <ResourcesPanel currentPlayer={game.currentPlayer} />
       </Stack>
     </Group>
   );
-};
+}
