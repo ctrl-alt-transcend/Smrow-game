@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, filterLogLevels } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-client-exception.filter';
@@ -10,7 +10,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
  */
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose'],
+    logger: filterLogLevels(process.env.LOG_LEVEL ?? '>=warn'),
   });
 
   app.useStaticAssets(join(process.cwd(), 'uploads', 'avatars'), {
