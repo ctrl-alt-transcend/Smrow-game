@@ -51,10 +51,12 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nestjs && adduser -S nestjs -u 1001
+RUN mkdir -p /app/backend/uploads/avatars && chown -R nestjs:nestjs /app/backend/uploads
 COPY --from=pruner /app/node_modules ./node_modules
 COPY --from=builder /app/shared/package.json ./shared/package.json
 COPY --from=builder /app/shared/dist ./shared/dist
-COPY --from=builder /app/backend ./backend
+COPY --from=builder --chown=nestjs:nestjs /app/backend ./backend
+RUN mkdir -p /app/backend/uploads/avatars && chown -R nestjs:nestjs /app/backend/uploads
 WORKDIR /app/backend
 USER nestjs
 EXPOSE 3000
