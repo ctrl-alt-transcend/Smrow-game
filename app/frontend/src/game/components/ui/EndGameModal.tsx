@@ -1,11 +1,11 @@
 import { Modal, Text, Title } from "@mantine/core";
 import EndGameButton from "./EndGameButton.tsx";
 import { PlayerPanel } from "./PlayerPanel.tsx";
-import type { Player } from "shared";
+import type { PlayerPublicDto } from "shared";
 
 type EndGameProps = {
   gameOver: boolean;
-  players: Player[];
+  players: PlayerPublicDto[];
   winner: string | null;
   winCondition: string | null;
 };

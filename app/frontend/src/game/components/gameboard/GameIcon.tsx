@@ -43,7 +43,7 @@ const ReserveIconArt: React.FC<ReserveIconArtProps> = ({
 
 export const ReserveIcon: React.FC<ReserveProps> = ({
   data,
-  isSelected,
+  isSelected = false,
   isHovered,
   onHoverChange,
   onClick,
@@ -61,7 +61,7 @@ export const ReserveIcon: React.FC<ReserveProps> = ({
       onMouseLeave={onMouseLeave}
       onClick={(e) => {
         e.stopPropagation();
-        onClick(data);
+        onClick?.(data);
       }}
       style={{ cursor: "pointer" }}
     >

@@ -1,12 +1,12 @@
 import { Modal, Title, Text } from "@mantine/core";
 import { PlayerPanel } from "./PlayerPanel.tsx";
-import type { Player } from "shared";
+import type { PlayerPublicDto } from "shared";
 import StartGameButton from "./StartGameButton.tsx";
 
 type WaitingPlayersProps = {
   gameId: string;
   waitingForPlayers: boolean;
-  players: Player[];
+  players: PlayerPublicDto[];
 };
 
 export function WaitingPlayersModal(waitingPlayersProps: WaitingPlayersProps) {
