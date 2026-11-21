@@ -37,3 +37,4 @@ jobs:
             git fetch origin prod
             git reset --hard origin/prod
             make refresh
+            docker image prune -f
