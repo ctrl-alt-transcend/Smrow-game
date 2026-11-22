@@ -258,7 +258,6 @@ export default function GameLaunchMenu() {
 
       {opened && (
         <Box pt="sm">
-          {/* Gameboard layout — not a numeric setting, so it lives outside the sliders */}
           <Select
             label="Gameboard layout"
             data={Object.values(GameboardLayout) as GameboardLayout[]}

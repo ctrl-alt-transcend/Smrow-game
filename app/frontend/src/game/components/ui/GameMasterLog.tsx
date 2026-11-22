@@ -19,7 +19,7 @@ function GameMasterLogs({ log }: { log: string | null }) {
           <Title order={6} ta="center">
             Game Master Logs
           </Title>
-          <Text size="sm" ta="center" lineClamp={2}>
+          <Text size={"lg"} ta="center" lineClamp={2}>
             {log ?? "…"}
           </Text>
         </Stack>

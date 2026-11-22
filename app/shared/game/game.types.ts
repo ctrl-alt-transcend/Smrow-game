@@ -574,7 +574,7 @@ export type BuildPayload = z.infer<typeof BuildPayloadSchema>;
  **********************************/
 export const DEFAULT_PRESET: SettingsData = {
   gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
-  turnDurationSeconds: 30,
+  turnDurationSeconds: 45,
   tradeLimit: 4,
   buildLimit: 2,
   specialPortOfferRate: 1,
@@ -603,8 +603,8 @@ export const MAXXING_PRESET: SettingsData = {
   reserveOfferRate: 3,
   roadPoints: 2,
   settlementPoints: 10,
-  cityPoints: 5,
-  pointsToWin: 80,
+  cityPoints: 8,
+  pointsToWin: 70,
   robberThreshold: ROBBER_THRESHOLD_MAX,
   resourcesMultiplier: MAX_MULTIPLIER,
   woodBonus: MAX_BONUS,
