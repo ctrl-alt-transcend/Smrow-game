@@ -1,9 +1,53 @@
 import { useNavigate } from "react-router";
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
-import { SettingsDataSchema, type SettingsData } from "shared";
+import {
+  BuildingType,
+  Phase,
+  ResourceType,
+  SettingsDataSchema,
+  type SettingsData,
+} from "shared";
 import { z } from "zod";
 import { http } from "../../services/http.tsx";
+import { Title, Text } from "@mantine/core";
+
+export function DisplaySetting({
+  gameId,
+  settings,
+}: {
+  gameId: string;
+  settings: SettingsData;
+}) {
+  return (
+    <Text style={{ whiteSpace: "pre-line" }}>
+      <Title order={4}>Current Game Settings</Title>
+      {`• Party code: ${gameId}\n` +
+        `• Gameboard layout: ${settings.gameboardLayout}\n`}
+      <Title order={6}>Time & Actions limits</Title>
+      {`• Time per player turn: ${settings.turnDurationSeconds}\n` +
+        `• Trade limit during « ${Phase.TRADE_BUILD} »: ${settings.tradeLimit}\n` +
+        `• Build limit during « ${Phase.TRADE_BUILD} »: ${settings.buildLimit}\n`}
+      <Title order={6}>Trading Rates</Title>
+      {`• Specialized Port rate: ${settings.specialPortOfferRate}\n` +
+        `• Generic Port rate: ${settings.genericPortOfferRate}\n` +
+        `• Reserve rate: ${settings.reserveOfferRate}\n`}
+      <Title order={6}>Points Earned</Title>
+      {`• Point(s) per ${BuildingType.ROAD}: ${settings.roadPoints}\n` +
+        `• Point(s) per ${BuildingType.SETTLEMENT}: ${settings.settlementPoints}\n` +
+        `• Point(s) per ${BuildingType.CITY}: ${settings.cityPoints}\n` +
+        `• Points to win: ${settings.pointsToWin}\n`}
+      <Title order={6}>Bonus</Title>
+      {`• Robber threshold: ${settings.robberThreshold}\n` +
+        `• Resources multiplier: ${settings.resourcesMultiplier}\n` +
+        `• ${ResourceType.WOOD} bonus: ${settings.woodBonus}\n` +
+        `• ${ResourceType.SHEEP} bonus: ${settings.sheepBonus}\n` +
+        `• ${ResourceType.BRICK} bonus: ${settings.brickBonus}\n` +
+        `• ${ResourceType.ORE} bonus: ${settings.oreBonus}\n` +
+        `• ${ResourceType.WHEAT} bonus: ${settings.wheatBonus}\n`}
+    </Text>
+  );
+}
 
 export function useCreateLobby() {
   const navigate = useNavigate();
