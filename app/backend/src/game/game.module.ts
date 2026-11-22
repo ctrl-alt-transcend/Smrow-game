@@ -6,6 +6,7 @@ import { GameGateway } from './game.gateway';
 import { UserModule } from '../user/user.module';
 import { StatsModule } from '../stats/stats.module';
 import { SocialModule } from '../social/social.module';
+import { SpectateGateway } from './spectate.gateway';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { SocialModule } from '../social/social.module';
     SocialModule,
   ],
   controllers: [GameController],
-  providers: [GameService, GameGateway],
+  providers: [GameService, GameGateway, SpectateGateway],
   exports: [GameService],
 })
 export class GameModule {}

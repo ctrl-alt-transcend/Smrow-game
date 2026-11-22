@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { gameSocket as socket } from "../../sockets/gameSocket.tsx";
+import { spectateSocket as socket } from "../../sockets/spectateSocket.tsx";
 import type { GameDataDto } from "shared";
 
 export function useSpectateGameBoard(gameId: string): {
@@ -26,11 +26,11 @@ export function useSpectateGameBoard(gameId: string): {
     };
 
     const onConnectError = (err: Error) =>
-      console.error("[socket] connect_error:", err);
+      console.error("[spectate] connect_error:", err);
 
     socket.on("connect", onConnect);
     socket.on("connect_error", onConnectError);
-    socket.on("game:state", setGame);
+    socket.on("spectate:update", setGame);
 
     if (socket.connected) void onConnect();
     else socket.connect();
@@ -38,7 +38,7 @@ export function useSpectateGameBoard(gameId: string): {
     return () => {
       socket.off("connect", onConnect);
       socket.off("connect_error", onConnectError);
-      socket.off("game:state", setGame);
+      socket.off("spectate:update", setGame);
       socket.disconnect();
     };
   }, [gameId]);
