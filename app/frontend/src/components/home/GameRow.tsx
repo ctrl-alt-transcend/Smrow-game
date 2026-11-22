@@ -40,7 +40,6 @@ export default function GameRow({ game }: GameRowProps) {
         <Table.Td>
           {gameStart ? "Game Started" : "Waiting for players"}
         </Table.Td>{" "}
-        :
         <Table.Td>
           {gameStart ? (
             <Button variant={variant} miw={100} onClick={spectateGame}>

@@ -30,6 +30,7 @@ import {
   DEFAULT_PRESET,
   MAXXING_PRESET,
   CLASSIC_PRESET,
+  ROBBER_THRESHOLD_MAX,
 } from "shared";
 import { useCreateLobby } from "../../game/utils/game.utils";
 
@@ -139,7 +140,7 @@ const SECTIONS: { id: string; title: string; sliders: SliderConfig[] }[] = [
         label: "Robber Threshold",
         description: `Threshold resources amount for the players to be stolen by the robber when 7 is rolled`,
         min: MIN_MULTIPLIER,
-        max: MAX_MULTIPLIER,
+        max: ROBBER_THRESHOLD_MAX,
       },
       {
         key: "resourcesMultiplier",
@@ -258,7 +259,6 @@ export default function GameLaunchMenu() {
 
       {opened && (
         <Box pt="sm">
-          {/* Gameboard layout — not a numeric setting, so it lives outside the sliders */}
           <Select
             label="Gameboard layout"
             data={Object.values(GameboardLayout) as GameboardLayout[]}
