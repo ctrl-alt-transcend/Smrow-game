@@ -627,7 +627,7 @@ export const CLASSIC_PRESET: SettingsData = {
   pointsToWin: POINTS_TO_WIN_DFLT,
   roadPoints: ROAD_POINT_DFLT,
   robberThreshold: ROBBER_THRESHOLD_DFLT,
-  resourcesMultiplier: MULTIPLIER_DFLT,
+  resourcesMultiplier: 1,
   woodBonus: 0,
   sheepBonus: 0,
   brickBonus: 0,
