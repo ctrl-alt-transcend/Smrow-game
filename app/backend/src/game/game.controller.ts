@@ -61,6 +61,7 @@ export class GameController {
   @UseGuards(JwtAuthGuard)
   quitGame(@Req() req: { user: UserPublic }) {
     const game = this.gameService.getGameInstanceByUserId(req.user.id);
+    if (!game) return;
     this.gameService.removePlayerFromGame(
       { id: req.user.id, username: req.user.name },
       game.getGameId(),

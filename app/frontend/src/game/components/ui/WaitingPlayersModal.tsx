@@ -1,12 +1,15 @@
-import { Modal, Title, Text } from "@mantine/core";
+import { Modal, Title, Stack } from "@mantine/core";
 import { PlayerPanel } from "./PlayerPanel.tsx";
-import type { PlayerPublicDto } from "shared";
+import type { PlayerPublicDto, SettingsData } from "shared";
 import StartGameButton from "./StartGameButton.tsx";
+import { DisplaySetting } from "../../utils/game.utils.tsx";
+import QuitGameButton from "./QuitGameButton.tsx";
 
 type WaitingPlayersProps = {
   gameId: string;
   waitingForPlayers: boolean;
   players: PlayerPublicDto[];
+  settings: SettingsData;
 };
 
 export function WaitingPlayersModal(waitingPlayersProps: WaitingPlayersProps) {
@@ -22,12 +25,18 @@ export function WaitingPlayersModal(waitingPlayersProps: WaitingPlayersProps) {
       closeOnClickOutside={false}
       closeOnEscape={false}
     >
-      <Title order={3} size="h1">
-        Waiting players !
-      </Title>
-      <Text>The party code is: {waitingPlayersProps.gameId}</Text>
-      <PlayerPanel players={waitingPlayersProps.players} />
-      <StartGameButton />
+      <Stack justify={"center"}>
+        <Title order={3} size="h1">
+          Waiting players !
+        </Title>
+        <PlayerPanel players={waitingPlayersProps.players} />
+        <StartGameButton nPlayers={waitingPlayersProps.players.length} />
+        <DisplaySetting
+          gameId={waitingPlayersProps.gameId}
+          settings={waitingPlayersProps.settings}
+        />
+        <QuitGameButton />
+      </Stack>
     </Modal>
   );
 }
