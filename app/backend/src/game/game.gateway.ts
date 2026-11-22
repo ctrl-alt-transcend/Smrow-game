@@ -12,40 +12,15 @@ import {
   BuildPayloadSchema,
   type TradePayload,
   TradePayloadSchema,
-  type JwtPayload,
 } from 'shared';
 import { JwtService } from '@nestjs/jwt';
-import type { Namespace, Socket, DefaultEventsMap } from 'socket.io';
+import { authMiddleware } from '../ws/auth.middleware';
 import { GameService } from './game.service';
-import { readSecret } from '../strategies/readSecret';
-import { AUTH } from '../config/config';
 import { GameStateContext } from './GameStateContext';
-import { parseCookie } from 'cookie';
 import { ZodValidationPipe } from 'nestjs-zod';
 import z from 'zod';
 import { Logger } from '@nestjs/common';
-
-export interface SocketUser {
-  id: string;
-  username: string;
-}
-
-interface SocketData {
-  user: SocketUser;
-}
-
-type SocketServer = Namespace<
-  DefaultEventsMap,
-  DefaultEventsMap,
-  DefaultEventsMap,
-  SocketData
->;
-type SocketClient = Socket<
-  DefaultEventsMap,
-  DefaultEventsMap,
-  DefaultEventsMap,
-  SocketData
->;
+import type { SocketClient, SocketServer } from '../ws/socket.types';
 
 @WebSocketGateway({
   path: '/ws',
@@ -186,34 +161,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       void this.emitGameDataDto(game);
     });
 
-    server.use((client: SocketClient, next) => {
-      try {
-        // Check is the client has a token or a cookie and save the cookie for verification with JWT
-        const authToken = client.handshake.auth.token as string;
-        const cookies = parseCookie(client.handshake.headers.cookie ?? '');
-        const cookieToken = cookies.access_token;
-        const token =
-          cookieToken ||
-          (typeof authToken === 'string' && authToken.length > 0
-            ? authToken
-            : cookieToken);
-        if (!token) {
-          throw new Error('JWT must be provided');
-        }
-        const payload = this.jwtService.verify<JwtPayload>(token, {
-          secret: readSecret(AUTH.JWT_FILE),
-        });
-        client.data.user = { id: payload.sub, username: payload.username };
-        next();
-      } catch (error) {
-        this.logger.warn(
-          `Client connection rejected: ${
-            client.id
-          } - ${(error as Error).message}`,
-        );
-        next(new Error('Authentication error'));
-      }
-    });
+    server.use(authMiddleware(this.jwtService, this.logger));
   }
 
   handleConnection(client: SocketClient) {
