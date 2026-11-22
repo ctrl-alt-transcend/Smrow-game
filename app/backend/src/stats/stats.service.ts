@@ -77,7 +77,6 @@ export class StatsService {
     return results.map(({ games, ...me }) => ({
       gameId: games.id,
       playedAt: games.playedAt.toISOString(),
-      duration: games.duration,
       totalTurns: games.totalTurns,
       isWinner: me.isWinner,
       playerRank: me.playerRank,
@@ -178,7 +177,6 @@ export class StatsService {
     return this.databaseService.games.create({
       data: {
         totalTurns: result.totalTurns,
-        duration: result.duration ?? null,
         playedAt: result.playedAt ? new Date(result.playedAt) : undefined,
         players: {
           createMany: {

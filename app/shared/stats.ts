@@ -97,7 +97,6 @@ export type MatchOpponent = {
 export type MatchHistoryEntry = {
   gameId: string;
   playedAt: string;
-  duration: number | null;
   totalTurns: number;
   isWinner: boolean;
   playerRank: number;
