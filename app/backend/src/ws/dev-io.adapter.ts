@@ -9,7 +9,13 @@ import { instrument } from '@socket.io/admin-ui';
  */
 export class DevIoAdapter extends IoAdapter {
   createIOServer(port: number, options?: ServerOptions): Server {
-    const server = super.createIOServer(port, options) as Server;
+    const server = super.createIOServer(port, {
+      ...options,
+      cors: {
+        origin: ['https://admin.socket.io'],
+        credentials: true,
+      },
+    }) as Server;
     instrument(server, { auth: false, mode: 'development' });
     return server;
   }

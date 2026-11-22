@@ -13,8 +13,6 @@ import {
   type TradePayload,
   TradePayloadSchema,
   type JwtPayload,
-  Phase,
-  NotifColor,
 } from 'shared';
 import { JwtService } from '@nestjs/jwt';
 import type { Namespace, Socket, DefaultEventsMap } from 'socket.io';
@@ -52,10 +50,7 @@ type SocketClient = Socket<
 @WebSocketGateway({
   path: '/ws',
   namespace: 'game',
-  cors: {
-    origin: true,
-    credentials: true,
-  }, //WARN: dev only
+  cors: { credentials: true },
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @WebSocketServer() server: SocketServer;
@@ -68,41 +63,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
 
   /*---------- Game ----------*/
 
-  private async emitGameDataDto(game: GameStateContext): Promise<void> {
-    const sockets = await this.server.in(game.getGameId()).fetchSockets();
-    for (const socket of sockets) {
-      const dto = game.getGameDataDto(socket.data.user.username);
-      if (dto) socket.emit('game:state', dto);
-    }
-    if (game.isGameTerminated()) {
-      this.endGame(game);
-    }
-    void this.gameService.recordResultIfOver(game);
-  }
-
   @SubscribeMessage('game:start')
   async startGame(@ConnectedSocket() client: SocketClient) {
-    this.logger.log(`:warnstartGame event received from client: client.id`);
+    this.logger.log(`startGame event received from client: ${client.id}`);
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
-    if (game.getCurrentPhase() !== Phase.PENDING) {
-      return;
-    }
-    if (game.getPlayers().size < 2) {
-      const player = game.getPlayerByUsername(client.data.user.username);
-      if (player) {
-        game.setPersonalLog(
-          player,
-          'Not enough players to start the game.',
-          NotifColor.PURPLE,
-        );
-      }
-      await this.emitGameDataDto(game);
-      return;
-    }
-    this.logger.verbose(
-      `Game ${game.getGameId()}: starting with ${game.getPlayers().size} players`,
-    );
-    game.launchGame();
+    game.startRequest(client.data.user.username);
     await this.emitGameDataDto(game);
   }
 
@@ -181,7 +146,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     this.logger.log(`Game ${gameId}: ended and deleted`);
   }
 
-  /*------------------------------*/
+  private async emitGameDataDto(game: GameStateContext): Promise<void> {
+    const sockets = await this.server.in(game.getGameId()).fetchSockets();
+    for (const socket of sockets) {
+      const dto = game.getGameDataDto(socket.data.user.username);
+      if (dto) socket.emit('game:state', dto);
+    }
+    if (game.isGameTerminated()) {
+      this.endGame(game);
+    }
+    void this.gameService.recordResultIfOver(game);
+  }
 
   /*---------- Spectate ----------*/
 
@@ -201,8 +176,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       return { ok: false, error: 'joinSpectate failed' };
     }
   }
-
-  /*--------------------------------*/
 
   /*---------- Connection ----------*/
 
