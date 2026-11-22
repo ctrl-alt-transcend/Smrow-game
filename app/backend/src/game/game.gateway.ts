@@ -42,6 +42,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   async startGame(@ConnectedSocket() client: SocketClient) {
     this.logger.log(`startGame event received from client: ${client.id}`);
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) {
+      return;
+    }
     game.startRequest(client.data.user.username);
     await this.emitGameDataDto(game);
   }
@@ -49,6 +52,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('game:quit')
   handleQuitGame(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) return;
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
     client.disconnect(false);
     this.logger.log(`Player ${client.data.user.username} quit the game`);
@@ -61,6 +65,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('game:dice')
   async dice(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) return;
     game.diceRequest(client.data.user.username);
     game.phaseCheckRequest();
     await this.emitGameDataDto(game);
@@ -69,6 +74,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('game:skip')
   async skip(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) return;
     game.skipRequest(client.data.user.username);
     game.phaseCheckRequest();
     await this.emitGameDataDto(game);
@@ -81,6 +87,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     payload: BuildPayload,
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) return;
     game.buildRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
     await this.emitGameDataDto(game);
@@ -93,6 +100,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     payload: TradePayload,
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) return;
     game.tradeRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
     await this.emitGameDataDto(game);
@@ -103,6 +111,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const userId = client.data.user.id;
     try {
       const game = this.gameService.getGameInstanceByUserId(userId);
+      if (!game) return;
       await client.join(game.getGameId());
       await this.emitGameDataDto(game);
       return { ok: true, data: game.getGameDataDto(client.data.user.username) };

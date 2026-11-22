@@ -1,22 +1,19 @@
 import { Accordion, Divider, Modal, Stack, Text, Title } from "@mantine/core";
 import {
-  BuildingType,
-  CURRENT_GAME_SETTINGS,
   END_GAME_INFO,
   END_GAME_PHASE,
   Phase,
   PLACEMENT_PHASE_INFO,
   RESOURCE_PHASE_INFO,
-  ResourceType,
   SPECIAL_RULES,
   SPECIAL_RULES_INFO,
   START_PHASE_INFO,
   TRADE_BUILD_INFO,
   type GameDataDto,
-  type SettingsData,
 } from "shared";
 import { PlayerPanel } from "./PlayerPanel.tsx";
 import QuitGameButton from "./QuitGameButton.tsx";
+import { DisplaySetting } from "../../utils/game.utils.tsx";
 
 type OptionsModalProps = {
   game: GameDataDto;
@@ -25,7 +22,6 @@ type OptionsModalProps = {
 };
 
 export function OptionsModal({ game, opened, onClose }: OptionsModalProps) {
-  const s: SettingsData = game.settings;
   const rules: { title: string; body: string }[] = [
     {
       title: `${Phase.START}`,
@@ -50,33 +46,6 @@ export function OptionsModal({ game, opened, onClose }: OptionsModalProps) {
     {
       title: `${SPECIAL_RULES}`,
       body: `${SPECIAL_RULES_INFO}`,
-    },
-    {
-      title: `${CURRENT_GAME_SETTINGS}`,
-      body:
-        `Game ID: ${game.gameId}\n` +
-        `Gameboard layout: ${s.gameboardLayout}\n\n` +
-        "Time & Actions limits\n" +
-        `• Time per player turn: ${s.turnDurationSeconds}\n` +
-        `• Trade limit during « ${Phase.TRADE_BUILD} »: ${s.tradeLimit}\n` +
-        `• Build limit during « ${Phase.TRADE_BUILD} »: ${s.buildLimit}\n\n` +
-        "Trading Rates\n" +
-        `• Specialized Port rate: ${s.specialPortOfferRate}\n` +
-        `• Generic Port rate: ${s.genericPortOfferRate}\n` +
-        `• Reserve rate: ${s.reserveOfferRate}\n\n` +
-        "Points Earned\n" +
-        `• Point(s) per ${BuildingType.ROAD}: ${s.roadPoints}\n` +
-        `• Point(s) per ${BuildingType.SETTLEMENT}: ${s.settlementPoints}\n` +
-        `• Point(s) per ${BuildingType.CITY}: ${s.cityPoints}\n` +
-        `• Points to win: ${s.pointsToWin}\n\n` +
-        "Bonus\n" +
-        `• Robber threshold: ${s.robberThreshold}\n` +
-        `• Resources multiplier: ${s.resourcesMultiplier}\n` +
-        `• ${ResourceType.WOOD} bonus: ${s.woodBonus}\n` +
-        `• ${ResourceType.SHEEP} bonus: ${s.sheepBonus}\n` +
-        `• ${ResourceType.BRICK} bonus: ${s.brickBonus}\n` +
-        `• ${ResourceType.ORE} bonus: ${s.oreBonus}\n` +
-        `• ${ResourceType.WHEAT} bonus: ${s.wheatBonus}\n`,
     },
   ];
 
@@ -105,16 +74,13 @@ export function OptionsModal({ game, opened, onClose }: OptionsModalProps) {
               <Stack gap="xs">
                 {rules.map((rule) => (
                   <Stack key={rule.title} gap={2}>
-                    <Title order={6}>{rule.title}</Title>
-                    <Text
-                      size="sm"
-                      c="dimmed"
-                      style={{ whiteSpace: "pre-line" }}
-                    >
+                    <Title order={4}>{rule.title}</Title>
+                    <Text size="sm" style={{ whiteSpace: "pre-line" }}>
                       {rule.body}
                     </Text>
                   </Stack>
                 ))}
+                <DisplaySetting gameId={game.gameId} settings={game.settings} />
               </Stack>
             </Accordion.Panel>
           </Accordion.Item>

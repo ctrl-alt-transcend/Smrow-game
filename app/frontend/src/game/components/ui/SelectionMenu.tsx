@@ -20,6 +20,7 @@ import {
   type SettingsData,
   SETTLEMENT,
   ROAD,
+  Phase,
 } from "shared";
 import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 
@@ -75,6 +76,7 @@ interface TradeOfferPanelProps {
   sourceKind: TraderType;
   targetOwnerId?: string | null;
   isMyTurn: boolean;
+  phase: Phase;
 }
 
 const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
@@ -84,6 +86,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
   sourceKind,
   targetOwnerId = null,
   isMyTurn,
+  phase,
 }) => {
   const [chosenOfferResource, setChosenOfferResource] =
     useState<ResourceType | null>(offerLockedResource ?? null);
@@ -137,7 +140,11 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
           data={RESOURCE_OPTIONS}
           value={offerResource}
           onChange={(v) => setChosenOfferResource(v as ResourceType)}
-          disabled={Boolean(offerLockedResource) || !isMyTurn}
+          disabled={
+            Boolean(offerLockedResource) ||
+            !isMyTurn ||
+            phase === Phase.RESOURCES
+          }
           style={{ flex: 1, minWidth: 120 }}
         />
         {!isBankTrade && (
@@ -196,6 +203,7 @@ interface BuildSelectionButtonProps {
   masterLog: string | null;
   onBuilt?: (target: BuildPayload) => void;
   isMyTurn: boolean;
+  phase: Phase;
 }
 
 const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
@@ -203,6 +211,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   masterLog,
   onBuilt,
   isMyTurn,
+  phase,
 }) => {
   const [busy, setBusy] = useState(false);
   const pendingRef = useRef<PendingBuild | null>(null);
@@ -267,7 +276,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
       w="100%"
       onClick={handleBuildRequest}
       loading={busy}
-      disabled={busy || !isMyTurn}
+      disabled={busy || !isMyTurn || phase === Phase.RESOURCES}
     >
       {busy ? "Building…" : actionLabel}
     </Button>
@@ -334,6 +343,7 @@ interface SelectionMenuProps {
   masterLog?: string | null;
   currentPlayerId?: string | null;
   onBuilt?: (target: BuildPayload) => void;
+  phase: Phase;
 }
 
 export const SelectionMenu: React.FC<SelectionMenuProps> = ({
@@ -342,6 +352,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
   masterLog = null,
   onBuilt,
   isMyTurn,
+  phase,
 }) => {
   const items = useSelectionDisplay(selected, settings);
   const { ref: cardBodyRef, width: cardBodyWidth } =
@@ -370,6 +381,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
             sourceId={port.id}
             sourceKind={TraderType.GENERIC_PORT}
             {...turnFlag}
+            phase={phase}
           />
         );
       }
@@ -381,6 +393,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
           sourceId={port.id}
           sourceKind={TraderType.SPECIALIZED_PORT}
           {...turnFlag}
+          phase={phase}
         />
       );
     }
@@ -397,6 +410,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
           masterLog={masterLog}
           onBuilt={onBuilt}
           {...turnFlag}
+          phase={phase}
         />
       );
     }
@@ -408,6 +422,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
           sourceId={selected.selectedReserve.id}
           sourceKind={TraderType.RESERVE}
           {...turnFlag}
+          phase={phase}
         />
       );
     }

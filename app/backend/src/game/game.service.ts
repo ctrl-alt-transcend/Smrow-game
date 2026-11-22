@@ -9,7 +9,12 @@ import { randomUUID } from 'crypto';
 import type { SocketUser } from '../ws/socket.types';
 import { StatsService } from '../stats/stats.service';
 import { buildGameResult } from './game.result';
-import { type SettingsData, type PlayerProfile, type GameList } from 'shared';
+import {
+  type SettingsData,
+  type PlayerProfile,
+  type GameList,
+  Phase,
+} from 'shared';
 import {
   GameStateContext,
   PendingPhase,
@@ -103,7 +108,13 @@ export class GameService {
   }
 
   joinGame(playerProfile: PlayerProfile, gameId: string) {
-    const game = this.getGameInstance(gameId);
+    const game = this.getGameInstanceByGameId(gameId);
+    if (!game) {
+      this.logger.debug(
+        `Player ${playerProfile.id} cannot join game ${gameId}: game doesn't exists`,
+      );
+      return;
+    }
     const playerId = playerProfile.id;
 
     if (this.playersMap.has(playerProfile.id)) {
@@ -139,19 +150,22 @@ export class GameService {
     this.broadcastGameList();
   }
 
-  removePlayerFromGame(user: SocketUser, game: string) {
+  removePlayerFromGame(user: SocketUser, gameId: string) {
     this.playersMap.delete(user.id);
-    this.gameInstances.get(game)?.removePlayer(user.username);
-    this.broadcastGameList();
-    this.logger.log(`Game ${game}: player ${user.username} removed`);
-  }
-
-  private getGameInstance(gameId: string): GameStateContext {
-    const game = this.gameInstances.get(gameId);
-    if (!game) {
-      throw new Error(`Game with id ${gameId} not found`);
+    const game = this.getGameInstanceByGameId(gameId);
+    if (!game) return;
+    game.removePlayer(user.username);
+    if (
+      game.getPlayers().size === 0 &&
+      game.getCurrentPhase() === Phase.PENDING
+    ) {
+      this.gameInstances.delete(gameId);
+      this.logger.log(
+        `Game ${gameId}: no player left in lobby creation, instance removed`,
+      );
     }
-    return game;
+    this.broadcastGameList();
+    this.logger.log(`Game ${gameId}: player ${user.username} removed`);
   }
 
   /**
@@ -159,19 +173,21 @@ export class GameService {
    * @param playerId - The user ID of the player
    * @returns the Gamestate instance in which the player is located
    */
-  getGameInstanceByUserId(playerId: string): GameStateContext {
+  getGameInstanceByUserId(playerId: string): GameStateContext | undefined {
     const gameId = this.playersMap.get(playerId);
     if (!gameId) {
-      throw new NotFoundException(
-        `Player with id ${playerId} is not in a game`,
-      );
+      this.logger.debug(`Player ${playerId} is not in a game`);
+      return undefined;
     }
-    return this.gameInstances.get(gameId) as GameStateContext;
+    return this.getGameInstanceByGameId(gameId);
   }
 
-  getGameInstanceByGameId(gameId: string): GameStateContext | null {
+  getGameInstanceByGameId(gameId: string): GameStateContext | undefined {
     const game = this.gameInstances.get(gameId);
-    if (!game) return null;
+    if (!game) {
+      this.logger.debug(`Game ${gameId} doesn't exist`);
+      return undefined;
+    }
     return game;
   }
 
@@ -193,7 +209,8 @@ export class GameService {
    * @warning You need to check if the palyer is already in a game before calling this function
    */
   private addPlayerToGame(gameId: string, playerProfile: PlayerProfile) {
-    const game = this.getGameInstance(gameId);
+    const game = this.getGameInstanceByGameId(gameId);
+    if (!game) return;
     this.playersMap.set(playerProfile.id, gameId);
     this.userIds.set(playerProfile.username, playerProfile.id);
     game

@@ -457,26 +457,28 @@ class GameStateContext {
   public removePlayer(username: string) {
     this.data.players.delete(username);
     const idx = this.data.turnOrder.indexOf(username);
-    if (idx === -1) return;
-    this.data.turnOrder.splice(idx, 1);
-    if (this.data.turnOrder.length === 0) return;
-    if (this.data.whosTurn === username) {
-      this.data.whosTurn = '';
-      if (idx % this.data.turnOrder.length === 0) {
-        this.setNextPlayer(0);
-      } else {
-        this.setNextPlayer();
+    if (idx !== -1) {
+      this.data.turnOrder.splice(idx, 1);
+      if (this.data.turnOrder.length === 0) return;
+      if (this.data.whosTurn === username) {
+        this.data.whosTurn = '';
+        if (idx % this.data.turnOrder.length === 0) {
+          this.setNextPlayer(0);
+        } else {
+          this.setNextPlayer();
+        }
+      } else if (idx < this.data.turnIndex) {
+        this.data.turnIndex--;
       }
-    } else if (idx < this.data.turnIndex) {
-      this.data.turnIndex--;
+      this.turnCount++;
     }
-    this.turnCount++;
+    this.notifyAllPlayers();
   }
 
   /***********************************
    * Methods
    **********************************/
-  private notifyAllPlayers() {
+  public notifyAllPlayers() {
     this.data.players.forEach((player) => {
       if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
     });
@@ -484,6 +486,7 @@ class GameStateContext {
 
   /** To call when the game is ready to start */
   public launchGame() {
+    if (this.isVictory()) return;
     if (this.getPlayers().size === 0) {
       this.data.gameTerminated = true;
       return;
@@ -564,17 +567,14 @@ class GameStateContext {
     if (this.isGameTerminated()) return true;
     this.data.players.forEach((player) => {
       if (this.data.players.size <= 1) {
-        this.setVictory(
-          player.username,
-          `is the only player left in game ! You won congrats !`,
-        );
+        this.setVictory(player.username, `Only player left in game !`);
         this.setGameTerminated(true);
         return;
       }
       if (player.victoryPoints >= this.getSettings().pointsToWin) {
         this.setVictory(
           player.username,
-          `won by earning ${player.victoryPoints} victory points !`,
+          `Won by earning ${player.victoryPoints} victory points !`,
         );
         this.setAllGuideLogs(`${this.data.winner} ${this.data.winCondition}`);
         this.setGameTerminated(true);
@@ -815,6 +815,7 @@ class StartPhase extends State {
   }
 
   public phaseCheck(): void {
+    if (this.state.isVictory()) return;
     if (this.state.getStartingRolls().size !== this.state.getPlayers().size)
       return;
     this.computeTurnOrder();
@@ -907,6 +908,7 @@ class PlacementPhase extends State {
   }
 
   public phaseCheck(): void {
+    if (this.state.isVictory()) return;
     if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
     this.state.resourcesProduction(true);
     this.state.setupNextPhase(Phase.RESOURCES);
@@ -967,6 +969,7 @@ class ResourcesPhase extends State {
   }
 
   public phaseCheck(): void {
+    if (this.state.isVictory()) return;
     if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
     this.state.setupNextPhase(Phase.TRADE_BUILD);
     this.state.transitionTo(new TradeAndBuildPhase());
@@ -994,13 +997,25 @@ class TradeAndBuildPhase extends State {
     if (
       this.tradeCount === this.state.getSettings().tradeLimit &&
       this.buildCount !== this.state.getSettings().buildLimit
-    )
+    ) {
+      this.state.setPersonalLog(
+        p,
+        `You traded everything you could during this ${Phase.TRADE_BUILD}`,
+        NotifColor.PURPLE,
+      );
       return false;
+    }
     if (
       this.tradeCount !== this.state.getSettings().tradeLimit &&
       this.buildCount === this.state.getSettings().buildLimit
-    )
+    ) {
+      this.state.setPersonalLog(
+        p,
+        `You built everything you could during this ${Phase.TRADE_BUILD}`,
+        NotifColor.PURPLE,
+      );
       return false;
+    }
     this.state.setPersonalLog(
       p,
       `You built and traded everything you could during this ${Phase.TRADE_BUILD}`,
@@ -1016,7 +1031,7 @@ class TradeAndBuildPhase extends State {
     if (this.buildCount === this.state.getSettings().buildLimit) {
       this.state.setPersonalLog(
         p,
-        this.state.forbiddenActionLog(Action.BUILD_LIMIT, Phase.PLACEMENT),
+        this.state.forbiddenActionLog(Action.BUILD_LIMIT, Phase.TRADE_BUILD),
         NotifColor.RED,
       );
       return;
@@ -1044,7 +1059,7 @@ class TradeAndBuildPhase extends State {
     if (this.tradeCount === this.state.getSettings().tradeLimit) {
       this.state.setPersonalLog(
         p,
-        this.state.forbiddenActionLog(Action.TRADE_LIMIT, Phase.PLACEMENT),
+        this.state.forbiddenActionLog(Action.TRADE_LIMIT, Phase.TRADE_BUILD),
         NotifColor.RED,
       );
       return;

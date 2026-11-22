@@ -54,13 +54,13 @@ export function ResourcesPanel({
           <ThemeIcon variant="transparent" size="sm" fz="md">
             {meta.icon}
           </ThemeIcon>
-          <Text size="sm" visibleFrom="xs">
+          <Text size="lg" visibleFrom="xs">
             {meta.label}
           </Text>
         </Group>
       </Table.Td>
       <Table.Td style={{ textAlign: "right" }}>
-        <Text size="sm" fw={600}>
+        <Text size="md" fw={600}>
           {currentPlayer.resources[meta.key]}
         </Text>
       </Table.Td>
