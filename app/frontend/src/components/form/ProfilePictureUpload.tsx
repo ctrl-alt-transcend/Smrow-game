@@ -40,7 +40,7 @@ export function ProfilePictureUpload() {
   };
 
   return (
-    <Stack>
+    <Stack w="100%">
       <FileInput
         accept="image/png,image/jpeg,image/gif"
         label="Change your profile picture"
