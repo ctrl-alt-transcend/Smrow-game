@@ -17,7 +17,7 @@ import { getAvatarSrc } from "../utils/avatar";
 export function FriendList() {
   const friends = useFriend();
   const [actionError, setActionError] = useState<string | null>(null);
-  // const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   if (!friends) {
     return <Text>Loading friend list...</Text>;
@@ -30,6 +30,8 @@ export function FriendList() {
   }
 
   const handleRemoveFriend = async (friendId: string) => {
+    setActionSuccess(null);
+    setActionSuccess(null);
     try {
       socket.emit("friend: remove", friendId);
     } catch {
@@ -59,12 +61,6 @@ export function FriendList() {
         </Anchor>
       </Table.Td>
       <Table.Td>
-        <Text fz="sm" c="dimmed">
-          Bio
-        </Text>
-        <Text fz="sm">{item.bio ?? "-"}</Text>
-      </Table.Td>
-      <Table.Td>
         <Text>{item.isOnline ? "online" : "offline"}</Text>
       </Table.Td>
       <Table.Td>
@@ -89,11 +85,11 @@ export function FriendList() {
           {actionError}
         </Text>
       )}
-      {/* {actionSuccess && (
+      {actionSuccess && (
         <Text c="green" fz="sm" p="sm">
           {actionSuccess}
         </Text>
-      )} */}
+      )}
       <ScrollArea.Autosize mah={400} type="auto" offsetScrollbars="y">
         <Table
           verticalSpacing="md"

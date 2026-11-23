@@ -118,7 +118,6 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
       isOnline: this.onlineUsers.has(friend.id),
     }));
     client.emit('friend: update', friendsStatus);
-    console.log('Sent friend list to', client.data.user.username, friends); //TEST: DEV_ONLY
   }
 
   @SubscribeMessage('friend: list')
