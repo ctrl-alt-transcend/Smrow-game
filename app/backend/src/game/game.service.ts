@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { SocketUser } from './game.gateway';
+import type { SocketUser } from '../ws/socket.types';
 import { StatsService } from '../stats/stats.service';
 import { buildGameResult } from './game.result';
 import {

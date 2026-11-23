@@ -42,6 +42,7 @@ import {
   randomizeFirstSettlement,
   randomizeRobber,
 } from './calculation/randomizeGameBoard';
+import { Logger } from '@nestjs/common';
 
 /**
  * The base State class declares methods that all Concrete State should
@@ -94,6 +95,7 @@ class GameStateContext {
   private roundCount: number = 0;
   private turnCount: number = 0;
   private turnStart: number = 0;
+  private readonly logger: Logger = new Logger(GameStateContext.name);
 
   constructor(
     gameId: string,
@@ -163,9 +165,34 @@ class GameStateContext {
     this.state.setGameState(this);
   }
 
+  private startGame(username: string) {
+    if (this.getCurrentPhase() !== Phase.PENDING) {
+      return;
+    }
+    const playersSize = this.getPlayers().size;
+    if (playersSize < 2) {
+      const player = this.getPlayerByUsername(username);
+      if (player) {
+        this.setPersonalLog(
+          player,
+          'Not enough players to start the game.',
+          NotifColor.PURPLE,
+        );
+      }
+      return;
+    }
+    this.logger.verbose(
+      `Game ${this.getGameId()}: starting with ${playersSize} players`,
+    );
+    this.launchGame();
+  }
+
   /***********************************
    * Requests
    **********************************/
+  public startRequest(username: string) {
+    this.startGame(username);
+  }
   public diceRequest(username: string) {
     return this.state.dice(username);
   }
@@ -489,7 +516,7 @@ class GameStateContext {
       if (p.firstDice === 0) this.diceRequest(p.username);
       if (p.secondDice === 0) {
         this.diceRequest(p.username);
-        console.log(
+        this.logger.debug(
           `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
             `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
             `${p.username} during « ${this.getCurrentPhase()} »`,
@@ -657,10 +684,10 @@ class GameStateContext {
     } else {
       const p = this.getPlayerByUsername(this.data.whosTurn);
       if (!p) return;
-      console.log(
-        `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
-          `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
-          `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
+      this.logger.debug(
+        `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time 
+          (${this.settings.turnDurationSeconds} seconds), auto-play for
+          ${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
       );
       switch (this.getCurrentPhase()) {
         case Phase.PLACEMENT:
