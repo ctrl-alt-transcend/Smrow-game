@@ -47,6 +47,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       return;
     }
     game.startRequest(client.data.user.username);
+    this.gameService.broadcastGameList();
     await this.emitGameDataDto(game);
   }
 
@@ -55,7 +56,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (!game) return;
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
-    client.disconnect(false);
+    this.server.in(`user:${client.data.user.id}`).disconnectSockets();
     this.logger.log(`Player ${client.data.user.username} quit the game`);
   }
 
@@ -108,7 +109,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const userId = client.data.user.id;
     try {
       const game = this.gameService.getGameInstanceByUserId(userId);
-      if (!game) return;
+      if (!game) return { ok: false, error: 'not in game' };
       await client.join(game.getGameId());
       await this.emitGameDataDto(game);
       return { ok: true, data: game.getGameDataDto(client.data.user.username) };
@@ -125,6 +126,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     this.server.in(gameId).socketsLeave(gameId);
     this.gameService.removeGameInstance(gameId);
     this.logger.log(`Game ${gameId}: ended and deleted`);
+    this.spectateGateway.endSpectate(gameId);
   }
 
   private async emitGameDataDto(game: GameStateContext): Promise<void> {
@@ -157,15 +159,24 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     server.use(authMiddleware(this.jwtService, this.logger));
   }
 
-  handleConnection(client: SocketClient) {
+  async handleConnection(client: SocketClient) {
     this.logger.log(
       `Client connected: ${client.id} - ${client.data.user.username}`,
     );
+    await client.join(`user:${client.data.user.id}`);
   }
 
-  handleDisconnect(client: SocketClient) {
+  async handleDisconnect(client: SocketClient) {
     this.logger.log(
       `Client disconnected: ${client.id} - ${client.data.user.username}`,
     );
+    const sockets = await this.server
+      .in(`user:${client.data.user.id}`)
+      .allSockets();
+    if (sockets.size === 0) {
+      this.logger.debug(
+        `No more sockets for user ${client.data.user.username}, removing from game if any`,
+      );
+    }
   }
 }

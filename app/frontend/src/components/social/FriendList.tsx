@@ -34,7 +34,7 @@ export function FriendList() {
     setActionSuccess(null);
     setActionSuccess(null);
     try {
-      socket.emit("friend: remove", friendId);
+      socket.emit("friend:remove", friendId);
     } catch {
       setActionError("Could not remove friend, try again later.");
     }
