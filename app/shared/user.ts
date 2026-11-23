@@ -97,10 +97,11 @@ export const FriendSchema = z.object({
 })
 export type Friend = z.infer<typeof FriendSchema>;
 
-export const PublicProfile = z.object({
+export const PublicProfileSchema = z.object({
   username: UsernameSchema,
   name: NameSchema,
   bio: BioSchema,
   avatar: AvatarUrlSchema,
   createdAt: DatetimeSchema,
 })
+export type PublicProfile = z.infer<typeof PublicProfileSchema>;

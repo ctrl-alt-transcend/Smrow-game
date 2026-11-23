@@ -2,7 +2,7 @@ import { http } from "./http";
 import {
   UpdateProfileSchema,
   UploadImageSchema,
-  UserPublicSchema,
+  PublicProfileSchema,
 } from "shared";
 import type { AxiosResponse } from "axios";
 import type { UploadImage, UserProfile, UpdateProfile } from "shared";
@@ -70,7 +70,8 @@ export async function uploadAvatar(
 }
 
 export async function fetchPublicProfile(username: string) {
-  console.log(username);
-  const { data } = await http.get(`/user/${encodeURIComponent(username)}`);
-  return UserPublicSchema.parse(data);
+  const { data } = await http.get(
+    `/user/publicProfile/${encodeURIComponent(username)}`,
+  );
+  return PublicProfileSchema.parse(data);
 }

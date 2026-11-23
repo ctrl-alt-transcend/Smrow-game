@@ -26,7 +26,7 @@ export const router = createBrowserRouter([
           { path: "home", Component: HomePage },
           { path: "profile", Component: ProfilePage },
           { path: "stats", Component: StatsPage },
-          { path: ":username", Component: PublicProfilePage },
+          { path: "user/:username", Component: PublicProfilePage },
         ],
       },
       { path: "/game", Component: GameShell },

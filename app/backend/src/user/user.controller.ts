@@ -155,7 +155,7 @@ export class UserController {
     return this.userService.acceptFriend(req.user.id, friendId);
   }
 
-  @Get('/:username')
+  @Get('publicProfile/:username')
   @UseGuards(JwtAuthGuard)
   async getPublicProfile(@Param('username') username: string) {
     return this.userService.getPublicProfile(username);
