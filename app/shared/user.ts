@@ -105,3 +105,8 @@ export const PublicProfileSchema = z.object({
   createdAt: DatetimeSchema,
 })
 export type PublicProfile = z.infer<typeof PublicProfileSchema>;
+
+export const FriendStatusSchema = FriendSchema.extend({
+  isOnline: z.boolean(),
+});
+export type FriendStatus = z.infer<typeof FriendStatusSchema>;
