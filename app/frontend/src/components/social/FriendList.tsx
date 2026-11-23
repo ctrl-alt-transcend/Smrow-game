@@ -49,8 +49,9 @@ export function FriendList() {
           underline="hover"
           fz="lg"
           fw={500}
+          display="block"
         >
-          <Group gap="sm">
+          <Group wrap="nowrap" gap="xs">
             <Avatar
               size={40}
               src={getAvatarSrc(item.avatar)}
@@ -62,7 +63,7 @@ export function FriendList() {
         </Anchor>
       </Table.Td>
       <Table.Td>
-        <Text>{item.isOnline ? "online" : "offline"}</Text>
+        <Text ta="right">{item.isOnline ? "online" : "offline"}</Text>
       </Table.Td>
       <Table.Td>
         <Group gap={0} justify="flex-end">
