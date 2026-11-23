@@ -456,6 +456,7 @@ class GameStateContext {
 
   public removePlayer(username: string) {
     this.data.players.delete(username);
+    this.data.startingRolls.delete(username);
     const idx = this.data.turnOrder.indexOf(username);
     if (idx !== -1) {
       this.data.turnOrder.splice(idx, 1);
@@ -472,6 +473,14 @@ class GameStateContext {
       }
       this.turnCount++;
     }
+    /**
+     * @description If the player that left the game was the one that had to play, we set the next player as the current player
+     */
+    else if (this.data.whosTurn === username) {
+      const next = this.data.players.keys().next().value as Player | undefined;
+      this.data.whosTurn = next?.username ?? '';
+    }
+    this.phaseCheckRequest();
     this.notifyAllPlayers();
   }
 

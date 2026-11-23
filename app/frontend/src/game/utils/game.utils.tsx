@@ -20,7 +20,7 @@ export function DisplaySetting({
   settings: SettingsData;
 }) {
   return (
-    <Text style={{ whiteSpace: "pre-line" }}>
+    <Text component="div" style={{ whiteSpace: "pre-line" }}>
       <Title order={4}>Current Game Settings</Title>
       {`• Party code: ${gameId}\n` +
         `• Gameboard layout: ${settings.gameboardLayout}\n`}

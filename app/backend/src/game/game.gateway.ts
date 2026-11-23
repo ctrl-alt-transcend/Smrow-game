@@ -51,11 +51,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   }
 
   @SubscribeMessage('game:quit')
-  handleQuitGame(@ConnectedSocket() client: SocketClient) {
+  async handleQuitGame(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (!game) return;
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
-    this.disconnectSockets(client);
+    await this.disconnectSockets(client);
     this.logger.log(`Player ${client.data.user.username} quit the game`);
   }
 
@@ -112,7 +112,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const userId = client.data.user.id;
     try {
       const game = this.gameService.getGameInstanceByUserId(userId);
-      if (!game) return;
+      if (!game) return { ok: false, error: 'not in game' };
       await client.join(game.getGameId());
       await this.emitGameDataDto(game);
       return { ok: true, data: game.getGameDataDto(client.data.user.username) };
@@ -129,6 +129,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     this.server.in(gameId).socketsLeave(gameId);
     this.gameService.removeGameInstance(gameId);
     this.logger.log(`Game ${gameId}: ended and deleted`);
+    this.spectateGateway.endSpectate(gameId);
   }
 
   private async emitGameDataDto(game: GameStateContext): Promise<void> {

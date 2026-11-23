@@ -32,6 +32,10 @@ export class SpectateGateway implements OnGatewayInit, OnGatewayConnection {
 
   /*---------- Spectate ----------*/
 
+  endSpectate(gameId: string) {
+    this.server.in(gameId).disconnectSockets(false);
+  }
+
   sendSpectateUpdate(gameId: string, gameDataDto: GameDataDto) {
     this.server.to(gameId).emit('spectate:update', gameDataDto);
   }
