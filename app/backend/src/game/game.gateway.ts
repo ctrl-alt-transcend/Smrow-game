@@ -55,7 +55,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (!game) return;
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
-    client.disconnect(false);
+    this.disconnectSockets(client);
     this.logger.log(`Player ${client.data.user.username} quit the game`);
   }
 
@@ -161,15 +161,33 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     server.use(authMiddleware(this.jwtService, this.logger));
   }
 
-  handleConnection(client: SocketClient) {
+  async handleConnection(client: SocketClient) {
     this.logger.log(
       `Client connected: ${client.id} - ${client.data.user.username}`,
     );
+    await client.join(`user:${client.data.user.id}`);
   }
 
-  handleDisconnect(client: SocketClient) {
+  async handleDisconnect(client: SocketClient) {
     this.logger.log(
       `Client disconnected: ${client.id} - ${client.data.user.username}`,
     );
+    const sockets = await this.server
+      .in(`user:${client.data.user.id}`)
+      .allSockets();
+    if (sockets.size === 0) {
+      this.logger.debug(
+        `No more sockets for user ${client.data.user.username}, removing from game if any`,
+      );
+    }
+  }
+
+  async disconnectSockets(client: SocketClient) {
+    const sockets = await this.server
+      .in(`user:${client.data.user.id}`)
+      .fetchSockets();
+    sockets.forEach((socket) => {
+      this.server.sockets.get(socket.id)?.disconnect(false);
+    });
   }
 }

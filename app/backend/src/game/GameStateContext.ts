@@ -685,9 +685,9 @@ class GameStateContext {
       const p = this.getPlayerByUsername(this.data.whosTurn);
       if (!p) return;
       this.logger.debug(
-        `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time 
-          (${this.settings.turnDurationSeconds} seconds), auto-play for
-          ${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
+        `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
+          `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
+          `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
       );
       switch (this.getCurrentPhase()) {
         case Phase.PLACEMENT:
