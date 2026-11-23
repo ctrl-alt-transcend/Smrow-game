@@ -1,11 +1,6 @@
 import { z } from 'zod'
 
 /***********************************
- * DEV
- **********************************/
-export const ZGEG_DEV = 'zGeG_tHe_dEv';
-
-/***********************************
  * Rules value
  **********************************/
 export const ROAD = 'Road';
@@ -27,8 +22,8 @@ export const GameboardLayout = {
 export type GameboardLayout = (typeof GameboardLayout)[keyof typeof GameboardLayout];
 export const GameboardLayoutSchema = z.enum(GameboardLayout);
 
-export const TRADE_LIMIT_DFLT = 10;
-export const BUILD_LIMIT_DFLT = 5;
+export const TRADE_LIMIT_DFLT = 15;
+export const BUILD_LIMIT_DFLT = 15;
 
 export const SPECIAL_PORT_OFFER_RATE_DFLT = 2;
 export const GENERIC_PORT_OFFER_RATE_DFLT = 3;
@@ -575,8 +570,8 @@ export type BuildPayload = z.infer<typeof BuildPayloadSchema>;
 export const DEFAULT_PRESET: SettingsData = {
   gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
   turnDurationSeconds: 45,
-  tradeLimit: 4,
-  buildLimit: 2,
+  tradeLimit: 10,
+  buildLimit: 10,
   specialPortOfferRate: 1,
   genericPortOfferRate: GENERIC_PORT_OFFER_RATE_DFLT,
   reserveOfferRate: RESERVE_OFFER_RATE_DFLT,
@@ -595,7 +590,7 @@ export const DEFAULT_PRESET: SettingsData = {
 
 export const MAXXING_PRESET: SettingsData = {
   gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
-  turnDurationSeconds: 5,
+  turnDurationSeconds: 30,
   tradeLimit: MAX_LIMIT,
   buildLimit: MAX_LIMIT,
   specialPortOfferRate: 1,
