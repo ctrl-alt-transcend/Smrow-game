@@ -24,11 +24,7 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
-      "/ws/game": {
-        target: "http://backend:3000",
-        ws: true,
-      },
-      "/ws/social": {
+      "/ws/": {
         target: "http://backend:3000",
         ws: true,
       },

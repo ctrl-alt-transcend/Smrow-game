@@ -40,14 +40,14 @@ export default function Chat() {
       }
     };
 
-    socket.emit("joinChat");
-    socket.on("new chat message", onMessage);
+    socket.emit("chat:join");
+    socket.on("chat:message", onMessage);
     loadOldMessages();
 
     return () => {
       cancelled = true;
-      socket.off("new chat message", onMessage);
-      socket.emit("leaveChat");
+      socket.off("chat:message", onMessage);
+      socket.emit("chat:leave");
     };
   }, []);
 
@@ -65,7 +65,7 @@ export default function Chat() {
   function handleSend() {
     if (draft.trim() === "") return;
 
-    socket.emit("chatMessage", { draft });
+    socket.emit("chat:send", { draft });
     setDraft("");
   }
 

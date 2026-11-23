@@ -36,5 +36,5 @@ export type JwtToken = z.infer<typeof JwtTokenSchema>;
 export const AvatarUrlSchema = z.string().optional();
 export type avatarURL = z.infer<typeof AvatarUrlSchema>;
 
-
-
+export const ChatContentSchema = z.string().trim().min(1).max(500);
+export type ChatContent = z.infer<typeof ChatContentSchema>;

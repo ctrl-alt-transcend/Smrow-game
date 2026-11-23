@@ -13,6 +13,11 @@ async function bootstrap() {
     logger: filterLogLevels(process.env.LOG_LEVEL ?? '>=warn'),
   });
 
+  if (process.env.NODE_ENV === 'development') {
+    const { DevIoAdapter } = await import('./ws/dev-io.adapter.js');
+    app.useWebSocketAdapter(new DevIoAdapter(app));
+  }
+
   app.useStaticAssets(join(process.cwd(), 'uploads', 'avatars'), {
     prefix: '/uploads/avatars',
     index: false,
