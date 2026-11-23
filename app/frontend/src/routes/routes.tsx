@@ -11,6 +11,7 @@ import ProfilePage from "../pages/ProfilePage";
 import StatsPage from "../pages/StatsPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import { ProtectedRoute } from "./ProtectedRoute";
+import PublicProfilePage from "../pages/PublicProfilePage";
 
 export const router = createBrowserRouter([
   { path: "/", Component: MainShell },
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
           { path: "home", Component: HomePage },
           { path: "profile", Component: ProfilePage },
           { path: "stats", Component: StatsPage },
+          { path: "profile/:username", Component: PublicProfilePage },
         ],
       },
       { path: "/game", Component: GameShell },

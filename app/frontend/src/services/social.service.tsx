@@ -2,10 +2,10 @@ import { http } from "./http";
 import { type Friend, FriendSchema, type Username } from "shared";
 import { z } from "zod";
 
-export const getFriendList = async (): Promise<Friend[]> => {
-  const res = await http.get("/user/friendlist");
-  return z.array(FriendSchema).parse(res.data);
-};
+// export const getFriendList = (friends: Friend[]): Friend[] => {
+//   // const res = await http.get("/user/friendlist");
+//   return z.array(FriendSchema).parse(friends);
+// };
 
 export const getPendingList = async (): Promise<Friend[]> => {
   const res = await http.get("user/pendinglist");
