@@ -128,6 +128,13 @@ export const theme = createTheme({
   },
 
   components: {
+    Text: {
+      styles: {
+        root: {
+          wordeBreak: "break-word",
+        },
+      },
+    },
     Title: {
       styles: {
         root: {

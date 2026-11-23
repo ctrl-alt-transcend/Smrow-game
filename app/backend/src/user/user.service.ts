@@ -399,6 +399,7 @@ export class UserService {
       username: profile.user.username,
       avatarURL: profile.avatarURL,
       createdAt: profile.createdAt.toISOString(),
+      bio: profile.bio,
     });
   }
 }
