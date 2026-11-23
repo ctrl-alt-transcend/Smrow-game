@@ -45,7 +45,7 @@ export type Password = z.infer<typeof PasswordSchema>;
 export const DatetimeSchema = z.iso.datetime();
 export type Datetime = z.infer<typeof DatetimeSchema>;
 
-export const BioSchema = z.string().max(1024).optional();
+export const BioSchema = z.string().max(1024).optional().nullable();
 export type Bio = z.infer<typeof BioSchema>;
 
 export const MessageSchema = z.string().nonempty().max(1024);

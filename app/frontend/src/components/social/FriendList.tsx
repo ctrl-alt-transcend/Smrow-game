@@ -41,7 +41,7 @@ export function FriendList() {
   };
 
   const rows = friends.map((item) => (
-    <Table.Tr key={item.id}>
+    <Table.Tr key={item.id} w="100%" mah={0}>
       <Table.Td>
         <Anchor
           component={Link}
@@ -57,12 +57,15 @@ export function FriendList() {
               src={getAvatarSrc(item.avatar)}
               radius={40}
               alt=""
+              style={{ flexShrink: 0 }}
             />
-            <Text>{item.username}</Text>
+            <Text truncate="end" style={{ flex: 1, minWidth: 0 }}>
+              {item.username}
+            </Text>
           </Group>
         </Anchor>
       </Table.Td>
-      <Table.Td>
+      <Table.Td w={1} style={{ whiteSpace: "nowrap" }}>
         <Text ta="right">{item.isOnline ? "online" : "offline"}</Text>
       </Table.Td>
       <Table.Td>
