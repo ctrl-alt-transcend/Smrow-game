@@ -32,6 +32,9 @@ export function AddFriend() {
     } catch (e) {
       if (isAxiosError(e)) {
         switch (e.status) {
+          case 400:
+            setSubmitError("You can't add yourself");
+            return;
           case 404:
             setSubmitError("Can't find user.");
             return;

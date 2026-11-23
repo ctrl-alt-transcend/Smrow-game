@@ -10,11 +10,12 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { DatabaseService } from '../database/database.service';
-import { PlayerProfile, FriendSchema } from 'shared';
+import { PlayerProfile, FriendSchema, PublicProfileSchema } from 'shared';
 import type {
   UserProfile,
   RegisterPost,
   UpdateProfile,
+  PublicProfile,
   Id,
   Friend,
 } from 'shared';
@@ -34,6 +35,7 @@ export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async create(usr: RegisterPost) {
+    console.log('Are we creating ??????');
     const prismaDtoUser: Prisma.UserCreateInput = {
       username: usr.username,
       name: usr.name,
@@ -44,7 +46,9 @@ export class UserService {
         },
       },
       profile: {
-        create: {},
+        create: {
+          bio: 'Empty bio',
+        },
       },
     };
 
@@ -359,6 +363,42 @@ export class UserService {
     return this.databaseService.friendRequest.update({
       where: { id: req.id },
       data: { status: 'ACCEPTED' },
+    });
+  }
+
+  async getPublicProfile(username: string): Promise<PublicProfile> {
+    const user = await this.databaseService.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const profile = await this.databaseService.profile.findUnique({
+      where: {
+        userId: user.id,
+      },
+      select: {
+        avatarURL: true,
+        bio: true,
+        createdAt: true,
+        user: { select: { username: true, id: true, name: true } },
+      },
+    });
+
+    if (!profile) {
+      throw new BadRequestException('Something went wrong');
+    }
+
+    return PublicProfileSchema.parse({
+      id: profile.user.id,
+      avatar: profile.avatarURL,
+      name: profile.user.name,
+      username: profile.user.username,
+      avatarURL: profile.avatarURL,
+      createdAt: profile.createdAt.toISOString(),
     });
   }
 }

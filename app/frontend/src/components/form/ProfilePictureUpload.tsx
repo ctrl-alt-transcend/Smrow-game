@@ -2,11 +2,10 @@ import { useState } from "react";
 import { Button, FileInput, Stack } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { UploadImageSchema } from "shared";
-import { useAuth } from "../../hooks/useAuth";
 import { uploadAvatar } from "../../services/user.service";
+import { type UserProfile } from "shared";
 
-export function ProfilePictureUpload() {
-  const { user } = useAuth();
+export function ProfilePictureUpload({ user }: { user: UserProfile }) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
