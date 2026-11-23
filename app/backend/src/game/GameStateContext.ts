@@ -96,7 +96,6 @@ class GameStateContext {
   private roundCount: number = 0;
   private turnCount: number = 0;
   private turnStart: number = 0;
-  private readonly logger: Logger = new Logger(GameStateContext.name);
 
   constructor(
     gameId: string,
