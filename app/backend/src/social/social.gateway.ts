@@ -4,6 +4,8 @@ import {
   OnGatewayConnection,
   SubscribeMessage,
   WebSocketServer,
+  ConnectedSocket,
+  MessageBody,
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { ChatService } from '../chat/chat.service';
@@ -11,8 +13,16 @@ import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
-import type { JwtPayload, GameList } from 'shared';
+import type {
+  JwtPayload,
+  GameList,
+  FriendStatus,
+  ChatSendPayload,
+} from 'shared';
+import { ChatSendPayloadSchema } from 'shared';
 import { parseCookie } from 'cookie';
+import { UserService } from '../user/user.service';
+import { ZodValidationPipe } from 'nestjs-zod';
 
 interface SocketUser {
   id: string;
@@ -37,80 +47,87 @@ type SocketClient = Socket<
 >;
 
 @WebSocketGateway({
-  path: '/ws/social',
-  cors: {
-    origin: true,
-    credentials: true,
-  }, //WARN: dev only
+  path: '/ws',
+  namespace: 'social',
+  cors: { credentials: true },
 })
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   private readonly logger = new Logger(SocialGateway.name);
 
+  private readonly onlineUsers = new Map<string, string[]>();
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly chatService: ChatService,
+    private readonly userService: UserService,
   ) {}
 
   @WebSocketServer() server: SocketServer;
 
-  // @SubscribeMessage('message')
-  // handleMessage(client: any, payload: any): string {
-  //   return 'Hello world!';
-  // }
+  /*---------- Game ----------*/
 
   handleGameList(game: GameList[]) {
-    this.server.to('gameList').emit('game list update', game);
+    this.server.to('gameList').emit('gameList:update', game);
   }
 
-  @SubscribeMessage('joinGameList')
-  async handleJoimGameList(client: SocketClient) {
+  @SubscribeMessage('gameList:join')
+  async handleJoinGameList(client: SocketClient) {
     await client.join('gameList');
   }
 
-  @SubscribeMessage('leaveGameList')
-  async handeLeaveGameList(client: SocketClient) {
+  @SubscribeMessage('gameList:leave')
+  async handleLeaveGameList(client: SocketClient) {
     await client.leave('gameList');
   }
 
-  @SubscribeMessage('chatMessage')
-  async handleChatMessage(client: SocketClient, payload: { draft: string }) {
-    if (typeof payload.draft !== 'string') {
-      return;
-    }
-    const content = payload.draft.trim();
-    if (content.length === 0 || content.length > 500) {
-      return;
-    }
-    this.logger.verbose(
-      `${client.data.user.username} sent a chat message: ${content}`,
-    ); //TEST: DEV_ONLY
+  /*---------- Chat ----------*/
 
+  @SubscribeMessage('chat:send')
+  async handleChatMessage(
+    @ConnectedSocket() client: SocketClient,
+    @MessageBody(new ZodValidationPipe(ChatSendPayloadSchema))
+    payload: ChatSendPayload,
+  ) {
     const chatMessage = await this.chatService.addChatMessage(
       client.data.user.id,
-      content,
+      payload.draft,
     );
-    this.server.to('chat').emit('new chat message', chatMessage);
+    this.server.to('chat').emit('chat:message', chatMessage);
   }
 
-  @SubscribeMessage('joinChat')
+  @SubscribeMessage('chat:join')
   async handleJoinChat(client: SocketClient) {
     await client.join('chat');
   }
 
-  @SubscribeMessage('leaveChat')
+  @SubscribeMessage('chat:leave')
   async handleLeaveChat(client: SocketClient) {
     await client.leave('chat');
   }
 
-  async afterInit(server: SocketServer) {
-    /** @warning development only */
-    if (process.env.NODE_ENV === 'development') {
-      const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
-      instrument(server, {
-        auth: false,
-        mode: 'development',
-      });
-    }
+  @SubscribeMessage('friend: remove')
+  async handleFriendRemove(client: SocketClient, friendId: string) {
+    await this.userService.removeFriend(client.data.user.id, friendId);
+    await this.sendFriendList(client);
+  }
+
+  private async sendFriendList(client: SocketClient) {
+    const friends = await this.userService.getFriendList(client.data.user.id);
+    const friendsStatus: FriendStatus[] = friends.map((friend) => ({
+      ...friend,
+      isOnline: this.onlineUsers.has(friend.id),
+    }));
+    client.emit('friend: update', friendsStatus);
+  }
+
+  @SubscribeMessage('friend: list')
+  async handleFriendList(client: SocketClient) {
+    await this.sendFriendList(client);
+  }
+
+  /*---------- Connection ----------*/
+
+  afterInit(server: SocketServer) {
     server.use((client: SocketClient, next) => {
       try {
         const authToken = client.handshake.auth.token as string;
@@ -130,16 +147,38 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
         client.data.user = { id: payload.sub, username: payload.username };
         next();
       } catch (error) {
-        this.logger.warn(
-          `Client connection rejected: ${client.id} - ${(error as Error).message}`,
+        console.log(
+          'Client connection rejected:',
+          client.id,
+          ' - ',
+          (error as Error).message,
         );
         next(new Error('Authentication error'));
       }
     });
   }
 
-  handleConnection(client: Socket) {
-    //TODO: handle multiple connections from the same user.
-    this.logger.verbose(`Client connected: ${client.id}`); //TEST:
+  handleDisconnect(client: SocketClient) {
+    const userId = client.data.user.id;
+    const sockets = this.onlineUsers.get(userId);
+    if (!sockets) return;
+
+    const index = sockets.indexOf(client.id);
+    if (index !== -1) {
+      sockets.splice(index, 1);
+    }
+
+    if (sockets.length === 0) {
+      this.onlineUsers.delete(userId);
+    }
+  }
+
+  handleConnection(client: SocketClient) {
+    if (this.onlineUsers.has(client.data.user.id)) {
+      this.onlineUsers.get(client.data.user.id)?.push(client.id);
+    } else {
+      this.onlineUsers.set(client.data.user.id, [client.id]);
+    }
+    console.log('Client connected:', client.id); //TEST:
   }
 }

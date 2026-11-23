@@ -3,7 +3,7 @@ import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 
 export default function StartGameButton({ nPlayers }: { nPlayers: number }) {
   const sendStartGameRequest = () => {
-    socket.emit("startGame");
+    socket.emit("game:start");
   };
 
   return (

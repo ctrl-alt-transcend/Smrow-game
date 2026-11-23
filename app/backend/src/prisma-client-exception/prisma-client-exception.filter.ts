@@ -1,18 +1,52 @@
-import { ArgumentsHost, Catch, HttpStatus, Logger } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
+import { ArgumentsHost, Catch, HttpStatus, Logger } from '@nestjs/common';
 
-@Catch(Prisma.PrismaClientKnownRequestError) // catches only the prismaerror
+type PrismaException =
+  | Prisma.PrismaClientKnownRequestError
+  | Prisma.PrismaClientUnknownRequestError
+  | Prisma.PrismaClientInitializationError
+  | Prisma.PrismaClientRustPanicError;
+
+@Catch(
+  Prisma.PrismaClientKnownRequestError,
+  Prisma.PrismaClientUnknownRequestError,
+  Prisma.PrismaClientInitializationError,
+  Prisma.PrismaClientRustPanicError,
+) // catches only the prismaerror
 export class PrismaClientExceptionFilter extends BaseExceptionFilter {
   private readonly logger = new Logger(PrismaClientExceptionFilter.name);
 
-  catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
-    this.logger.error(`[${exception.code}] ${exception.message}`);
+  catch(exception: PrismaException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    //const message = exception.message.replace(/\n/g, ''); // clean newlines from Prisma log
+
+    if (!(exception instanceof Prisma.PrismaClientKnownRequestError)) {
+      this.logger.error(`[Prisma Critical] ${exception.message}`);
+      const status = HttpStatus.SERVICE_UNAVAILABLE;
+      return response.status(status).json({
+        statusCode: status,
+        message: 'Server is currently unavailable. Please try again later.',
+        error: 'Service Unavailable',
+      });
+    }
+
+    this.logger.error(`[${exception.code}] ${exception.message}`);
     switch (exception.code) {
+      case 'P1001':
+      case 'P1002':
+      case 'P1008':
+      case 'P1017': {
+        const status = HttpStatus.SERVICE_UNAVAILABLE;
+        return response.status(status).json({
+          statusCode: status,
+          message:
+            'Database service is currently down. Please try again later.',
+          error: 'Service Unavailable',
+        });
+      }
+
       // error unique restriction, duplicated field, already in use
       case 'P2002': {
         const status = HttpStatus.CONFLICT; // 409

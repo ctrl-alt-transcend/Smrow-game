@@ -83,7 +83,7 @@ export function DiceRoller({
     if (busy || !isMyTurn) return;
     rollPendingRef.current = true;
     setBusy(true);
-    socket.emit("dice");
+    socket.emit("game:dice");
     timeoutRef.current = window.setTimeout(unlock, SERVER_TIMEOUT_MS);
   }, [busy, isMyTurn, unlock]);
 

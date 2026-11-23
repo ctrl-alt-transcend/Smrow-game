@@ -1,11 +1,4 @@
-@font-face {
-  font-family: 'Basteleur-Bold';
-  src: url('fonts/Basteleur/Basteleur-Bold.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Tiny5+Duo:ital,wght@0,100..900;1,100..900&display=swap');
 :root {
   --text: #ffffff;
   --text-h: #000000;
