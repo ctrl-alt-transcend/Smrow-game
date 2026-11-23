@@ -19,7 +19,7 @@ type PanContainerProps = {
 export function PanContainer({
   children,
   maxPan = 400,
-  minScale = 1,
+  minScale = 0.8,
   maxScale = 3,
   zoomStep = 1.25,
 }: PanContainerProps) {
@@ -202,7 +202,7 @@ export function PanContainer({
         wrap="nowrap"
         style={{
           position: "absolute",
-          bottom: 4,
+          top: 6,
           left: 0,
           right: 0,
           margin: "0 auto",
