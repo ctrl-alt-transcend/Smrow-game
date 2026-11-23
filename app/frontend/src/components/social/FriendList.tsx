@@ -9,10 +9,12 @@ import {
   Loader,
   Paper,
   ScrollArea,
+  Anchor,
 } from "@mantine/core";
 import { useFetch } from "../../hooks/useFetch";
 import { getFriendList, removeFriend } from "../../services/social.service";
 import ErrorMessages from "../utils/ErrorMessages";
+import { Link } from "react-router";
 
 export function FriendList() {
   const friendlist = useFetch(getFriendList);
@@ -54,12 +56,18 @@ export function FriendList() {
   const rows = friendlist.data.map((item) => (
     <Table.Tr key={item.id}>
       <Table.Td>
-        <Group gap="sm">
-          <Avatar size={40} src={item.avatar} radius={40} alt="" />
-          <Text fz="lg" fw={500}>
-            {item.username}
-          </Text>
-        </Group>
+        <Anchor
+          component={Link}
+          to={`/profile/${encodeURIComponent(item.username)}`}
+          underline="hover"
+          fz="lg"
+          fw={500}
+        >
+          <Group gap="sm">
+            <Avatar size={40} src={item.avatar} radius={40} alt="" />
+            <Text>{item.username}</Text>
+          </Group>
+        </Anchor>
       </Table.Td>
       <Table.Td>
         <Text fz="sm" c="dimmed">
