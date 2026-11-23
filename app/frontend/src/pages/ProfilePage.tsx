@@ -35,7 +35,13 @@ export default function ProfilePage() {
                 radius="md"
                 color="red"
               />
-              <Title order={2} ta="center">
+              <Title
+                order={2}
+                ta="center"
+                maw="100%"
+                lineClamp={2}
+                title={user?.username}
+              >
                 {user?.username}
               </Title>
               {user && <ProfilePictureUpload user={user} />}
