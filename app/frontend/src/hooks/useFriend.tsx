@@ -6,12 +6,12 @@ export function useFriend(): FriendStatus[] | null {
   const [friends, setFriends] = useState<FriendStatus[] | null>(null);
 
   useEffect(() => {
-    socket.on("friend: update", setFriends);
-    socket.emit("friend: list");
+    socket.on("friend:update", setFriends);
+    socket.emit("friend:list");
     console.log("useFriend: socket emit friend: list");
 
     return () => {
-      socket.off("friend: updateList", setFriends);
+      socket.off("friend:update", setFriends);
     };
   }, []);
   console.log("useFriend: friends =", friends);

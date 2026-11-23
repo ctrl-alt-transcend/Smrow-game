@@ -477,7 +477,8 @@ class GameStateContext {
      * @description If the player that left the game was the one that had to play, we set the next player as the current player
      */
     else if (this.data.whosTurn === username) {
-      const next = this.data.players.keys().next().value as Player | undefined;
+      const next = this.data.players.values().next().value as
+        Player | undefined;
       this.data.whosTurn = next?.username ?? '';
     }
     this.phaseCheckRequest();

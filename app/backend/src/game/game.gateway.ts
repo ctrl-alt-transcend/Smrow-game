@@ -47,15 +47,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       return;
     }
     game.startRequest(client.data.user.username);
+    this.gameService.broadcastGameList();
     await this.emitGameDataDto(game);
   }
 
   @SubscribeMessage('game:quit')
-  async handleQuitGame(@ConnectedSocket() client: SocketClient) {
+  handleQuitGame(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (!game) return;
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
-    await this.disconnectSockets(client);
+    this.server.in(`user:${client.data.user.id}`).disconnectSockets();
     this.logger.log(`Player ${client.data.user.username} quit the game`);
   }
 
@@ -177,14 +178,5 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
         `No more sockets for user ${client.data.user.username}, removing from game if any`,
       );
     }
-  }
-
-  async disconnectSockets(client: SocketClient) {
-    const sockets = await this.server
-      .in(`user:${client.data.user.id}`)
-      .fetchSockets();
-    sockets.forEach((socket) => {
-      this.server.sockets.get(socket.id)?.disconnect(false);
-    });
   }
 }

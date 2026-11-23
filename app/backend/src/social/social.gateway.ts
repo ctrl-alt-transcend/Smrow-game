@@ -2,6 +2,7 @@ import {
   WebSocketGateway,
   OnGatewayInit,
   OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketServer,
   ConnectedSocket,
@@ -10,51 +11,27 @@ import {
 import { Logger } from '@nestjs/common';
 import { ChatService } from '../chat/chat.service';
 import { JwtService } from '@nestjs/jwt';
-import type { Server, Socket, DefaultEventsMap } from 'socket.io';
-import { readSecret } from '../strategies/readSecret';
-import { AUTH } from '../config/config';
-import type {
-  JwtPayload,
-  GameList,
-  FriendStatus,
-  ChatSendPayload,
+import { authMiddleware } from '../ws/auth.middleware';
+import type { SocketClient, SocketServer } from '../ws/socket.types';
+import {
+  type GameList,
+  type FriendStatus,
+  type ChatSendPayload,
+  ChatSendPayloadSchema,
+  IdSchema,
 } from 'shared';
-import { ChatSendPayloadSchema } from 'shared';
-import { parseCookie } from 'cookie';
 import { UserService } from '../user/user.service';
 import { ZodValidationPipe } from 'nestjs-zod';
-
-interface SocketUser {
-  id: string;
-  username: string;
-}
-
-interface SocketData {
-  user: SocketUser;
-}
-
-type SocketServer = Server<
-  DefaultEventsMap,
-  DefaultEventsMap,
-  DefaultEventsMap,
-  SocketData
->;
-type SocketClient = Socket<
-  DefaultEventsMap,
-  DefaultEventsMap,
-  DefaultEventsMap,
-  SocketData
->;
 
 @WebSocketGateway({
   path: '/ws',
   namespace: 'social',
   cors: { credentials: true },
 })
-export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
+export class SocialGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   private readonly logger = new Logger(SocialGateway.name);
-
-  private readonly onlineUsers = new Map<string, string[]>();
 
   constructor(
     private readonly jwtService: JwtService,
@@ -71,12 +48,12 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   }
 
   @SubscribeMessage('gameList:join')
-  async handleJoinGameList(client: SocketClient) {
+  async handleJoinGameList(@ConnectedSocket() client: SocketClient) {
     await client.join('gameList');
   }
 
   @SubscribeMessage('gameList:leave')
-  async handleLeaveGameList(client: SocketClient) {
+  async handleLeaveGameList(@ConnectedSocket() client: SocketClient) {
     await client.leave('gameList');
   }
 
@@ -96,18 +73,28 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   }
 
   @SubscribeMessage('chat:join')
-  async handleJoinChat(client: SocketClient) {
+  async handleJoinChat(@ConnectedSocket() client: SocketClient) {
     await client.join('chat');
   }
 
   @SubscribeMessage('chat:leave')
-  async handleLeaveChat(client: SocketClient) {
+  async handleLeaveChat(@ConnectedSocket() client: SocketClient) {
     await client.leave('chat');
   }
 
-  @SubscribeMessage('friend: remove')
-  async handleFriendRemove(client: SocketClient, friendId: string) {
+  /*---------- Friends ----------*/
+
+  @SubscribeMessage('friend:remove')
+  async handleFriendRemove(
+    @ConnectedSocket() client: SocketClient,
+    @MessageBody(new ZodValidationPipe(IdSchema)) friendId: string,
+  ) {
     await this.userService.removeFriend(client.data.user.id, friendId);
+    await this.sendFriendList(client);
+  }
+
+  @SubscribeMessage('friend:list')
+  async handleFriendList(@ConnectedSocket() client: SocketClient) {
     await this.sendFriendList(client);
   }
 
@@ -115,70 +102,27 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
     const friends = await this.userService.getFriendList(client.data.user.id);
     const friendsStatus: FriendStatus[] = friends.map((friend) => ({
       ...friend,
-      isOnline: this.onlineUsers.has(friend.id),
+      isOnline: this.server.adapter.rooms.has(`user:${friend.id}`),
     }));
-    client.emit('friend: update', friendsStatus);
-  }
-
-  @SubscribeMessage('friend: list')
-  async handleFriendList(client: SocketClient) {
-    await this.sendFriendList(client);
+    client.emit('friend:update', friendsStatus);
   }
 
   /*---------- Connection ----------*/
 
   afterInit(server: SocketServer) {
-    server.use((client: SocketClient, next) => {
-      try {
-        const authToken = client.handshake.auth.token as string;
-        const cookies = parseCookie(client.handshake.headers.cookie ?? '');
-        const cookieToken = cookies.access_token;
-        const token =
-          cookieToken ||
-          (typeof authToken === 'string' && authToken.length > 0
-            ? authToken
-            : cookieToken);
-        if (!token) {
-          throw new Error('JWT must be provided');
-        }
-        const payload = this.jwtService.verify<JwtPayload>(token, {
-          secret: readSecret(AUTH.JWT_FILE),
-        });
-        client.data.user = { id: payload.sub, username: payload.username };
-        next();
-      } catch (error) {
-        console.log(
-          'Client connection rejected:',
-          client.id,
-          ' - ',
-          (error as Error).message,
-        );
-        next(new Error('Authentication error'));
-      }
-    });
+    server.use(authMiddleware(this.jwtService, this.logger));
+  }
+
+  async handleConnection(client: SocketClient) {
+    await client.join(`user:${client.data.user.id}`);
+    this.logger.debug(
+      `Client connected: ${client.id} - ${client.data.user.username}`,
+    );
   }
 
   handleDisconnect(client: SocketClient) {
-    const userId = client.data.user.id;
-    const sockets = this.onlineUsers.get(userId);
-    if (!sockets) return;
-
-    const index = sockets.indexOf(client.id);
-    if (index !== -1) {
-      sockets.splice(index, 1);
-    }
-
-    if (sockets.length === 0) {
-      this.onlineUsers.delete(userId);
-    }
-  }
-
-  handleConnection(client: SocketClient) {
-    if (this.onlineUsers.has(client.data.user.id)) {
-      this.onlineUsers.get(client.data.user.id)?.push(client.id);
-    } else {
-      this.onlineUsers.set(client.data.user.id, [client.id]);
-    }
-    console.log('Client connected:', client.id); //TEST:
+    this.logger.debug(
+      `Client disconnected: ${client.id} - ${client.data.user.username}`,
+    );
   }
 }

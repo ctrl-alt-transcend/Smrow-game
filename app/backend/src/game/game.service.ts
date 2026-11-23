@@ -222,7 +222,7 @@ export class GameService {
     this.logger.log(`Game ${gameId}: player ${playerProfile.username} joined`);
     this.broadcastGameList();
   }
-  private broadcastGameList() {
+  broadcastGameList() {
     this.socialGateway.handleGameList(this.getGamesList());
   }
 }
