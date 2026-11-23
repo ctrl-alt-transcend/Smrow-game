@@ -57,8 +57,14 @@ export default function PublicProfilePage() {
           <Text fz="sm" c="dimmed">
             Bio
           </Text>
-          <Text>{profile.bio ?? "-"}</Text>
-
+          <Text
+            textWrap="wrap"
+            style={{
+              wordBreak: "break-word",
+            }}
+          >
+            {profile.bio ?? "-"}
+          </Text>
           <Text fz="sm" c="dimmed" mt="md">
             Member since
           </Text>
