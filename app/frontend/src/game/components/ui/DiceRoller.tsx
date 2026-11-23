@@ -54,7 +54,8 @@ export function DiceRoller({
   const { ref: containerRef, width } = useElementWidth<HTMLDivElement>();
 
   const diceSize = Math.round(Math.max(48, Math.min(96, (width - 64) / 2)));
-  const locked = !isMyTurn || phase === Phase.TRADE_BUILD;
+  const locked =
+    !isMyTurn || phase === Phase.TRADE_BUILD || phase === Phase.PLACEMENT;
 
   const clearServerTimeout = useCallback(() => {
     if (timeoutRef.current !== null) {
