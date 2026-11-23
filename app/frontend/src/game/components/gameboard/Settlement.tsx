@@ -11,7 +11,7 @@ import {
 
 export const Settlement: React.FC<SettlementProps> = ({
   data,
-  isSelected,
+  isSelected = false,
   isHovered,
   onHoverChange,
   onClick,
@@ -42,7 +42,7 @@ export const Settlement: React.FC<SettlementProps> = ({
         onMouseLeave={onMouseLeave}
         onClick={(e) => {
           e.stopPropagation();
-          onClick(data);
+          onClick?.(data);
         }}
         style={{ cursor: "pointer" }}
       />
@@ -58,7 +58,7 @@ export const Settlement: React.FC<SettlementProps> = ({
       onMouseLeave={onMouseLeave}
       onClick={(e) => {
         e.stopPropagation();
-        onClick(data);
+        onClick?.(data);
       }}
       style={{ cursor: "pointer" }}
     >

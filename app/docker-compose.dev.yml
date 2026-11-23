@@ -37,6 +37,7 @@ services:
       DB_PASSWORD_FILE: /run/secrets/db_password
       JWT_SECRET_FILE: /run/secrets/jwt_secret
       NODE_ENV: development
+      LOG_LEVEL: '>=verbose' #['fatal', 'error', 'warn', 'log', 'debug', 'verbose']
     depends_on:
       postgres:
         condition: service_healthy

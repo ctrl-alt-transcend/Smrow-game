@@ -137,14 +137,16 @@ function GameShell({ game }: { game: GameDataDto }) {
               settings={game.settings}
               masterLog={game.masterLog}
               isMyTurn={navEnabled}
+              phase={game.currentPhase}
             />
 
             <DiceRoller
               currentRoll={game.currentPlayer.currentRoll}
               isMyTurn={navEnabled}
+              phase={game.currentPhase}
             />
 
-            <SkipTurnButton isMyTurn={navEnabled} />
+            <SkipTurnButton isMyTurn={navEnabled} phase={game.currentPhase} />
 
             <Accordion variant="separated" multiple defaultValue={["players"]}>
               <Accordion.Item value="players">
@@ -169,6 +171,7 @@ function GameShell({ game }: { game: GameDataDto }) {
           gameId={game.gameId}
           waitingForPlayers={waitingForPlayers}
           players={game.players}
+          settings={game.settings}
         />
         <Center flex={1} w="100%" h="100%" mih={0} p={0}>
           <PanContainer maxPan={400}>

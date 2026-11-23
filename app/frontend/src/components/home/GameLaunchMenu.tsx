@@ -12,15 +12,6 @@ import {
   Tooltip,
 } from "@mantine/core";
 import {
-  BUILD_LIMIT_DFLT,
-  CITY_POINT_DFLT,
-  GENERIC_PORT_OFFER_RATE_DFLT,
-  POINTS_TO_WIN_DFLT,
-  RESERVE_OFFER_RATE_DFLT,
-  ROAD_POINT_DFLT,
-  SETTLEMENT_POINT_DFLT,
-  SPECIAL_PORT_OFFER_RATE_DFLT,
-  TRADE_LIMIT_DFLT,
   MIN_SETTINGS,
   GameboardLayout,
   TraderType,
@@ -30,56 +21,18 @@ import {
   MAX_POINTS_TO_WIN,
   MAX_BONUS,
   type SettingsData,
-  MULTIPLIER_DFLT,
   MIN_MULTIPLIER,
   MAX_MULTIPLIER,
   Phase,
   ResourceType,
-  TIME_DFLT,
   TIME_MIN,
   TIME_MAX,
+  DEFAULT_PRESET,
+  MAXXING_PRESET,
+  CLASSIC_PRESET,
+  ROBBER_THRESHOLD_MAX,
 } from "shared";
 import { useCreateLobby } from "../../game/utils/game.utils";
-
-const DEFAULTS: SettingsData = {
-  gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
-  turnDurationSeconds: TIME_DFLT,
-  tradeLimit: TRADE_LIMIT_DFLT,
-  buildLimit: BUILD_LIMIT_DFLT,
-  specialPortOfferRate: SPECIAL_PORT_OFFER_RATE_DFLT,
-  genericPortOfferRate: GENERIC_PORT_OFFER_RATE_DFLT,
-  reserveOfferRate: RESERVE_OFFER_RATE_DFLT,
-  settlementPoints: SETTLEMENT_POINT_DFLT,
-  cityPoints: CITY_POINT_DFLT,
-  pointsToWin: POINTS_TO_WIN_DFLT,
-  roadPoints: ROAD_POINT_DFLT,
-  resourcesMultiplier: MULTIPLIER_DFLT,
-  woodBonus: 0,
-  sheepBonus: 0,
-  brickBonus: 0,
-  oreBonus: 0,
-  wheatBonus: 0,
-};
-
-const CATAN_MAXXING: SettingsData = {
-  gameboardLayout: GameboardLayout.CLASSIC_LAYOUT,
-  turnDurationSeconds: 20,
-  tradeLimit: MAX_LIMIT,
-  buildLimit: MAX_LIMIT,
-  specialPortOfferRate: 1,
-  genericPortOfferRate: 2,
-  reserveOfferRate: 3,
-  roadPoints: 2,
-  settlementPoints: 10,
-  cityPoints: 10,
-  pointsToWin: MAX_POINTS_TO_WIN,
-  resourcesMultiplier: MAX_MULTIPLIER,
-  woodBonus: MAX_BONUS,
-  sheepBonus: MAX_BONUS,
-  brickBonus: MAX_BONUS,
-  oreBonus: MAX_BONUS,
-  wheatBonus: MAX_BONUS,
-};
 
 type SliderConfig = {
   // Numeric settings only — the layout is handled separately by the Select
@@ -183,6 +136,13 @@ const SECTIONS: { id: string; title: string; sliders: SliderConfig[] }[] = [
     title: "Resources",
     sliders: [
       {
+        key: "robberThreshold",
+        label: "Robber Threshold",
+        description: `Threshold resources amount for the players to be stolen by the robber when 7 is rolled`,
+        min: MIN_MULTIPLIER,
+        max: ROBBER_THRESHOLD_MAX,
+      },
+      {
         key: "resourcesMultiplier",
         label: "Resources Multiplier",
         description: `multiplicator applied to resources produced during « ${Phase.RESOURCES} »`,
@@ -271,7 +231,7 @@ function SettingsSlider({
 
 export default function GameLaunchMenu() {
   const createLobby = useCreateLobby();
-  const [values, setValues] = useState<SettingsData>({ ...DEFAULTS });
+  const [values, setValues] = useState<SettingsData>({ ...DEFAULT_PRESET });
   const [opened, setOpened] = useState(false);
 
   // Generic setter: handles the layout (string) and numeric sliders alike
@@ -280,8 +240,9 @@ export default function GameLaunchMenu() {
     val: SettingsData[K],
   ) => setValues((prev) => ({ ...prev, [key]: val }));
 
-  const reset = () => setValues({ ...DEFAULTS });
-  const maxxing = () => setValues({ ...CATAN_MAXXING });
+  const reset = () => setValues({ ...DEFAULT_PRESET });
+  const maxxing = () => setValues({ ...MAXXING_PRESET });
+  const classic = () => setValues({ ...CLASSIC_PRESET });
 
   return (
     <Paper shadow="xs" radius="md" p={{ base: "sm", sm: "md" }} w="100%">
@@ -298,7 +259,6 @@ export default function GameLaunchMenu() {
 
       {opened && (
         <Box pt="sm">
-          {/* Gameboard layout — not a numeric setting, so it lives outside the sliders */}
           <Select
             label="Gameboard layout"
             data={Object.values(GameboardLayout) as GameboardLayout[]}
@@ -334,18 +294,30 @@ export default function GameLaunchMenu() {
           <Group justify="space-between" mt="md" gap="sm" wrap="wrap">
             <Tooltip
               label={
-                "Original rules, for chill players that have a lot of time"
+                "Slightly faster variant of the original Catan: little resources bonus and multiplier enabled"
               }
             >
               <Button variant="subtle" color="gray" onClick={reset}>
-                Vanilla Catan
+                Default
               </Button>
             </Tooltip>
             <Tooltip
-              label={"Fast paced variant of the game, for hangry players"}
+              label={
+                "Huge resources bonus and multiplier, low victory conditions for fast paced games"
+              }
             >
-              <Button variant="subtle" color="red" onClick={maxxing}>
-                Catan Maxxing
+              <Button variant="subtle" color="grey" onClick={maxxing}>
+                Power Maxxing
+              </Button>
+            </Tooltip>
+
+            <Tooltip
+              label={
+                "Based on original rules: slow paced and low resources generation"
+              }
+            >
+              <Button variant="subtle" color="grey" onClick={classic}>
+                Classic Catan
               </Button>
             </Tooltip>
             <Button onClick={() => createLobby(values)}>

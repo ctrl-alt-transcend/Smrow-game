@@ -10,7 +10,7 @@ import {
 
 export const Coast: React.FC<CoastProps> = ({
   data,
-  isSelected,
+  isSelected = false,
   isHovered,
   onHoverChange,
   onClick,
@@ -49,7 +49,7 @@ export const Coast: React.FC<CoastProps> = ({
       onMouseLeave={onMouseLeave}
       onClick={(e) => {
         e.stopPropagation();
-        onClick(data);
+        onClick?.(data);
       }}
       style={{ cursor: "pointer" }}
     >

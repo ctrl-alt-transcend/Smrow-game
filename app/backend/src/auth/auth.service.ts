@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bycrypt from 'bcrypt';
@@ -23,6 +23,8 @@ import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly userService: UserService,
     private readonly JwtService: JwtService,
@@ -41,6 +43,7 @@ export class AuthService {
       username: user.username,
     });
 
+    this.logger.log(`User ${user.username} created successfully`);
     return RegisterResponseSchema.parse({
       message: 'User created successfully',
       user: UserPublicSchema.parse(user),
@@ -62,6 +65,7 @@ export class AuthService {
       username: user.username,
     });
 
+    this.logger.log(`User ${user.username} logged in successfully`);
     return { access_token };
   }
 
@@ -149,16 +153,19 @@ export class AuthService {
         return existingUser;
       }
 
-      // when no registers exist, create the account and user with an Interactive Transaction
+      // when no registers exists, create the account and user with an Interactive Transaction
       // this executes the user and account creation safely, if one fails it rolls back all.
       // $transaction( async (tx) => {...} )
 
-      await this.databaseService.$transaction(async (tx) => {
+      return await this.databaseService.$transaction(async (tx) => {
         const user = tx.user.create({
           data: {
             email: googleUser.email,
             username: `google_${googleUser.googleId}`,
             name: googleUser.name,
+            profile: {
+              create: {},
+            },
           },
         });
 
