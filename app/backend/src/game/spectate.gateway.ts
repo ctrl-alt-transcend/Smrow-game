@@ -32,6 +32,10 @@ export class SpectateGateway implements OnGatewayInit, OnGatewayConnection {
 
   /*---------- Spectate ----------*/
 
+  endSpectate(gameId: string) {
+    this.server.in(gameId).disconnectSockets(false);
+  }
+
   sendSpectateUpdate(gameId: string, gameDataDto: GameDataDto) {
     this.server.to(gameId).emit('spectate:update', gameDataDto);
   }
@@ -45,8 +49,10 @@ export class SpectateGateway implements OnGatewayInit, OnGatewayConnection {
     try {
       const game = this.gameService.getGameInstanceByGameId(gameId);
       if (!game) return { ok: false, error: "game doesn't exist" };
+      const dto = game.getGameDataDto(game.getWhosTurn());
+      if (!dto) return { ok: false, error: 'no active player' };
       await client.join(game.getGameId());
-      return { ok: true, data: game.getGameDataDto(game.getWhosTurn()) };
+      return { ok: true, data: dto };
     } catch (e) {
       this.logger.log(
         `User ${client.data.user.username} failed to join spectate for game ${gameId}: ${e}`,
