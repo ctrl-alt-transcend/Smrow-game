@@ -11,7 +11,7 @@ export default function SkipTurnButton({
   phase: Phase;
 }) {
   const handleSkipRequest = useCallback(() => {
-    socket.emit("skip");
+    socket.emit("game:skip");
   }, []);
 
   return (

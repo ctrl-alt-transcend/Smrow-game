@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
 import { ChatMessage } from 'shared';
-// import { IncomingMessage } from 'node:http';
+import { Logger } from '@nestjs/common';
 
 /**
  * @brief Prisma options to fetch a message along with its author.
@@ -24,28 +24,14 @@ type ChatWithUser = Prisma.ChatGetPayload<typeof chatWithUser>;
 
 @Injectable()
 export class ChatService {
+  private readonly logger = new Logger(ChatService.name);
+
   constructor(private readonly databaseService: DatabaseService) {}
 
   async getChatHistory(): Promise<ChatMessage[]> {
-    // const chatMessages: ChatMessage[] = [
-    //   {
-    //     id: "1",
-    //     date: Date.now(),
-    //     content: 'Hello, how are you?',
-    //     username: 'JohnDoe'
-    //   },
-    //   {
-    //     id: "2",
-    //     date: Date.now() + 1,
-    //     content: 'Fine and you ?',
-    //     username: 'JaneDoe'
-    //   },
-    // ]
-
     const messages = await this.databaseService.chat.findMany({
       include: { user: { select: { username: true } } },
     });
-
     return messages.map((message) => this.toChatMessage(message));
   }
 
@@ -57,6 +43,7 @@ export class ChatService {
       },
       include: chatWithUser.include,
     });
+    this.logger.verbose(`${userId} sent a chat message: ${content}`);
     return this.toChatMessage(message);
   }
 
