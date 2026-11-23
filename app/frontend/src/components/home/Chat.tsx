@@ -85,15 +85,22 @@ export default function Chat() {
           ))}
         </Stack>
       </ScrollArea>
-      <Group gap="xs" mt="md">
-        <TextInput
-          flex={1}
-          placeholder="Say something toxic..."
-          value={draft}
-          onChange={(event) => setDraft(event.currentTarget.value)}
-        />
-        <Button onClick={handleSend}>send</Button>
-      </Group>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleSend();
+        }}
+      >
+        <Group gap="xs" mt="md">
+          <TextInput
+            flex={1}
+            placeholder="Say something toxic..."
+            value={draft}
+            onChange={(event) => setDraft(event.currentTarget.value)}
+          />
+          <Button onClick={handleSend}>send</Button>
+        </Group>
+      </form>
     </Paper>
   );
 }
