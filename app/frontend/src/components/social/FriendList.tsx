@@ -15,6 +15,7 @@ import { useFetch } from "../../hooks/useFetch";
 import { getFriendList, removeFriend } from "../../services/social.service";
 import ErrorMessages from "../utils/ErrorMessages";
 import { Link } from "react-router";
+import { getAvatarSrc } from "../utils/avatar";
 
 export function FriendList() {
   const friendlist = useFetch(getFriendList);
@@ -64,7 +65,12 @@ export function FriendList() {
           fw={500}
         >
           <Group gap="sm">
-            <Avatar size={40} src={item.avatar} radius={40} alt="" />
+            <Avatar
+              size={40}
+              src={getAvatarSrc(item.avatar)}
+              radius={40}
+              alt=""
+            />
             <Text>{item.username}</Text>
           </Group>
         </Anchor>
