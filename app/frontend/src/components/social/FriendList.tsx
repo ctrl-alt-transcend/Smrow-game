@@ -6,44 +6,23 @@ import {
   Group,
   Table,
   Text,
-  Loader,
   Paper,
   ScrollArea,
+  Anchor,
 } from "@mantine/core";
-import { useFetch } from "../../hooks/useFetch";
-import { getFriendList, removeFriend } from "../../services/social.service";
-import ErrorMessages from "../utils/ErrorMessages";
+import { socialSocket as socket } from "../../sockets/socialSocket.tsx";
+import { useFriend } from "../../hooks/useFriend.tsx";
+import { Link } from "react-router";
+import { getAvatarSrc } from "../utils/avatar";
 
 export function FriendList() {
-  const friendlist = useFetch(getFriendList);
+  const friends = useFriend();
   const [actionError, setActionError] = useState<string | null>(null);
-  // const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  const handleRemoveFriend = async (friendId: string) => {
-    try {
-      setActionError(null);
-      // setActionSuccess(null);
-      await removeFriend(friendId);
-      // setActionSuccess("Friend removed successfully.");
-      friendlist.refetch();
-    } catch {
-      setActionError("Could not remove friend, try again later.");
-    }
-  };
-
-  if (friendlist.loading) {
-    return (
-      <Group justify="center" py="xl">
-        <Loader />
-      </Group>
-    );
-  }
-
-  if (friendlist.error) {
-    return <ErrorMessages error={friendlist.error} />;
-  }
-
-  if (!friendlist.data || friendlist.data.length === 0) {
+  if (!friends) {
+    return <Text>Loading friend list...</Text>;
+  } else if (friends.length === 0) {
     return (
       <Text c="dimmed" ta="center" py="xl">
         You don't have any friend :(
@@ -51,21 +30,43 @@ export function FriendList() {
     );
   }
 
-  const rows = friendlist.data.map((item) => (
-    <Table.Tr key={item.id}>
+  const handleRemoveFriend = async (friendId: string) => {
+    setActionSuccess(null);
+    setActionSuccess(null);
+    try {
+      socket.emit("friend: remove", friendId);
+    } catch {
+      setActionError("Could not remove friend, try again later.");
+    }
+  };
+
+  const rows = friends.map((item) => (
+    <Table.Tr key={item.id} w="100%" mah={0}>
       <Table.Td>
-        <Group gap="sm">
-          <Avatar size={40} src={item.avatar} radius={40} alt="" />
-          <Text fz="lg" fw={500}>
-            {item.username}
-          </Text>
-        </Group>
+        <Anchor
+          component={Link}
+          to={`/profile/${encodeURIComponent(item.username)}`}
+          underline="hover"
+          fz="lg"
+          fw={500}
+          display="block"
+        >
+          <Group wrap="nowrap" gap="xs">
+            <Avatar
+              size={40}
+              src={getAvatarSrc(item.avatar)}
+              radius={40}
+              alt=""
+              style={{ flexShrink: 0 }}
+            />
+            <Text truncate="end" style={{ flex: 1, minWidth: 0 }}>
+              {item.username}
+            </Text>
+          </Group>
+        </Anchor>
       </Table.Td>
-      <Table.Td>
-        <Text fz="sm" c="dimmed">
-          Bio
-        </Text>
-        <Text fz="sm">{item.bio ?? "-"}</Text>
+      <Table.Td w={1} style={{ whiteSpace: "nowrap" }}>
+        <Text ta="right">{item.isOnline ? "online" : "offline"}</Text>
       </Table.Td>
       <Table.Td>
         <Group gap={0} justify="flex-end">
@@ -89,11 +90,11 @@ export function FriendList() {
           {actionError}
         </Text>
       )}
-      {/* {actionSuccess && (
+      {actionSuccess && (
         <Text c="green" fz="sm" p="sm">
           {actionSuccess}
         </Text>
-      )} */}
+      )}
       <ScrollArea.Autosize mah={400} type="auto" offsetScrollbars="y">
         <Table
           verticalSpacing="md"

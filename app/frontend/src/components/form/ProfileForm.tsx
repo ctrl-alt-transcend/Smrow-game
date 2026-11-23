@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { schemaResolver, useForm } from "@mantine/form";
-import {
-  type PaperProps,
-  Button,
-  Paper,
-  Stack,
-  Textarea,
-  TextInput,
-} from "@mantine/core";
+import { Button, Paper, Stack, Textarea, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { UpdateProfileSchema, type UpdateProfile } from "shared";
+import {
+  UpdateProfileSchema,
+  type UpdateProfile,
+  type UserProfile,
+} from "shared";
 import { useAuth } from "../../hooks/useAuth";
 import ErrorMessages from "../utils/ErrorMessages";
 import { updateProfile } from "../../services/user.service";
@@ -27,8 +24,8 @@ const fields: FieldConfig[] = [
   { name: "bio", label: "bio", component: Textarea },
 ];
 
-export function ProfileSettings(props: PaperProps) {
-  const { user, updateUser } = useAuth();
+export function ProfileForm({ user }: { user: UserProfile }) {
+  const { updateUser } = useAuth();
   const [error, setError] = useState<string | string[] | string | null>(null);
 
   const form = useForm({
@@ -57,7 +54,7 @@ export function ProfileSettings(props: PaperProps) {
   });
 
   return (
-    <Paper p="xs" withBorder {...props}>
+    <Paper p="xs" withBorder>
       <form onSubmit={handleUpdate}>
         <Stack>
           {fields.map(({ name, label, component: Field = TextInput }) => (

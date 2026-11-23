@@ -10,7 +10,7 @@ import {
 } from "@mantine/core";
 import { FriendList } from "../components/social/FriendList";
 import { useAuth } from "../hooks/useAuth";
-import { ProfileSettings } from "../components/form/ProfileForm";
+import { ProfileForm } from "../components/form/ProfileForm";
 import { ProfilePictureUpload } from "../components/form/ProfilePictureUpload";
 import { getAvatarSrc } from "../components/utils/avatar";
 import { AddFriend } from "../components/form/AddFriend";
@@ -35,15 +35,21 @@ export default function ProfilePage() {
                 radius="md"
                 color="red"
               />
-              <Title order={2} ta="center">
+              <Title
+                order={2}
+                ta="center"
+                maw="100%"
+                lineClamp={2}
+                title={user?.username}
+              >
                 {user?.username}
               </Title>
-              <ProfilePictureUpload />
+              {user && <ProfilePictureUpload user={user} />}
             </Stack>
 
             <Divider my="lg" label="Settings" labelPosition="center" />
 
-            <ProfileSettings />
+            {user && <ProfileForm user={user} />}
           </Paper>
         </Grid.Col>
 

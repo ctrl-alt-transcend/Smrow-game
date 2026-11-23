@@ -13,7 +13,6 @@ import {
   PERSONNAL_LOG_LIMIT,
   ROBBER_NAME,
   ROLLED_A,
-  ZGEG_DEV,
   PlayerPublicDto,
 } from 'shared';
 import {
@@ -82,12 +81,14 @@ export type PlayerNotifier = (id: string, username: string) => void;
  * state of the Context.
  */
 class GameStateContext {
-  private state!: State;
+  private readonly logger = new Logger(GameStateContext.name);
+  private readonly notify: PlayerNotifier;
+
   protected data!: GameData;
   protected graph!: GameBoardGraph;
   protected settings!: SettingsData;
   protected buildings: BuildingsInGame = new Map();
-  private readonly notify: PlayerNotifier;
+  private state!: State;
   private turnTimeoutId: NodeJS.Timeout | null = null;
   private logId: number = 0;
   private rollId: number = 0;
@@ -95,7 +96,6 @@ class GameStateContext {
   private roundCount: number = 0;
   private turnCount: number = 0;
   private turnStart: number = 0;
-  private readonly logger: Logger = new Logger(GameStateContext.name);
 
   constructor(
     gameId: string,
@@ -489,7 +489,7 @@ class GameStateContext {
    **********************************/
   public notifyAllPlayers() {
     this.data.players.forEach((player) => {
-      if (player.username !== ZGEG_DEV) this.notify(player.id, player.username);
+      this.notify(player.id, player.username);
     });
   }
 
@@ -525,8 +525,8 @@ class GameStateContext {
       if (p.firstDice === 0) this.diceRequest(p.username);
       if (p.secondDice === 0) {
         this.diceRequest(p.username);
-        this.logger.debug(
-          `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
+        this.logger.log(
+          `Game [${this.data.gameId}]: no actions within the elapsed time ` +
             `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
             `${p.username} during « ${this.getCurrentPhase()} »`,
         );
@@ -560,16 +560,24 @@ class GameStateContext {
     return roll;
   }
 
-  public setupNextPhase(nextPhase: Phase) {
-    if (nextPhase === Phase.RESOURCES) this.roundCount++;
-    this.setNextPlayer(0);
+  public setupNextPhase(
+    nextPhase: Phase,
+    playerMode: 'reset' | 'advance' | 'keep' = 'reset',
+  ): void {
+    if (this.isVictory()) return;
+    if (playerMode !== 'keep') {
+      this.setNextPlayer(playerMode === 'reset' ? 0 : undefined);
+      if (nextPhase === Phase.RESOURCES && this.data.turnIndex === 0) {
+        this.roundCount++;
+      }
+    }
     this.setTurnCount(0);
     this.setCurrentPhase(nextPhase);
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
     );
     this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
-    this.resetAllDices();
+    if (playerMode !== 'keep') this.resetAllDices();
   }
 
   public isVictory(): boolean {
@@ -590,6 +598,9 @@ class GameStateContext {
         return;
       }
     });
+    if (this.isGameTerminated()) {
+      this.stopWatch();
+    }
     return this.isGameTerminated();
   }
 
@@ -688,33 +699,37 @@ class GameStateContext {
    * Turn Watcher
    **********************************/
   private onExpire(): void {
-    if (this.getCurrentPhase() === Phase.START) {
+    this.turnTimeoutId = null;
+    const currentPhase = this.getCurrentPhase();
+    if (currentPhase === Phase.START) {
       this.everybodyRollDices();
     } else {
       const p = this.getPlayerByUsername(this.data.whosTurn);
       if (!p) return;
-      this.logger.debug(
-        `GameStateContext.onExpire: game [${this.data.gameId}]: no actions within the elapsed time ` +
+      this.logger.log(
+        `Game [${this.data.gameId}]: no actions within the elapsed time ` +
           `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
-          `${this.data.whosTurn} during « ${this.getCurrentPhase()} »`,
+          `${p.username} during « ${this.getCurrentPhase()} »`,
       );
-      switch (this.getCurrentPhase()) {
+      switch (currentPhase) {
         case Phase.PLACEMENT:
           this.afkDuringPlacement(p);
+          this.setNextPlayer();
+          this.phaseCheckRequest();
           break;
-        case Phase.START:
         case Phase.RESOURCES:
-          if (p.firstDice === 0) this.rollDice(p);
-          if (p.secondDice === 0) this.rollDice(p);
+          if (p.firstDice === 0) this.diceRequest(p.username);
+          if (p.secondDice === 0) this.diceRequest(p.username);
+          this.skipRequest(p.username);
+          break;
+        case Phase.TRADE_BUILD:
+          this.skipRequest(p.username);
           break;
         default:
-          break;
+          return;
       }
     }
-    if (this.turnTimeoutId === null) return;
-    this.turnTimeoutId = null;
-    this.setNextPlayer();
-    this.phaseCheckRequest();
+    this.isVictory();
     this.notifyAllPlayers();
   }
 
@@ -784,6 +799,7 @@ class StartPhase extends State {
         NotifColor.GREEN,
       );
       this.state.getStartingRolls().set(username, p.firstDice + p.secondDice);
+      this.phaseCheck();
     }
   }
 
@@ -894,6 +910,7 @@ class PlacementPhase extends State {
       'You finshied your placement, wait for the other players to play ...',
       NotifColor.GREEN,
     );
+    this.phaseCheck();
   }
 
   public trade(username: string) {
@@ -943,7 +960,7 @@ class ResourcesPhase extends State {
           this.state.resourcesProduction(false);
           break;
       }
-      this.state.setNextPlayer();
+      this.phaseCheck();
     }
   }
 
@@ -976,11 +993,11 @@ class ResourcesPhase extends State {
       NotifColor.RED,
     );
   }
-
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
-    if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
-    this.state.setupNextPhase(Phase.TRADE_BUILD);
+    const p = this.state.getCurrentPlayer();
+    if (!p || !this.state.hasRolledBothDices(p)) return;
+    this.state.setupNextPhase(Phase.TRADE_BUILD, 'keep');
     this.state.transitionTo(new TradeAndBuildPhase());
   }
 }
@@ -1059,7 +1076,7 @@ class TradeAndBuildPhase extends State {
     }
     this.state.setPersonalLog(p, `${response.message}`, NotifColor.GREEN);
     this.buildCount++;
-    if (this.isTradeBuildLimit(p)) this.state.setNextPlayer();
+    if (this.isTradeBuildLimit(p)) this.phaseCheck();
   }
 
   public trade(username: string, payload: TradePayload) {
@@ -1085,7 +1102,7 @@ class TradeAndBuildPhase extends State {
     }
     this.state.setPersonalLog(p, `${response.message}`, NotifColor.GREEN);
     this.tradeCount++;
-    if (this.isTradeBuildLimit(p)) this.state.setNextPlayer();
+    if (this.isTradeBuildLimit(p)) this.phaseCheck();
   }
 
   public dice(username: string) {
@@ -1101,15 +1118,14 @@ class TradeAndBuildPhase extends State {
   public skip(username: string) {
     const p = this.state.isPlayersTurn(username);
     if (!p) return;
-    this.state.setNextPlayer();
     this.state.setPersonalLog(p, `You ended your turn !`, NotifColor.GREEN);
-    this.resetTradeBuildCount();
+    this.phaseCheck();
   }
 
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
-    if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
-    this.state.setupNextPhase(Phase.RESOURCES);
+    this.resetTradeBuildCount();
+    this.state.setupNextPhase(Phase.RESOURCES, 'advance');
     this.state.transitionTo(new ResourcesPhase());
   }
 }

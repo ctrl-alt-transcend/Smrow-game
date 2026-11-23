@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { socialSocket as socket } from "../../sockets/socialSocket";
 import { http } from "../../services/http";
 import {
@@ -17,6 +17,7 @@ export default function Chat() {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +52,12 @@ export default function Chat() {
     };
   }, []);
 
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    viewport.scrollTo({ top: viewport.scrollHeight, behavior: "smooth" });
+  }, [messages, loaded]);
+
   if (!loaded) {
     return (
       <Paper withBorder p="md" h="100%">
@@ -74,7 +81,7 @@ export default function Chat() {
       <Title order={3} ta="center" mb="md">
         Toxic chat
       </Title>
-      <ScrollArea h={480}>
+      <ScrollArea h={480} viewportRef={viewportRef}>
         <Stack gap="xs" align="flex-start">
           {messages.map((message) => (
             <MessageItem
@@ -85,15 +92,22 @@ export default function Chat() {
           ))}
         </Stack>
       </ScrollArea>
-      <Group gap="xs" mt="md">
-        <TextInput
-          flex={1}
-          placeholder="Say something toxic..."
-          value={draft}
-          onChange={(event) => setDraft(event.currentTarget.value)}
-        />
-        <Button onClick={handleSend}>send</Button>
-      </Group>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleSend();
+        }}
+      >
+        <Group gap="xs" mt="md">
+          <TextInput
+            flex={1}
+            placeholder="Say something toxic..."
+            value={draft}
+            onChange={(event) => setDraft(event.currentTarget.value)}
+          />
+          <Button onClick={handleSend}>send</Button>
+        </Group>
+      </form>
     </Paper>
   );
 }

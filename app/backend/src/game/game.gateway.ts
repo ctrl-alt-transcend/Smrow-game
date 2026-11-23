@@ -68,7 +68,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (!game) return;
     game.diceRequest(client.data.user.username);
-    game.phaseCheckRequest();
     await this.emitGameDataDto(game);
   }
 
@@ -77,7 +76,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (!game) return;
     game.skipRequest(client.data.user.username);
-    game.phaseCheckRequest();
     await this.emitGameDataDto(game);
   }
 
@@ -90,7 +88,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (!game) return;
     game.buildRequest(client.data.user.username, payload);
-    game.phaseCheckRequest();
     await this.emitGameDataDto(game);
   }
 
@@ -103,7 +100,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
     if (!game) return;
     game.tradeRequest(client.data.user.username, payload);
-    game.phaseCheckRequest();
     await this.emitGameDataDto(game);
   }
 

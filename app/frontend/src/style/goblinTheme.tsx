@@ -79,7 +79,7 @@ export const theme = createTheme({
   white: "#f9f8f0",
   black: "#121007",
 
-  fontFamily: "Times",
+  fontFamily: "Roboto, sans-serif",
 
   fontSizes: {
     xs: "0.75rem",
@@ -91,7 +91,7 @@ export const theme = createTheme({
   },
 
   headings: {
-    fontFamily: "Basteleur-Bold",
+    fontFamily: "Tiny5 Duo, sans-serif",
     fontWeight: "700",
     textWrap: "pretty",
     sizes: {
@@ -128,6 +128,20 @@ export const theme = createTheme({
   },
 
   components: {
+    Text: {
+      styles: {
+        root: {
+          wordeBreak: "break-word",
+        },
+      },
+    },
+    Title: {
+      styles: {
+        root: {
+          color: "var(--mantine-color-Red-7)",
+        },
+      },
+    },
     Paper: {
       styles: {
         root: {
