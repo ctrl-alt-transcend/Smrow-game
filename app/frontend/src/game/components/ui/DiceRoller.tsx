@@ -6,7 +6,7 @@ import {
   type DiceValue,
 } from "../gameboard/Dice/Dice";
 import { gameSocket as socket } from "../../../sockets/gameSocket";
-import type { DiceRoll } from "shared";
+import { Phase, type DiceRoll } from "shared";
 
 /** Safety timeout: if the server never answers, unlock the UI. */
 const SERVER_TIMEOUT_MS = 2000;
@@ -37,9 +37,11 @@ function useElementWidth<T extends HTMLElement>() {
 export function DiceRoller({
   currentRoll,
   isMyTurn,
+  phase,
 }: {
   currentRoll: DiceRoll;
   isMyTurn: boolean;
+  phase: Phase;
 }) {
   const [busy, setBusy] = useState(false);
 
@@ -52,7 +54,7 @@ export function DiceRoller({
   const { ref: containerRef, width } = useElementWidth<HTMLDivElement>();
 
   const diceSize = Math.round(Math.max(48, Math.min(96, (width - 64) / 2)));
-  const locked = !isMyTurn;
+  const locked = !isMyTurn || phase === Phase.TRADE_BUILD;
 
   const clearServerTimeout = useCallback(() => {
     if (timeoutRef.current !== null) {
@@ -80,7 +82,7 @@ export function DiceRoller({
     if (busy || !isMyTurn) return;
     rollPendingRef.current = true;
     setBusy(true);
-    socket.emit("dice");
+    socket.emit("game:dice");
     timeoutRef.current = window.setTimeout(unlock, SERVER_TIMEOUT_MS);
   }, [busy, isMyTurn, unlock]);
 

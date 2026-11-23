@@ -35,7 +35,7 @@ export function ReconnectionModal(props: Props) {
         You’re still in a game. Would you like to try logging in again ?
       </Title>
       <Group>
-        <Button onClick={() => navigate("/game")}>Go ahed !</Button>
+        <Button onClick={() => navigate("/game")}>Go ahead !</Button>
         <Button onClick={quitGame}>No, thanks</Button>
       </Group>
     </Modal>

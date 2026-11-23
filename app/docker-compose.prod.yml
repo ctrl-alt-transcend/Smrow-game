@@ -1,0 +1,85 @@
+name: ft-catan
+
+services:
+  # -- Backend -- #
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: runner
+    container_name: backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      NODE_ENV: production
+      LOG_LEVEL: '>=log'  #['fatal', 'error', 'warn', 'log', 'debug', 'verbose']
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ft-network
+    volumes:
+        - ./backend/uploads: /app/backend/uploads
+    secrets:
+      - jwt_secret
+      - db_password
+
+  # -- Database -- #
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/
+    networks:
+      - ft-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    secrets:
+      - db_password
+
+  # -- Frontend + Nginx Reverse Proxy (HTTPS) -- #
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: runner
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - ft-network
+
+# --- Volumes --- #
+volumes:
+  postgres-data:
+
+# --- Networks --- #
+networks:
+  ft-network:
+
+# --- Secrets --- #
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  jwt_secret:
+    file: ./secrets/jwt_secret.txt

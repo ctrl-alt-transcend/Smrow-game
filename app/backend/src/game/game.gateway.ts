@@ -12,167 +12,114 @@ import {
   BuildPayloadSchema,
   type TradePayload,
   TradePayloadSchema,
-  GameDataDto,
-  ZGEG_DEV,
-  type JwtPayload,
-  Phase,
-  NotifColor,
 } from 'shared';
 import { JwtService } from '@nestjs/jwt';
-import type { Server, Socket, DefaultEventsMap } from 'socket.io';
+import { authMiddleware } from '../ws/auth.middleware';
 import { GameService } from './game.service';
-import { readSecret } from '../strategies/readSecret';
-import { AUTH } from '../config/config';
 import { GameStateContext } from './GameStateContext';
-import { parseCookie } from 'cookie';
 import { ZodValidationPipe } from 'nestjs-zod';
-
-export interface SocketUser {
-  id: string;
-  username: string;
-}
-
-interface SocketData {
-  user: SocketUser;
-}
-
-type SocketServer = Server<
-  DefaultEventsMap,
-  DefaultEventsMap,
-  DefaultEventsMap,
-  SocketData
->;
-type SocketClient = Socket<
-  DefaultEventsMap,
-  DefaultEventsMap,
-  DefaultEventsMap,
-  SocketData
->;
+import { Logger } from '@nestjs/common';
+import type { SocketClient, SocketServer } from '../ws/socket.types';
+import { SpectateGateway } from './spectate.gateway';
 
 @WebSocketGateway({
-  path: '/ws/game',
-  cors: {
-    origin: true,
-    credentials: true,
-  }, //WARN: dev only
+  path: '/ws',
+  namespace: 'game',
+  cors: { credentials: true },
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection {
   @WebSocketServer() server: SocketServer;
+  private readonly logger = new Logger(GameGateway.name);
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly gameService: GameService,
+    private readonly spectateGateway: SpectateGateway,
   ) {}
 
-  private emitGameDataDto(game: GameStateContext, user: string) {
-    let gameData: GameDataDto;
-    try {
-      gameData = game.getGameDataDto(user);
-    } catch (e) {
-      console.log(`Error: ${e}`);
-      return;
-    }
-    this.server.to(game.getGameId()).emit('gameState', gameData);
-    if (game.isGameTerminated()) {
-      this.endGame(game);
-    }
-    // every action ends here, so a finished game is recorded right away
-    void this.gameService.recordResultIfOver(game);
-  }
+  /*---------- Game ----------*/
 
-  @SubscribeMessage('startGame')
-  startGame(@ConnectedSocket() client: SocketClient) {
-    console.log('startGame event received from client:', client.id);
+  @SubscribeMessage('game:start')
+  async startGame(@ConnectedSocket() client: SocketClient) {
+    this.logger.log(`startGame event received from client: ${client.id}`);
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
-    if (game.getCurrentPhase() !== Phase.PENDING) {
+    if (!game) {
       return;
     }
-    if (game.getPlayers().size < 2) {
-      const player = game.getPlayerByUsername(client.data.user.username);
-      if (player) {
-        game.setPersonalLog(
-          player,
-          'Not enough players to start the game.',
-          NotifColor.PURPLE,
-        );
-      }
-      this.emitGameDataDto(game, client.data.user.username);
-    }
-    console.log(
-      `Starting game ${game.getGameId()} with ${game.getPlayers().size} players.`,
-    );
-    game.launchGame();
-    this.emitGameDataDto(game, client.data.user.username);
+    game.startRequest(client.data.user.username);
+    await this.emitGameDataDto(game);
   }
 
-  @SubscribeMessage('quitGame')
+  @SubscribeMessage('game:quit')
   handleQuitGame(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) return;
     this.gameService.removePlayerFromGame(client.data.user, game.getGameId());
-    client.disconnect(true);
-    console.log('player', client.data.user.username, 'disconnected');
+    client.disconnect(false);
+    this.logger.log(`Player ${client.data.user.username} quit the game`);
   }
 
   /**
    * @brief Handle the 'dice' event from the client.
    * @details Always broadcasts the new gameState to all clients in the room.
    */
-  @SubscribeMessage('dice')
-  dice(@ConnectedSocket() client: SocketClient) {
+  @SubscribeMessage('game:dice')
+  async dice(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) return;
     game.diceRequest(client.data.user.username);
     game.phaseCheckRequest();
-
-    //⚠️ FOR TESTING
-    game.diceRequest(`${ZGEG_DEV}`);
-    game.phaseCheckRequest();
-    // -------------
-
-    this.emitGameDataDto(game, client.data.user.username);
+    await this.emitGameDataDto(game);
   }
 
-  @SubscribeMessage('skip')
-  skip(@ConnectedSocket() client: SocketClient) {
+  @SubscribeMessage('game:skip')
+  async skip(@ConnectedSocket() client: SocketClient) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) return;
     game.skipRequest(client.data.user.username);
     game.phaseCheckRequest();
-    this.emitGameDataDto(game, client.data.user.username);
+    await this.emitGameDataDto(game);
   }
 
-  @SubscribeMessage('build')
-  build(
+  @SubscribeMessage('game:build')
+  async build(
     @ConnectedSocket() client: SocketClient,
     @MessageBody(new ZodValidationPipe(BuildPayloadSchema))
     payload: BuildPayload,
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) return;
     game.buildRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-    this.emitGameDataDto(game, client.data.user.username);
+    await this.emitGameDataDto(game);
   }
 
-  @SubscribeMessage('trade')
-  trade(
+  @SubscribeMessage('game:trade')
+  async trade(
     @ConnectedSocket() client: SocketClient,
     @MessageBody(new ZodValidationPipe(TradePayloadSchema))
     payload: TradePayload,
   ) {
     const game = this.gameService.getGameInstanceByUserId(client.data.user.id);
+    if (!game) return;
     game.tradeRequest(client.data.user.username, payload);
     game.phaseCheckRequest();
-    this.emitGameDataDto(game, client.data.user.username);
+    await this.emitGameDataDto(game);
   }
 
-  @SubscribeMessage('joinRoom')
+  @SubscribeMessage('game:join')
   async handleJoinRoom(@ConnectedSocket() client: SocketClient) {
     const userId = client.data.user.id;
     try {
       const game = this.gameService.getGameInstanceByUserId(userId);
+      if (!game) return;
       await client.join(game.getGameId());
-      this.emitGameDataDto(game, client.data.user.username);
+      await this.emitGameDataDto(game);
       return { ok: true, data: game.getGameDataDto(client.data.user.username) };
     } catch (e) {
-      console.log('joinRoom failed', e);
+      this.logger.warn(
+        `joinRoom failed for ${client.data.user.username}: ${(e as Error).message}`,
+      );
       return { ok: false, error: 'not in game' };
     }
   }
@@ -181,56 +128,48 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     const gameId = game.getGameId();
     this.server.in(gameId).socketsLeave(gameId);
     this.gameService.removeGameInstance(gameId);
+    this.logger.log(`Game ${gameId}: ended and deleted`);
   }
 
-  async afterInit(server: SocketServer) {
-    this.gameService.setNotifier((id, username) => {
-      const game = this.gameService.getGameInstanceByUserId(id);
-      this.emitGameDataDto(game, username);
-    });
-
-    /** @warning development only */
-    if (process.env.NODE_ENV === 'development') {
-      const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
-      instrument(this.server, {
-        auth: false,
-        mode: 'development',
-      });
-    }
-
-    server.use((client: SocketClient, next) => {
-      try {
-        // Check is the client has a token or a cookie and save the cookie for verification with JWT
-
-        const authToken = client.handshake.auth.token as string;
-        const cookies = parseCookie(client.handshake.headers.cookie ?? '');
-        const cookieToken = cookies.access_token;
-        const token =
-          cookieToken ||
-          (typeof authToken === 'string' && authToken.length > 0
-            ? authToken
-            : cookieToken);
-        if (!token) {
-          throw new Error('JWT must be provided');
-        }
-        const payload = this.jwtService.verify<JwtPayload>(token, {
-          secret: readSecret(AUTH.JWT_FILE),
-        });
-        client.data.user = { id: payload.sub, username: payload.username };
-        next();
-      } catch (error) {
-        console.log(
-          'Client connection rejected:',
-          client.id,
-          ' - ',
-          (error as Error).message,
-        );
-        next(new Error('Authentication error'));
+  private async emitGameDataDto(game: GameStateContext): Promise<void> {
+    const sockets = await this.server.in(game.getGameId()).fetchSockets();
+    for (const socket of sockets) {
+      const dto = game.getGameDataDto(socket.data.user.username);
+      if (dto) {
+        socket.emit('game:state', dto);
       }
+    }
+    const spectateDto = game.getGameDataDto(game.getWhosTurn());
+    if (spectateDto) {
+      this.spectateGateway.sendSpectateUpdate(game.getGameId(), spectateDto);
+    }
+    if (game.isGameTerminated()) {
+      this.endGame(game);
+    }
+    void this.gameService.recordResultIfOver(game);
+  }
+
+  /*---------- Connection ----------*/
+
+  afterInit(server: SocketServer) {
+    this.gameService.setNotifier((id) => {
+      const game = this.gameService.getGameInstanceByUserId(id);
+      if (!game) return;
+      void this.emitGameDataDto(game);
     });
+
+    server.use(authMiddleware(this.jwtService, this.logger));
   }
 
   handleConnection(client: SocketClient) {
-    console.log('Client connected:', client.id); //TEST:
+    this.logger.log(
+      `Client connected: ${client.id} - ${client.data.user.username}`,
+    );
+  }
+
+  handleDisconnect(client: SocketClient) {
+    this.logger.log(
+      `Client disconnected: ${client.id} - ${client.data.user.username}`,
+    );
   }
 }

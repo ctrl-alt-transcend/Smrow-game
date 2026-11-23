@@ -35,7 +35,7 @@ export default function TurnProgressBar({
     <Box w="100%" mt={2}>
       <Group justify="space-between" gap="xs" wrap="nowrap" h={16}>
         <Text size="xs" c="dimmed" lh={1}>
-          Time to play
+          Time left before auto-play
         </Text>
         <Text size="xs" fw={600} lh={1}>
           {remaining}s

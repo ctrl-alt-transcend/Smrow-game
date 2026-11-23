@@ -11,7 +11,7 @@ export default function QuitGameButton() {
       children: <Text size="sm">Are you sure you want to leave the game?</Text>,
       labels: { confirm: "Quit", cancel: "Stay" },
       onConfirm: () => {
-        socket.emit("quitGame");
+        socket.emit("game:quit");
         navigate("/home", { replace: true });
       },
       centered: true,

@@ -6,19 +6,19 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { SocketUser } from './game.gateway';
+import type { SocketUser } from '../ws/socket.types';
 import { StatsService } from '../stats/stats.service';
 import { buildGameResult } from './game.result';
 import {
-  ZGEG_DEV,
   type SettingsData,
   type PlayerProfile,
   type GameList,
+  Phase,
 } from 'shared';
 import {
   GameStateContext,
   PendingPhase,
-  type GameNotifier,
+  type PlayerNotifier,
 } from './GameStateContext';
 import { SocialGateway } from '../social/social.gateway';
 
@@ -27,7 +27,7 @@ export class GameService {
   private readonly logger = new Logger(GameService.name);
   private gameInstances: Map<string, GameStateContext> = new Map();
   private playersMap = new Map<string, string>(); //INFO: link playerId with a gameId
-  private notifier: GameNotifier = () => {};
+  private notifier: PlayerNotifier = () => {};
   private userIds = new Map<string, string>(); //INFO: link in game playerId (username) with the user ID
   private recordedGames = new Set<string>();
 
@@ -68,7 +68,7 @@ export class GameService {
    * The game doesn't know who is notified or how, it only decide when.
    * @details Called by GameGateway in afterInit
    */
-  setNotifier(notifier: GameNotifier) {
+  setNotifier(notifier: PlayerNotifier) {
     this.notifier = notifier;
   }
 
@@ -87,6 +87,7 @@ export class GameService {
    */
   createGame(playerProfile: PlayerProfile, settings: SettingsData) {
     if (this.playersMap.has(playerProfile.id)) {
+      this.logger.debug(`Player ${playerProfile.id} is already in a game`);
       throw new ConflictException(
         `Player with id ${playerProfile.username} is already in a game`,
       );
@@ -103,21 +104,37 @@ export class GameService {
       ),
     );
     this.addPlayerToGame(gameId, playerProfile);
-    console.log(`Game created with id ${gameId}`);
+    this.logger.log(`Game ${gameId}: created`);
   }
 
   joinGame(playerProfile: PlayerProfile, gameId: string) {
-    const game = this.getGameInstance(gameId);
+    const game = this.getGameInstanceByGameId(gameId);
+    if (!game) {
+      this.logger.debug(
+        `Player ${playerProfile.id} cannot join game ${gameId}: game doesn't exists`,
+      );
+      return;
+    }
+    const playerId = playerProfile.id;
 
     if (this.playersMap.has(playerProfile.id)) {
+      this.logger.debug(
+        `Player ${playerId} cannot join game ${gameId}: already in a game`,
+      );
       throw new ConflictException(
         `Player with id ${playerProfile.username} is already in a game`,
       );
     }
     if (game.getPlayers().size >= 4) {
-      throw new ForbiddenException(`Game with id ${gameId} is full`);
+      this.logger.debug(`Game ${gameId}: full`);
+      throw new ForbiddenException(
+        `Player ${playerId} cannot join game with id ${gameId}: is full`,
+      );
     }
     if (game.getCurrentPhase() !== 'Pending Player') {
+      this.logger.debug(
+        `Player ${playerId} cannot join game ${gameId}: already started`,
+      );
       throw new ForbiddenException(
         `Game with id ${gameId} has already started`,
       );
@@ -133,18 +150,22 @@ export class GameService {
     this.broadcastGameList();
   }
 
-  removePlayerFromGame(user: SocketUser, game: string) {
+  removePlayerFromGame(user: SocketUser, gameId: string) {
     this.playersMap.delete(user.id);
-    this.gameInstances.get(game)?.getPlayers().delete(user.username);
-    this.broadcastGameList();
-  }
-
-  private getGameInstance(gameId: string): GameStateContext {
-    const game = this.gameInstances.get(gameId);
-    if (!game) {
-      throw new Error(`Game with id ${gameId} not found`);
+    const game = this.getGameInstanceByGameId(gameId);
+    if (!game) return;
+    game.removePlayer(user.username);
+    if (
+      game.getPlayers().size === 0 &&
+      game.getCurrentPhase() === Phase.PENDING
+    ) {
+      this.gameInstances.delete(gameId);
+      this.logger.log(
+        `Game ${gameId}: no player left in lobby creation, instance removed`,
+      );
     }
-    return game;
+    this.broadcastGameList();
+    this.logger.log(`Game ${gameId}: player ${user.username} removed`);
   }
 
   /**
@@ -152,19 +173,28 @@ export class GameService {
    * @param playerId - The user ID of the player
    * @returns the Gamestate instance in which the player is located
    */
-  getGameInstanceByUserId(playerId: string): GameStateContext {
+  getGameInstanceByUserId(playerId: string): GameStateContext | undefined {
     const gameId = this.playersMap.get(playerId);
     if (!gameId) {
-      throw new NotFoundException(
-        `Player with id ${playerId} is not in a game`,
-      );
+      this.logger.debug(`Player ${playerId} is not in a game`);
+      return undefined;
     }
-    return this.gameInstances.get(gameId) as GameStateContext;
+    return this.getGameInstanceByGameId(gameId);
+  }
+
+  getGameInstanceByGameId(gameId: string): GameStateContext | undefined {
+    const game = this.gameInstances.get(gameId);
+    if (!game) {
+      this.logger.debug(`Game ${gameId} doesn't exist`);
+      return undefined;
+    }
+    return game;
   }
 
   getGameId(playerId: string): string {
     const gameId = this.playersMap.get(playerId);
     if (!gameId) {
+      this.logger.debug(`Player ${playerId} is not in a game`);
       throw new NotFoundException(
         `Player with id ${playerId} is not in a game`,
       );
@@ -179,7 +209,8 @@ export class GameService {
    * @warning You need to check if the palyer is already in a game before calling this function
    */
   private addPlayerToGame(gameId: string, playerProfile: PlayerProfile) {
-    const game = this.getGameInstance(gameId);
+    const game = this.getGameInstanceByGameId(gameId);
+    if (!game) return;
     this.playersMap.set(playerProfile.id, gameId);
     this.userIds.set(playerProfile.username, playerProfile.id);
     game
@@ -188,18 +219,9 @@ export class GameService {
         playerProfile.username,
         game.initPlayer(playerProfile.id, playerProfile.username),
       );
+    this.logger.log(`Game ${gameId}: player ${playerProfile.username} joined`);
     this.broadcastGameList();
-    //⚠️REMOVE in PROD -------------------
-    console.log(`---------------------------------------
-⚠️ The following is currently set in 'app/backend/src/game/game.service.ts':
-- added mocked player '${ZGEG_DEV}', remove his 'diceRequest' in 'game.gateway.ts' for prod
----------------------------------------`);
-    game
-      .getPlayers()
-      .set(`${ZGEG_DEV}`, game.initPlayer('1010101010101010', `${ZGEG_DEV}`));
-    // -----------------------------------
   }
-
   private broadcastGameList() {
     this.socialGateway.handleGameList(this.getGamesList());
   }

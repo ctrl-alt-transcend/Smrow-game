@@ -51,16 +51,6 @@ model Account {
 	userId				String
 	provider			String
 	providerAccountId	String
-
-		// optional fields
-	refresh_token		String?
-	access_token		String?
-	expires_at			Int?
-	token_type			String?
-	scope				String?
-	id_token			String?
-	session_state		String?
-
 	createdAt			DateTime @default(now())
 	updatedAt			DateTime @updatedAt
 
@@ -73,7 +63,6 @@ model Account {
 model Games {
 	id			String @default(cuid()) @id
 	totalTurns	Int
-	duration	Int?
 	playedAt	DateTime @default(now())
 	players		GamesPlayer[]
 

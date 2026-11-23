@@ -4,15 +4,25 @@ import {
   OnGatewayConnection,
   SubscribeMessage,
   WebSocketServer,
+  ConnectedSocket,
+  MessageBody,
 } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { ChatService } from '../chat/chat.service';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { readSecret } from '../strategies/readSecret';
 import { AUTH } from '../config/config';
-import type { JwtPayload, GameList, FriendStatus } from 'shared';
+import type {
+  JwtPayload,
+  GameList,
+  FriendStatus,
+  ChatSendPayload,
+} from 'shared';
+import { ChatSendPayloadSchema } from 'shared';
 import { parseCookie } from 'cookie';
 import { UserService } from '../user/user.service';
+import { ZodValidationPipe } from 'nestjs-zod';
 
 interface SocketUser {
   id: string;
@@ -37,13 +47,13 @@ type SocketClient = Socket<
 >;
 
 @WebSocketGateway({
-  path: '/ws/social',
-  cors: {
-    origin: true,
-    credentials: true,
-  }, //WARN: dev only
+  path: '/ws',
+  namespace: 'social',
+  cors: { credentials: true },
 })
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
+  private readonly logger = new Logger(SocialGateway.name);
+
   private readonly onlineUsers = new Map<string, string[]>();
 
   constructor(
@@ -54,44 +64,43 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
 
   @WebSocketServer() server: SocketServer;
 
+  /*---------- Game ----------*/
+
   handleGameList(game: GameList[]) {
-    this.server.to('gameList').emit('game list update', game);
+    this.server.to('gameList').emit('gameList:update', game);
   }
 
-  @SubscribeMessage('joinGameList')
-  async handleJoimGameList(client: SocketClient) {
+  @SubscribeMessage('gameList:join')
+  async handleJoinGameList(client: SocketClient) {
     await client.join('gameList');
   }
 
-  @SubscribeMessage('leaveGameList')
-  async handeLeaveGameList(client: SocketClient) {
+  @SubscribeMessage('gameList:leave')
+  async handleLeaveGameList(client: SocketClient) {
     await client.leave('gameList');
   }
 
-  @SubscribeMessage('chatMessage')
-  async handleChatMessage(client: SocketClient, payload: { draft: string }) {
-    if (typeof payload.draft !== 'string') {
-      return;
-    }
-    const content = payload.draft.trim();
-    if (content.length === 0 || content.length > 500) {
-      return;
-    }
-    console.log(client.data.user.username, 'sent a chat message:', content); //TEST: DEV_ONLY
+  /*---------- Chat ----------*/
 
+  @SubscribeMessage('chat:send')
+  async handleChatMessage(
+    @ConnectedSocket() client: SocketClient,
+    @MessageBody(new ZodValidationPipe(ChatSendPayloadSchema))
+    payload: ChatSendPayload,
+  ) {
     const chatMessage = await this.chatService.addChatMessage(
       client.data.user.id,
-      content,
+      payload.draft,
     );
-    this.server.to('chat').emit('new chat message', chatMessage);
+    this.server.to('chat').emit('chat:message', chatMessage);
   }
 
-  @SubscribeMessage('joinChat')
+  @SubscribeMessage('chat:join')
   async handleJoinChat(client: SocketClient) {
     await client.join('chat');
   }
 
-  @SubscribeMessage('leaveChat')
+  @SubscribeMessage('chat:leave')
   async handleLeaveChat(client: SocketClient) {
     await client.leave('chat');
   }
@@ -99,11 +108,6 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('friend: remove')
   async handleFriendRemove(client: SocketClient, friendId: string) {
     await this.userService.removeFriend(client.data.user.id, friendId);
-    await this.sendFriendList(client);
-  }
-
-  @SubscribeMessage('friend: list')
-  async handleFriendList(client: SocketClient) {
     await this.sendFriendList(client);
   }
 
@@ -117,15 +121,14 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
     console.log('Sent friend list to', client.data.user.username, friends); //TEST: DEV_ONLY
   }
 
-  async afterInit(server: SocketServer) {
-    /** @warning development only */
-    if (process.env.NODE_ENV === 'development') {
-      const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
-      instrument(server, {
-        auth: false,
-        mode: 'development',
-      });
-    }
+  @SubscribeMessage('friend: list')
+  async handleFriendList(client: SocketClient) {
+    await this.sendFriendList(client);
+  }
+
+  /*---------- Connection ----------*/
+
+  afterInit(server: SocketServer) {
     server.use((client: SocketClient, next) => {
       try {
         const authToken = client.handshake.auth.token as string;

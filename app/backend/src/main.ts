@@ -1,3 +1,4 @@
+import { Logger, filterLogLevels } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-client-exception.filter';
@@ -8,7 +9,14 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 /** @brief: Defines the application gateway. This is where the Nest instance starts up
  */
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: filterLogLevels(process.env.LOG_LEVEL ?? '>=warn'),
+  });
+
+  if (process.env.NODE_ENV === 'development') {
+    const { DevIoAdapter } = await import('./ws/dev-io.adapter.js');
+    app.useWebSocketAdapter(new DevIoAdapter(app));
+  }
 
   app.useStaticAssets(join(process.cwd(), 'uploads', 'avatars'), {
     prefix: '/uploads/avatars',
@@ -25,4 +33,4 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap().catch((err) => console.error(err));
+bootstrap().catch((err) => Logger.fatal(err, 'Bootstrap'));
