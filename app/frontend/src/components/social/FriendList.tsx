@@ -14,6 +14,7 @@ import { socialSocket as socket } from "../../sockets/socialSocket.tsx";
 import { useFriend } from "../../hooks/useFriend.tsx";
 import { Link } from "react-router";
 import { getAvatarSrc } from "../utils/avatar";
+
 export function FriendList() {
   const friends = useFriend();
   const [actionError, setActionError] = useState<string | null>(null);
