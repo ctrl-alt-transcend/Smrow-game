@@ -117,7 +117,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
       offer: { resource: offerResource!, amount: offerAmount },
       target: { resource: targetResource!, amount: targetAmount },
     };
-    socket.emit("trade", { ...payload, targetOwnerId });
+    socket.emit("game:trade", { ...payload, targetOwnerId });
     console.log("Trade offer sent:", payload, "→ owner:", targetOwnerId);
   }, [
     isValid,
@@ -238,7 +238,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
     if (busy || !target || !isMyTurn) return;
     pendingRef.current = { target, logAtSend: masterLog };
     setBusy(true);
-    socket.emit("build", {
+    socket.emit("game:build", {
       kind: target.kind,
       id: target.id,
       data: target.data,

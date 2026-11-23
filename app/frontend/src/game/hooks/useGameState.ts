@@ -10,7 +10,7 @@ export function useGameState(): { game: GameDataDto | null } {
   useEffect(() => {
     const onConnect = async () => {
       try {
-        const response = await socket.timeout(5000).emitWithAck("joinRoom");
+        const response = await socket.timeout(5000).emitWithAck("game:join");
         console.log("[joinRoom] ack =", response);
         if (response?.ok && response.data) setGame(response.data);
         else {
@@ -30,7 +30,7 @@ export function useGameState(): { game: GameDataDto | null } {
 
     socket.on("connect", onConnect);
     socket.on("connect_error", onConnectError);
-    socket.on("gameState", setGame);
+    socket.on("game:state", setGame);
 
     if (socket.connected) void onConnect();
     else socket.connect();
@@ -38,7 +38,7 @@ export function useGameState(): { game: GameDataDto | null } {
     return () => {
       socket.off("connect", onConnect);
       socket.off("connect_error", onConnectError);
-      socket.off("gameState", setGame); //INFO: unsubscribe from the gameState event
+      socket.off("game:state", setGame); //INFO: unsubscribe from the gameState event
       socket.disconnect(); //INFO: disconnect the socket
     };
   }, [navigate]); //INFO: [] means that the effect will only run once, when the component mounts.

@@ -4,44 +4,25 @@ import {
   OnGatewayConnection,
   SubscribeMessage,
   WebSocketServer,
+  ConnectedSocket,
+  MessageBody,
 } from '@nestjs/websockets';
+import { authMiddleware } from '../ws/auth.middleware';
 import { Logger } from '@nestjs/common';
 import { ChatService } from '../chat/chat.service';
 import { JwtService } from '@nestjs/jwt';
-import type { Server, Socket, DefaultEventsMap } from 'socket.io';
-import { readSecret } from '../strategies/readSecret';
-import { AUTH } from '../config/config';
-import type { JwtPayload, GameList } from 'shared';
-import { parseCookie } from 'cookie';
-
-interface SocketUser {
-  id: string;
-  username: string;
-}
-
-interface SocketData {
-  user: SocketUser;
-}
-
-type SocketServer = Server<
-  DefaultEventsMap,
-  DefaultEventsMap,
-  DefaultEventsMap,
-  SocketData
->;
-type SocketClient = Socket<
-  DefaultEventsMap,
-  DefaultEventsMap,
-  DefaultEventsMap,
-  SocketData
->;
+import {
+  type GameList,
+  type ChatSendPayload,
+  ChatSendPayloadSchema,
+} from 'shared';
+import type { SocketClient, SocketServer } from '../ws/socket.types';
+import { ZodValidationPipe } from 'nestjs-zod';
 
 @WebSocketGateway({
-  path: '/ws/social',
-  cors: {
-    origin: true,
-    credentials: true,
-  }, //WARN: dev only
+  path: '/ws',
+  namespace: 'social',
+  cors: { credentials: true },
 })
 export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
   private readonly logger = new Logger(SocialGateway.name);
@@ -53,93 +34,55 @@ export class SocialGateway implements OnGatewayInit, OnGatewayConnection {
 
   @WebSocketServer() server: SocketServer;
 
-  // @SubscribeMessage('message')
-  // handleMessage(client: any, payload: any): string {
-  //   return 'Hello world!';
-  // }
+  /*---------- Game ----------*/
 
   handleGameList(game: GameList[]) {
-    this.server.to('gameList').emit('game list update', game);
+    this.server.to('gameList').emit('gameList:update', game);
   }
 
-  @SubscribeMessage('joinGameList')
-  async handleJoimGameList(client: SocketClient) {
+  @SubscribeMessage('gameList:join')
+  async handleJoinGameList(client: SocketClient) {
     await client.join('gameList');
   }
 
-  @SubscribeMessage('leaveGameList')
-  async handeLeaveGameList(client: SocketClient) {
+  @SubscribeMessage('gameList:leave')
+  async handleLeaveGameList(client: SocketClient) {
     await client.leave('gameList');
   }
 
-  @SubscribeMessage('chatMessage')
-  async handleChatMessage(client: SocketClient, payload: { draft: string }) {
-    if (typeof payload.draft !== 'string') {
-      return;
-    }
-    const content = payload.draft.trim();
-    if (content.length === 0 || content.length > 500) {
-      return;
-    }
-    this.logger.verbose(
-      `${client.data.user.username} sent a chat message: ${content}`,
-    ); //TEST: DEV_ONLY
+  /*---------- Chat ----------*/
 
+  @SubscribeMessage('chat:send')
+  async handleChatMessage(
+    @ConnectedSocket() client: SocketClient,
+    @MessageBody(new ZodValidationPipe(ChatSendPayloadSchema))
+    payload: ChatSendPayload,
+  ) {
     const chatMessage = await this.chatService.addChatMessage(
       client.data.user.id,
-      content,
+      payload.draft,
     );
-    this.server.to('chat').emit('new chat message', chatMessage);
+    this.server.to('chat').emit('chat:message', chatMessage);
   }
 
-  @SubscribeMessage('joinChat')
+  @SubscribeMessage('chat:join')
   async handleJoinChat(client: SocketClient) {
     await client.join('chat');
   }
 
-  @SubscribeMessage('leaveChat')
+  @SubscribeMessage('chat:leave')
   async handleLeaveChat(client: SocketClient) {
     await client.leave('chat');
   }
 
-  async afterInit(server: SocketServer) {
-    /** @warning development only */
-    if (process.env.NODE_ENV === 'development') {
-      const { instrument } = await import('@socket.io/admin-ui'); //WARN: dev only
-      instrument(server, {
-        auth: false,
-        mode: 'development',
-      });
-    }
-    server.use((client: SocketClient, next) => {
-      try {
-        const authToken = client.handshake.auth.token as string;
-        const cookies = parseCookie(client.handshake.headers.cookie ?? '');
-        const cookieToken = cookies.access_token;
-        const token =
-          cookieToken ||
-          (typeof authToken === 'string' && authToken.length > 0
-            ? authToken
-            : cookieToken);
-        if (!token) {
-          throw new Error('JWT must be provided');
-        }
-        const payload = this.jwtService.verify<JwtPayload>(token, {
-          secret: readSecret(AUTH.JWT_FILE),
-        });
-        client.data.user = { id: payload.sub, username: payload.username };
-        next();
-      } catch (error) {
-        this.logger.warn(
-          `Client connection rejected: ${client.id} - ${(error as Error).message}`,
-        );
-        next(new Error('Authentication error'));
-      }
-    });
+  /*---------- Connection ----------*/
+
+  afterInit(server: SocketServer) {
+    server.use(authMiddleware(this.jwtService, this.logger));
   }
 
-  handleConnection(client: Socket) {
+  handleConnection(client: SocketClient) {
     //TODO: handle multiple connections from the same user.
-    this.logger.verbose(`Client connected: ${client.id}`); //TEST:
+    this.logger.verbose(`Client connected: ${client.id}`);
   }
 }
