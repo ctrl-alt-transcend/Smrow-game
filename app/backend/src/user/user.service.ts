@@ -394,6 +394,7 @@ export class UserService {
 
     return PublicProfileSchema.parse({
       id: profile.user.id,
+      avatar: profile.avatarURL,
       name: profile.user.name,
       username: profile.user.username,
       avatarURL: profile.avatarURL,
