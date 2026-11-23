@@ -103,7 +103,7 @@ function GameShell({ game }: { game: GameDataDto }) {
                   game.currentPlayer.timeToPlay ??
                   game.settings.turnDurationSeconds
                 }
-                resetKey={game.currentPlayer.timeToPlay}
+                resetKey={`${game.currentPhase}-${game.whosTurn}`}
               />
             </Stack>
           </Box>
