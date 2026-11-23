@@ -39,7 +39,13 @@ export default function PublicProfilePage() {
             radius="md"
             color="red"
           />
-          <Title c="Red" order={2} ta="center">
+          <Title
+            order={2}
+            ta="center"
+            maw="100%"
+            lineClamp={2}
+            title={profile?.username}
+          >
             {profile.username}
           </Title>
           <Text c="dimmed">{profile.name}</Text>
