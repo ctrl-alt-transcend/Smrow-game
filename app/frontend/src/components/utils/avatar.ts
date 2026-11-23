@@ -3,7 +3,6 @@ const API_URL =
   (import.meta.env.DEV ? "http://localhost:3000" : "");
 
 export function getAvatarSrc(avatarURL?: string | null): string {
-  console.log("AVATAR: ", avatarURL);
   if (!avatarURL) return "/default-avatar.png";
   if (avatarURL.startsWith("http://") || avatarURL.startsWith("https://")) {
     return avatarURL;
