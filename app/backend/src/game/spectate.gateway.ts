@@ -2,6 +2,7 @@ import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
+  OnGatewayDisconnect,
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
@@ -21,7 +22,9 @@ import type { GameDataDto } from 'shared';
   namespace: 'spectate',
   cors: { credentials: true },
 })
-export class SpectateGateway implements OnGatewayInit, OnGatewayConnection {
+export class SpectateGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer() server: SocketServer;
   private readonly logger = new Logger(SpectateGateway.name);
 

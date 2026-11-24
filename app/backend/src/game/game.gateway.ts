@@ -2,6 +2,7 @@ import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
+  OnGatewayDisconnect,
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
@@ -27,7 +28,9 @@ import { SpectateGateway } from './spectate.gateway';
   namespace: 'game',
   cors: { credentials: true },
 })
-export class GameGateway implements OnGatewayInit, OnGatewayConnection {
+export class GameGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer() server: SocketServer;
   private readonly logger = new Logger(GameGateway.name);
 
@@ -164,6 +167,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       `Client connected: ${client.id} - ${client.data.user.username}`,
     );
     await client.join(`user:${client.data.user.id}`);
+    this.gameService.cancelDisconnectTimer(client.data.user.id);
   }
 
   async handleDisconnect(client: SocketClient) {
@@ -175,8 +179,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       .allSockets();
     if (sockets.size === 0) {
       this.logger.debug(
-        `No more sockets for user ${client.data.user.username}, removing from game if any`,
+        `No more sockets for user ${client.data.user.username}`,
       );
+      this.gameService.setDisconnectTimer(client.data.user);
     }
   }
 }
