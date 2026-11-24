@@ -5,21 +5,27 @@ import * as bycrypt from 'bcrypt';
 import {
   type UserPublic,
   type LoginPost,
-  type RegisterResponse,
   type RegisterPost,
   type JwtToken,
   type JwtPayload,
-  JwtTokenSchema,
-  RegisterResponseSchema,
   type UserProfile,
+  JwtTokenSchema,
+  MessageSchema,
   UserPublicSchema,
   UserProfileSchema,
   Password,
   PasswordSchema,
-  LoginResponse,
   UpdateProfile,
 } from 'shared';
 import { DatabaseService } from '../database/database.service';
+import { z } from 'zod/mini';
+
+const RegisterResponseSchema = z.object({
+  message: MessageSchema,
+  user: UserPublicSchema,
+  access_token: JwtTokenSchema,
+});
+type RegisterResponse = z.infer<typeof RegisterResponseSchema>;
 
 @Injectable()
 export class AuthService {
@@ -47,11 +53,11 @@ export class AuthService {
     return RegisterResponseSchema.parse({
       message: 'User created successfully',
       user: UserPublicSchema.parse(user),
-      access_token: JwtTokenSchema.parse(access_token),
+      access_token: access_token,
     });
   }
 
-  async signIn(recvData: LoginPost): Promise<LoginResponse> {
+  async signIn(recvData: LoginPost): Promise<JwtToken> {
     const user = await this.userService.findByMail(recvData.email);
     if (
       user == null ||
@@ -66,7 +72,7 @@ export class AuthService {
     });
 
     this.logger.log(`User ${user.username} logged in successfully`);
-    return { access_token };
+    return access_token;
   }
 
   async getProfile(userId: string): Promise<UserProfile> {

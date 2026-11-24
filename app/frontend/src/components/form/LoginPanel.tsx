@@ -63,6 +63,7 @@ export function LoginPanel(props: PaperProps) {
   const handleLogin = loginForm.onSubmit(async (data) => {
     setError(null);
     try {
+      console.log("Entered Handlelogin");
       await login(data);
     } catch (errorMessage: any) {
       setError(errorMessage);

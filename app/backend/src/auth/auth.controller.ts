@@ -11,7 +11,12 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { type UserProfile, UserPublic } from 'shared';
+import {
+  type UserProfile,
+  type LoginResponse,
+  type RegisterResponse,
+  UserPublic,
+} from 'shared';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
   LoginDto,
@@ -23,6 +28,7 @@ import {
 } from './dto/auth.dto';
 import { GoogleAuthGuard } from '../guards/google-auth/google-auth.guard';
 import type { Response } from 'express';
+import { setAuthCookie, clearAuthCookie } from './auth.cookies';
 
 @Controller('auth')
 export class AuthController {
@@ -32,14 +38,24 @@ export class AuthController {
 
   @Post('register')
   @ZodSerializerDto(RegisterResponseDto)
-  async register(@Body() body: RegisterDto) {
-    return this.AuthService.signUp(body);
+  async register(
+    @Body() body: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<RegisterResponse> {
+    const result = this.AuthService.signUp(body);
+    setAuthCookie(res, (await result).access_token);
+    return result;
   }
 
   @Post('login')
   @ZodSerializerDto(LoginResponseDto)
-  async login(@Body() body: LoginDto) {
-    return this.AuthService.signIn(body);
+  async login(
+    @Body() body: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LoginResponse> {
+    const access_token = await this.AuthService.signIn(body);
+    setAuthCookie(res, access_token);
+    return { message: 'Successfully logged in!' };
   }
 
   @Get('me')
@@ -109,14 +125,8 @@ export class AuthController {
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
     this.logger.log('Logout request received');
-    const isProd = process.env.NODE_ENV === 'production';
-    res.clearCookie('access_token', {
-      httpOnly: true,
-      secure: isProd, // for dev,
-      sameSite: 'lax',
-      path: '/',
-    });
-
+    // const isProd = process.env.NODE_ENV === 'production';
+    clearAuthCookie(res);
     return { message: 'User logged out successfully' };
   }
 }

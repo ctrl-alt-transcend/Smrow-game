@@ -39,17 +39,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = useCallback(async (data: LoginPost) => {
-    const response = await loginUser(data);
-    localStorage.setItem("access_token", response.access_token);
-    const profile = await getCurrentUser();
-    setUser(profile);
+    console.log("entered LOGIN");
+    await loginUser(data);
+    setUser(await getCurrentUser());
   }, []);
 
   const register = useCallback(async (data: RegisterPost) => {
-    const response = await registerUser(data);
-    localStorage.setItem("access_token", response.access_token);
-    const profile = await getCurrentUser();
-    setUser(profile);
+    await registerUser(data);
+    setUser(await getCurrentUser());
   }, []);
 
   const logout = useCallback(async (reason?: string) => {
@@ -62,7 +59,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error("could not logout from server: ", error);
     } finally {
-      localStorage.removeItem("access_token");
       setUser(null);
       if (reason) setAuthMessage(reason);
     }
