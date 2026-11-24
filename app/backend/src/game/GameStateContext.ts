@@ -91,7 +91,6 @@ class GameStateContext {
   protected settings!: SettingsData;
   protected buildings: BuildingsInGame = new Map();
   private magicDice: MagicDice = new MagicDice();
-  private magicDiceRolled: boolean = false;
   private state!: State;
   private turnTimeoutId: NodeJS.Timeout | null = null;
   private logId: number = 0;

@@ -32,6 +32,7 @@ import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import PanContainer from "./components/ui/PanContainer.tsx";
 import { Notifications } from "@mantine/notifications";
 import MagicDice from "./components/ui/MagicDice.tsx";
+import MagicEffect from "./components/ui/MagicEffect.tsx";
 
 export default function Game() {
   const { game } = useGameState();
@@ -152,7 +153,10 @@ function GameShell({ game }: { game: GameDataDto }) {
                 game.currentPhase !== Phase.TRADE_BUILD
               }
             />
-
+            <SkipTurnButton
+              isMyTurn={navEnabled}
+              disabled={game.currentPhase !== Phase.TRADE_BUILD}
+            />
             <DiceRoller
               title="Dice Roller"
               currentRoll={game.currentRoll}
@@ -165,11 +169,7 @@ function GameShell({ game }: { game: GameDataDto }) {
               }
             />
 
-            <SkipTurnButton
-              isMyTurn={navEnabled}
-              disabled={game.currentPhase !== Phase.TRADE_BUILD}
-            />
-
+            <MagicEffect magicDice={game.magicDice} />
             <Accordion variant="separated" multiple defaultValue={["players"]}>
               <Accordion.Item value="players">
                 <Accordion.Control>Players</Accordion.Control>
