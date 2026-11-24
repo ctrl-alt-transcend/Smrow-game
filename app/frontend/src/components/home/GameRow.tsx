@@ -1,5 +1,5 @@
 import { Table, Button, Modal } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import type { GameList } from "shared";
 import SpectateGameBoard from "./SpectateGameBoard";
 import { useJoinLobby } from "../../game/utils/game.utils.tsx";
@@ -14,6 +14,7 @@ export default function GameRow({ game }: GameRowProps) {
     useDisclosure(false);
 
   const joinLobby = useJoinLobby();
+  const isMobile = useMediaQuery("(max-width: 48em)");
   const isFull = game.playerCount >= maxPlayers;
   const gameStart = game.state !== "Pending Player";
   const variant = gameStart ? "default" : "filled";
@@ -63,6 +64,7 @@ export default function GameRow({ game }: GameRowProps) {
         onClose={closeSpectate}
         title={`Spectating game #${game.gameId.substring(0, 5)}`}
         size="xl"
+        fullScreen={isMobile}
       >
         <SpectateGameBoard gameId={game.gameId} />
       </Modal>

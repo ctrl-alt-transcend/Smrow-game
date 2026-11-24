@@ -4,7 +4,7 @@ import { HeaderTabs } from "../components/navbar/HeaderTabs";
 
 export default function AppLayout() {
   return (
-    <AppShell header={{ height: 60 }} padding="xl">
+    <AppShell header={{ height: 60 }} padding={{ base: "sm", md: "xl" }}>
       <AppShell.Header>
         <HeaderTabs />
       </AppShell.Header>
