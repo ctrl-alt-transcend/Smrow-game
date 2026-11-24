@@ -80,6 +80,12 @@ export const SettingsDataSchema = z.object({
   /** Amount of points to win the game */
   pointsToWin: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_POINTS_TO_WIN),
 
+  // Magic Dice settings
+  /** Enables Magic Dice roll at each new round */
+  magicDiceEnabled: z.number().min(0).max(1),
+  /** Time countdown before Magic Dice vanishes */
+  magicDiceDurationSeconds: z.number().int().nonnegative().min(MIN_SETTINGS).max(MAX_LIMIT),
+
   // Bonus settings
   /** Threshold resources amount for the players to be stolen by the robber */
   robberThreshold: z.number().int().nonnegative().min(MIN_SETTINGS).max(ROBBER_THRESHOLD_MAX),
@@ -201,7 +207,8 @@ export const Phase = {
   START: 'Start Phase',
   PLACEMENT: 'Placement Phase',
   RESOURCES: 'Resources Phase',
-  TRADE_BUILD: 'Trade & Build Phase'
+  TRADE_BUILD: 'Trade & Build Phase',
+  MAGIC_DICE: 'Magic Dice Phase'
 } as const;
 export type Phase = (typeof Phase)[keyof typeof Phase];
 
@@ -211,6 +218,7 @@ export const GUIDE_LOG: Record<Phase, string> = {
   [Phase.PLACEMENT]: `${Phase.PLACEMENT}: build a settllement and a road.`,
   [Phase.RESOURCES]: `${Phase.RESOURCES}: ${Action.DICE} to collect your resources.`,
   [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade! End your turn when you're done.`,
+  [Phase.MAGIC_DICE]: `${Phase.MAGIC_DICE}: choose wisely, roll it at your own risk!`,
 } as const;
 
 export const START_PHASE_INFO =
@@ -461,12 +469,14 @@ export type GameDataBase = {
   whosTurn: string;
   currentPhase: Phase;
   gameTerminated: boolean;
+  currentRoll: DiceRoll;
 }
 
 export type GameDataDto  = GameDataBase & {
   players: PlayerPublicDto[];
   currentPlayer: PlayerDto;
   settings: SettingsData;
+  magicDice: MagicDiceDto | null;
 }
 
 export type GameData = GameDataBase & {
@@ -579,6 +589,8 @@ export const DEFAULT_PRESET: SettingsData = {
   cityPoints: 2,
   pointsToWin: 15,
   roadPoints: 1,
+  magicDiceEnabled: 1,
+  magicDiceDurationSeconds: 15,
   robberThreshold: 50,
   resourcesMultiplier: MULTIPLIER_DFLT,
   woodBonus: 10,
@@ -600,6 +612,8 @@ export const MAXXING_PRESET: SettingsData = {
   settlementPoints: 10,
   cityPoints: 8,
   pointsToWin: 70,
+  magicDiceEnabled: 1,
+  magicDiceDurationSeconds: 15,
   robberThreshold: ROBBER_THRESHOLD_MAX,
   resourcesMultiplier: MAX_MULTIPLIER,
   woodBonus: MAX_BONUS,
@@ -621,6 +635,8 @@ export const CLASSIC_PRESET: SettingsData = {
   cityPoints: CITY_POINT_DFLT,
   pointsToWin: POINTS_TO_WIN_DFLT,
   roadPoints: ROAD_POINT_DFLT,
+  magicDiceEnabled: 0,
+  magicDiceDurationSeconds: 20,
   robberThreshold: ROBBER_THRESHOLD_DFLT,
   resourcesMultiplier: 1,
   woodBonus: 0,
@@ -628,4 +644,103 @@ export const CLASSIC_PRESET: SettingsData = {
   brickBonus: 0,
   oreBonus: 0,
   wheatBonus: 0,
+};
+
+/***********************************
+ * Magic Dice
+ **********************************/
+export const MagicDiceRule = {
+  /** Resources: +1 for everybody */
+  EXTRA_RESOURCES: 'Extra Resources',
+  /** Resources: -1 for everybody */
+  RESOURCES_CRISIS: 'Resources Crisis',
+  /** Resources: +2 for the roller */
+  WEALTHY_LANDLORD: 'Wealthy Landlord',
+  /** Resources: -2 for the roller */
+  POOR_LANDLORD: 'Poor Landlord',
+  /** VPs: +1 for everybody */
+  ALL_BLESSED: 'All Blessed',
+  /** VPs: +2 for everybody */
+  BLESSED_ONE: 'Blessed One',
+  /** VPs: -1 for the roller */
+  DOOMED_ONE: 'Doomed One',
+  /** Trades: 1:1 everywhere */
+  SALES: 'Sales',
+  /** Trades: *+1:1 everywhere */
+  INFLATION: 'Inflation',
+  /** Turn: all players banned except the roller */
+  BAN_THEM: 'Ban Them',
+  /** Turn: player is ban for the next round */
+  BAN_ME: 'Ban Me',
+} as const;
+export type MagicDiceRule = (typeof MagicDiceRule)[keyof typeof MagicDiceRule];
+
+export const MAGIC_DICE_RULES: Record<MagicDiceRule, string> = {
+  [MagicDiceRule.EXTRA_RESOURCES]: `${MagicDiceRule.EXTRA_RESOURCES}: +1 resources production for everybody`,
+  [MagicDiceRule.RESOURCES_CRISIS]: `${MagicDiceRule.RESOURCES_CRISIS}: -1 resources production for everybody`,
+  [MagicDiceRule.WEALTHY_LANDLORD]: `${MagicDiceRule.WEALTHY_LANDLORD}: +2 resources production for `,
+  [MagicDiceRule.POOR_LANDLORD]: `${MagicDiceRule.POOR_LANDLORD}: -2 resources production for `,
+  [MagicDiceRule.ALL_BLESSED]: `${MagicDiceRule.ALL_BLESSED}: +1 victory points for everybody`,
+  [MagicDiceRule.BLESSED_ONE]: `${MagicDiceRule.BLESSED_ONE}: +2 victory points for `,
+  [MagicDiceRule.DOOMED_ONE]: `${MagicDiceRule.BLESSED_ONE}: -1 victory points for `,
+  [MagicDiceRule.SALES]: `${MagicDiceRule.SALES}: all trade ratios at 1:1`,
+  [MagicDiceRule.INFLATION]: `${MagicDiceRule.INFLATION}: all trade ratios at ?+1:1`,
+  [MagicDiceRule.BAN_THEM]: `${MagicDiceRule.BAN_THEM}: all players banned for next round except `,
+  [MagicDiceRule.BAN_ME]: `${MagicDiceRule.BAN_ME}: will be banned for next round `,
+} as const;
+
+export const RULE_BY_TOTAL: Record<number, MagicDiceRule> = {
+  2: MagicDiceRule.EXTRA_RESOURCES,
+  3: MagicDiceRule.RESOURCES_CRISIS,
+  4: MagicDiceRule.WEALTHY_LANDLORD,
+  5: MagicDiceRule.POOR_LANDLORD,
+  6: MagicDiceRule.ALL_BLESSED,
+  7: MagicDiceRule.BLESSED_ONE,
+  8: MagicDiceRule.DOOMED_ONE,
+  9: MagicDiceRule.SALES,
+  10: MagicDiceRule.INFLATION,
+  11: MagicDiceRule.BAN_THEM,
+  12: MagicDiceRule.BAN_ME,
+};
+
+export type MagicDiceEffectKind = 'resource' | 'trade' | 'turn' | 'victoryPoint';
+export type MagicDiceEffectTarget = 'personal' | 'collective';
+export type MagicDiceEffectSign = 'plus' | 'minus';
+
+export type MagicDiceEffect = {
+  kind: MagicDiceEffectKind;
+  target: MagicDiceEffectTarget;
+  sign: MagicDiceEffectSign;
+  val: number;
+};
+
+export const EFFECT_BY_RULE: Record<MagicDiceRule, MagicDiceEffect> = {
+  [MagicDiceRule.EXTRA_RESOURCES]: { kind: 'resource', target: 'collective', sign: 'plus', val: 1 },
+  [MagicDiceRule.RESOURCES_CRISIS]: { kind: 'resource', target: 'collective', sign: 'minus', val: 1 },
+  [MagicDiceRule.WEALTHY_LANDLORD]: { kind: 'resource', target: 'personal', sign: 'plus', val: 2 },
+  [MagicDiceRule.POOR_LANDLORD]: { kind: 'resource', target: 'personal', sign: 'minus', val: 2 },
+  [MagicDiceRule.ALL_BLESSED]: { kind: 'victoryPoint', target: 'collective', sign: 'plus', val: 1 },
+  [MagicDiceRule.BLESSED_ONE]: { kind: 'victoryPoint', target: 'personal', sign: 'plus', val: 2 },
+  [MagicDiceRule.DOOMED_ONE]: { kind: 'victoryPoint', target: 'personal', sign: 'minus', val: 1 },
+  [MagicDiceRule.SALES]: { kind: 'trade', target: 'collective', sign: 'plus', val: 1 },
+  [MagicDiceRule.INFLATION]: { kind: 'trade', target: 'collective', sign: 'minus', val: 1 },
+  [MagicDiceRule.BAN_THEM]: { kind: 'turn', target: 'collective', sign: 'minus', val: 0 },
+  [MagicDiceRule.BAN_ME]: { kind: 'turn', target: 'personal', sign: 'minus', val: 0 },
+};
+
+export type MagicDiceEffectResolved = MagicDiceEffect & { roller: string };
+
+export type MagicDiceDto = {
+  firstRoll: DiceRoll;
+  secondRoll: DiceRoll;
+  currentRoll: DiceRoll;
+  rollCount: number;
+  lastRoller: string | null;
+  rule: MagicDiceRule | null;
+  ruleLabel: string | null;
+  ruleDescription: string | null;
+  isMalus: boolean | null;
+  log: string | null;
+  canRoll: boolean;
+  effect: MagicDiceEffect | null;
 };

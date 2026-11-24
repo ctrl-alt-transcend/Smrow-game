@@ -132,6 +132,26 @@ const SECTIONS: { id: string; title: string; sliders: SliderConfig[] }[] = [
     ],
   },
   {
+    id: "magicDice",
+    title: "Magic Dice",
+    sliders: [
+      {
+        key: "magicDiceEnabled",
+        label: "Magic Dice enabled",
+        description: `enable the possibilty to roll the Magic Dice for bonus and malus`,
+        min: 0,
+        max: 1,
+      },
+      {
+        key: "magicDiceDurationSeconds",
+        label: "Magic Dice Duration",
+        description: `time before Magic Dice vanish ...`,
+        min: MIN_SETTINGS,
+        max: MAX_LIMIT,
+      },
+    ],
+  },
+  {
     id: "bonus",
     title: "Resources",
     sliders: [

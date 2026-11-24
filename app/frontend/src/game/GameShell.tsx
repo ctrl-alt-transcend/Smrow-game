@@ -9,6 +9,7 @@ import {
   ScrollArea,
   Stack,
   Tooltip,
+  Transition,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconSettings } from "@tabler/icons-react";
@@ -30,6 +31,7 @@ import TurnProgressBar from "./components/ui/TurnProgressBar.tsx";
 import SkipTurnButton from "./components/ui/SkipTurnButton.tsx";
 import PanContainer from "./components/ui/PanContainer.tsx";
 import { Notifications } from "@mantine/notifications";
+import MagicDice from "./components/ui/MagicDice.tsx";
 
 export default function Game() {
   const { game } = useGameState();
@@ -55,6 +57,15 @@ function GameShell({ game }: { game: GameDataDto }) {
 
   const navEnabled = isMyTurn && !waitingForPlayers;
   const isDesktop = useMediaQuery("(min-width: 36em)");
+
+  const currentRoll =
+    game.currentPhase === Phase.START
+      ? game.currentPlayer.currentRoll
+      : game.currentRoll;
+
+  console.log(
+    `GameShell: phase [${game.currentPhase}]: magicDice: [${game.magicDice ?? "null"}]`,
+  );
 
   return (
     <AppShell
@@ -98,13 +109,17 @@ function GameShell({ game }: { game: GameDataDto }) {
           <Box flex={1} miw={120} py={4}>
             <Stack gap={0} justify="center" h="100%">
               <GameMasterLog log={masterLog} />
-              <TurnProgressBar
-                durationSeconds={
-                  game.currentPlayer.timeToPlay ??
-                  game.settings.turnDurationSeconds
-                }
-                resetKey={`${game.currentPhase}-${game.whosTurn}`}
-              />
+              {game.currentPhase !== Phase.MAGIC_DICE && (
+                <TurnProgressBar
+                  durationSeconds={
+                    game.currentPlayer.timeToPlay ??
+                    game.settings.turnDurationSeconds
+                  }
+                  resetKey={`${game.currentPhase}-${game.whosTurn}`}
+                  label="Time left before auto-play"
+                  isMyTurn={isMyTurn}
+                />
+              )}
             </Stack>
           </Box>
         </Group>
@@ -137,16 +152,28 @@ function GameShell({ game }: { game: GameDataDto }) {
               settings={game.settings}
               masterLog={game.masterLog}
               isMyTurn={navEnabled}
-              phase={game.currentPhase}
+              disabled={
+                game.currentPhase !== Phase.PLACEMENT &&
+                game.currentPhase !== Phase.TRADE_BUILD
+              }
             />
 
             <DiceRoller
-              currentRoll={game.currentPlayer.currentRoll}
+              title="Dice Roller"
+              currentRoll={currentRoll}
+              firstDice={game.currentPlayer.firstDice}
+              secondDice={game.currentPlayer.secondDice}
               isMyTurn={navEnabled}
-              phase={game.currentPhase}
+              disabled={
+                game.currentPhase !== Phase.START &&
+                game.currentPhase !== Phase.RESOURCES
+              }
             />
 
-            <SkipTurnButton isMyTurn={navEnabled} phase={game.currentPhase} />
+            <SkipTurnButton
+              isMyTurn={navEnabled}
+              disabled={game.currentPhase !== Phase.TRADE_BUILD}
+            />
 
             <Accordion variant="separated" multiple defaultValue={["players"]}>
               <Accordion.Item value="players">
@@ -173,10 +200,48 @@ function GameShell({ game }: { game: GameDataDto }) {
           players={game.players}
           settings={game.settings}
         />
-        <Center flex={1} w="100%" h="100%" mih={0} p={0}>
-          <PanContainer maxPan={400}>
-            <GameBoard {...GameBoardProps} />
-          </PanContainer>
+        <Center flex={1} w="100%" h="100%" mih={0} p={20}>
+          <Box style={{ position: "relative", width: "100%", height: "100%" }}>
+            <Center h="100%" w="100%">
+              <PanContainer maxPan={400}>
+                <GameBoard {...GameBoardProps} />
+              </PanContainer>
+            </Center>
+
+            <Transition
+              mounted={game.currentPhase === Phase.MAGIC_DICE}
+              transition="fade"
+              duration={500}
+              exitDuration={400}
+              timingFunction="ease"
+            >
+              {(styles) => (
+                <Center
+                  style={{
+                    ...styles,
+                    position: "absolute",
+                    inset: 0,
+                    zIndex: 20,
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Box
+                    style={{
+                      position: "relative",
+                      borderRadius: 16,
+                      animation: "magicPulse 3s ease-in-out infinite",
+                    }}
+                  >
+                    <MagicDice
+                      magicDice={game.magicDice}
+                      timeLeft={game.currentPlayer.timeToPlay}
+                      resetKey={`${game.currentPhase}-magic`}
+                    />
+                  </Box>
+                </Center>
+              )}
+            </Transition>
+          </Box>
         </Center>
       </AppShell.Main>
 

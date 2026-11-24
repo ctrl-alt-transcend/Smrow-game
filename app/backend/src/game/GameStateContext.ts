@@ -14,6 +14,7 @@ import {
   ROBBER_NAME,
   ROLLED_A,
   PlayerPublicDto,
+  MagicDiceDto,
 } from 'shared';
 import {
   GameBoard,
@@ -42,6 +43,7 @@ import {
   randomizeRobber,
 } from './calculation/randomizeGameBoard';
 import { Logger } from '@nestjs/common';
+import { MagicDice } from './MagicDice';
 
 /**
  * The base State class declares methods that all Concrete State should
@@ -88,14 +90,18 @@ class GameStateContext {
   protected graph!: GameBoardGraph;
   protected settings!: SettingsData;
   protected buildings: BuildingsInGame = new Map();
+  private magicDice: MagicDice = new MagicDice();
+  private magicDiceRolled: boolean = false;
   private state!: State;
   private turnTimeoutId: NodeJS.Timeout | null = null;
   private logId: number = 0;
   private rollId: number = 0;
   private factionSwitch: number = 0;
+  private watchSeconds: number = 0;
   private roundCount: number = 0;
-  private turnCount: number = 0;
   private turnStart: number = 0;
+  /** Used only to keep count during Placement Phase */
+  private turnCount: number = 0;
 
   constructor(
     gameId: string,
@@ -121,7 +127,9 @@ class GameStateContext {
       winner: null,
       winCondition: null,
       gameTerminated: false,
+      currentRoll: { id: -1, val: null },
     };
+    this.watchSeconds = this.settings.turnDurationSeconds;
     this.transitionTo(state);
   }
 
@@ -261,6 +269,12 @@ class GameStateContext {
   public getMasterLog(): string {
     return this.data.masterLog;
   }
+  public getMagicDice(): MagicDice {
+    return this.magicDice;
+  }
+  public getMagicDiceDto(): MagicDiceDto {
+    return this.magicDice.toDto();
+  }
   public getPlayerByUsername(username: string): Player | undefined {
     return this.data.players.get(username);
   }
@@ -295,7 +309,7 @@ class GameStateContext {
       id: p.id,
       username: p.username,
       victoryPoints: p.victoryPoints,
-      timeToPlay: this.getTimeLeft(p.username),
+      timeToPlay: this.getTimeLeft(),
       firstDice: p.firstDice,
       secondDice: p.secondDice,
       level: p.level,
@@ -330,6 +344,8 @@ class GameStateContext {
       currentPhase: gameData.currentPhase,
       gameTerminated: gameData.gameTerminated,
       settings: this.settings,
+      magicDice: this.magicDice.toDto(),
+      currentRoll: gameData.currentRoll,
     };
   }
   public isPlayersTurn(username: string): Player | null {
@@ -504,7 +520,7 @@ class GameStateContext {
     });
     this.notifyAllPlayers();
     this.transitionTo(new StartPhase());
-    this.startWatch();
+    this.startWatch(this.settings.turnDurationSeconds);
   }
 
   /** @description Generates: "You can't ${Action} during ${Phase}" */
@@ -525,30 +541,37 @@ class GameStateContext {
     });
   }
   public rollDice(p: Player): DiceRoll {
-    const roll: DiceRoll = { val: null, id: 0 };
-    roll.val = Math.floor(Math.random() * 6) + 1;
-    roll.id = this.rollId++;
+    this.data.currentRoll.val = Math.floor(Math.random() * 6) + 1;
+    this.data.currentRoll.id = this.rollId++;
     if (p.firstDice === 0) {
-      p.firstDice = roll.val;
-      this.setPersonalLog(p, `You ${ROLLED_A} ${roll.val}`, NotifColor.GREEN);
+      p.firstDice = this.data.currentRoll.val;
+      this.setPersonalLog(
+        p,
+        `You ${ROLLED_A} ${this.data.currentRoll.val}`,
+        NotifColor.GREEN,
+      );
       this.setAllPersonnalLog(
         p.username,
-        `${p.username} ${ROLLED_A} ${roll.val}`,
+        `${p.username} ${ROLLED_A} ${this.data.currentRoll.val}`,
         NotifColor.PURPLE,
       );
     } else if (p.secondDice === 0) {
-      p.secondDice = roll.val;
-      this.setPersonalLog(p, `You ${ROLLED_A} ${roll.val}`, NotifColor.GREEN);
+      p.secondDice = this.data.currentRoll.val;
+      this.setPersonalLog(
+        p,
+        `You ${ROLLED_A} ${this.data.currentRoll.val}`,
+        NotifColor.GREEN,
+      );
       this.setAllPersonnalLog(
         p.username,
-        `${p.username} ${ROLLED_A} ${roll.val}`,
+        `${p.username} ${ROLLED_A} ${this.data.currentRoll.val}`,
         NotifColor.PURPLE,
       );
     } else {
-      roll.val = null;
+      this.data.currentRoll.val = null;
       this.setPersonalLog(p, `${YOU_DIDNT_ROLLED}`, NotifColor.RED);
     }
-    return roll;
+    return this.data.currentRoll;
   }
 
   public setupNextPhase(
@@ -556,19 +579,80 @@ class GameStateContext {
     playerMode: 'reset' | 'advance' | 'keep' = 'reset',
   ): void {
     if (this.isVictory()) return;
+
     if (playerMode !== 'keep') {
       this.setNextPlayer(playerMode === 'reset' ? 0 : undefined);
-      if (nextPhase === Phase.RESOURCES && this.data.turnIndex === 0) {
-        this.roundCount++;
+    }
+    if (
+      playerMode !== 'keep' &&
+      nextPhase === Phase.RESOURCES &&
+      this.data.turnIndex === 0
+    ) {
+      this.roundCount++;
+      if (
+        this.settings.magicDiceEnabled &&
+        this.getCurrentPhase() !== Phase.MAGIC_DICE
+      ) {
+        nextPhase = Phase.MAGIC_DICE;
+        this.magicDice = new MagicDice();
       }
     }
-    this.setTurnCount(0);
     this.setCurrentPhase(nextPhase);
+    this.setTurnCount(0);
     this.setMasterLog(
       `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
     );
     this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
     if (playerMode !== 'keep') this.resetAllDices();
+    this.startWatch(
+      nextPhase === Phase.MAGIC_DICE
+        ? this.settings.magicDiceDurationSeconds
+        : undefined,
+    );
+    //if (this.isVictory()) return;
+    //if (playerMode !== 'keep') {
+    //  if (nextPhase === Phase.RESOURCES && this.data.turnIndex === 0) {
+    //    this.roundCount++;
+    //    if (this.settings.magicDiceEnabled && this.magicDiceRolled === false) {
+    //      this.magicDice = new MagicDice();
+    //      nextPhase = Phase.MAGIC_DICE;
+    //      this.magicDiceRolled = true;
+    //      this.watchSeconds = this.settings.magicDiceDurationSeconds;
+    //      this.startWatch();
+    //    } else {
+    //      this.magicDiceRolled = false;
+    //      this.watchSeconds = this.settings.turnDurationSeconds;
+    //      this.stopWatch();
+    //    }
+    //  }
+    //  this.setNextPlayer(playerMode === 'reset' ? 0 : undefined);
+    //}
+    //this.setCurrentPhase(nextPhase);
+    //this.setTurnCount(0);
+    //this.setMasterLog(
+    //  `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
+    //);
+    //this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
+    //if (playerMode !== 'keep') this.resetAllDices();
+    switch (nextPhase) {
+      case Phase.START:
+        this.transitionTo(new StartPhase());
+        break;
+      case Phase.PLACEMENT:
+        this.transitionTo(new PlacementPhase());
+        break;
+      case Phase.RESOURCES:
+        this.transitionTo(new ResourcesPhase());
+        break;
+      case Phase.TRADE_BUILD:
+        this.transitionTo(new TradeAndBuildPhase());
+        break;
+      case Phase.MAGIC_DICE:
+        this.transitionTo(new MagicDicePhase());
+        break;
+      default:
+        break;
+    }
   }
 
   public isVictory(): boolean {
@@ -708,6 +792,11 @@ class GameStateContext {
           this.setNextPlayer();
           this.phaseCheckRequest();
           break;
+        case Phase.MAGIC_DICE:
+          if (this.magicDice && !this.magicDice.isResolved())
+            this.magicDice.expire();
+          this.setupNextPhase(Phase.RESOURCES, 'reset');
+          break;
         case Phase.RESOURCES:
           if (p.firstDice === 0) this.diceRequest(p.username);
           if (p.secondDice === 0) this.diceRequest(p.username);
@@ -728,11 +817,13 @@ class GameStateContext {
     return Date.now() - this.turnStart;
   }
 
-  public startWatch(): void {
+  public startWatch(seconds?: number): void {
+    this.stopWatch();
+    this.watchSeconds = seconds ?? this.settings.turnDurationSeconds;
     this.turnStart = Date.now();
     this.turnTimeoutId = setTimeout(
       () => this.onExpire(),
-      this.settings.turnDurationSeconds * 1000,
+      this.watchSeconds * 1000,
     );
   }
 
@@ -744,12 +835,9 @@ class GameStateContext {
   }
 
   /** Seconds remaining before the forced play, rounded up. */
-  public getTimeLeft(username: string): number {
-    if (this.getCurrentPhase() === Phase.START)
-      return this.settings.turnDurationSeconds;
-    if (username !== this.data.whosTurn) return 0;
-    const remaining =
-      this.settings.turnDurationSeconds * 1000 - this.elapsedMs();
+  public getTimeLeft(): number {
+    if (!this.data.whosTurn) return 0;
+    const remaining = this.watchSeconds * 1000 - this.elapsedMs();
     return Math.max(0, Math.ceil(remaining / 1000));
   }
 }
@@ -836,7 +924,6 @@ class StartPhase extends State {
       return;
     this.computeTurnOrder();
     this.state.setupNextPhase(Phase.PLACEMENT);
-    this.state.transitionTo(new PlacementPhase());
   }
 }
 
@@ -929,7 +1016,6 @@ class PlacementPhase extends State {
     if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
     this.state.resourcesProduction(true);
     this.state.setupNextPhase(Phase.RESOURCES);
-    this.state.transitionTo(new ResourcesPhase());
   }
 }
 
@@ -989,7 +1075,65 @@ class ResourcesPhase extends State {
     const p = this.state.getCurrentPlayer();
     if (!p || !this.state.hasRolledBothDices(p)) return;
     this.state.setupNextPhase(Phase.TRADE_BUILD, 'keep');
-    this.state.transitionTo(new TradeAndBuildPhase());
+  }
+}
+
+/***********************************
+ * Magic Dice Phase
+ **********************************/
+class MagicDicePhase extends State {
+  public dice(username: string) {
+    const p = this.state.getPlayerByUsername(username);
+    if (!p) return;
+    const magic = this.state.getMagicDice();
+    if (!magic.canRoll()) return;
+    const roll = magic.roll(username);
+    if (roll) {
+      this.state.setPersonalLog(
+        p,
+        `You touched the magic dice: ${roll.val} !`,
+        NotifColor.PURPLE,
+      );
+      this.state.setAllPersonnalLog(
+        p.username,
+        `${p.username} touched the magic dice !`,
+        NotifColor.PURPLE,
+      );
+      this.state.notifyAllPlayers();
+    }
+  }
+
+  public build(username: string) {
+    const p = this.state.getPlayerByUsername(username);
+    if (!p) return;
+    this.state.setPersonalLog(
+      p,
+      this.state.forbiddenActionLog(Action.BUILD, Phase.MAGIC_DICE),
+      NotifColor.RED,
+    );
+  }
+
+  public trade(username: string) {
+    const p = this.state.getPlayerByUsername(username);
+    if (!p) return;
+    this.state.setPersonalLog(
+      p,
+      this.state.forbiddenActionLog(Action.TRADE, Phase.MAGIC_DICE),
+      NotifColor.RED,
+    );
+  }
+
+  public skip(username: string) {
+    const p = this.state.getPlayerByUsername(username);
+    if (!p) return;
+    this.state.setPersonalLog(
+      p,
+      this.state.forbiddenActionLog(Action.SKIP, Phase.MAGIC_DICE),
+      NotifColor.RED,
+    );
+  }
+  public phaseCheck(): void {
+    return;
   }
 }
 
@@ -1117,7 +1261,6 @@ class TradeAndBuildPhase extends State {
     if (this.state.isVictory()) return;
     this.resetTradeBuildCount();
     this.state.setupNextPhase(Phase.RESOURCES, 'advance');
-    this.state.transitionTo(new ResourcesPhase());
   }
 }
 

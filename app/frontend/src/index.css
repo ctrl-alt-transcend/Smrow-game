@@ -108,3 +108,24 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+
+@keyframes magicPulse {
+  0%, 100% {
+    box-shadow: 0 0 40px 8px rgba(109, 74, 255, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 90px 24px rgba(109, 74, 255, 0.55);
+  }
+}
+
+@keyframes diceFlash {
+  0%   { filter: drop-shadow(0 0 0 rgba(103, 197, 133, 0)); }
+  35%  { filter: drop-shadow(0 0 14px rgba(103, 197, 133, 0.8)); }
+  100% { filter: drop-shadow(0 0 0 rgba(103, 197, 133, 0)); }
+}
+
+@keyframes magicDiceGlow {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(109, 74, 255, 0.45)); }
+  50%      { filter: drop-shadow(0 0 22px rgba(109, 74, 255, 0.8)); }
+}

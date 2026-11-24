@@ -2,7 +2,6 @@ import { Modal, Stack, Text, Title } from "@mantine/core";
 import { PlayerPanel } from "./PlayerPanel.tsx";
 import type { PlayerPublicDto } from "shared";
 import QuitGameButton from "./QuitGameButton.tsx";
-import { notifications } from "@mantine/notifications";
 
 type EndGameProps = {
   gameOver: boolean;
@@ -15,7 +14,6 @@ export function EndGameModal(endGameProps: EndGameProps) {
   if (!endGameProps.gameOver) {
     return null;
   }
-  notifications.clean();
   return (
     <Modal
       opened={true}

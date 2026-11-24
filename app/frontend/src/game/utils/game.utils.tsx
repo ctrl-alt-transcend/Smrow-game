@@ -37,6 +37,9 @@ export function DisplaySetting({
         `• Point(s) per ${BuildingType.SETTLEMENT}: ${settings.settlementPoints}\n` +
         `• Point(s) per ${BuildingType.CITY}: ${settings.cityPoints}\n` +
         `• Points to win: ${settings.pointsToWin}\n`}
+      <Title order={6}>Magic Dice</Title>
+      {`• Magic Dice enabled: ${settings.magicDiceEnabled}\n` +
+        `• Time to roll Magic Dice: ${settings.magicDiceDurationSeconds}\n`}
       <Title order={6}>Bonus</Title>
       {`• Robber threshold: ${settings.robberThreshold}\n` +
         `• Resources multiplier: ${settings.resourcesMultiplier}\n` +

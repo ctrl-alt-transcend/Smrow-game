@@ -2,6 +2,7 @@ import { Button, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { useNavigate } from "react-router";
 import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
+import { notifications } from "@mantine/notifications";
 
 export default function QuitGameButton() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function QuitGameButton() {
       labels: { confirm: "Quit", cancel: "Stay" },
       onConfirm: () => {
         socket.emit("game:quit");
+        notifications.clean();
         navigate("/home", { replace: true });
       },
       centered: true,
