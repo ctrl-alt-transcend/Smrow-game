@@ -45,17 +45,6 @@ export default function MainShell() {
       aside={{ width: 300, breakpoint: "sm" }}
       padding="xs"
     >
-      <BackgroundImage
-        src="https://github.com/makccr/wallpapers/blob/master/wallpapers/psychedelic/Alex%20Grey%20-%20Net%20of%20Being.jpg"
-        h={"100%"}
-        w={"100%"}
-        style={{
-          objectFit: "cover",
-          position: "absolute",
-          inset: 0,
-        }}
-      />
-
       <AppShell.Header>
         <BackgroundImage
           src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperaccess.com%2Ffull%2F117951.jpg&f=1&nofb=1&ipt=b0cd04325308305c02bf1a7d5fe7b202f95ce1e12253a29225022b5eef822969"
