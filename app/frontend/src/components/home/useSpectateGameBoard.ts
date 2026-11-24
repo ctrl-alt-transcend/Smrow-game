@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { spectateSocket as socket } from "../../sockets/spectateSocket.tsx";
 import type { GameDataDto } from "shared";
+import { notifications } from "@mantine/notifications";
 
 export function useSpectateGameBoard(gameId: string): {
   game: GameDataDto | null;
@@ -16,11 +17,19 @@ export function useSpectateGameBoard(gameId: string): {
         console.log("[joinSpectate] ack =", response);
         if (response?.ok && response.data) setGame(response.data);
         else {
-          console.warn("[joinSpectate] refused:", response?.error);
+          notifications.show({
+            title: "No game",
+            message: "the game does not exist.",
+            color: "yellow",
+          });
           return;
         }
-      } catch (err) {
-        console.error("[joinSpectate] no ack (timeout / disconnect):", err);
+      } catch {
+        notifications.show({
+          title: "Server error",
+          message: `Could not join the game. Please try again later.`,
+          color: "red",
+        });
         return;
       }
     };
