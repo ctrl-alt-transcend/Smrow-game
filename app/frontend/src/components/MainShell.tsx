@@ -4,6 +4,7 @@ import {
   Anchor,
   AppShell,
   BackgroundImage,
+  Grid,
   Group,
   Text,
   Title,
@@ -38,11 +39,10 @@ export default function MainShell() {
 
   return (
     <AppShell
-      h="100vh"
+      mih="100vh"
       mode="static"
-      header={{ height: 200 }}
+      header={{ height: { base: 100, md: 200 } }}
       footer={{ height: 60 }}
-      aside={{ width: 300, breakpoint: "sm" }}
       padding="xs"
     >
       <AppShell.Header>
@@ -57,21 +57,27 @@ export default function MainShell() {
           }}
         >
           <Group h="100%" px="md" justify="center">
-            <Title c={"Cream"}>This is Da Game</Title>
+            <Title c={"Cream"} fz={{ base: "h3", md: "h1" }}>
+              This is Da Game
+            </Title>
           </Group>
         </BackgroundImage>
       </AppShell.Header>
 
       <AppShell.Main>
-        <Title order={1} c={"Red"}>
-          Amazing Catan
-        </Title>
-        <CardImage />
-      </AppShell.Main>
+        <Grid>
+          <Grid.Col span={{ base: 12, md: 8 }} order={{ base: 2, md: 1 }}>
+            <Title order={1} c={"Red"} fz={{ base: "h3", md: "h1" }}>
+              Amazing Catan
+            </Title>
+            <CardImage />
+          </Grid.Col>
 
-      <AppShell.Aside h="100%" p="xs" zIndex={20}>
-        <LoginPanel />
-      </AppShell.Aside>
+          <Grid.Col span={{ base: 12, md: 4 }} order={{ base: 1, md: 2 }}>
+            <LoginPanel />
+          </Grid.Col>
+        </Grid>
+      </AppShell.Main>
 
       <AppShell.Footer>
         <Stack h="100%" justify="center" align="flex-start" gap={2} px="md">
