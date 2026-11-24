@@ -32,11 +32,7 @@ export function useGameState(): { game: GameDataDto | null } {
       }
     };
 
-    const onConnectError = (err: Error) =>
-      console.error("[socket] connect_error:", err);
-
     socket.on("connect", onConnect);
-    socket.on("connect_error", onConnectError);
     socket.on("game:state", setGame);
     socket.on("disconnect", onDisconnect);
 
@@ -45,7 +41,6 @@ export function useGameState(): { game: GameDataDto | null } {
 
     return () => {
       socket.off("connect", onConnect);
-      socket.off("connect_error", onConnectError);
       socket.off("game:state", setGame); //INFO: unsubscribe from the gameState event
       socket.off("disconnect", onDisconnect);
       socket.disconnect(); //INFO: disconnect the socket

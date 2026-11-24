@@ -25,11 +25,7 @@ export function useSpectateGameBoard(gameId: string): {
       }
     };
 
-    const onConnectError = (err: Error) =>
-      console.error("[spectate] connect_error:", err);
-
     socket.on("connect", onConnect);
-    socket.on("connect_error", onConnectError);
     socket.on("spectate:update", setGame);
 
     if (socket.connected) void onConnect();
@@ -37,7 +33,6 @@ export function useSpectateGameBoard(gameId: string): {
 
     return () => {
       socket.off("connect", onConnect);
-      socket.off("connect_error", onConnectError);
       socket.off("spectate:update", setGame);
       socket.disconnect();
     };
