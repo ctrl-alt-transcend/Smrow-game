@@ -243,11 +243,18 @@ export class GameService {
     }
     this.cancelDisconnectTimer(user.id);
     const timer = setTimeout(() => {
-      this.playerTimeouts.delete(user.id);
-      const gameId = this.playersMap.get(user.id);
-      if (!gameId) return;
-      this.logger.log(`Game ${gameId}: player ${user.username} timed out`);
-      this.removePlayerFromGame(user, gameId);
+      try {
+        this.playerTimeouts.delete(user.id);
+        const gameId = this.playersMap.get(user.id);
+        if (!gameId) return;
+        this.logger.log(`Game ${gameId}: player ${user.username} timed out`);
+        this.removePlayerFromGame(user, gameId);
+      } catch (e) {
+        this.logger.error(
+          `Disconnect timer failed for player ${user.username}`,
+          e instanceof Error ? e.stack : String(e),
+        );
+      }
     }, GAME_DISCONNECT_TIMEOUT);
     this.playerTimeouts.set(user.id, timer);
     this.logger.log(
