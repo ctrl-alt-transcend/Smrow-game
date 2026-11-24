@@ -41,12 +41,18 @@ export default function Chat() {
       }
     };
 
-    socket.emit("chat:join");
+    const onConnect = () => {
+      socket.emit("chat:join");
+      loadOldMessages();
+    };
+
     socket.on("chat:message", onMessage);
-    loadOldMessages();
+    socket.on("connect", onConnect);
+    if (socket.connected) onConnect();
 
     return () => {
       cancelled = true;
+      socket.off("connect", onConnect);
       socket.off("chat:message", onMessage);
       socket.emit("chat:leave");
     };
