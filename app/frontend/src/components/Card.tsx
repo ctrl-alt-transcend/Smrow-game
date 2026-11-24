@@ -1,8 +1,16 @@
 import { Card, Text, Image } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 
 export default function CardImage() {
+  const isMobile = useMediaQuery("(max-width: 48em)");
+
   return (
-    <Card p="sm" m={"sm"} withBorder orientation="horizontal">
+    <Card
+      p="sm"
+      m={"sm"}
+      withBorder
+      orientation={isMobile ? "vertical" : "horizontal"}
+    >
       <Card.Section p={"lg"} px="xs">
         <Text c={"Grey"}>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam

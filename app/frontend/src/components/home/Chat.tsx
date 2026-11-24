@@ -87,7 +87,7 @@ export default function Chat() {
       <Title order={3} ta="center" mb="md">
         Toxic chat
       </Title>
-      <ScrollArea h={480} viewportRef={viewportRef}>
+      <ScrollArea h={{ base: 300, md: 480 }} viewportRef={viewportRef}>
         <Stack gap="xs" align="flex-start">
           {messages.map((message) => (
             <MessageItem
