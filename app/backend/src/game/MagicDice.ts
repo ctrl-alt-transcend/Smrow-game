@@ -15,6 +15,7 @@ export class MagicDice {
   private rollCount: number = 0;
   private lastRoller: string | null = null;
   private rule: MagicDiceRule | null = null;
+  private ruleLabel: string | null = null;
   private effect: MagicDiceEffect | null = null;
   private log: string | null = null;
   private expired: boolean = false;
@@ -71,11 +72,13 @@ export class MagicDice {
         'The magic dice perceived an anomally, no rule was revealed...';
       return;
     }
-    let description = MAGIC_DICE_RULES[this.rule];
+    this.ruleLabel = `${MAGIC_DICE_RULES[this.rule]}`;
     if (this.effect.target === 'personal') {
-      description += this.lastRoller;
+      this.ruleLabel += ` for ${this.lastRoller}`;
+    } else {
+      this.ruleLabel += ' for everybody';
     }
-    this.log = `${this.lastRoller} rolled ${total}: ${description}`;
+    this.log = `${this.lastRoller} touched the dice last... May be blessed or cursed!`;
   }
 
   public expire(): void {
@@ -99,9 +102,14 @@ export class MagicDice {
     return this.currentRoll;
   }
 
+  public getMagicEffect(): MagicDiceEffect | null {
+    return this.effect;
+  }
+
   public toDto(): MagicDiceDto {
-    const ruleLabel = this.rule === null ? null : MAGIC_DICE_RULES[this.rule];
     const isMalus = this.effect === null ? null : this.effect.sign === 'minus';
+    const isPersonnal =
+      this.effect === null ? null : this.effect.target === 'personal';
     return {
       firstRoll: this.firstRoll,
       secondRoll: this.secondRoll,
@@ -109,12 +117,9 @@ export class MagicDice {
       rollCount: this.rollCount,
       lastRoller: this.lastRoller,
       rule: this.rule,
-      ruleLabel,
-      ruleDescription:
-        this.rule === null
-          ? null
-          : MAGIC_DICE_RULES[this.rule].split(': ').slice(1).join(': '),
+      ruleLabel: this.ruleLabel,
       isMalus,
+      isPersonnal,
       log: this.log,
       canRoll: this.canRoll(),
       effect: this.effect,

@@ -663,7 +663,7 @@ export const MagicDiceRule = {
   /** VPs: +2 for everybody */
   BLESSED_ONE: 'Blessed One',
   /** VPs: -1 for the roller */
-  DOOMED_ONE: 'Doomed One',
+  CURSED_ONE: 'Cursed One',
   /** Trades: 1:1 everywhere */
   SALES: 'Sales',
   /** Trades: *+1:1 everywhere */
@@ -676,17 +676,17 @@ export const MagicDiceRule = {
 export type MagicDiceRule = (typeof MagicDiceRule)[keyof typeof MagicDiceRule];
 
 export const MAGIC_DICE_RULES: Record<MagicDiceRule, string> = {
-  [MagicDiceRule.EXTRA_RESOURCES]: `${MagicDiceRule.EXTRA_RESOURCES}: +1 resources production for everybody`,
-  [MagicDiceRule.RESOURCES_CRISIS]: `${MagicDiceRule.RESOURCES_CRISIS}: -1 resources production for everybody`,
-  [MagicDiceRule.WEALTHY_LANDLORD]: `${MagicDiceRule.WEALTHY_LANDLORD}: +2 resources production for `,
-  [MagicDiceRule.POOR_LANDLORD]: `${MagicDiceRule.POOR_LANDLORD}: -2 resources production for `,
-  [MagicDiceRule.ALL_BLESSED]: `${MagicDiceRule.ALL_BLESSED}: +1 victory points for everybody`,
-  [MagicDiceRule.BLESSED_ONE]: `${MagicDiceRule.BLESSED_ONE}: +2 victory points for `,
-  [MagicDiceRule.DOOMED_ONE]: `${MagicDiceRule.BLESSED_ONE}: -1 victory points for `,
+  [MagicDiceRule.EXTRA_RESOURCES]: `${MagicDiceRule.EXTRA_RESOURCES}: +1 resources production`,
+  [MagicDiceRule.RESOURCES_CRISIS]: `${MagicDiceRule.RESOURCES_CRISIS}: -1 resources production`,
+  [MagicDiceRule.WEALTHY_LANDLORD]: `${MagicDiceRule.WEALTHY_LANDLORD}: +2 resources production`,
+  [MagicDiceRule.POOR_LANDLORD]: `${MagicDiceRule.POOR_LANDLORD}: -2 resources production`,
+  [MagicDiceRule.ALL_BLESSED]: `${MagicDiceRule.ALL_BLESSED}: +1 victory points`,
+  [MagicDiceRule.BLESSED_ONE]: `${MagicDiceRule.BLESSED_ONE}: +2 victory points`,
+  [MagicDiceRule.CURSED_ONE]: `${MagicDiceRule.CURSED_ONE}: -1 victory points`,
   [MagicDiceRule.SALES]: `${MagicDiceRule.SALES}: all trade ratios at 1:1`,
-  [MagicDiceRule.INFLATION]: `${MagicDiceRule.INFLATION}: all trade ratios at ?+1:1`,
-  [MagicDiceRule.BAN_THEM]: `${MagicDiceRule.BAN_THEM}: all players banned for next round except `,
-  [MagicDiceRule.BAN_ME]: `${MagicDiceRule.BAN_ME}: will be banned for next round `,
+  [MagicDiceRule.INFLATION]: `${MagicDiceRule.INFLATION}: all trade ratios at X+1:1`,
+  [MagicDiceRule.BAN_THEM]: `${MagicDiceRule.BAN_THEM}: all players banned for next round`,
+  [MagicDiceRule.BAN_ME]: `${MagicDiceRule.BAN_ME}: will be banned for next round`,
 } as const;
 
 export const RULE_BY_TOTAL: Record<number, MagicDiceRule> = {
@@ -696,7 +696,7 @@ export const RULE_BY_TOTAL: Record<number, MagicDiceRule> = {
   5: MagicDiceRule.POOR_LANDLORD,
   6: MagicDiceRule.ALL_BLESSED,
   7: MagicDiceRule.BLESSED_ONE,
-  8: MagicDiceRule.DOOMED_ONE,
+  8: MagicDiceRule.CURSED_ONE,
   9: MagicDiceRule.SALES,
   10: MagicDiceRule.INFLATION,
   11: MagicDiceRule.BAN_THEM,
@@ -721,7 +721,7 @@ export const EFFECT_BY_RULE: Record<MagicDiceRule, MagicDiceEffect> = {
   [MagicDiceRule.POOR_LANDLORD]: { kind: 'resource', target: 'personal', sign: 'minus', val: 2 },
   [MagicDiceRule.ALL_BLESSED]: { kind: 'victoryPoint', target: 'collective', sign: 'plus', val: 1 },
   [MagicDiceRule.BLESSED_ONE]: { kind: 'victoryPoint', target: 'personal', sign: 'plus', val: 2 },
-  [MagicDiceRule.DOOMED_ONE]: { kind: 'victoryPoint', target: 'personal', sign: 'minus', val: 1 },
+  [MagicDiceRule.CURSED_ONE]: { kind: 'victoryPoint', target: 'personal', sign: 'minus', val: 1 },
   [MagicDiceRule.SALES]: { kind: 'trade', target: 'collective', sign: 'plus', val: 1 },
   [MagicDiceRule.INFLATION]: { kind: 'trade', target: 'collective', sign: 'minus', val: 1 },
   [MagicDiceRule.BAN_THEM]: { kind: 'turn', target: 'collective', sign: 'minus', val: 0 },
@@ -738,8 +738,8 @@ export type MagicDiceDto = {
   lastRoller: string | null;
   rule: MagicDiceRule | null;
   ruleLabel: string | null;
-  ruleDescription: string | null;
   isMalus: boolean | null;
+  isPersonnal: boolean | null;
   log: string | null;
   canRoll: boolean;
   effect: MagicDiceEffect | null;

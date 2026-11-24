@@ -58,11 +58,6 @@ function GameShell({ game }: { game: GameDataDto }) {
   const navEnabled = isMyTurn && !waitingForPlayers;
   const isDesktop = useMediaQuery("(min-width: 36em)");
 
-  const currentRoll =
-    game.currentPhase === Phase.START
-      ? game.currentPlayer.currentRoll
-      : game.currentRoll;
-
   console.log(
     `GameShell: phase [${game.currentPhase}]: magicDice: [${game.magicDice ?? "null"}]`,
   );
@@ -160,7 +155,7 @@ function GameShell({ game }: { game: GameDataDto }) {
 
             <DiceRoller
               title="Dice Roller"
-              currentRoll={currentRoll}
+              currentRoll={game.currentRoll}
               firstDice={game.currentPlayer.firstDice}
               secondDice={game.currentPlayer.secondDice}
               isMyTurn={navEnabled}

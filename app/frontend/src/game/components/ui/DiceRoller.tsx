@@ -64,7 +64,6 @@ export function DiceRoller({
   }
   const flashOn = theme === "default" && flashRollId === currentRoll.id;
 
-  // Invalid roll value -> unlock by safety (render-time, like below).
   if (!isDiceValue(currentRoll.val) && busy) setBusy(false);
   if (locked && busy) setBusy(false);
 
@@ -80,11 +79,9 @@ export function DiceRoller({
     setBusy(false);
   }, [clearServerTimeout]);
 
-  // ✨ Animation for EVERYONE: any client receiving a NEW roll id animates.
-  // No setState here, only the ref access -> React Compiler compliant.
   useEffect(() => {
-    if (currentRoll.val === null) return; // nothing to animate yet
-    if (currentRoll.id === handledRollIdRef.current) return; // already handled
+    if (currentRoll.val === null) return;
+    if (currentRoll.id === handledRollIdRef.current) return;
     handledRollIdRef.current = currentRoll.id;
     if (isDiceValue(currentRoll.val)) {
       diceRef.current?.rollDice(currentRoll.val);

@@ -1,6 +1,6 @@
 import type { MagicDiceDto } from "shared";
 import { DiceRoller } from "./DiceRoller";
-import { Box, Card, Group, Stack, Text } from "@mantine/core";
+import { Box, Card, Stack, Text } from "@mantine/core";
 import TurnProgressBar from "./TurnProgressBar";
 
 export default function MagicDice({
@@ -18,8 +18,8 @@ export default function MagicDice({
     currentRoll,
     rule,
     ruleLabel,
-    ruleDescription,
     isMalus,
+    isPersonnal,
     log,
     canRoll,
     lastRoller,
@@ -36,16 +36,14 @@ export default function MagicDice({
         />
         <Card withBorder radius="md" shadow="sm" padding="sm" w="100%">
           {rule ? (
-            <Stack gap={4}>
-              <Group justify="space-between" w="100%" wrap="nowrap">
-                <Text fw={700} size="sm">
-                  {ruleLabel}
-                </Text>
-                <Text size="xs" c={isMalus ? "red" : "green"} fw={600}>
-                  {isMalus ? "MALUS" : "BONUS"}
-                </Text>
-              </Group>
-              <Text size="sm">{ruleDescription}</Text>
+            <Stack justify="center" w="100%" gap={"xs"}>
+              <Text fw={700} size="sm">
+                {ruleLabel}
+              </Text>
+              <Text size="xs" c={isMalus ? "red" : "green"} fw={600}>
+                {isPersonnal ? "PERSONNAL" : "COLLECTIVE"}{" "}
+                {isMalus ? "MALUS" : "BONUS"}
+              </Text>
             </Stack>
           ) : (
             <Text size="sm" c="dimmed" ta="center">
