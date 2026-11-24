@@ -40,7 +40,7 @@ export default function ListGames() {
   }, []);
 
   return (
-    <Paper withBorder p="md" mih={600} h="100%">
+    <Paper withBorder p="md" mih={{ base: 200, md: 600 }} h="100%">
       <Title order={3} mb="md">
         Game in progress
       </Title>
@@ -54,23 +54,25 @@ export default function ListGames() {
           No game in progress ..
         </Text>
       ) : (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th ta="left">ID</Table.Th>
-              <Table.Th ta="left">Players</Table.Th>
-              <Table.Th ta="left">Status</Table.Th>
+        <Table.ScrollContainer minWidth={500}>
+          <Table striped highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th ta="left">ID</Table.Th>
+                <Table.Th ta="left">Players</Table.Th>
+                <Table.Th ta="left">Status</Table.Th>
 
-              <Table.Th></Table.Th>
-            </Table.Tr>
-          </Table.Thead>
+                <Table.Th></Table.Th>
+              </Table.Tr>
+            </Table.Thead>
 
-          <Table.Tbody>
-            {games.map((game) => (
-              <GameRow key={game.gameId} game={game} />
-            ))}
-          </Table.Tbody>
-        </Table>
+            <Table.Tbody>
+              {games.map((game) => (
+                <GameRow key={game.gameId} game={game} />
+              ))}
+            </Table.Tbody>
+          </Table>
+        </Table.ScrollContainer>
       )}
     </Paper>
   );
