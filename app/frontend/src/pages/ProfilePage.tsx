@@ -21,7 +21,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <Title order={1} mb="xl" ta="center">
+      <Title order={1} mb="xl" ta="center" fz={{ base: "h3", md: "h1" }}>
         Profile
       </Title>
 

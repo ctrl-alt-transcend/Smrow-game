@@ -70,7 +70,7 @@ export function HeaderTabs() {
           <Burger
             opened={opened}
             onClick={toggle}
-            hiddenFrom="xs"
+            hiddenFrom="sm"
             size="sm"
             aria-label="Toggle navigation"
           />
@@ -85,6 +85,7 @@ export function HeaderTabs() {
           >
             <Menu.Target>
               <UnstyledButton
+                visibleFrom="sm"
                 className={cx(classes.user, {
                   [classes.userActive]: userMenuOpened,
                 })}
@@ -152,11 +153,10 @@ export function HeaderTabs() {
         size="100%"
         padding="md"
         title="Navigation"
-        hiddenFrom="xs"
+        hiddenFrom="sm"
         zIndex={1000000}
       >
-        <ScrollArea h="calc(100vh - 80px" mx="-md">
-          <Divider my="sm" />
+        <ScrollArea h="calc(100vh - 80px)" mx="-md">
           {navLinks.map((link) => (
             <Link
               key={link.to}
@@ -167,6 +167,27 @@ export function HeaderTabs() {
               {link.label}
             </Link>
           ))}
+          <Divider my="sm" mx="md" color="gray.3" />
+          <Link to="/privacy" className={classes.drawerLink} onClick={close}>
+            Privacy Policy
+          </Link>
+          <Link to="/terms" className={classes.drawerLink} onClick={close}>
+            Terms of Service
+          </Link>
+          <UnstyledButton
+            className={classes.drawerLink}
+            c="red"
+            w="100%"
+            p="md"
+            fz="sm"
+            fw={500}
+            onClick={() => {
+              close();
+              handleLogout();
+            }}
+          >
+            Logout
+          </UnstyledButton>
         </ScrollArea>
       </Drawer>
     </div>
