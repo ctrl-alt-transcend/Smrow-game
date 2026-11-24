@@ -2,6 +2,7 @@ import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
+  OnGatewayDisconnect,
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
@@ -27,7 +28,9 @@ import { SpectateGateway } from './spectate.gateway';
   namespace: 'game',
   cors: { credentials: true },
 })
-export class GameGateway implements OnGatewayInit, OnGatewayConnection {
+export class GameGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer() server: SocketServer;
   private readonly logger = new Logger(GameGateway.name);
 
@@ -144,7 +147,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     if (game.isGameTerminated()) {
       this.endGame(game);
     }
-    void this.gameService.recordResultIfOver(game);
+    this.gameService
+      .recordResultIfOver(game)
+      .catch((e) =>
+        this.logger.error(
+          `Could not record the result of game ${game.getGameId()}`,
+          e instanceof Error ? e.stack : String(e),
+        ),
+      );
   }
 
   /*---------- Connection ----------*/
@@ -153,7 +163,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
     this.gameService.setNotifier((id) => {
       const game = this.gameService.getGameInstanceByUserId(id);
       if (!game) return;
-      void this.emitGameDataDto(game);
+      this.emitGameDataDto(game).catch((e) =>
+        this.logger.error(
+          `Could not emit the state of game ${game.getGameId()}`,
+          e instanceof Error ? e.stack : String(e),
+        ),
+      );
     });
 
     server.use(authMiddleware(this.jwtService, this.logger));
@@ -164,6 +179,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       `Client connected: ${client.id} - ${client.data.user.username}`,
     );
     await client.join(`user:${client.data.user.id}`);
+    this.gameService.cancelDisconnectTimer(client.data.user.id);
   }
 
   async handleDisconnect(client: SocketClient) {
@@ -175,8 +191,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection {
       .allSockets();
     if (sockets.size === 0) {
       this.logger.debug(
-        `No more sockets for user ${client.data.user.username}, removing from game if any`,
+        `No more sockets for user ${client.data.user.username}`,
       );
+      this.gameService.setDisconnectTimer(client.data.user);
     }
   }
 }
