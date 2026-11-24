@@ -35,7 +35,6 @@ export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async create(usr: RegisterPost) {
-    console.log('Are we creating ??????');
     const prismaDtoUser: Prisma.UserCreateInput = {
       username: usr.username,
       name: usr.name,

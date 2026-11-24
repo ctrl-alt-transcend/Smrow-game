@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = useCallback(async (data: LoginPost) => {
-    console.log("entered LOGIN");
     await loginUser(data);
     setUser(await getCurrentUser());
   }, []);

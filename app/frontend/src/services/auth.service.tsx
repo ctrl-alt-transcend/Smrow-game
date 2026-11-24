@@ -24,9 +24,7 @@ export const registerUser = async (
 
 export const loginUser = async (data: LoginPost): Promise<LoginResponse> => {
   try {
-    console.log("ENTERING LOGINUSER");
     const res = await http.post<LoginResponse>("/auth/login", data);
-    console.log("SUCCESSS");
     return res.data;
   } catch (error: any) {
     const err_msg = error.response?.data?.message;

@@ -12,15 +12,13 @@ export function useGameState(): { game: GameDataDto | null } {
     const onConnect = async () => {
       try {
         const response = await socket.timeout(5000).emitWithAck("game:join");
-        console.log("[joinRoom] ack =", response);
         if (response?.ok && response.data) setGame(response.data);
         else {
-          console.warn("[joinRoom] refused:", response?.error);
           navigate("/home");
           return;
         }
       } catch (err) {
-        console.error("[joinRoom] no ack (timeout / disconnect):", err);
+        console.error(err);
         navigate("/home");
         return;
       }

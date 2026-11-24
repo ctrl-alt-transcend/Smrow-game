@@ -13,14 +13,12 @@ export function useSpectateGameBoard(gameId: string): {
         const response = await socket
           .timeout(5000)
           .emitWithAck("spectate:join", gameId);
-        console.log("[joinSpectate] ack =", response);
         if (response?.ok && response.data) setGame(response.data);
         else {
-          console.warn("[joinSpectate] refused:", response?.error);
           return;
         }
       } catch (err) {
-        console.error("[joinSpectate] no ack (timeout / disconnect):", err);
+        console.error(err);
         return;
       }
     };
