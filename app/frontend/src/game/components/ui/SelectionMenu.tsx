@@ -20,7 +20,6 @@ import {
   type SettingsData,
   SETTLEMENT,
   ROAD,
-  Phase,
 } from "shared";
 import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 
@@ -76,7 +75,7 @@ interface TradeOfferPanelProps {
   sourceKind: TraderType;
   targetOwnerId?: string | null;
   isMyTurn: boolean;
-  phase: Phase;
+  disabled: boolean;
 }
 
 const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
@@ -86,7 +85,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
   sourceKind,
   targetOwnerId = null,
   isMyTurn,
-  phase,
+  disabled,
 }) => {
   const [chosenOfferResource, setChosenOfferResource] =
     useState<ResourceType | null>(offerLockedResource ?? null);
@@ -118,6 +117,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
       target: { resource: targetResource!, amount: targetAmount },
     };
     socket.emit("game:trade", { ...payload, targetOwnerId });
+    console.log("Trade offer sent:", payload, "→ owner:", targetOwnerId);
   }, [
     isValid,
     isMyTurn,
@@ -139,11 +139,7 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
           data={RESOURCE_OPTIONS}
           value={offerResource}
           onChange={(v) => setChosenOfferResource(v as ResourceType)}
-          disabled={
-            Boolean(offerLockedResource) ||
-            !isMyTurn ||
-            phase === Phase.RESOURCES
-          }
+          disabled={Boolean(offerLockedResource) || !isMyTurn || disabled}
           style={{ flex: 1, minWidth: 120 }}
         />
         {!isBankTrade && (
@@ -202,7 +198,7 @@ interface BuildSelectionButtonProps {
   masterLog: string | null;
   onBuilt?: (target: BuildPayload) => void;
   isMyTurn: boolean;
-  phase: Phase;
+  disabled: boolean;
 }
 
 const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
@@ -210,7 +206,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
   masterLog,
   onBuilt,
   isMyTurn,
-  phase,
+  disabled,
 }) => {
   const [busy, setBusy] = useState(false);
   const pendingRef = useRef<PendingBuild | null>(null);
@@ -275,7 +271,7 @@ const BuildSelectionButton: React.FC<BuildSelectionButtonProps> = ({
       w="100%"
       onClick={handleBuildRequest}
       loading={busy}
-      disabled={busy || !isMyTurn || phase === Phase.RESOURCES}
+      disabled={busy || !isMyTurn || disabled}
     >
       {busy ? "Building…" : actionLabel}
     </Button>
@@ -342,7 +338,7 @@ interface SelectionMenuProps {
   masterLog?: string | null;
   currentPlayerId?: string | null;
   onBuilt?: (target: BuildPayload) => void;
-  phase: Phase;
+  disabled: boolean;
 }
 
 export const SelectionMenu: React.FC<SelectionMenuProps> = ({
@@ -351,7 +347,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
   masterLog = null,
   onBuilt,
   isMyTurn,
-  phase,
+  disabled,
 }) => {
   const items = useSelectionDisplay(selected, settings);
   const { ref: cardBodyRef, width: cardBodyWidth } =
@@ -380,7 +376,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
             sourceId={port.id}
             sourceKind={TraderType.GENERIC_PORT}
             {...turnFlag}
-            phase={phase}
+            disabled={disabled}
           />
         );
       }
@@ -392,7 +388,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
           sourceId={port.id}
           sourceKind={TraderType.SPECIALIZED_PORT}
           {...turnFlag}
-          phase={phase}
+          disabled={disabled}
         />
       );
     }
@@ -409,7 +405,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
           masterLog={masterLog}
           onBuilt={onBuilt}
           {...turnFlag}
-          phase={phase}
+          disabled={disabled}
         />
       );
     }
@@ -421,7 +417,7 @@ export const SelectionMenu: React.FC<SelectionMenuProps> = ({
           sourceId={selected.selectedReserve.id}
           sourceKind={TraderType.RESERVE}
           {...turnFlag}
-          phase={phase}
+          disabled={disabled}
         />
       );
     }

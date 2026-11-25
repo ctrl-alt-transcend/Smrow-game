@@ -1,14 +1,13 @@
 import { Button } from "@mantine/core";
 import { gameSocket as socket } from "../../../sockets/gameSocket.tsx";
 import { useCallback } from "react";
-import { Phase } from "shared";
 
 export default function SkipTurnButton({
   isMyTurn,
-  phase,
+  disabled,
 }: {
   isMyTurn: boolean;
-  phase: Phase;
+  disabled: boolean;
 }) {
   const handleSkipRequest = useCallback(() => {
     socket.emit("game:skip");
@@ -17,7 +16,7 @@ export default function SkipTurnButton({
   return (
     <Button
       onClick={handleSkipRequest}
-      disabled={!isMyTurn || phase === Phase.RESOURCES}
+      disabled={!isMyTurn || disabled}
       fullWidth
     >
       End turn
