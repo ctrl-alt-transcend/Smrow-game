@@ -90,7 +90,7 @@ export default function Chat() {
   }
 
   return (
-    <Card withBorder p="md" h="100%">
+    <Card withBorder p="md" h="100%" radius="md">
       <Card.Section withBorder p="sm">
         <Title order={3} ta="center">
           Toxic chat
