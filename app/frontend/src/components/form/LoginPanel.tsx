@@ -1,14 +1,16 @@
 import {
   Button,
   Anchor,
+  Title,
+  Card,
   Checkbox,
+  Divider,
   Group,
-  Paper,
   Stack,
   PasswordInput,
   Text,
   TextInput,
-  type PaperProps,
+  type CardProps,
 } from "@mantine/core";
 
 import { Link } from "react-router";
@@ -21,7 +23,7 @@ import { useAuth } from "../../hooks/useAuth";
 import ErrorMessages from "../utils/ErrorMessages";
 import { RegisterPostSchema, LoginPostSchema } from "shared";
 
-export function LoginPanel(props: PaperProps) {
+export function LoginPanel(props: CardProps) {
   const { register, login } = useAuth();
   const [type, toggle] = useToggle(["register", "login"]);
   const [error, setError] = useState<string | string[] | null>(null);
@@ -77,10 +79,13 @@ export function LoginPanel(props: PaperProps) {
   }
 
   return (
-    <Paper p="xs" withBorder {...props}>
-      <Text p="xs" size="lg" fw="500" c="Red">
+    <Card withBorder radius="md" p="sm" {...props}>
+      <Title size="xl" fw="500" c="Red" ta="center" mb="sm">
         Login to play !
-      </Text>
+      </Title>
+      <Card.Section mb="sm">
+        <Divider color="black" />
+      </Card.Section>
 
       {type === "register" && (
         <form onSubmit={handleRegister}>
@@ -197,6 +202,6 @@ export function LoginPanel(props: PaperProps) {
         </Anchor>
         .
       </Text>
-    </Paper>
+    </Card>
   );
 }
