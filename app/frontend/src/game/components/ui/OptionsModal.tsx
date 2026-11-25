@@ -13,7 +13,10 @@ import {
 } from "shared";
 import { PlayerPanel } from "./PlayerPanel.tsx";
 import QuitGameButton from "./QuitGameButton.tsx";
-import { DisplaySetting } from "../../utils/game.utils.tsx";
+import {
+  DisplayMagicDiceRules,
+  DisplaySetting,
+} from "../../utils/game.utils.tsx";
 
 type OptionsModalProps = {
   game: GameDataDto;
@@ -80,6 +83,7 @@ export function OptionsModal({ game, opened, onClose }: OptionsModalProps) {
                     </Text>
                   </Stack>
                 ))}
+                <DisplayMagicDiceRules />
                 <DisplaySetting gameId={game.gameId} settings={game.settings} />
               </Stack>
             </Accordion.Panel>

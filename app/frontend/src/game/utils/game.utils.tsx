@@ -3,6 +3,10 @@ import { notifications } from "@mantine/notifications";
 import axios from "axios";
 import {
   BuildingType,
+  MAGIC_DICE_INFO,
+  MAGIC_DICE_RULES,
+  MAGIC_DICE_TITLE,
+  MagicDiceRule,
   Phase,
   ResourceType,
   SettingsDataSchema,
@@ -11,6 +15,27 @@ import {
 import { z } from "zod";
 import { http } from "../../services/http.tsx";
 import { Title, Text } from "@mantine/core";
+
+export function DisplayMagicDiceRules() {
+  return (
+    <Text style={{ whiteSpace: "pre-line" }}>
+      <Title order={4}>{MAGIC_DICE_TITLE}</Title>
+      {MAGIC_DICE_INFO}
+      <Title order={6}>Magic Dice Effects</Title>
+      {`• ${MAGIC_DICE_RULES[MagicDiceRule.EXTRA_RESOURCES]} for everybody\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.RESOURCES_CRISIS]} for everybody\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.WEALTHY_LANDLORD]} for the roller\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.POOR_LANDLORD]} for the roller\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.ALL_BLESSED]} for everybody\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.BLESSED_ONE]} for the roller\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.CURSED_ONE]} for the roller\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.SALES]} for everybody\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.INFLATION]} for everybody\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.BAN_THEM]} except the roller\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.BAN_ME]}\n`}
+    </Text>
+  );
+}
 
 export function DisplaySetting({
   gameId,

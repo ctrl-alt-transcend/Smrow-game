@@ -119,13 +119,18 @@ code {
   }
 }
 
-@keyframes diceFlash {
-  0%   { filter: drop-shadow(0 0 0 rgba(103, 197, 133, 0)); }
-  35%  { filter: drop-shadow(0 0 14px rgba(103, 197, 133, 0.8)); }
-  100% { filter: drop-shadow(0 0 0 rgba(103, 197, 133, 0)); }
-}
-
 @keyframes magicDiceGlow {
   0%, 100% { filter: drop-shadow(0 0 10px rgba(109, 74, 255, 0.45)); }
   50%      { filter: drop-shadow(0 0 22px rgba(109, 74, 255, 0.8)); }
+}
+
+@keyframes tickPop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.25); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes softPulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.9; }
 }

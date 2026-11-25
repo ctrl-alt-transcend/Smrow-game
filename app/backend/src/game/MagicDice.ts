@@ -17,7 +17,7 @@ export class MagicDice {
   private rule: MagicDiceRule | null = null;
   private ruleLabel: string | null = null;
   private effect: MagicDiceEffect | null = null;
-  private log: string | null = null;
+  private log: string | null = 'Avoid touching it to stay safe...';
   private expired: boolean = false;
   private rollId: number = 0;
 
@@ -34,10 +34,15 @@ export class MagicDice {
     this.currentRoll = {
       id: this.rollId++,
       val: Math.floor(Math.random() * 6) + 1,
+      roller: username,
     };
     this.lastRoller = username;
-    if (this.rollCount === 0) this.firstRoll = this.currentRoll;
-    else this.secondRoll = this.currentRoll;
+    if (this.rollCount === 0) {
+      this.firstRoll = this.currentRoll;
+    } else {
+      this.secondRoll = this.currentRoll;
+    }
+    this.log = `${this.lastRoller} touched the dice ...`;
     this.rollCount++;
     if (this.rollCount === 2) this.resolve();
     return this.currentRoll;

@@ -54,7 +54,10 @@ function GameShell({ game }: { game: GameDataDto }) {
 
   let isMyTurn = game.currentPlayer.username === game.whosTurn;
   if (game.currentPhase === Phase.START) isMyTurn = true;
-  const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
+  const masterLog =
+    isMyTurn && game.currentPhase !== Phase.MAGIC_DICE
+      ? game.currentPlayer.guideLog
+      : game.masterLog;
 
   const navEnabled = isMyTurn && !waitingForPlayers;
   const isDesktop = useMediaQuery("(min-width: 36em)");
@@ -169,7 +172,9 @@ function GameShell({ game }: { game: GameDataDto }) {
               }
             />
 
-            <MagicEffect magicDice={game.magicDice} />
+            {game.settings.magicDiceEnabled && (
+              <MagicEffect magicDice={game.magicDice} />
+            )}
             <Accordion variant="separated" multiple defaultValue={["players"]}>
               <Accordion.Item value="players">
                 <Accordion.Control>Players</Accordion.Control>

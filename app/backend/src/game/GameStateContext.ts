@@ -598,9 +598,15 @@ class GameStateContext {
     }
     this.setCurrentPhase(nextPhase);
     this.setTurnCount(0);
-    this.setMasterLog(
-      `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
-    );
+    if (nextPhase === Phase.MAGIC_DICE) {
+      this.setMasterLog(
+        `${this.getCurrentPhase()}: ${GUIDE_LOG[Phase.MAGIC_DICE]}`,
+      );
+    } else {
+      this.setMasterLog(
+        `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
+      );
+    }
     this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
     if (playerMode !== 'keep') this.resetAllDices();
     this.startWatch(

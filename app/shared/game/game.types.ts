@@ -208,7 +208,7 @@ export const Phase = {
   PLACEMENT: 'Placement Phase',
   RESOURCES: 'Resources Phase',
   TRADE_BUILD: 'Trade & Build Phase',
-  MAGIC_DICE: 'Magic Dice Phase'
+  MAGIC_DICE: 'Magic Dice'
 } as const;
 export type Phase = (typeof Phase)[keyof typeof Phase];
 
@@ -218,7 +218,7 @@ export const GUIDE_LOG: Record<Phase, string> = {
   [Phase.PLACEMENT]: `${Phase.PLACEMENT}: build a settllement and a road.`,
   [Phase.RESOURCES]: `${Phase.RESOURCES}: ${Action.DICE} to collect your resources.`,
   [Phase.TRADE_BUILD]: `${Phase.TRADE_BUILD}: build, trade, upgrade! End your turn when you're done.`,
-  [Phase.MAGIC_DICE]: `${Phase.MAGIC_DICE}: choose wisely, roll it at your own risk!`,
+  [Phase.MAGIC_DICE]: `${Phase.MAGIC_DICE}: roll it or wait until the dice vanishes...`,
 } as const;
 
 export const START_PHASE_INFO =
@@ -256,6 +256,13 @@ export const SPECIAL_RULES_INFO =
 "would normally produce\n" +
 "• Crossroad Rule: build the 3 roads surrounding one of your " +
 "settlements to earn a victory point.\n"
+
+export const MAGIC_DICE_TITLE = "Magic Dice";
+export const MAGIC_DICE_INFO =
+"Every new round the Magic Dice will appear, during its apparition ANYBODY " +
+"in the game can roll it, but beware! The result could be a collective or " +
+"personnal malus fot the last player that touches the dice, but it could " +
+"also be a bonus if you are lucky enough!\n"
 
 export const CURRENT_GAME_SETTINGS = "Current Game Settings"
 
@@ -508,6 +515,7 @@ export type Resources = {
 export type DiceRoll = {
   val: number | null;
   id: number;
+  roller?: string;
 }
 
 export type GameLog = {
@@ -686,7 +694,7 @@ export const MAGIC_DICE_RULES: Record<MagicDiceRule, string> = {
   [MagicDiceRule.SALES]: `${MagicDiceRule.SALES}: all trade ratios at 1:1`,
   [MagicDiceRule.INFLATION]: `${MagicDiceRule.INFLATION}: all trade ratios at X+1:1`,
   [MagicDiceRule.BAN_THEM]: `${MagicDiceRule.BAN_THEM}: all players banned for next round`,
-  [MagicDiceRule.BAN_ME]: `${MagicDiceRule.BAN_ME}: will be banned for next round`,
+  [MagicDiceRule.BAN_ME]: `${MagicDiceRule.BAN_ME}: roller will be banned for next round`,
 } as const;
 
 export const RULE_BY_TOTAL: Record<number, MagicDiceRule> = {
