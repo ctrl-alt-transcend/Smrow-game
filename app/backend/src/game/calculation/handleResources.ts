@@ -1,4 +1,4 @@
-import type { Resources, TradeForm } from 'shared';
+import type { MagicDiceEffect, Resources, TradeForm } from 'shared';
 import { LandType, BuildingType, BUILD_COSTS, ResourceType } from 'shared';
 
 export function addStartingResources(resources: Resources) {
@@ -131,36 +131,65 @@ export function hasEnoughResourcesToBuild(
   return false;
 }
 
+function applyResourceFx(
+  fx: MagicDiceEffect | undefined,
+  username: string,
+  resources: Resources,
+  resource: keyof Resources,
+): void {
+  if (!fx || fx.kind !== 'resource') return;
+
+  const applies =
+    fx.target === 'collective' ||
+    (fx.target === 'personal' && fx.playerConcerned === username);
+  if (!applies) return;
+
+  const delta = fx.sign === 'plus' ? fx.val : -fx.val;
+  resources[resource] += delta;
+}
+
 export function produceResources(
   land: LandType,
   resources: Resources,
   multiplier: number,
+  username: string,
   isCity?: boolean,
+  fx?: MagicDiceEffect,
 ): number {
   switch (land) {
     case LandType.DESERT: {
       return 0;
     }
-    case LandType.FIELD:
+    case LandType.FIELD: {
       if (isCity) resources.wheat += 2 * multiplier;
       else resources.wheat += 1 * multiplier;
+      applyResourceFx(fx, username, resources, 'wheat');
       break;
-    case LandType.FOREST:
+    }
+    case LandType.FOREST: {
       if (isCity) resources.wood += 2 * multiplier;
       else resources.wood += 1 * multiplier;
+      applyResourceFx(fx, username, resources, 'wood');
       break;
-    case LandType.HILL:
+    }
+    case LandType.HILL: {
       if (isCity) resources.brick += 2 * multiplier;
       else resources.brick += 1 * multiplier;
+      applyResourceFx(fx, username, resources, 'brick');
       break;
-    case LandType.MOUNTAIN:
+    }
+    case LandType.MOUNTAIN: {
       if (isCity) resources.ore += 2 * multiplier;
       else resources.ore += 1 * multiplier;
+      applyResourceFx(fx, username, resources, 'ore');
       break;
-    case LandType.PASTURE:
+    }
+    case LandType.PASTURE: {
       if (isCity) resources.sheep += 2 * multiplier;
       else resources.sheep += 1 * multiplier;
+      applyResourceFx(fx, username, resources, 'sheep');
       break;
+    }
     default:
       return 0;
   }

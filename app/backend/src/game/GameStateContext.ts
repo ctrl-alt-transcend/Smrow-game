@@ -15,6 +15,8 @@ import {
   ROLLED_A,
   PlayerPublicDto,
   MagicDiceDto,
+  MagicDiceEffect,
+  MagicDiceRule,
 } from 'shared';
 import {
   GameBoard,
@@ -89,6 +91,7 @@ class GameStateContext {
   protected data!: GameData;
   protected graph!: GameBoardGraph;
   protected settings!: SettingsData;
+  protected originalSettings!: SettingsData;
   protected buildings: BuildingsInGame = new Map();
   private magicDice: MagicDice = new MagicDice();
   private state!: State;
@@ -110,6 +113,7 @@ class GameStateContext {
   ) {
     this.notify = notify;
     this.settings = settings;
+    this.originalSettings = settings;
     const { board, graph } = createGameBoard(this.settings.gameboardLayout);
     this.graph = graph;
     this.data = {
@@ -531,11 +535,6 @@ class GameStateContext {
       if (p.firstDice === 0) this.diceRequest(p.username);
       if (p.secondDice === 0) {
         this.diceRequest(p.username);
-        this.logger.log(
-          `Game [${this.data.gameId}]: no actions within the elapsed time ` +
-            `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
-            `${p.username} during « ${this.getCurrentPhase()} »`,
-        );
       }
     });
   }
@@ -592,6 +591,7 @@ class GameStateContext {
         this.settings.magicDiceEnabled &&
         this.getCurrentPhase() !== Phase.MAGIC_DICE
       ) {
+        this.settings = this.originalSettings;
         nextPhase = Phase.MAGIC_DICE;
         this.magicDice = new MagicDice();
       }
@@ -614,31 +614,6 @@ class GameStateContext {
         ? this.settings.magicDiceDurationSeconds
         : undefined,
     );
-    //if (this.isVictory()) return;
-    //if (playerMode !== 'keep') {
-    //  if (nextPhase === Phase.RESOURCES && this.data.turnIndex === 0) {
-    //    this.roundCount++;
-    //    if (this.settings.magicDiceEnabled && this.magicDiceRolled === false) {
-    //      this.magicDice = new MagicDice();
-    //      nextPhase = Phase.MAGIC_DICE;
-    //      this.magicDiceRolled = true;
-    //      this.watchSeconds = this.settings.magicDiceDurationSeconds;
-    //      this.startWatch();
-    //    } else {
-    //      this.magicDiceRolled = false;
-    //      this.watchSeconds = this.settings.turnDurationSeconds;
-    //      this.stopWatch();
-    //    }
-    //  }
-    //  this.setNextPlayer(playerMode === 'reset' ? 0 : undefined);
-    //}
-    //this.setCurrentPhase(nextPhase);
-    //this.setTurnCount(0);
-    //this.setMasterLog(
-    //  `${this.getCurrentPhase()}: ${this.getCurrentPlayer()?.username} is playing ...`,
-    //);
-    //this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
-    //if (playerMode !== 'keep') this.resetAllDices();
     switch (nextPhase) {
       case Phase.START:
         this.transitionTo(new StartPhase());
@@ -685,9 +660,11 @@ class GameStateContext {
   }
 
   public resourcesProduction(placementPhase: boolean) {
+    const fx = this.getMagicDice().getMagicEffect();
     for (const [settlementId, player] of this.buildings) {
       const graphEntry = this.graph.get(settlementId);
       if (!graphEntry) continue;
+      if (this.magicDiceBlock(fx, player)) continue;
       graphEntry.adjacentTiles.forEach((tile) => {
         let prod: number = 0;
         if (placementPhase === true) {
@@ -695,21 +672,25 @@ class GameStateContext {
             tile.land,
             player.resources,
             this.settings.resourcesMultiplier,
+            player.username,
           );
         } else if (tile.value === this.data.dicesSum && !tile.hasRobber) {
           const settlement = player.settlementsBuilt.get(settlementId);
-          if (settlement)
+          if (settlement) {
             prod = produceResources(
               tile.land,
               player.resources,
               this.settings.resourcesMultiplier,
+              player.username,
               settlement.isCity,
+              fx ?? undefined,
             );
+          }
         }
         if (prod > 0) {
           this.setPersonalLog(
             player,
-            `You produced ${prod} ${LAND_RESOURCE[tile.land]}`,
+            `You produced ${LAND_RESOURCE[tile.land]}`,
             NotifColor.GREEN,
           );
         } else if (tile.land == LandType.DESERT && !placementPhase) {
@@ -786,11 +767,6 @@ class GameStateContext {
     } else {
       const p = this.getPlayerByUsername(this.data.whosTurn);
       if (!p) return;
-      this.logger.log(
-        `Game [${this.data.gameId}]: no actions within the elapsed time ` +
-          `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
-          `${p.username} during « ${this.getCurrentPhase()} »`,
-      );
       switch (currentPhase) {
         case Phase.PLACEMENT:
           this.afkDuringPlacement(p);
@@ -798,8 +774,10 @@ class GameStateContext {
           this.phaseCheckRequest();
           break;
         case Phase.MAGIC_DICE:
-          if (this.magicDice && !this.magicDice.isResolved())
+          if (this.magicDice && !this.magicDice.isResolved()) {
             this.magicDice.expire();
+            this.applyMagicEffect(this.magicDice.getMagicEffect());
+          }
           this.setupNextPhase(Phase.RESOURCES, 'reset');
           break;
         case Phase.RESOURCES:
@@ -813,6 +791,11 @@ class GameStateContext {
         default:
           return;
       }
+      this.logger.log(
+        `Game [${this.data.gameId}]: no actions within the elapsed time ` +
+          `(${this.settings.turnDurationSeconds} seconds), auto-play for ` +
+          `${p.username} during « ${this.getCurrentPhase()} »`,
+      );
     }
     this.isVictory();
     this.notifyAllPlayers();
@@ -844,6 +827,98 @@ class GameStateContext {
     if (!this.data.whosTurn) return 0;
     const remaining = this.watchSeconds * 1000 - this.elapsedMs();
     return Math.max(0, Math.ceil(remaining / 1000));
+  }
+
+  /***********************************
+   * Magic Dice
+   **********************************/
+  private applyMagicEffect(fx: MagicDiceEffect | null) {
+    if (!fx) return;
+    switch (fx.kind) {
+      case 'resource':
+        this.resourceEffect(fx);
+        break;
+      case 'victoryPoint':
+        this.victoryPointEffect(fx);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private calculateVP(fx: MagicDiceEffect, p: Player) {
+    if (fx.sign === 'minus') {
+      p.victoryPoints -= fx.val;
+    } else {
+      p.victoryPoints += fx.val;
+    }
+  }
+
+  private victoryPointEffect(fx: MagicDiceEffect) {
+    if (fx.target === 'personal') {
+      const p = this.getPlayerByUsername(fx.playerConcerned ?? '');
+      if (!p) return;
+      this.calculateVP(fx, p);
+    } else {
+      this.data.players.forEach((p) => {
+        this.calculateVP(fx, p);
+      });
+    }
+  }
+
+  private resourceEffect(fx: MagicDiceEffect) {
+    const p = this.getPlayerByUsername(fx.playerConcerned ?? '');
+    if (!p) return;
+    switch (fx.sign) {
+      case 'plus':
+        p.resources.brick -= fx.val;
+        p.resources.ore -= fx.val;
+        p.resources.sheep -= fx.val;
+        p.resources.wheat -= fx.val;
+        p.resources.wood -= fx.val;
+        break;
+      case 'minus':
+        p.resources.brick += fx.val;
+        p.resources.ore += fx.val;
+        p.resources.sheep += fx.val;
+        p.resources.wheat += fx.val;
+        p.resources.wood += fx.val;
+        break;
+    }
+  }
+
+  private magicDiceBlock(fx: MagicDiceEffect | null, p: Player) {
+    if (!fx) return false;
+    if (
+      fx.rule !== MagicDiceRule.FREEZE_THEM &&
+      fx.rule !== MagicDiceRule.FREEZE_ME
+    )
+      return false;
+    switch (fx.target) {
+      case 'personal': {
+        if (fx.playerConcerned === p.username) {
+          this.setPersonalLog(
+            p,
+            'Production freezed by the Magic Dice',
+            NotifColor.PURPLE,
+          );
+          return true;
+        }
+        break;
+      }
+      case 'collective': {
+        if (fx.playerConcerned !== p.username) {
+          this.setPersonalLog(
+            p,
+            'Production freezed by the Magic Dice',
+            NotifColor.PURPLE,
+          );
+          return true;
+        }
+        break;
+      }
+    }
+    return false;
   }
 }
 
@@ -1096,12 +1171,12 @@ class MagicDicePhase extends State {
     if (roll) {
       this.state.setPersonalLog(
         p,
-        `You touched the magic dice: ${roll.val} !`,
-        NotifColor.PURPLE,
+        `You touched the magic dice!`,
+        NotifColor.GREEN,
       );
       this.state.setAllPersonnalLog(
         p.username,
-        `${p.username} touched the magic dice !`,
+        `${p.username} touched the magic dice!`,
         NotifColor.PURPLE,
       );
       this.state.notifyAllPlayers();

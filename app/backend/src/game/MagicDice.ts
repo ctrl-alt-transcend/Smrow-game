@@ -72,6 +72,7 @@ export class MagicDice {
     const total = a + b;
     this.rule = this.ruleByTotal(total);
     this.effect = this.effectByRule(this.rule);
+    this.effect = this.effectByRule(this.rule);
     if (!this.rule || !this.effect) {
       this.log =
         'The magic dice perceived an anomally, no rule was revealed...';
@@ -80,10 +81,13 @@ export class MagicDice {
     this.ruleLabel = `${MAGIC_DICE_RULES[this.rule]}`;
     if (this.effect.target === 'personal') {
       this.ruleLabel += ` for ${this.lastRoller}`;
+      //} else if (this.rule === MagicDiceRule.FREEZE_THEM) {
+      //  this.ruleLabel += ` for everybody except ${this.lastRoller}`;
     } else {
       this.ruleLabel += ' for everybody';
     }
     this.log = `${this.lastRoller} touched the dice last... May be blessed or cursed!`;
+    this.effect.playerConcerned = this.lastRoller;
   }
 
   public expire(): void {

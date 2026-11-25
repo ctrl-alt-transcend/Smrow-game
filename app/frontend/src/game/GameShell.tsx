@@ -172,9 +172,9 @@ function GameShell({ game }: { game: GameDataDto }) {
               }
             />
 
-            {game.settings.magicDiceEnabled && (
+            {game.settings.magicDiceEnabled ? (
               <MagicEffect magicDice={game.magicDice} />
-            )}
+            ) : null}
             <Accordion variant="separated" multiple defaultValue={["players"]}>
               <Accordion.Item value="players">
                 <Accordion.Control>Players</Accordion.Control>

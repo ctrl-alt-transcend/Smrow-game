@@ -666,20 +666,20 @@ export const MagicDiceRule = {
   WEALTHY_LANDLORD: 'Wealthy Landlord',
   /** Resources: -2 for the roller */
   POOR_LANDLORD: 'Poor Landlord',
+  /** Resources: resources productions blocked for all player except roller */
+  FREEZE_THEM: 'Freeze Them',
+  /** Resources: resources productions blocked for the roller */
+  FREEZE_ME: 'Freeze Me',
   /** VPs: +1 for everybody */
   ALL_BLESSED: 'All Blessed',
   /** VPs: +2 for everybody */
   BLESSED_ONE: 'Blessed One',
   /** VPs: -1 for the roller */
   CURSED_ONE: 'Cursed One',
-  /** Trades: 1:1 everywhere */
-  SALES: 'Sales',
-  /** Trades: *+1:1 everywhere */
-  INFLATION: 'Inflation',
-  /** Turn: all players banned except the roller */
-  BAN_THEM: 'Ban Them',
-  /** Turn: player is ban for the next round */
-  BAN_ME: 'Ban Me',
+  /** Resources: +1 of each resources for the roller */
+  GOLDEN_AGE: 'Golden Age',
+  /** Resources: -1 of each resources for the roller */
+  DOOM_AGE: 'Doom Age',
 } as const;
 export type MagicDiceRule = (typeof MagicDiceRule)[keyof typeof MagicDiceRule];
 
@@ -688,13 +688,13 @@ export const MAGIC_DICE_RULES: Record<MagicDiceRule, string> = {
   [MagicDiceRule.RESOURCES_CRISIS]: `${MagicDiceRule.RESOURCES_CRISIS}: -1 resources production`,
   [MagicDiceRule.WEALTHY_LANDLORD]: `${MagicDiceRule.WEALTHY_LANDLORD}: +2 resources production`,
   [MagicDiceRule.POOR_LANDLORD]: `${MagicDiceRule.POOR_LANDLORD}: -2 resources production`,
+  [MagicDiceRule.FREEZE_THEM]: `${MagicDiceRule.FREEZE_THEM}: resources productions blocked`,
+  [MagicDiceRule.FREEZE_ME]: `${MagicDiceRule.FREEZE_ME}: resources productions blocked`,
   [MagicDiceRule.ALL_BLESSED]: `${MagicDiceRule.ALL_BLESSED}: +1 victory points`,
   [MagicDiceRule.BLESSED_ONE]: `${MagicDiceRule.BLESSED_ONE}: +2 victory points`,
   [MagicDiceRule.CURSED_ONE]: `${MagicDiceRule.CURSED_ONE}: -1 victory points`,
-  [MagicDiceRule.SALES]: `${MagicDiceRule.SALES}: all trade ratios at 1:1`,
-  [MagicDiceRule.INFLATION]: `${MagicDiceRule.INFLATION}: all trade ratios at X+1:1`,
-  [MagicDiceRule.BAN_THEM]: `${MagicDiceRule.BAN_THEM}: all players banned for next round`,
-  [MagicDiceRule.BAN_ME]: `${MagicDiceRule.BAN_ME}: roller will be banned for next round`,
+  [MagicDiceRule.GOLDEN_AGE]: `${MagicDiceRule.GOLDEN_AGE}: +1 of each resources`,
+  [MagicDiceRule.DOOM_AGE]: `${MagicDiceRule.DOOM_AGE}: -1 of each resources`,
 } as const;
 
 export const RULE_BY_TOTAL: Record<number, MagicDiceRule> = {
@@ -705,35 +705,37 @@ export const RULE_BY_TOTAL: Record<number, MagicDiceRule> = {
   6: MagicDiceRule.ALL_BLESSED,
   7: MagicDiceRule.BLESSED_ONE,
   8: MagicDiceRule.CURSED_ONE,
-  9: MagicDiceRule.SALES,
-  10: MagicDiceRule.INFLATION,
-  11: MagicDiceRule.BAN_THEM,
-  12: MagicDiceRule.BAN_ME,
+  9: MagicDiceRule.GOLDEN_AGE,
+  10: MagicDiceRule.DOOM_AGE,
+  11: MagicDiceRule.FREEZE_THEM,
+  12: MagicDiceRule.FREEZE_ME,
 };
 
-export type MagicDiceEffectKind = 'resource' | 'trade' | 'turn' | 'victoryPoint';
+export type MagicDiceEffectKind = 'resource' | 'victoryPoint';
 export type MagicDiceEffectTarget = 'personal' | 'collective';
 export type MagicDiceEffectSign = 'plus' | 'minus';
 
 export type MagicDiceEffect = {
+  rule: MagicDiceRule;
   kind: MagicDiceEffectKind;
   target: MagicDiceEffectTarget;
   sign: MagicDiceEffectSign;
   val: number;
+  playerConcerned: string | null;
 };
 
 export const EFFECT_BY_RULE: Record<MagicDiceRule, MagicDiceEffect> = {
-  [MagicDiceRule.EXTRA_RESOURCES]: { kind: 'resource', target: 'collective', sign: 'plus', val: 1 },
-  [MagicDiceRule.RESOURCES_CRISIS]: { kind: 'resource', target: 'collective', sign: 'minus', val: 1 },
-  [MagicDiceRule.WEALTHY_LANDLORD]: { kind: 'resource', target: 'personal', sign: 'plus', val: 2 },
-  [MagicDiceRule.POOR_LANDLORD]: { kind: 'resource', target: 'personal', sign: 'minus', val: 2 },
-  [MagicDiceRule.ALL_BLESSED]: { kind: 'victoryPoint', target: 'collective', sign: 'plus', val: 1 },
-  [MagicDiceRule.BLESSED_ONE]: { kind: 'victoryPoint', target: 'personal', sign: 'plus', val: 2 },
-  [MagicDiceRule.CURSED_ONE]: { kind: 'victoryPoint', target: 'personal', sign: 'minus', val: 1 },
-  [MagicDiceRule.SALES]: { kind: 'trade', target: 'collective', sign: 'plus', val: 1 },
-  [MagicDiceRule.INFLATION]: { kind: 'trade', target: 'collective', sign: 'minus', val: 1 },
-  [MagicDiceRule.BAN_THEM]: { kind: 'turn', target: 'collective', sign: 'minus', val: 0 },
-  [MagicDiceRule.BAN_ME]: { kind: 'turn', target: 'personal', sign: 'minus', val: 0 },
+  [MagicDiceRule.EXTRA_RESOURCES]: { rule: MagicDiceRule.EXTRA_RESOURCES, kind: 'resource', target: 'collective', sign: 'plus', val: 1, playerConcerned: null},
+  [MagicDiceRule.RESOURCES_CRISIS]: { rule: MagicDiceRule.RESOURCES_CRISIS, kind: 'resource', target: 'collective', sign: 'minus', val: 1, playerConcerned: null},
+  [MagicDiceRule.WEALTHY_LANDLORD]: { rule: MagicDiceRule.WEALTHY_LANDLORD, kind: 'resource', target: 'personal', sign: 'plus', val: 2, playerConcerned: null},
+  [MagicDiceRule.POOR_LANDLORD]: { rule: MagicDiceRule.POOR_LANDLORD, kind: 'resource', target: 'personal', sign: 'minus', val: 2, playerConcerned: null},
+  [MagicDiceRule.FREEZE_THEM]: { rule: MagicDiceRule.FREEZE_THEM, kind: 'resource', target: 'collective', sign: 'minus', val: 0, playerConcerned: null},
+  [MagicDiceRule.FREEZE_ME]: { rule: MagicDiceRule.FREEZE_ME, kind: 'resource', target: 'personal', sign: 'minus', val: 0, playerConcerned: null},
+  [MagicDiceRule.ALL_BLESSED]: { rule: MagicDiceRule.ALL_BLESSED, kind: 'victoryPoint', target: 'collective', sign: 'plus', val: 1, playerConcerned: null},
+  [MagicDiceRule.BLESSED_ONE]: { rule: MagicDiceRule.BLESSED_ONE, kind: 'victoryPoint', target: 'personal', sign: 'plus', val: 2, playerConcerned: null},
+  [MagicDiceRule.CURSED_ONE]: { rule: MagicDiceRule.CURSED_ONE, kind: 'victoryPoint', target: 'personal', sign: 'minus', val: 1, playerConcerned: null},
+  [MagicDiceRule.GOLDEN_AGE]: { rule: MagicDiceRule.GOLDEN_AGE, kind: 'resource', target: 'personal', sign: 'plus', val: 1, playerConcerned: null},
+  [MagicDiceRule.DOOM_AGE]: { rule: MagicDiceRule.DOOM_AGE, kind: 'resource', target: 'personal', sign: 'minus', val: 1, playerConcerned: null},
 };
 
 export type MagicDiceEffectResolved = MagicDiceEffect & { roller: string };

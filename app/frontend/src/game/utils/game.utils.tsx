@@ -31,8 +31,8 @@ export function DisplayMagicDiceRules() {
         `• ${MAGIC_DICE_RULES[MagicDiceRule.CURSED_ONE]} for the roller\n` +
         `• ${MAGIC_DICE_RULES[MagicDiceRule.SALES]} for everybody\n` +
         `• ${MAGIC_DICE_RULES[MagicDiceRule.INFLATION]} for everybody\n` +
-        `• ${MAGIC_DICE_RULES[MagicDiceRule.BAN_THEM]} except the roller\n` +
-        `• ${MAGIC_DICE_RULES[MagicDiceRule.BAN_ME]}\n`}
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.FREEZE_THEM]} except the roller\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.FREEZE_ME]}\n`}
     </Text>
   );
 }
