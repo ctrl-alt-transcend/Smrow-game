@@ -8,7 +8,6 @@ import {
   DatetimeSchema,
   BioSchema,
   MessageSchema,
-  JwtTokenSchema,
   AvatarUrlSchema,
 } from "./types.js";
 
