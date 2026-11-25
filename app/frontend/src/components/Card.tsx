@@ -1,32 +1,29 @@
-import { Card, Text, Image } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+import { Card, Divider, Image, Text, Title } from "@mantine/core";
 
 export default function CardImage() {
-  const isMobile = useMediaQuery("(max-width: 48em)");
-
   return (
-    <Card
-      p="sm"
-      m={"sm"}
-      withBorder
-      orientation={isMobile ? "vertical" : "horizontal"}
-    >
-      <Card.Section p={"lg"} px="xs">
-        <Text c={"Grey"}>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam
-          voluptatum corporis minus sequi soluta est, odio delectus
-          voluptatibus? Praesentium eveniet doloremque est doloribus non
-          consequuntur quas, mollitia accusamus vitae voluptates!
-        </Text>
+    <Card withBorder radius="md" p="md" m="sm">
+      <Title
+        order={1}
+        c="Red"
+        fz={{ base: "h3", md: "h1" }}
+        ta="center"
+        mb="sm"
+      >
+        Amazing Catan
+      </Title>
+      <Card.Section>
+        <Divider color="black" />
+      </Card.Section>
+      <Card.Section>
+        <Image src="/assets/catan.webp" alt="Game preview" />
       </Card.Section>
 
-      <Card.Section inheritPadding px="md">
-        <Image
-          src="https://plus.unsplash.com/premium_photo-1789200609644-cbcd8711dae2?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          w={"100%"}
-          h={"100%"}
-        />
-      </Card.Section>
+      <Text c="dimmed" mt="md">
+        Build your colony, gather resources and trade with up to three other
+        players to be the first to reach the victory points. Pick a preset or
+        tweak every rule to make each game unique.
+      </Text>
     </Card>
   );
 }
