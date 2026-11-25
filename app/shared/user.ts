@@ -8,9 +8,16 @@ import {
   DatetimeSchema,
   BioSchema,
   MessageSchema,
-  JwtTokenSchema,
   AvatarUrlSchema,
 } from "./types.js";
+
+export const UserPublicSchema = z.object({
+  id: IdSchema,
+  name: NameSchema,
+  username: UsernameSchema,
+  email: EmailSchema,
+});
+export type UserPublic = z.infer<typeof UserPublicSchema>;
 
 export const RegisterPostSchema = z.object({
   username: UsernameSchema,
@@ -20,19 +27,17 @@ export const RegisterPostSchema = z.object({
 });
 export type RegisterPost = z.infer<typeof RegisterPostSchema>;
 
+export const RegisterResponseSchema = z.object({
+  user: UserPublicSchema,
+  message: MessageSchema,
+})
+export type RegisterResponse = z.infer<typeof RegisterResponseSchema>;
+
 export const LoginPostSchema = z.object({
   email: EmailSchema,
   password: PasswordSchema,
 });
 export type LoginPost = z.infer<typeof LoginPostSchema>;
-
-export const UserPublicSchema = z.object({
-  id: IdSchema,
-  name: NameSchema,
-  username: UsernameSchema,
-  email: EmailSchema,
-});
-export type UserPublic = z.infer<typeof UserPublicSchema>;
 
 export const UserProfileSchema = z.object({
   id: IdSchema,
@@ -45,15 +50,8 @@ export const UserProfileSchema = z.object({
 });
 export type UserProfile = z.infer<typeof UserProfileSchema>;
 
-export const RegisterResponseSchema = z.object({
-  message: MessageSchema,
-  user: UserPublicSchema,
-  access_token: JwtTokenSchema,
-});
-export type RegisterResponse = z.infer<typeof RegisterResponseSchema>;
-
 export const LoginResponseSchema = z.object({
-  access_token: JwtTokenSchema,
+  message: z.string(),
 });
 export type LoginResponse = z.infer<typeof LoginResponseSchema>;
 

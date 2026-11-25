@@ -39,7 +39,6 @@ export class UserService {
   ) {}
 
   async create(usr: RegisterPost) {
-    console.log('Are we creating ??????');
     const prismaDtoUser: Prisma.UserCreateInput = {
       username: usr.username,
       name: usr.name,

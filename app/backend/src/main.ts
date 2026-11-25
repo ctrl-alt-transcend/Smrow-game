@@ -25,6 +25,10 @@ async function bootstrap() {
   });
   app.useStaticAssets(join(process.cwd(), 'public'));
   app.use(cookieParser());
+  app.enableCors({
+    origin: '*',
+    credentials: true,
+  });
   const { httpAdapter } = app.get(HttpAdapterHost);
 
   /** @brief: includes the global exception filter for the Prisma Exception events.
