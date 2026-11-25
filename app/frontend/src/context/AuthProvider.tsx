@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(profile);
       } catch (error) {
         if (isAxiosError(error) && error.response?.status === 401) {
-          localStorage.removeItem("access_token");
           setAuthMessage("Your session has expired.");
         } else {
           console.error("Could not restore session:", error);
@@ -49,12 +48,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const logout = useCallback(async (reason?: string) => {
-    // Added the 'logoutUser' for google before checking the local user
-    // this will remove the cookie from the front without accesing it directly, by calling the back
-
     try {
       await logoutUser();
-      setUser(null);
     } catch (error) {
       console.error("could not logout from server: ", error);
     } finally {

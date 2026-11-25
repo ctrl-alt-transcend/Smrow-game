@@ -27,7 +27,6 @@ http.interceptors.response.use(
     ].some((path) => url.includes(path));
 
     if (error.response?.status === 401 && !isAuthRoute) {
-      localStorage.removeItem(KEY.ACCESS_TOKEN);
       authEvents.dispatchEvent(
         new CustomEvent("logout", {
           detail: "You session has expired.",

@@ -99,14 +99,7 @@ export class AuthController {
 
     const isProd = process.env.NODE_ENV === 'production';
 
-    this.logger.debug(`NODE_ENV: ${process.env.NODE_ENV}`);
-    res.cookie('access_token', access_token, {
-      httpOnly: true,
-      secure: isProd, // for dev
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+    setAuthCookie(res, access_token);
 
     const redir = isProd ? '/' : 'http://localhost:5173';
 
