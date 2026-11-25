@@ -61,13 +61,11 @@ export function useCreateLobby() {
     try {
       await http.post("/game/create", parsed.data);
       navigate("/game");
-      console.log("Game created succesfully");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         navigate("/");
         return;
       }
-      console.log("User already in a game");
       navigate("/game");
       return;
     }

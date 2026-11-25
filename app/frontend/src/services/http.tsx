@@ -18,9 +18,15 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
   (res) => res,
   (error) => {
-    const token = localStorage.getItem(KEY.ACCESS_TOKEN);
-    if (error.response?.status === 401 && token) {
-      localStorage.removeItem(KEY.ACCESS_TOKEN);
+    const url: string = error.config?.url ?? "";
+    const isAuthRoute = [
+      "auth/me",
+      "auth/login",
+      "auth/register",
+      "auth/logout",
+    ].some((path) => url.includes(path));
+
+    if (error.response?.status === 401 && !isAuthRoute) {
       authEvents.dispatchEvent(
         new CustomEvent("logout", {
           detail: "You session has expired.",
