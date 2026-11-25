@@ -4,7 +4,7 @@ import { http } from "../../services/http";
 import {
   Title,
   Paper,
-  ScrollArea,
+  Box,
   Stack,
   Group,
   TextInput,
@@ -41,12 +41,18 @@ export default function Chat() {
       }
     };
 
-    socket.emit("chat:join");
+    const onConnect = () => {
+      socket.emit("chat:join");
+      loadOldMessages();
+    };
+
     socket.on("chat:message", onMessage);
-    loadOldMessages();
+    socket.on("connect", onConnect);
+    if (socket.connected) onConnect();
 
     return () => {
       cancelled = true;
+      socket.off("connect", onConnect);
       socket.off("chat:message", onMessage);
       socket.emit("chat:leave");
     };
@@ -81,7 +87,7 @@ export default function Chat() {
       <Title order={3} ta="center" mb="md">
         Toxic chat
       </Title>
-      <ScrollArea h={{ base: 300, md: 480 }} viewportRef={viewportRef}>
+      <Box h={480} style={{ overflowY: "auto" }} ref={viewportRef}>
         <Stack gap="xs" align="flex-start">
           {messages.map((message) => (
             <MessageItem
@@ -91,7 +97,7 @@ export default function Chat() {
             />
           ))}
         </Stack>
-      </ScrollArea>
+      </Box>
       <form
         onSubmit={(event) => {
           event.preventDefault();

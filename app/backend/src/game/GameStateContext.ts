@@ -740,10 +740,16 @@ class GameStateContext {
 
   public startWatch(): void {
     this.turnStart = Date.now();
-    this.turnTimeoutId = setTimeout(
-      () => this.onExpire(),
-      this.settings.turnDurationSeconds * 1000,
-    );
+    this.turnTimeoutId = setTimeout(() => {
+      try {
+        this.onExpire();
+      } catch (e) {
+        this.logger.error(
+          `Game [${this.data.gameId}]: turn timer failed`,
+          e instanceof Error ? e.stack : String(e),
+        );
+      }
+    }, this.settings.turnDurationSeconds * 1000);
   }
 
   public stopWatch(): void {

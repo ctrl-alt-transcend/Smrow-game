@@ -6,10 +6,16 @@ export function useFriend(): FriendStatus[] | null {
   const [friends, setFriends] = useState<FriendStatus[] | null>(null);
 
   useEffect(() => {
+    const onConnect = () => {
+      socket.emit("friend:list");
+    };
+
     socket.on("friend:update", setFriends);
-    socket.emit("friend:list");
+    socket.on("connect", onConnect);
+    if (socket.connected) onConnect();
 
     return () => {
+      socket.off("connect", onConnect);
       socket.off("friend:update", setFriends);
     };
   }, []);
