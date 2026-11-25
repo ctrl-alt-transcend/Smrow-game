@@ -4,7 +4,6 @@ import { http } from "../../services/http";
 import {
   Title,
   Paper,
-  //ScrollArea,
   Box,
   Stack,
   Group,
