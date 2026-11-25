@@ -22,11 +22,14 @@ import {
 } from './GameStateContext';
 import { SocialGateway } from '../social/social.gateway';
 
+const GAME_DISCONNECT_TIMEOUT = 90000;
+
 @Injectable()
 export class GameService {
   private readonly logger = new Logger(GameService.name);
   private gameInstances: Map<string, GameStateContext> = new Map();
   private playersMap = new Map<string, string>(); //INFO: link playerId with a gameId
+  private playerTimeouts = new Map<string, NodeJS.Timeout>();
   private notifier: PlayerNotifier = () => {};
   private userIds = new Map<string, string>(); //INFO: link in game playerId (username) with the user ID
   private recordedGames = new Set<string>();
@@ -144,13 +147,17 @@ export class GameService {
 
   removeGameInstance(gameId: string) {
     this.playersMap.forEach((id, userId) => {
-      if (id === gameId) this.playersMap.delete(userId);
+      if (id === gameId) {
+        this.playersMap.delete(userId);
+        this.cancelDisconnectTimer(userId);
+      }
     });
     this.gameInstances.delete(gameId);
     this.broadcastGameList();
   }
 
   removePlayerFromGame(user: SocketUser, gameId: string) {
+    this.cancelDisconnectTimer(user.id);
     this.playersMap.delete(user.id);
     const game = this.getGameInstanceByGameId(gameId);
     if (!game) return;
@@ -224,5 +231,43 @@ export class GameService {
   }
   broadcastGameList() {
     this.socialGateway.handleGameList(this.getGamesList());
+  }
+
+  /**
+   * @brief Set a timer when a player disconnects
+   *        When the timer expires, the player is removed from the game
+   */
+  setDisconnectTimer(user: SocketUser) {
+    if (!this.playersMap.has(user.id)) {
+      return;
+    }
+    this.cancelDisconnectTimer(user.id);
+    const timer = setTimeout(() => {
+      try {
+        this.playerTimeouts.delete(user.id);
+        const gameId = this.playersMap.get(user.id);
+        if (!gameId) return;
+        this.logger.log(`Game ${gameId}: player ${user.username} timed out`);
+        this.removePlayerFromGame(user, gameId);
+      } catch (e) {
+        this.logger.error(
+          `Disconnect timer failed for player ${user.username}`,
+          e instanceof Error ? e.stack : String(e),
+        );
+      }
+    }, GAME_DISCONNECT_TIMEOUT);
+    this.playerTimeouts.set(user.id, timer);
+    this.logger.log(
+      `Player ${user.username} disconnected, timer set for ${GAME_DISCONNECT_TIMEOUT}ms`,
+    );
+  }
+
+  cancelDisconnectTimer(userId: string) {
+    const timer = this.playerTimeouts.get(userId);
+    if (!timer) {
+      return;
+    }
+    clearTimeout(timer);
+    this.playerTimeouts.delete(userId);
   }
 }
