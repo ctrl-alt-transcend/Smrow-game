@@ -29,8 +29,8 @@ export function DisplayMagicDiceRules() {
         `• ${MAGIC_DICE_RULES[MagicDiceRule.ALL_BLESSED]} for everybody\n` +
         `• ${MAGIC_DICE_RULES[MagicDiceRule.BLESSED_ONE]} for the roller\n` +
         `• ${MAGIC_DICE_RULES[MagicDiceRule.CURSED_ONE]} for the roller\n` +
-        `• ${MAGIC_DICE_RULES[MagicDiceRule.SALES]} for everybody\n` +
-        `• ${MAGIC_DICE_RULES[MagicDiceRule.INFLATION]} for everybody\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.GOLDEN_AGE]} for the roller\n` +
+        `• ${MAGIC_DICE_RULES[MagicDiceRule.DOOM_AGE]} for the roller\n` +
         `• ${MAGIC_DICE_RULES[MagicDiceRule.FREEZE_THEM]} except the roller\n` +
         `• ${MAGIC_DICE_RULES[MagicDiceRule.FREEZE_ME]}\n`}
     </Text>
