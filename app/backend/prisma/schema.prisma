@@ -24,14 +24,14 @@ model User {
 	localAuth				UserAuth?
 	accounts				Account[]
 	gamesHistory			GamesPlayer[]
-  	chat          			Chat[]
-  	sentFriendRequests		FriendRequest[] @relation("SentFriendRequests")
-  	receivedFriendRequests	FriendRequest[] @relation("ReceivedFriendRequests")
+  chat          			Chat[]
+  sentFriendRequests		FriendRequest[] @relation("SentFriendRequests")
+  receivedFriendRequests	FriendRequest[] @relation("ReceivedFriendRequests")
 }
 
 model Profile {
 	id			String @default(cuid()) @id
-	bio			String?
+	bio			String? @default("Empty bio")
 	avatarURL	String? @default("/avatars/default.jpg")
 	user User	@relation(fields: [userId], references: [id], onDelete: Cascade)
 	userId		String @unique
