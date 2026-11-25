@@ -6,6 +6,7 @@ import {
   Paper,
   Box,
   Stack,
+  BackgroundImage,
   Group,
   TextInput,
   Button,
@@ -87,17 +88,19 @@ export default function Chat() {
       <Title order={3} ta="center" mb="md">
         Toxic chat
       </Title>
-      <Box h={480} style={{ overflowY: "auto" }} ref={viewportRef}>
-        <Stack gap="xs" align="flex-start">
-          {messages.map((message) => (
-            <MessageItem
-              key={message.id}
-              content={message.content}
-              author={message.username}
-            />
-          ))}
-        </Stack>
-      </Box>
+      <BackgroundImage src="assets/bg-whatsapp.webp">
+        <Box h={480} style={{ overflowY: "auto" }} ref={viewportRef}>
+          <Stack gap="xs" align="flex-start">
+            {messages.map((message) => (
+              <MessageItem
+                key={message.id}
+                content={message.content}
+                author={message.username}
+              />
+            ))}
+          </Stack>
+        </Box>
+      </BackgroundImage>
       <form
         onSubmit={(event) => {
           event.preventDefault();
