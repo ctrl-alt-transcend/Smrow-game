@@ -60,7 +60,7 @@ export default function ListGames() {
           No game in progress ..
         </Text>
       ) : (
-        <Table.ScrollContainer minWidth={500}>
+        <Table.ScrollContainer minWidth={320}>
           <Table striped highlightOnHover>
             <Table.Thead>
               <Table.Tr>
