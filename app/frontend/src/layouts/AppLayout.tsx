@@ -1,4 +1,4 @@
-import { AppShell } from "@mantine/core";
+import { AppShell, Box } from "@mantine/core";
 import { Outlet } from "react-router";
 import { HeaderTabs } from "../components/navbar/HeaderTabs";
 
@@ -9,7 +9,9 @@ export default function AppLayout() {
         <HeaderTabs />
       </AppShell.Header>
       <AppShell.Main>
-        <Outlet />
+        <Box mt="xl">
+          <Outlet />
+        </Box>
       </AppShell.Main>
     </AppShell>
   );

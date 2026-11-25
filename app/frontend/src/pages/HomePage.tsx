@@ -23,9 +23,7 @@ export default function HomePage() {
         isInGame={isInGame}
         onQuit={() => setIsInGame(false)}
       />
-      <Title mb="xl" ta="center" fz={{ base: "h3", md: "h1" }}>
-        Amazing Catan
-      </Title>
+
       <Title fz={{ base: "h5", md: "h3" }}>Hello {user?.name} !</Title>
 
       <Grid>
