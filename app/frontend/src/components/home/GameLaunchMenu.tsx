@@ -4,7 +4,7 @@ import {
   Box,
   Button,
   Group,
-  Paper,
+  Modal,
   Select,
   Slider,
   Stack,
@@ -32,6 +32,7 @@ import {
   CLASSIC_PRESET,
   ROBBER_THRESHOLD_MAX,
 } from "shared";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useCreateLobby } from "../../game/utils/game.utils";
 
 type SliderConfig = {
@@ -232,7 +233,8 @@ function SettingsSlider({
 export default function GameLaunchMenu() {
   const createLobby = useCreateLobby();
   const [values, setValues] = useState<SettingsData>({ ...DEFAULT_PRESET });
-  const [opened, setOpened] = useState(false);
+  const [opened, { open, close }] = useDisclosure(false);
+  const isMobile = useMediaQuery("(max-width: 48em)");
 
   // Generic setter: handles the layout (string) and numeric sliders alike
   const setValue = <K extends keyof SettingsData>(
@@ -245,87 +247,80 @@ export default function GameLaunchMenu() {
   const classic = () => setValues({ ...CLASSIC_PRESET });
 
   return (
-    <Paper shadow="xs" radius="md" p={{ base: "sm", sm: "md" }} w="100%">
-      <Button
-        variant="light"
-        fullWidth
-        justify="space-between"
-        rightSection={<Text size="sm">{opened ? "▲" : "▼"}</Text>}
-        onClick={() => setOpened((o) => !o)}
-        aria-expanded={opened}
+    <>
+      <Button onClick={open}>Create a game</Button>
+
+      <Modal
+        opened={opened}
+        onClose={close}
+        title="Create a game"
+        size="lg"
+        centered
+        fullScreen={isMobile}
       >
-        Create a game
-      </Button>
-
-      {opened && (
-        <Box pt="sm">
-          <Select
-            label="Gameboard layout"
-            data={Object.values(GameboardLayout) as GameboardLayout[]}
-            value={values.gameboardLayout}
-            onChange={(val) =>
-              val !== null &&
-              setValue("gameboardLayout", val as GameboardLayout)
+        <Select
+          label="Gameboard layout"
+          data={Object.values(GameboardLayout) as GameboardLayout[]}
+          value={values.gameboardLayout}
+          onChange={(val) =>
+            val !== null && setValue("gameboardLayout", val as GameboardLayout)
+          }
+          allowDeselect={false}
+          mb="md"
+        />
+        <Accordion chevronPosition="left">
+          {SECTIONS.map((section) => (
+            <Accordion.Item key={section.id} value={section.id}>
+              <Accordion.Control>{section.title}</Accordion.Control>
+              <Accordion.Panel>
+                <Stack gap="lg">
+                  {section.sliders.map((config) => (
+                    <SettingsSlider
+                      key={config.key}
+                      config={config}
+                      value={values[config.key]}
+                      onChange={(val) => setValue(config.key, Math.round(val))}
+                    />
+                  ))}
+                </Stack>
+              </Accordion.Panel>
+            </Accordion.Item>
+          ))}
+        </Accordion>
+        <Group justify="space-between" mt="md" gap="sm" wrap="wrap">
+          <Tooltip
+            label={
+              "Slightly faster variant of the original Catan: little resources bonus and multiplier enabled"
             }
-            allowDeselect={false}
-            mb="md"
-          />
-          <Accordion chevronPosition="left">
-            {SECTIONS.map((section) => (
-              <Accordion.Item key={section.id} value={section.id}>
-                <Accordion.Control>{section.title}</Accordion.Control>
-                <Accordion.Panel>
-                  <Stack gap="lg">
-                    {section.sliders.map((config) => (
-                      <SettingsSlider
-                        key={config.key}
-                        config={config}
-                        value={values[config.key]}
-                        onChange={(val) =>
-                          setValue(config.key, Math.round(val))
-                        }
-                      />
-                    ))}
-                  </Stack>
-                </Accordion.Panel>
-              </Accordion.Item>
-            ))}
-          </Accordion>
-          <Group justify="space-between" mt="md" gap="sm" wrap="wrap">
-            <Tooltip
-              label={
-                "Slightly faster variant of the original Catan: little resources bonus and multiplier enabled"
-              }
-            >
-              <Button variant="subtle" color="gray" onClick={reset}>
-                Default
-              </Button>
-            </Tooltip>
-            <Tooltip
-              label={
-                "Huge resources bonus and multiplier, low victory conditions for fast paced games"
-              }
-            >
-              <Button variant="subtle" color="grey" onClick={maxxing}>
-                Power Maxxing
-              </Button>
-            </Tooltip>
-
-            <Tooltip
-              label={
-                "Based on original rules: slow paced and low resources generation"
-              }
-            >
-              <Button variant="subtle" color="grey" onClick={classic}>
-                Classic Catan
-              </Button>
-            </Tooltip>
-            <Button onClick={() => createLobby(values)}>
-              Validate and create game
+          >
+            <Button variant="subtle" color="gray" onClick={reset}>
+              Default
             </Button>
-          </Group>
-        </Box>
-      )}
-    </Paper>
+          </Tooltip>
+          <Tooltip
+            label={
+              "Huge resources bonus and multiplier, low victory conditions for fast paced games"
+            }
+          >
+            <Button variant="subtle" color="grey" onClick={maxxing}>
+              Power Maxxing
+            </Button>
+          </Tooltip>
+
+          <Tooltip
+            label={
+              "Based on original rules: slow paced and low resources generation"
+            }
+          >
+            <Button variant="subtle" color="grey" onClick={classic}>
+              Classic Catan
+            </Button>
+          </Tooltip>
+          <Button fullWidth={isMobile} onClick={() => createLobby(values)}>
+            Validate and create game
+          </Button>
+        </Group>
+      </Modal>
+    </>
   );
 }

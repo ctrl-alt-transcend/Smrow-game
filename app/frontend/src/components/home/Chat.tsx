@@ -3,9 +3,12 @@ import { socialSocket as socket } from "../../sockets/socialSocket";
 import { http } from "../../services/http";
 import {
   Title,
-  Paper,
+  Text,
   Box,
+  Divider,
+  Card,
   Stack,
+  BackgroundImage,
   Group,
   TextInput,
   Button,
@@ -66,12 +69,16 @@ export default function Chat() {
 
   if (!loaded) {
     return (
-      <Paper withBorder p="md" h="100%">
-        <Title order={3} ta="center" mb="md">
-          Toxic chat
-        </Title>
-        loading chat...
-      </Paper>
+      <Card withBorder p="md" h="100%">
+        <Card.Section withBorder p="sm">
+          <Title order={3} ta="center">
+            Toxic chat
+          </Title>
+        </Card.Section>
+        <Text ta="center" py="md">
+          loading chat...
+        </Text>
+      </Card>
     );
   }
 
@@ -83,37 +90,55 @@ export default function Chat() {
   }
 
   return (
-    <Paper withBorder p="md" h="100%">
-      <Title order={3} ta="center" mb="md">
-        Toxic chat
-      </Title>
-      <Box h={480} style={{ overflowY: "auto" }} ref={viewportRef}>
-        <Stack gap="xs" align="flex-start">
-          {messages.map((message) => (
-            <MessageItem
-              key={message.id}
-              content={message.content}
-              author={message.username}
+    <Card withBorder p="md" h="100%" radius="md">
+      <Card.Section withBorder p="sm">
+        <Title order={3} ta="center">
+          Toxic chat
+        </Title>
+      </Card.Section>
+
+      <Card.Section>
+        <Divider color="black" />
+      </Card.Section>
+
+      <Card.Section>
+        <BackgroundImage src="/assets/bg-whatsapp.webp">
+          <Box h={480} p="sm" style={{ overflowY: "auto" }} ref={viewportRef}>
+            <Stack gap="xs" align="flex-start">
+              {messages.map((message) => (
+                <MessageItem
+                  key={message.id}
+                  content={message.content}
+                  author={message.username}
+                />
+              ))}
+            </Stack>
+          </Box>
+        </BackgroundImage>
+      </Card.Section>
+
+      <Card.Section>
+        <Divider color="black" />
+      </Card.Section>
+
+      <Card.Section withBorder p="sm">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleSend();
+          }}
+        >
+          <Group gap="xs">
+            <TextInput
+              flex={1}
+              placeholder="Say something toxic..."
+              value={draft}
+              onChange={(event) => setDraft(event.currentTarget.value)}
             />
-          ))}
-        </Stack>
-      </Box>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleSend();
-        }}
-      >
-        <Group gap="xs" mt="md">
-          <TextInput
-            flex={1}
-            placeholder="Say something toxic..."
-            value={draft}
-            onChange={(event) => setDraft(event.currentTarget.value)}
-          />
-          <Button onClick={handleSend}>send</Button>
-        </Group>
-      </form>
-    </Paper>
+            <Button onClick={handleSend}>send</Button>
+          </Group>
+        </form>
+      </Card.Section>
+    </Card>
   );
 }
