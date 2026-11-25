@@ -7,8 +7,16 @@ type MessageItemProps = {
 
 export default function MessageItem({ content, author }: MessageItemProps) {
   return (
-    <Paper bg="Red.1" p="xs" maw="95%" style={{ overflowWrap: "anywhere" }}>
-      <Text fw={700}>@{author}</Text>
+    <Paper
+      radius="md"
+      bg="Red.1"
+      p="xs"
+      maw="95%"
+      style={{ overflowWrap: "anywhere" }}
+    >
+      <Text right="esr" fw={700}>
+        @{author}
+      </Text>
       <Text>{content}</Text>
     </Paper>
   );
