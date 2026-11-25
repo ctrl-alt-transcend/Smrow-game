@@ -125,17 +125,22 @@ class GameStateContext {
     this.transitionTo(state);
   }
 
-  public initPlayer(id: string, username: string): Player {
+  public initPlayer(
+    id: string,
+    username: string,
+    avatarURL: string | null,
+    level: number,
+  ): Player {
     const newPlayer: Player = {
       id: id,
       username: username,
       victoryPoints: 0,
       timeToPlay: 0,
-      level: 1, //⚠️ For testing only
+      level: level,
       firstDice: 0,
       secondDice: 0,
       settlementsBuilt: new Map<string, SettlementData>(),
-      avatarURL: null,
+      avatarURL: avatarURL,
       faction: this.pickFaction(),
       guideLog: `${GUIDE_LOG[Phase.START]}`,
       personalLog: [],
