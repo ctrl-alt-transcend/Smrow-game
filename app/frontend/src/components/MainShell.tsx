@@ -68,9 +68,6 @@ export default function MainShell() {
       <AppShell.Main>
         <Grid>
           <Grid.Col span={{ base: 12, md: 8 }} order={{ base: 2, md: 1 }}>
-            <Title order={1} c={"Red"} fz={{ base: "h3", md: "h1" }}>
-              Amazing Catan
-            </Title>
             <CardImage />
           </Grid.Col>
 
