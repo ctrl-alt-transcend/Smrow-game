@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { socialSocket as socket } from "../../sockets/socialSocket";
 import { http } from "../../services/http";
-import { Title, Text, Paper, Table } from "@mantine/core";
+import { Title, Text, Divider, Table, Card } from "@mantine/core";
 import type { GameList } from "shared";
 import GameRow from "./GameRow";
 
@@ -46,10 +46,13 @@ export default function ListGames() {
   }, []);
 
   return (
-    <Paper withBorder p="md" mih={{ base: 200, md: 600 }} h="100%">
-      <Title order={3} mb="md">
+    <Card withBorder p="sm" h="100%" radius="md">
+      <Title order={3} mb="sm" ta="center">
         Game in progress
       </Title>
+      <Card.Section>
+        <Divider color="black" />
+      </Card.Section>
 
       {!loaded ? (
         <Text c="dimmed" ta="center" py="xl">
@@ -60,7 +63,7 @@ export default function ListGames() {
           No game in progress ..
         </Text>
       ) : (
-        <Table.ScrollContainer minWidth={320}>
+        <Table.ScrollContainer minWidth={300} p="sm">
           <Table striped highlightOnHover>
             <Table.Thead>
               <Table.Tr>
@@ -80,6 +83,6 @@ export default function ListGames() {
           </Table>
         </Table.ScrollContainer>
       )}
-    </Paper>
+    </Card>
   );
 }
