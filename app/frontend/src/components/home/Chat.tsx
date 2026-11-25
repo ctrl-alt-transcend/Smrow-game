@@ -4,7 +4,8 @@ import { http } from "../../services/http";
 import {
   Title,
   Paper,
-  ScrollArea,
+  //ScrollArea,
+  Box,
   Stack,
   Group,
   TextInput,
@@ -87,7 +88,7 @@ export default function Chat() {
       <Title order={3} ta="center" mb="md">
         Toxic chat
       </Title>
-      <ScrollArea h={{ base: 300, md: 480 }} viewportRef={viewportRef}>
+      <Box h={480} style={{ overflowY: "auto" }} ref={viewportRef}>
         <Stack gap="xs" align="flex-start">
           {messages.map((message) => (
             <MessageItem
@@ -97,7 +98,7 @@ export default function Chat() {
             />
           ))}
         </Stack>
-      </ScrollArea>
+      </Box>
       <form
         onSubmit={(event) => {
           event.preventDefault();
