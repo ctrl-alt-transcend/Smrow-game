@@ -20,7 +20,7 @@ function StatsPage() {
 
   return (
     <>
-      <Title mb="xl" ta="center" fz={{ base: "h3", md: "h1" }}>
+      <Title mb="xl" ta="left" fz={{ base: "h3", md: "h1" }}>
         Stats
       </Title>
 

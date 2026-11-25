@@ -1,4 +1,4 @@
-import { Group, Loader, Paper, Text, Title } from "@mantine/core";
+import { Box, Divider, Group, Card, Loader, Text, Title } from "@mantine/core";
 import ErrorMessages from "../utils/ErrorMessages";
 
 type StatsSectionProps = {
@@ -10,7 +10,6 @@ type StatsSectionProps = {
   children: React.ReactNode;
 };
 
-// Common frame of the stats blocks: title, loader, error and empty state
 export default function StatsSection({
   title,
   loading,
@@ -35,11 +34,16 @@ export default function StatsSection({
     );
 
   return (
-    <Paper withBorder p="md" h="100%">
-      <Title order={3} mb="md">
+    <Card withBorder p="sm" h="100%" radius="md">
+      <Title order={3} mb="sm" ta="center">
         {title}
       </Title>
-      {content}
-    </Paper>
+
+      <Card.Section>
+        <Divider color="black" />
+      </Card.Section>
+
+      <Box pt="sm">{content}</Box>
+    </Card>
   );
 }
