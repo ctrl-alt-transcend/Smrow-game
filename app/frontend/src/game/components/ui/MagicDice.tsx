@@ -31,7 +31,6 @@ export default function MagicDice({
           title="Magic Dice"
           currentRoll={currentRoll}
           isMyTurn={true}
-          theme="magic"
           disabled={false}
         />
         <Card withBorder radius="md" shadow="sm" padding="sm" w="100%">

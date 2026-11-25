@@ -159,7 +159,7 @@ function GameShell({ game }: { game: GameDataDto }) {
             />
             <DiceRoller
               title="Dice Roller"
-              currentRoll={game.currentRoll}
+              currentRoll={game.currentPlayer.currentRoll}
               firstDice={game.currentPlayer.firstDice}
               secondDice={game.currentPlayer.secondDice}
               isMyTurn={navEnabled}

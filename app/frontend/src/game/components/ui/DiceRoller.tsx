@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Card, Stack, Title, Box, Text } from "@mantine/core";
+import { Card, Stack, Title, Box } from "@mantine/core";
 import {
   Dice3D,
   type Dice3DHandle,
@@ -7,7 +7,6 @@ import {
 } from "../gameboard/Dice/Dice";
 import { gameSocket as socket } from "../../../sockets/gameSocket";
 import { type DiceRoll } from "shared";
-import useElementWidth from "../../hooks/useElementWidth";
 
 /** Safety timeout: if the server never answers, unlock the UI. */
 const SERVER_TIMEOUT_MS = 2000;
@@ -16,56 +15,53 @@ function isDiceValue(n: unknown): n is DiceValue {
   return typeof n === "number" && Number.isInteger(n) && n >= 1 && n <= 6;
 }
 
+/** Measures the container width to adapt the dice size (responsive). */
+function useElementWidth<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      setWidth(entries[0].contentRect.width);
+    });
+    observer.observe(el);
+    setWidth(el.getBoundingClientRect().width);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, width };
+}
+
 export function DiceRoller({
-  title,
   currentRoll,
-  firstDice = 0,
-  secondDice = 0,
   isMyTurn,
   disabled = false,
-  theme = "default",
+  firstDice = 0,
+  secondDice = 0,
+  title = "",
 }: {
-  title: string;
   currentRoll: DiceRoll;
+  isMyTurn: boolean;
+  disabled?: boolean;
   firstDice?: number;
   secondDice?: number;
-  isMyTurn: boolean;
-  /** Blocking conditions computed by the caller (phase gating, limits...) */
-  disabled?: boolean;
-  /** "default": short flash on each new roll. "magic": persistent violet glow. */
-  theme?: "default" | "magic";
+  title: string;
 }) {
   const [busy, setBusy] = useState(false);
-  /**
-   * Id of the roll currently flashing. Derived-state pattern: adjusted
-   * during render (allowed by React), never inside an effect.
-   */
-  const [flashRollId, setFlashRollId] = useState<number | null>(null);
 
-  /** Last roll id already animated. null so an id-0 roll is not swallowed. */
-  const handledRollIdRef = useRef<number | null>(null);
+  const [handledRoll, setHandledRoll] = useState<DiceRoll>(currentRoll);
+
+  const rollPendingRef = useRef(false);
   const timeoutRef = useRef<number | null>(null);
   const diceRef = useRef<Dice3DHandle>(null);
 
   const { ref: containerRef, width } = useElementWidth<HTMLDivElement>();
 
   const diceSize = Math.round(Math.max(48, Math.min(96, (width - 64) / 2)));
-  const locked = disabled || !isMyTurn;
-
-  // --- Derived state, adjusted during render (React-sanctioned pattern) ---
-
-  // New roll arrived -> remember it to trigger the flash animation.
-  if (
-    theme === "default" &&
-    isDiceValue(currentRoll.val) &&
-    currentRoll.id !== flashRollId
-  ) {
-    setFlashRollId(currentRoll.id);
-  }
-  const flashOn = theme === "default" && flashRollId === currentRoll.id;
-
-  if (!isDiceValue(currentRoll.val) && busy) setBusy(false);
-  if (locked && busy) setBusy(false);
+  const locked = !isMyTurn || disabled;
+  const total = firstDice && secondDice ? firstDice + secondDice : 0;
 
   const clearServerTimeout = useCallback(() => {
     if (timeoutRef.current !== null) {
@@ -79,37 +75,42 @@ export function DiceRoller({
     setBusy(false);
   }, [clearServerTimeout]);
 
-  useEffect(() => {
-    if (currentRoll.val === null) return;
-    if (currentRoll.id === handledRollIdRef.current) return;
-    handledRollIdRef.current = currentRoll.id;
-    if (isDiceValue(currentRoll.val)) {
-      diceRef.current?.rollDice(currentRoll.val);
+  if (currentRoll.id !== handledRoll.id) {
+    setHandledRoll(currentRoll);
+    if (!isDiceValue(currentRoll.val)) {
+      setBusy(false);
     }
-  }, [currentRoll.id, currentRoll.val]);
+  }
+  if (locked && busy) {
+    setBusy(false);
+  }
 
   const handleDiceRequest = useCallback(() => {
-    if (busy || locked) return;
+    if (busy || !isMyTurn) return;
+    rollPendingRef.current = true;
     setBusy(true);
     socket.emit("game:dice");
     timeoutRef.current = window.setTimeout(unlock, SERVER_TIMEOUT_MS);
-  }, [busy, locked, unlock]);
+  }, [busy, isMyTurn, unlock]);
+
+  useEffect(() => {
+    if (!rollPendingRef.current || !isDiceValue(currentRoll.val)) return;
+    rollPendingRef.current = false;
+    diceRef.current?.rollDice(currentRoll.val);
+  }, [currentRoll.id, currentRoll.val]);
+
+  useEffect(() => {
+    if (!isDiceValue(currentRoll.val)) {
+      clearServerTimeout();
+      rollPendingRef.current = false;
+    }
+  }, [currentRoll.id, currentRoll.val, clearServerTimeout]);
 
   const handleAnimationComplete = useCallback(() => {
     unlock();
   }, [unlock]);
 
   useEffect(() => clearServerTimeout, [clearServerTimeout]);
-
-  const effectStyle =
-    theme === "magic"
-      ? { animation: "magicDiceGlow 3s ease-in-out infinite" }
-      : flashOn
-        ? { animation: "diceFlash 0.9s ease" }
-        : undefined;
-
-  let total: number = 0;
-  if (firstDice && secondDice) total = firstDice + secondDice;
 
   return (
     <Box
@@ -128,22 +129,14 @@ export function DiceRoller({
       >
         <Stack gap="xs" align="center" justify="center" w="100%">
           <Title order={4}>{title}</Title>
-          <Box
-            style={effectStyle}
-            onAnimationEnd={() => {
-              // Event handler, not an effect: setState allowed here.
-              if (flashRollId === currentRoll.id) setFlashRollId(null);
-            }}
-          >
-            <Dice3D
-              ref={diceRef}
-              size={diceSize}
-              onRoll={handleAnimationComplete}
-              triggers={[]}
-              style={{ pointerEvents: "none" }}
-            />
-          </Box>
-          {total ? <Text>You rolled «{total}» in total!</Text> : null}
+          <Dice3D
+            ref={diceRef}
+            size={diceSize}
+            onRoll={handleAnimationComplete}
+            triggers={[]}
+            style={{ pointerEvents: "none" }}
+          />
+          {total !== 0 && `You rolled a ${total} total!`}
         </Stack>
       </Card>
 
