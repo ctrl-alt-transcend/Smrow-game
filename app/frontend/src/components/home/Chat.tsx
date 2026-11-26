@@ -15,12 +15,14 @@ import {
 } from "@mantine/core";
 import MessageItem from "./MessageItem";
 import type { ChatMessage } from "shared";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function Chat() {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loaded, setLoaded] = useState(false);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const user = useAuth();
 
   useEffect(() => {
     let cancelled = false;
@@ -104,12 +106,13 @@ export default function Chat() {
       <Card.Section>
         <BackgroundImage src="/assets/bg-whatsapp.webp">
           <Box h={480} p="sm" style={{ overflowY: "auto" }} ref={viewportRef}>
-            <Stack gap="xs" align="flex-start">
+            <Stack gap="xs">
               {messages.map((message) => (
                 <MessageItem
                   key={message.id}
                   content={message.content}
                   author={message.username}
+                  isOwn={message.username === user?.user?.username}
                 />
               ))}
             </Stack>
