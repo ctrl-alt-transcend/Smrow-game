@@ -17,7 +17,7 @@ export default function Leaderboard({
 
   return (
     <>
-      <Table.ScrollContainer minWidth={360}>
+      <Table.ScrollContainer minWidth={310}>
         <Table highlightOnHover>
           <Table.Thead>
             <Table.Tr>
