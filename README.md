@@ -191,6 +191,42 @@ here is the list of all the feature implemented in our application:
 
 # Modules
 
+## Use a Frontend framework
+We chose React and Nestjs to gain time, as we only had to learn a single language to be able to implement features from front to back.
+We also considered the use of a Full-stack framework but we quickly realize that it would take away some of the fun. Putting together multiple technologies and understand how they interact and work together is maybe harder but it allowed use to understand better how application are made.
+## Real time feature using Socket
+Doing a web-based game has been the idea since the beginning. This lead us to look on how to implement real time features such as a chat quit naturally.
+## User Interaction
+To create competitive mind and friendship in a game it is important for users to be able to interact between each other. They can do this through a Friend system and a General Chat system. Once connected player are connected using WebSockets to a general room where they can send and receive message to everyone connected.
+## ORM
+please write this shit Enrique
+
+## Support for additional web browser
+Don't need to justify this one much.... we wanted our game to be played across different setups.
+## Standard user management
+To be able to track user progression and statistic and for user to access these we needed an authentication system. Thus allowing us to create Profile, personal account etc...
+## Remote authentication
+In a goal to make our game as accessible as possible we added Remote authentication through Google. We love their work and what they do to improve our everyday life so this is sort of an homage to Google.com.
+
+Thank you.
+
+## Web based Game
+Well this was the main idea of the project, we first wanted to make a sort of Worms clone but quickly realized that given the time we had -> this would be complicated. We then thought about a board game and Hayden rightfully thought about Catan, a game that he cherish in his hearth and spent all his childhood playing.
+That was also a good idea because we were able to spend time on learning the language and the technologies instead of having to work on designing a game.
+
+## Remote & Multiplayer
+You can't play Catan alone. From this statement we had to implement multiplayer and allow people across the glob to play with their friends.
+This is one of the modules that just needed to be implemented for the project.
+We decided to implement this through WebSocket. Each game lives on the server on are saved in the Data base only when the game is over.
+## Game customization
+We wanted player to be able to modify game settings. This allows for less redundant games and can lead to unexpected game ending !
+Once the main game was set this was pretty easy to implement.
+
+## Gamification system
+To encourage player to play, we implemented a gamification system with Trophies that player can display on their profile page. Player can earn trophies by simply playing the game and interacting with each other.
+## Spectator mode
+Waiting for you friend to finish their game ? well with the spectator mode feature you can spectate you friends while they are getting rekt by a 12 years old Korean child from SKT T1 Catan team.
+
 | Modules                                                                         | Justification                                                                                                                                                                                                                                                                                 | Pts    |           |
 | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | --------- |
 | Use a frontend framework                                                        | (React, Vue, Angular, Svelte, etc.)                                                                                                                                                                                                                                                           | 1 pt   |           |
@@ -259,3 +295,5 @@ The first thing that I implemented was the login/register panel. Front/back comm
   _All of these features include front and backend implementation_
 
 ---
+
+
