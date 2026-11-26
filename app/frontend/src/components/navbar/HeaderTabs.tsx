@@ -17,7 +17,6 @@ import {
   Menu,
   ScrollArea,
   Button,
-  Text,
   UnstyledButton,
   useMantineTheme,
 } from "@mantine/core";
