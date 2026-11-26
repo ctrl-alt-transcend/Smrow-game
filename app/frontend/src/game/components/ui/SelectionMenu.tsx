@@ -117,7 +117,6 @@ const TradeOfferPanel: React.FC<TradeOfferPanelProps> = ({
       target: { resource: targetResource!, amount: targetAmount },
     };
     socket.emit("game:trade", { ...payload, targetOwnerId });
-    console.log("Trade offer sent:", payload, "→ owner:", targetOwnerId);
   }, [
     isValid,
     isMyTurn,
