@@ -2,7 +2,7 @@ import { Button, Container, List, Stack, Text, Title } from "@mantine/core";
 import { Link } from "react-router";
 
 const LAST_UPDATED = "November 19, 2026";
-const CONTACT_EMAIL = "contact@example.com";
+const CONTACT_EMAIL = "matthieu@gillieron.dev";
 
 function PrivacyPage() {
   return (
