@@ -48,6 +48,9 @@ export class UserService {
           passwordHash: usr.password,
         },
       },
+      profile: {
+        create: {},
+      },
     };
 
     return await this.databaseService.user.create({
