@@ -19,6 +19,7 @@ import {
   Button,
   UnstyledButton,
   useMantineTheme,
+  Anchor,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import classes from "./HeaderTabs.module.css";
@@ -54,7 +55,9 @@ export function HeaderTabs() {
     <div className={classes.header}>
       <Container className={classes.mainSection} size="md">
         <Group justify="space-between">
-          <Title size="xl">Amazing Catan</Title>
+          <Anchor component={Link} to={"/home"} fz="lg" fw={500}>
+            <Title size="xl">Amazing Catan</Title>
+          </Anchor>
 
           <Group gap="xs" visibleFrom="sm" component="nav">
             {navLinks.map((link) => (
