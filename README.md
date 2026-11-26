@@ -277,26 +277,6 @@ Waiting for you friend to finish their game ? well with the spectator mode featu
 
 ---
 
-## magillie
-
-**Frontend architecture**
-- Set up the routing with React Router: app layout, page routes and the 404 page
-- Built the navigation bar with Mantine UI (game name, links, user menu, mobile burger menu)
-
-**Web pages**
-- Home page: game list (with join/spectate states), global "Toxic chat" UI (auto-scroll to the latest message), buttons to join or create a game
-- Statistics page: overview (level/XP, wins, win rate, average rank), achievements with progress bars, match history and leaderboard
-- Legal pages: Privacy Policy and Terms of Service, links in the header and the landing footer, mandatory "accept terms" checkbox on registration
-
-**Responsive design and UI consistency**
-- Made every page except the game usable on mobile
-- Harmonized the UI across pages (cards, dividers, rounded corners, images converted to WebP)
-
-**Challenges**
-- *Navigation unreachable on some screen widths*: the burger menu and the desktop links used different breakpoints. I aligned them on the same breakpoint and added the legal links and logout to the mobile drawer.
-
----
-
 ## timmi - Théo
 
 ### Planning
