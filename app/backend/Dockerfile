@@ -48,6 +48,7 @@ mkdir -p /app/backend/uploads/avatars && chown -R nestjs:nestjs /app/backend/upl
 
 #copy compiled production dependencies
 COPY --from=builder --chown=nestjs:nestjs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nestjs /app/backend/node_modules ./backend/node_modules
 
 
 #copy the shared dependencies
@@ -56,7 +57,11 @@ COPY --from=builder /app/shared/dist ./shared/dist
 
 COPY --from=builder --chown=nestjs:nestjs /app/backend/package.json ./backend/package.json
 COPY --from=builder --chown=nestjs:nestjs /app/backend/dist ./backend/dist
+COPY --from=builder --chown=nestjs:nestjs /app/backend/src/strategies ./backend/src/strategies
+COPY --from=builder --chown=nestjs:nestjs /app/backend/src/config ./backend/src/config
 COPY --from=builder --chown=nestjs:nestjs /app/backend/prisma ./backend/prisma
+COPY --from=builder --chown=nestjs:nestjs /app/backend/prisma7.config.ts ./backend/prisma7.config.ts
+
 
 WORKDIR /app/backend
 USER nestjs
