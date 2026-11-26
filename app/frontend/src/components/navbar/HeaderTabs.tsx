@@ -7,6 +7,7 @@ import {
 } from "@tabler/icons-react";
 import cx from "clsx";
 import {
+  Avatar,
   Burger,
   Container,
   Divider,
@@ -16,7 +17,6 @@ import {
   Menu,
   ScrollArea,
   Button,
-  Text,
   UnstyledButton,
   useMantineTheme,
 } from "@mantine/core";
@@ -25,6 +25,7 @@ import classes from "./HeaderTabs.module.css";
 import { Link, useLocation } from "react-router";
 import { navLinks } from "./navLinks";
 import { useAuth } from "../../hooks/useAuth";
+import { getAvatarSrc } from "../utils/avatar";
 
 // const user = {
 //   name: 'Mr. Goblin',
@@ -92,10 +93,18 @@ export function HeaderTabs() {
                 })}
               >
                 <Group gap={7}>
-                  {/* <Avatar src={user.image} alt="" radius="xl" size={20} /> */}
-                  <Text fw={500} size="sm" lh={1} mr={3}>
+                  {
+                    <Avatar
+                      src={getAvatarSrc(user?.avatarURL)}
+                      alt="avatar"
+                      radius="xl"
+                      size={28}
+                    />
+                  }
+
+                  {/*<Text fw={500} size="sm" lh={1} mr={3}>
                     {user?.name}
-                  </Text>
+                  </Text>*/}
                   <IconChevronDown size={12} stroke={1.5} />
                 </Group>
               </UnstyledButton>

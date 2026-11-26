@@ -1,5 +1,6 @@
 import { Card, Stack, Text, Avatar } from "@mantine/core";
 import type { PlayerPublicDto } from "shared";
+import { getAvatarSrc } from "../../../components/utils/avatar";
 
 //TODO: Make this responsive
 const AVATAR_SIZE = 50;
@@ -12,15 +13,9 @@ type PlayerCardProps = {
 };
 
 export function PlayerCard({ name, level, score, avatarURL }: PlayerCardProps) {
-  const avatarSrc = avatarURL ? (
-    <Avatar src={avatarURL} radius={0} size={AVATAR_SIZE} />
-  ) : (
-    <Avatar name={name} radius={0} size={AVATAR_SIZE} color="initials" />
-  );
-
   return (
     <Card padding={0} withBorder orientation="horizontal">
-      <Card.Section withBorder>{avatarSrc}</Card.Section>
+      <Avatar src={getAvatarSrc(avatarURL)} radius={0} size={AVATAR_SIZE} />
       <Card.Section px="xs">
         <Stack gap={0} h={AVATAR_SIZE}>
           <Text fz="lg" fw="700" lh={1.1}>

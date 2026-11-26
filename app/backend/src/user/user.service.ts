@@ -19,6 +19,7 @@ import type {
   Id,
   Friend,
 } from 'shared';
+import { StatsService } from '../stats/stats.service';
 
 const UPLOAD_DIR = join(process.cwd(), 'uploads', 'avatars');
 const EXT: Record<string, string> = {
@@ -32,7 +33,10 @@ const EXT: Record<string, string> = {
 export class UserService {
   private readonly logger = new Logger(UserService.name);
 
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly starsService: StatsService,
+  ) {}
 
   async create(usr: RegisterPost) {
     const prismaDtoUser: Prisma.UserCreateInput = {
@@ -42,11 +46,6 @@ export class UserService {
       localAuth: {
         create: {
           passwordHash: usr.password,
-        },
-      },
-      profile: {
-        create: {
-          bio: 'Empty bio',
         },
       },
     };
@@ -102,9 +101,12 @@ export class UserService {
       throw new NotFoundException(`User not found with id: ${id}`);
     }
 
+    const playerStats = await this.starsService.getPlayerStats(id);
+
     return {
       id: user.id,
       username: user.username,
+      level: playerStats.level.level,
       avatarURL: user.profile?.avatarURL ?? null,
     };
   }

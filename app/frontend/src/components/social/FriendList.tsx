@@ -3,6 +3,7 @@ import { IconMinus } from "@tabler/icons-react";
 import {
   ActionIcon,
   Avatar,
+  Box,
   Group,
   Table,
   Text,
@@ -66,7 +67,17 @@ export function FriendList() {
         </Anchor>
       </Table.Td>
       <Table.Td w={1} style={{ whiteSpace: "nowrap" }}>
-        <Text ta="right">{item.isOnline ? "online" : "offline"}</Text>
+        <Group gap="xs" justify="flex-end" wrap="nowrap">
+          <Box
+            w={8}
+            h={8}
+            bg={item.isOnline ? "green" : "gray"}
+            style={{ borderRadius: "50%", flexShrink: 0 }}
+          />
+          <Text c={item.isOnline ? undefined : "dimmed"} ta="right">
+            {item.isOnline ? "online" : "offline"}
+          </Text>
+        </Group>
       </Table.Td>
       <Table.Td>
         <Group gap={0} justify="flex-end">

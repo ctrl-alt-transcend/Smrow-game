@@ -6,7 +6,7 @@ import {
   type DiceValue,
 } from "../gameboard/Dice/Dice";
 import { gameSocket as socket } from "../../../sockets/gameSocket";
-import { Phase, type DiceRoll } from "shared";
+import { type DiceRoll } from "shared";
 
 /** Safety timeout: if the server never answers, unlock the UI. */
 const SERVER_TIMEOUT_MS = 2000;
@@ -37,11 +37,17 @@ function useElementWidth<T extends HTMLElement>() {
 export function DiceRoller({
   currentRoll,
   isMyTurn,
-  phase,
+  disabled = false,
+  firstDice = 0,
+  secondDice = 0,
+  title = "",
 }: {
   currentRoll: DiceRoll;
   isMyTurn: boolean;
-  phase: Phase;
+  disabled?: boolean;
+  firstDice?: number;
+  secondDice?: number;
+  title: string;
 }) {
   const [busy, setBusy] = useState(false);
 
@@ -54,8 +60,8 @@ export function DiceRoller({
   const { ref: containerRef, width } = useElementWidth<HTMLDivElement>();
 
   const diceSize = Math.round(Math.max(48, Math.min(96, (width - 64) / 2)));
-  const locked =
-    !isMyTurn || phase === Phase.TRADE_BUILD || phase === Phase.PLACEMENT;
+  const locked = !isMyTurn || disabled;
+  const total = firstDice && secondDice ? firstDice + secondDice : 0;
 
   const clearServerTimeout = useCallback(() => {
     if (timeoutRef.current !== null) {
@@ -122,7 +128,7 @@ export function DiceRoller({
         style={{ display: "flex", flexDirection: "column" }}
       >
         <Stack gap="xs" align="center" justify="center" w="100%">
-          <Title order={4}>Dice Roller</Title>
+          <Title order={4}>{title}</Title>
           <Dice3D
             ref={diceRef}
             size={diceSize}
@@ -130,6 +136,7 @@ export function DiceRoller({
             triggers={[]}
             style={{ pointerEvents: "none" }}
           />
+          {total !== 0 && `You rolled a ${total} in total!`}
         </Stack>
       </Card>
 

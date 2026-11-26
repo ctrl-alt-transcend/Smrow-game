@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { Box, Group, Progress, Text } from "@mantine/core";
 
-type TurnProgressBarProps = {
-  durationSeconds: number;
-  resetKey: string | number | null;
-};
-
 export default function TurnProgressBar({
   durationSeconds,
   resetKey,
-}: TurnProgressBarProps) {
+  label = undefined,
+  isMyTurn = true,
+}: {
+  durationSeconds: number;
+  resetKey: string | number | null;
+  label?: string;
+  isMyTurn?: boolean;
+}) {
   const [remaining, setRemaining] = useState(durationSeconds);
 
   const [prevKey, setPrevKey] = useState(resetKey);
@@ -33,15 +35,22 @@ export default function TurnProgressBar({
 
   return (
     <Box w="100%" mt={2}>
-      <Group justify="space-between" gap="xs" wrap="nowrap" h={16}>
-        <Text size="xs" c="dimmed" lh={1}>
-          Time left before auto-play
-        </Text>
-        <Text size="xs" fw={600} lh={1}>
-          {remaining}s
-        </Text>
-      </Group>
-      <Progress value={ratio} size={4} radius="xs" />
+      {label && (
+        <Group justify="space-between" gap="xs" wrap="nowrap" h={16}>
+          <Text size="xs" c="dimmed" lh={1}>
+            {label}
+          </Text>
+          <Text size="xs" fw={600} lh={1}>
+            {remaining}s
+          </Text>
+        </Group>
+      )}
+      <Progress
+        value={ratio}
+        size={4}
+        radius="xs"
+        color={isMyTurn ? "green" : "grape"}
+      />
     </Box>
   );
 }
