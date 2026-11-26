@@ -13,6 +13,7 @@ The web portal serves as an access to the game, this is where new player can cre
 
 At first a new user will be granted with the _landing page_ displaying a brief text about the game and the possibility for them to create an account using their email or by using Google authentification.
 
+You can create a lobby for you friend to join and wait for more of your friends to join ! Isn't it revolutionary ? I think so.
 Once logged in, users have access to 3 panels:
 
 - **Home**: This is where you create/join lobby and interact with users through the global chat.
@@ -74,6 +75,8 @@ As a.i. keeps getting better and undenyingly useful in some cases, we allowed ou
 - Gathering information or condencing large amount of data.
 - Writting test scripts.
 - Fixing minor UI issues.
+- Make long and revetitive task (like rename all variable in a file).
+- Explain some concepts we didn't understand.
 
 ---
 
@@ -82,8 +85,8 @@ As a.i. keeps getting better and undenyingly useful in some cases, we allowed ou
 |          | Role               | Description                                                                                                   |
 | -------- | ------------------ | ------------------------------------------------------------------------------------------------------------- |
 | emurillo | PO                 |                                                                                                               |
-| hdougoud | Software Architect |                                                                                                               |
-| magillie | Software Architect |                                                                                                               |
+| hdougoud | Software Architect | - Backend structure: Controllers, Gateways, services, modules. <br> - Handle websockets for game and social features                                                                                                                |
+| magillie | Software Architect | - Frontend structure: app layout, routing, header <br> - Home, stats, profile and legal pages <br> - Responsive design |
 | emonacho | PM, DevOps         | - Planning meetings<br>- Ensuring good communication between collaborators<br>- frontend/backend game developpement                                                                                                           |
 | timmi    | Tech Lead          | - Wrote documention for the team<br>- Handled communication between frontend and backend...<br>- Shared types |
 |          |                    |                                                                                                               |
@@ -254,6 +257,46 @@ Waiting for you friend to finish their game ? well with the spectator mode featu
 
 # Individual Contributions
 
+## magillie
+
+**Frontend architecture**
+- Set up the routing with React Router: app layout, page routes and the 404 page
+- Built the navigation bar with Mantine UI (game name, links, user menu, mobile burger menu)
+
+**Web pages**
+- Home page: game list (with join/spectate states), global "Toxic chat" UI (auto-scroll to the latest message), buttons to join or create a game
+- Statistics page: overview (level/XP, wins, win rate, average rank), achievements with progress bars, match history and leaderboard
+- Legal pages: Privacy Policy and Terms of Service, links in the header and the landing footer, mandatory "accept terms" checkbox on registration
+
+**Responsive design and UI consistency**
+- Made every page except the game usable on mobile
+- Harmonized the UI across pages (cards, dividers, rounded corners, images converted to WebP)
+
+**Challenges**
+- *Navigation unreachable on some screen widths*: the burger menu and the desktop links used different breakpoints. I aligned them on the same breakpoint and added the legal links and logout to the mobile drawer.
+
+---
+
+## magillie
+
+**Frontend architecture**
+- Set up the routing with React Router: app layout, page routes and the 404 page
+- Built the navigation bar with Mantine UI (game name, links, user menu, mobile burger menu)
+
+**Web pages**
+- Home page: game list (with join/spectate states), global "Toxic chat" UI (auto-scroll to the latest message), buttons to join or create a game
+- Statistics page: overview (level/XP, wins, win rate, average rank), achievements with progress bars, match history and leaderboard
+- Legal pages: Privacy Policy and Terms of Service, links in the header and the landing footer, mandatory "accept terms" checkbox on registration
+
+**Responsive design and UI consistency**
+- Made every page except the game usable on mobile
+- Harmonized the UI across pages (cards, dividers, rounded corners, images converted to WebP)
+
+**Challenges**
+- *Navigation unreachable on some screen widths*: the burger menu and the desktop links used different breakpoints. I aligned them on the same breakpoint and added the legal links and logout to the mobile drawer.
+
+---
+
 ## timmi - Théo
 
 ### Planning
@@ -314,6 +357,43 @@ Having a particular interest in this part of the project—and with no one else 
   - **Front-end ⟷ back-end communication**: The entire implementation follows an "authoritative server" logic; in other words, every action validated on the front end by players is transmitted to the back end via sockets for verification. The server is the sole source of truth—no manipulation on the front end can allow players to influence the game in any way. Once verified, the game instance transmits the game state (board, resources) back to the players via sockets and generates custom logs to notify them of their actions.
 
   - **Gameboard & UI**: All game-related UI elements were built using Mantine components; utilizing this library allowed for the simple and rapid integration of all interactive elements. The game board itself was implemented by generating an interactive SVG based on the chosen layout. This board consists of hexagonal tiles, roads, vertices (for settlements and cities), and coastlines. Since the board generation involved mathematical concepts that were not immediately intuitive to me, I leveraged AI for this part—which, in turn, sourced its code from the "Red Blob Games" website, a resource that provides excellent documentation on the process of creating a "hex grid." I personally implemented all the underlying logic that connects these board elements—handling construction and trade validation, turn management, and resource management on the back end.
+
 ---
 
+## hdougoud
+#### Detailed breakdown
 
+**Infrastructure basics**
+- Creation of Dockerfiles and docker-compose.
+- Setup of HotReload for containers.
+- Setup of Vite Proxy for the frontend.
+- Modification of the Makefile to separate Dev and Prod.
+
+**Setup of localAuth with Passport**
+- Setup of localAuth.
+- Password hashing with bcrypt.
+- Setup of the basics for Passport.
+- Creation of the JWT Token.
+
+**Websocket management**
+- Setup of the basics for game rooms and events.
+- Implementation of the backend logic for the Social gateway.
+- Synchronization of the Frontend and Backend for social events (Chat, game list, online status).
+- Creation of Gateways with Socket.io.
+- Setup of Admin UI to have a graphical interface to visualize websockets.
+
+#### Challenges
+
+**The main challenges I encountered are:**
+- Having to write in a programming language that is new to me (TypeScript).
+- Learning Nest.js and how it works.
+- Understanding what websockets are and how to use them.
+- Understanding new concepts like async, promises, etc.
+- Having to build a frontend.
+
+**For each of these challenges, I apply this set of actions:**
+-  Reading the official documentation.
+- Doing several simple attempts to get familiar with the technology / tool in question.
+- Researching best practices on the internet.
+
+---
