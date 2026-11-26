@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Avatar, Group, Table, Text } from "@mantine/core";
+import { Anchor, Avatar, Group, Table, Text } from "@mantine/core";
 import type { LeaderboardEntry } from "shared";
 import ShowMoreButton, { VISIBLE_ROWS } from "./ShowMoreButton";
+import { Link } from "react-router";
 
 type LeaderboardProps = {
   entries: LeaderboardEntry[];
@@ -37,14 +38,23 @@ export default function Leaderboard({
                 >
                   <Table.Td fw={700}>{entry.rank}</Table.Td>
                   <Table.Td>
-                    <Group gap="xs" wrap="nowrap">
-                      <Avatar src={entry.avatarURL} size="sm" radius="xl">
-                        {entry.username.slice(0, 2).toUpperCase()}
-                      </Avatar>
-                      <Text size="sm" fw={isMe ? 700 : undefined}>
-                        {entry.username}
-                      </Text>
-                    </Group>
+                    <Anchor
+                      component={Link}
+                      to={`/profile/${encodeURIComponent(entry.username)}`}
+                      underline="hover"
+                      fz="lg"
+                      fw={500}
+                      display="block"
+                    >
+                      <Group gap="xs" wrap="nowrap">
+                        <Avatar src={entry.avatarURL} size="sm" radius="xl">
+                          {entry.username.slice(0, 2).toUpperCase()}
+                        </Avatar>
+                        <Text size="sm" fw={isMe ? 700 : undefined}>
+                          {entry.username}
+                        </Text>
+                      </Group>
+                    </Anchor>
                   </Table.Td>
                   <Table.Td>{entry.wins}</Table.Td>
                   <Table.Td>{entry.winRate}%</Table.Td>
