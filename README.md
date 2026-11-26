@@ -15,7 +15,7 @@ Once logged in, users have access to 3 panels:
 - **Profile**: From this page, users can customize their profile and manage their friend list. Additionally you can use the friend list to see other user profile.
 
 ## The game
-The fun starts here ! each player are able to create or join a game of Catan. A game can host up to 4 people at a time but can be played with a minimum of 2. The game mainly follow basic Catan rules with some variation that you'll discover while playing.
+The fun starts here ! Each player is able to create or join a game of Catan. A game can host up to 4 people at a time but can be played with a minimum of 2. The game mainly follow basic Catan rules with some variation that you'll discover while playing.
 Additionally to the 4 active player, other player can *spectate* the game.
 
 ---
@@ -34,7 +34,7 @@ make
 ```
 This will compile and deploy the project in *dev* environement.
 
-After that, the app is accecible at https://localhost:5173.
+After that, the app is accessible at https://localhost:5173.
 
 Additionally the Makefile provide more command to help you debug/understand the project so have a look.
 
@@ -53,7 +53,7 @@ The resources used for this project are various and can't be all listed here but
 - [Axios Documentation](https://axios.rest/pages/getting-started/first-steps)
 - ...
 ## Use of A.I.
-As a.i. keeps getting better and undenyingly useful in some cases, we allowed ouself to use this tool for certain tasks:
+As a.i. keeps getting better and undenyingly useful in some cases, we allowed ourselves to use this tool for certain tasks:
 - Gathering information or condencing large amount of data.
 - Writting test scripts.
 - Fixing minor UI issues.
@@ -62,10 +62,10 @@ As a.i. keeps getting better and undenyingly useful in some cases, we allowed ou
 # Team Information
 |          | Role               | Description                                                                                                   |
 | -------- | ------------------ | ------------------------------------------------------------------------------------------------------------- |
-| emurillo | PM                 |                                                                                                               |
+| emurillo | PO                 |                                                                                                               |
 | hdougoud | Software Architect |                                                                                                               |
 | magillie | Software Architect |                                                                                                               |
-| emonacho | PO, DevOps         |                                                                                                               |
+| emonacho | PM, DevOps         | - Planning meetings<br>- Ensuring good communication between collaborators<br>- frontend/backend game developpement                                                                                                           |
 | timmi    | Tech Lead          | - Wrote documention for the team<br>- Handled communication between frontend and backend...<br>- Shared types |
 |          |                    |                                                                                                               |
 
@@ -103,6 +103,9 @@ We used figma in 2 different ways:
 - To design and sketch the look of our page
 - To have a board where we can easily share ideas and reflexion with other member of the team.
 
+## Discord
+The platform allowed us to share documentation, organize our meetings and do group calls flowlessly.
+
 ---
 
 # Technical Stack
@@ -138,6 +141,7 @@ here is the list of all the feature implemented in our application:
 - Register with Google authentification
 - Global chat
 - Lobby creation
+- Game settings customization
 - Real-time multiplayer game
 - Friend list system
 - Profil system
