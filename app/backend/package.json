@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "author": "Enrique Murillo Orosco, Hayden Dougoud, Matthieu Gillieron, Eliot Monachon, Théo Immi",
+  "author": "Enrique Murillo Orosco, Hayden Dougoud, Matthieu Gillieron, Eliot Monachon, Th\u00e9o Immi",
   "private": true,
   "license": "MIT License",
   "scripts": {
