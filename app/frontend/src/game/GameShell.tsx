@@ -65,7 +65,7 @@ function GameShell({ game }: { game: GameDataDto }) {
         collapsed: { desktop: !navbarOpened, mobile: !navbarOpened },
       }}
       padding={0}
-      style={{ height: "100dvh", overflow: "hidden" }}
+      style={{ height: "100dvh", overflow: "visible" }}
     >
       <EndGameModal
         gameOver={game.gameTerminated}
@@ -175,7 +175,7 @@ function GameShell({ game }: { game: GameDataDto }) {
           display: "flex",
           flexDirection: "column",
           minHeight: 0,
-          overflow: "hidden",
+          overflow: "visible",
         }}
       >
         <WaitingPlayersModal

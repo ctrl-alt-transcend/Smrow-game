@@ -175,7 +175,7 @@ export function PanContainer({
       h="100%"
       style={{
         position: "relative",
-        overflow: "hidden",
+        overflow: "visible",
         cursor: dragging ? "grabbing" : "grab",
         touchAction: "none",
         userSelect: "none",
