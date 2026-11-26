@@ -63,7 +63,7 @@ export class GameController {
     const game = this.gameService.getGameInstanceByUserId(req.user.id);
     if (!game) return;
     this.gameService.removePlayerFromGame(
-      { id: req.user.id, username: req.user.name },
+      { id: req.user.id, username: req.user.username },
       game.getGameId(),
     );
   }

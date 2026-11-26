@@ -19,6 +19,18 @@ export const RESERVED_USERNAMES = [
     'game',
 ];
 
+export const RESERVED_PASSWORDS = [
+    'password',
+    '123',
+    'password123',
+    'ftcatan',
+    '1234567890',
+    '0123456789',
+    'secret',
+    'secrets',
+    'motdepasse',
+    'qwerty',
+]
 
 export const IdSchema = z.string().nonempty();
 export type Id = z.infer<typeof IdSchema>;
@@ -33,14 +45,11 @@ export const UsernameSchema = z
     .min(3, "Username too short !")
     .max(30, "Username too long !")
     .regex(/^[a-z0-9_]+$/, 'Wrong character.')
-    .refine((v) => !RESERVED_USERNAMES.includes(v), 'Unavailable username');;
+    .refine((v) => !RESERVED_USERNAMES.includes(v), 'Unavailable username');
 export type Username = z.infer<typeof UsernameSchema>;
 
 export const NameSchema = z.string().nonempty("Can't be empty").max(20, "Name too long !");
 export type Name = z.infer<typeof NameSchema>;
-
-export const PasswordSchema = z.string().min(8, "Password too short !").max(128, "Password too long !");
-export type Password = z.infer<typeof PasswordSchema>;
 
 export const DatetimeSchema = z.iso.datetime();
 export type Datetime = z.infer<typeof DatetimeSchema>;
@@ -59,3 +68,15 @@ export type avatarURL = z.infer<typeof AvatarUrlSchema>;
 
 export const ChatContentSchema = z.string().trim().min(1).max(500);
 export type ChatContent = z.infer<typeof ChatContentSchema>;
+
+export const PasswordSchema = z
+.string().min(8, "Password too short !")
+.max(128, "Password too long !")
+.refine((password) => /[A-Z]/.test(password),
+"You need at least 1 uppercase character.")
+.refine((password) => /[a-z]/.test(password),
+"You need at least 1 lowercase character.")
+.refine((password) => /[!@#$%^&*]/.test(password),
+"You need at least 1 special character")
+.refine((password) => !RESERVED_PASSWORDS.includes(password), 'Password is too weak !');
+export type Password = z.infer<typeof PasswordSchema>;
