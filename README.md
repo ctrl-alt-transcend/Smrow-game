@@ -88,7 +88,7 @@ As a.i. keeps getting better and undenyingly useful in some cases, we allowed ou
 |          | Role               | Description                                                                                                   |
 | -------- | ------------------ | ------------------------------------------------------------------------------------------------------------- |
 | emurillo | PM                 |                                                                                                               |
-| hdougoud | Software Architect |                                                                                                               |
+| hdougoud | Software Architect | - Backend structure: Controllers, Gateways, services, modules. <br> - Handle websockets for game and social features                                                                                                                |
 | magillie | Software Architect | - Frontend structure: app layout, routing, header <br> - Home, stats, profile and legal pages <br> - Responsive design |
 | emonacho | PO, DevOps         |                                                                                                               |
 | timmi    | Tech Lead          | - Wrote documention for the team<br>- Handled communication between frontend and backend...<br>- Shared types |
@@ -251,43 +251,6 @@ Waiting for you friend to finish their game ? well with the spectator mode featu
 
 ---
 
-# Individual Contributions:
-
-## hdougoud
-#### Detailed breakdown
-
-**Infrastructure basics**
-- Creation of Dockerfiles and docker-compose.
-- Setup of HotReload for containers.
-- Setup of Vite Proxy for the frontend.
-- Modification of the Makefile to separate Dev and Prod.
-
-**Setup of localAuth with Passport**
-- Setup of localAuth.
-- Password hashing with bcrypt.
-- Setup of the basics for Passport.
-- Creation of the JWT Token.
-
-**Websocket management**
-- Setup of the basics for game rooms and events.
-- Implementation of the backend logic for the Social gateway.
-- Synchronization of the Frontend and Backend for social events (Chat, game list, online status).
-- Creation of Gateways with Socket.io.
-- Setup of Admin UI to have a graphical interface to visualize websockets.
-
-#### Challenges
-
-**The main challenges I encountered are:**
-- Having to write in a programming language that is new to me (TypeScript).
-- Learning Nest.js and how it works.
-- Understanding what websockets are and how to use them.
-- Understanding new concepts like async, promises, etc.
-- Having to build a frontend.
-
-**For each of these challenges, I apply this set of actions:**
--  Reading the official documentation.
-- Doing several simple attempts to get familiar with the technology / tool in question.
-- Researching best practices on the internet.
 # Individual Contributions
 
 ## magillie
@@ -357,3 +320,40 @@ The first thing that I implemented was the login/register panel. Front/back comm
 ---
 
 
+## hdougoud
+#### Detailed breakdown
+
+**Infrastructure basics**
+- Creation of Dockerfiles and docker-compose.
+- Setup of HotReload for containers.
+- Setup of Vite Proxy for the frontend.
+- Modification of the Makefile to separate Dev and Prod.
+
+**Setup of localAuth with Passport**
+- Setup of localAuth.
+- Password hashing with bcrypt.
+- Setup of the basics for Passport.
+- Creation of the JWT Token.
+
+**Websocket management**
+- Setup of the basics for game rooms and events.
+- Implementation of the backend logic for the Social gateway.
+- Synchronization of the Frontend and Backend for social events (Chat, game list, online status).
+- Creation of Gateways with Socket.io.
+- Setup of Admin UI to have a graphical interface to visualize websockets.
+
+#### Challenges
+
+**The main challenges I encountered are:**
+- Having to write in a programming language that is new to me (TypeScript).
+- Learning Nest.js and how it works.
+- Understanding what websockets are and how to use them.
+- Understanding new concepts like async, promises, etc.
+- Having to build a frontend.
+
+**For each of these challenges, I apply this set of actions:**
+-  Reading the official documentation.
+- Doing several simple attempts to get familiar with the technology / tool in question.
+- Researching best practices on the internet.
+
+---
