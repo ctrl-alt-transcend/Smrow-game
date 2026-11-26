@@ -61,7 +61,9 @@ export function FriendList() {
               style={{ flexShrink: 0 }}
             />
             <Text truncate="end" style={{ flex: 1, minWidth: 0 }}>
-              {item.username}
+              {item.username.length > 15
+                ? `${item.username.slice(0, 15)}...`
+                : item.username}
             </Text>
           </Group>
         </Anchor>
