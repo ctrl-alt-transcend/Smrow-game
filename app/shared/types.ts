@@ -39,9 +39,6 @@ export type Username = z.infer<typeof UsernameSchema>;
 export const NameSchema = z.string().nonempty("Can't be empty").max(20, "Name too long !");
 export type Name = z.infer<typeof NameSchema>;
 
-export const PasswordSchema = z.string().min(8, "Password too short !").max(128, "Password too long !");
-export type Password = z.infer<typeof PasswordSchema>;
-
 export const DatetimeSchema = z.iso.datetime();
 export type Datetime = z.infer<typeof DatetimeSchema>;
 
@@ -59,3 +56,14 @@ export type avatarURL = z.infer<typeof AvatarUrlSchema>;
 
 export const ChatContentSchema = z.string().trim().min(1).max(500);
 export type ChatContent = z.infer<typeof ChatContentSchema>;
+
+export const PasswordSchema = z
+.string().min(8, "Password too short !")
+.max(128, "Password too long !")
+.refine((password) => /[A-Z]/.test(password),
+"You need at least 1 uppercase character.")
+.refine((password) => /[a-z]/.test(password),
+"You need at least 1 lowercase character.")
+.refine((password) => /[!@#$%^&*]/.test(password),
+"You need at least 1 special character");
+export type Password = z.infer<typeof PasswordSchema>;
