@@ -84,10 +84,10 @@ As a.i. keeps getting better and undenyingly useful in some cases, we allowed ou
 
 |          | Role               | Description                                                                                                   |
 | -------- | ------------------ | ------------------------------------------------------------------------------------------------------------- |
-| emurillo | PO                 |                                                                                                               |
 | hdougoud | Software Architect | - Backend structure: Controllers, Gateways, services, modules. <br> - Handle websockets for game and social features                                                                                                                |
 | magillie | Software Architect | - Frontend structure: app layout, routing, header <br> - Home, stats, profile and legal pages <br> - Responsive design |
-| emonacho | PM, DevOps         | - Planning meetings<br>- Ensuring good communication between collaborators<br>- frontend/backend game developpement                                                                                                           |
+| emonacho | PM, DevOps         | - Planning meetings and ensuring good communication between collaborators<br>- frontend/backend game developpement                                                                                                           |
+| emurillo | PO                 |         - Help & support with structure, infrastructure and database communications.                                                                                                       |
 | timmi    | Tech Lead          | - Wrote documention for the team<br>- Handled communication between frontend and backend...<br>- Shared types |
 |          |                    |                                                                                                               |
 
@@ -203,7 +203,9 @@ Doing a web-based game has been the idea since the beginning. This lead us to lo
 ## User Interaction
 To create competitive mind and friendship in a game it is important for users to be able to interact between each other. They can do this through a Friend system and a General Chat system. Once connected player are connected using WebSockets to a general room where they can send and receive message to everyone connected.
 ## ORM
-please write this shit Enrique
+An ORM allows for efficient and simple communication with the Database. We use Prisma ORM, a tool that will allow as to communicate with Postgres without having to manually design SQL scripts, it will manage the schema via the prisma schema so our DB can read the schema to build the tables.
+Prisma uses it's own auto-generated client with full Typescrips types,allowing to validate the querys in real time.
+
 
 ## Support for additional web browser
 Don't need to justify this one much.... we wanted our game to be played across different setups.
@@ -257,7 +259,7 @@ Waiting for you friend to finish their game ? well with the spectator mode featu
 
 # Individual Contributions
 
-## magillie
+## magillie - Matthieu
 
 **Frontend architecture**
 - Set up the routing with React Router: app layout, page routes and the 404 page
@@ -340,7 +342,62 @@ Having a particular interest in this part of the project—and with no one else 
 
 ---
 
-## hdougoud
+## emurillo - Enrique
+
+### Planning
+
+As a part of the planning of this project, we have decided the stack, the github structure (PR with validation, SCRUM methodology, CI/CD, etc). Divide the tasks in issues and follow-up of pending tasks.
+
+### Infrastructure
+
+Docker structure decided in collabotarion with **hdougoud**, set up of the docker production file.
+
+Adding the migration standards for creating and pushing migrations, with make rules to standarize the process.
+
+### CI/CD
+
+Along with **Timmi** we set up the `CI/CD` for the backend and the frontend. This steps helped us to better test and reduce the errors of our code when we push into the develop branch.
+
+This part was later completed with the inclusion of `husky` to add the format and lint, as well as, the build checks when commiting and pushing our contributions to the project.
+
+### Schema DB
+
+Decided the DB Schema with the rest of the team and translating it into a Prisma schema. In close collaboration with Hdougoud, we decided the minimal fields needed for each table.
+
+
+### Prisma ORM
+
+Set up and schema creation of the prisma schema for the database. The ORM handles all communications with the DB, centralizing and standardizing all queries, with it's own client and types compatible with Typescript.
+
+- Schema creation
+- Creation of user & stats resources(controllers, services)
+
+
+### Google OAuth
+
+Complete set-up of the google OAuth module. This module requires the local Auth structure and the set up of the jwtStrategy. As part of this module tasks we can see:
+
+- Google guards and google strategy definition
+- Cloud console set-up to be able to use the API
+- Creation of a user validation service to allow the connection
+
+### Continous testing
+
+In addition to the infrasctructure. The creation and mantainment of the VM with the production of the project. This has allowed us to have a real production version of the app to see and test our features in almost real time.
+
+
+### Challenges
+
+The first challenge of a group project is to decide what we want to do, try to manage the time and the people with all the constraints and be able to conciliate these differences.
+
+My personal challenges include:
+- Typescript, I had never used it before and I stil think is different and I need to work on it.
+- The Prisma integration with the backend caused many difficulties, specially at the begining of the proyect. To understand the concept of a migration and the api communication with the DB, was a big challenge.
+- npx prisma generate
+
+---
+
+## hdougoud - Hayden
 #### Detailed breakdown
 
 **Infrastructure basics**
