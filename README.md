@@ -13,6 +13,7 @@ The web portal serves as an access to the game, this is where new player can cre
 
 At first a new user will be granted with the _landing page_ displaying a brief text about the game and the possibility for them to create an account using their email or by using Google authentification.
 
+You can create a lobby for you friend to join and wait for more of your friends to join ! Isn't it revolutionary ? I think so.
 Once logged in, users have access to 3 panels:
 
 - **Home**: This is where you create/join lobby and interact with users through the global chat.
@@ -77,6 +78,8 @@ As a.i. keeps getting better and undenyingly useful in some cases, we allowed ou
 - Gathering information or condencing large amount of data.
 - Writting test scripts.
 - Fixing minor UI issues.
+- Make long and revetitive task (like rename all variable in a file).
+- Explain some concepts we didn't understand.
 
 ---
 
@@ -84,10 +87,10 @@ As a.i. keeps getting better and undenyingly useful in some cases, we allowed ou
 
 |          | Role               | Description                                                                                                   |
 | -------- | ------------------ | ------------------------------------------------------------------------------------------------------------- |
-| emurillo | PM                 |         - Help & support with structure, infrastructure and database communications.                                                                                                       |
-| hdougoud | Software Architect |                                                                                                               |
-| magillie | Software Architect |                                                                                                               |
-| emonacho | PO, DevOps         |                                                                                                               |
+| hdougoud | Software Architect | - Backend structure: Controllers, Gateways, services, modules. <br> - Handle websockets for game and social features                                                                                                                |
+| magillie | Software Architect | - Frontend structure: app layout, routing, header <br> - Home, stats, profile and legal pages <br> - Responsive design |
+| emurillo | PO                 |         - Help & support with structure, infrastructure and database communications.                                                                                                       |
+| emonacho | PM, DevOps         |                                                                                                               |
 | timmi    | Tech Lead          | - Wrote documention for the team<br>- Handled communication between frontend and backend...<br>- Shared types |
 |          |                    |                                                                                                               |
 
@@ -252,6 +255,26 @@ Waiting for you friend to finish their game ? well with the spectator mode featu
 
 # Individual Contributions
 
+## Magillie
+
+**Frontend architecture**
+- Set up the routing with React Router: app layout, page routes and the 404 page
+- Built the navigation bar with Mantine UI (game name, links, user menu, mobile burger menu)
+
+**Web pages**
+- Home page: game list (with join/spectate states), global "Toxic chat" UI (auto-scroll to the latest message), buttons to join or create a game
+- Statistics page: overview (level/XP, wins, win rate, average rank), achievements with progress bars, match history and leaderboard
+- Legal pages: Privacy Policy and Terms of Service, links in the header and the landing footer, mandatory "accept terms" checkbox on registration
+
+**Responsive design and UI consistency**
+- Made every page except the game usable on mobile
+- Harmonized the UI across pages (cards, dividers, rounded corners, images converted to WebP)
+
+**Challenges**
+- *Navigation unreachable on some screen widths*: the burger menu and the desktop links used different breakpoints. I aligned them on the same breakpoint and added the legal links and logout to the mobile drawer.
+
+---
+
 ## Timmi
 
 ### Planning
@@ -298,7 +321,7 @@ The first thing that I implemented was the login/register panel. Front/back comm
 
 ---
 
-## emurillo
+## Emurillo
 
 ### Planning
 
@@ -350,3 +373,44 @@ My personal challenges include:
 - Typescript, I had never used it before and I stil think is different and I need to work on it.
 - The Prisma integration with the backend caused many difficulties, specially at the begining of the proyect. To understand the concept of a migration and the api communication with the DB, was a big challenge.
 - npx prisma generate
+
+---
+
+## Hdougoud
+#### Detailed breakdown
+
+**Infrastructure basics**
+- Creation of Dockerfiles and docker-compose.
+- Setup of HotReload for containers.
+- Setup of Vite Proxy for the frontend.
+- Modification of the Makefile to separate Dev and Prod.
+
+**Setup of localAuth with Passport**
+- Setup of localAuth.
+- Password hashing with bcrypt.
+- Setup of the basics for Passport.
+- Creation of the JWT Token.
+
+**Websocket management**
+- Setup of the basics for game rooms and events.
+- Implementation of the backend logic for the Social gateway.
+- Synchronization of the Frontend and Backend for social events (Chat, game list, online status).
+- Creation of Gateways with Socket.io.
+- Setup of Admin UI to have a graphical interface to visualize websockets.
+
+#### Challenges
+
+**The main challenges I encountered are:**
+- Having to write in a programming language that is new to me (TypeScript).
+- Learning Nest.js and how it works.
+- Understanding what websockets are and how to use them.
+- Understanding new concepts like async, promises, etc.
+- Having to build a frontend.
+
+**For each of these challenges, I apply this set of actions:**
+-  Reading the official documentation.
+- Doing several simple attempts to get familiar with the technology / tool in question.
+- Researching best practices on the internet.
+
+---`
+`
