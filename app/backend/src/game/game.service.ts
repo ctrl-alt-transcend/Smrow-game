@@ -224,7 +224,12 @@ export class GameService {
       .getPlayers()
       .set(
         playerProfile.username,
-        game.initPlayer(playerProfile.id, playerProfile.username),
+        game.initPlayer(
+          playerProfile.id,
+          playerProfile.username,
+          playerProfile.avatarURL,
+          playerProfile.level,
+        ),
       );
     this.logger.log(`Game ${gameId}: player ${playerProfile.username} joined`);
     this.broadcastGameList();

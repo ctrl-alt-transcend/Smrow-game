@@ -6,6 +6,7 @@ import {
   BackgroundImage,
   Grid,
   Group,
+  Image,
   Text,
   Title,
   Stack,
@@ -47,7 +48,7 @@ export default function MainShell() {
     >
       <AppShell.Header>
         <BackgroundImage
-          src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperaccess.com%2Ffull%2F117951.jpg&f=1&nofb=1&ipt=b0cd04325308305c02bf1a7d5fe7b202f95ce1e12253a29225022b5eef822969"
+          src="assets/landing.webp"
           h="100%"
           w="100%"
           style={{
@@ -67,14 +68,14 @@ export default function MainShell() {
       <AppShell.Main>
         <Grid>
           <Grid.Col span={{ base: 12, md: 8 }} order={{ base: 2, md: 1 }}>
-            <Title order={1} c={"Red"} fz={{ base: "h3", md: "h1" }}>
-              Amazing Catan
-            </Title>
             <CardImage />
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, md: 4 }} order={{ base: 1, md: 2 }}>
-            <LoginPanel />
+            <Stack gap="md">
+              <LoginPanel />
+              <Image src="/assets/zuck.webp" radius="md" alt="" />
+            </Stack>
           </Grid.Col>
         </Grid>
       </AppShell.Main>

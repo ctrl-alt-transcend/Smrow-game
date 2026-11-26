@@ -13,6 +13,7 @@ import {
   Divider,
   Drawer,
   Group,
+  Title,
   Menu,
   ScrollArea,
   Button,
@@ -54,7 +55,7 @@ export function HeaderTabs() {
     <div className={classes.header}>
       <Container className={classes.mainSection} size="md">
         <Group justify="space-between">
-          <Text>Amazing Catan</Text>
+          <Title size="xl">Amazing Catan</Title>
 
           <Group gap="xs" visibleFrom="sm" component="nav">
             {navLinks.map((link) => (

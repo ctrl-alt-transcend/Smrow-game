@@ -483,7 +483,7 @@ export type GameData = GameDataBase & {
 export type PlayerProfile = {
   id: string;
   username: string;
-  //level: number;
+  level: number;
   avatarURL: string | null;
 };
 

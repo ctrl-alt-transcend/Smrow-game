@@ -3,6 +3,8 @@ import {
   Divider,
   Grid,
   Paper,
+  Box,
+  Card,
   SimpleGrid,
   Stack,
   Text,
@@ -21,7 +23,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <Title order={1} mb="xl" ta="center" fz={{ base: "h3", md: "h1" }}>
+      <Title order={1} mb="xl" ta="left" fz={{ base: "h3", md: "h1" }}>
         Profile
       </Title>
 
@@ -56,31 +58,44 @@ export default function ProfilePage() {
         <Grid.Col span={{ base: 12, md: 8 }}>
           <Stack gap="lg" h="100%">
             <SimpleGrid cols={{ base: 1, sm: 1 }} spacing="lg">
-              <Paper withBorder shadow="xs" radius="md" p="lg">
-                <Title order={4} mb="md">
+              <Card withBorder shadow="xs" radius="md" p="sm">
+                <Title order={4} mb="sm" ta="center">
                   Friends
                 </Title>
-                <FriendList />
-              </Paper>
+                <Card.Section>
+                  <Divider color="black" />
+                </Card.Section>
+                <Box pt="sm">
+                  <FriendList />
+                </Box>
+              </Card>
             </SimpleGrid>
 
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-              <Paper withBorder shadow="xs" radius="md" p="lg">
-                <Title order={4} mb="xs">
+              <Card withBorder shadow="xs" radius="md" p="sm">
+                <Title order={4} mb="sm" ta="center">
                   Add friends
                 </Title>
-                <Text c="dimmed" size="sm" mb="md">
+                <Card.Section>
+                  <Divider color="black" />
+                </Card.Section>
+                <Text c="dimmed" size="sm" mt="sm" mb="md">
                   Search for a user and send them a friend request.
                 </Text>
                 <AddFriend />
-              </Paper>
+              </Card>
 
-              <Paper withBorder shadow="xs" radius="md" p="lg">
-                <Title order={4} mb="md">
+              <Card withBorder shadow="xs" radius="md" p="sm">
+                <Title order={4} mb="sm" ta="center">
                   Pending requests
                 </Title>
-                <PendingList />
-              </Paper>
+                <Card.Section>
+                  <Divider color="black" />
+                </Card.Section>
+                <Box pt="sm">
+                  <PendingList />
+                </Box>
+              </Card>
             </SimpleGrid>
           </Stack>
         </Grid.Col>
