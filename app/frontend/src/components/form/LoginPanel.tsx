@@ -13,6 +13,8 @@ import {
   type CardProps,
 } from "@mantine/core";
 
+import { Notifications } from "@mantine/notifications";
+
 import { Link } from "react-router";
 
 import { schemaResolver, useForm } from "@mantine/form";
@@ -57,8 +59,12 @@ export function LoginPanel(props: CardProps) {
     }
     try {
       await register(data);
-    } catch (error: any) {
-      setError(error);
+    } catch {
+      Notifications.show({
+        title: "Server error",
+        message: "Server unavailable. Please try again later.",
+        color: "red",
+      });
     }
   });
 
@@ -66,8 +72,12 @@ export function LoginPanel(props: CardProps) {
     setError(null);
     try {
       await login(data);
-    } catch (errorMessage: any) {
-      setError(errorMessage);
+    } catch {
+      Notifications.show({
+        title: "Server error",
+        message: "Server unavailable. Please try again later.",
+        color: "red",
+      });
     }
   });
 

@@ -22,7 +22,7 @@ services:
     networks:
       - ft-network
     volumes:
-        - ./backend/uploads: /app/backend/uploads
+        - ./backend/uploads:/app/backend/uploads
     secrets:
       - jwt_secret
       - db_password
