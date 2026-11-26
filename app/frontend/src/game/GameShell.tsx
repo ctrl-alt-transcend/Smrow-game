@@ -9,7 +9,6 @@ import {
   ScrollArea,
   Stack,
   Tooltip,
-  Transition,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconSettings } from "@tabler/icons-react";
@@ -52,17 +51,10 @@ function GameShell({ game }: { game: GameDataDto }) {
 
   let isMyTurn = game.currentPlayer.username === game.whosTurn;
   if (game.currentPhase === Phase.START) isMyTurn = true;
-  const masterLog =
-    isMyTurn && game.currentPhase !== Phase.MAGIC_DICE
-      ? game.currentPlayer.guideLog
-      : game.masterLog;
+  const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
 
   const navEnabled = isMyTurn && !waitingForPlayers;
   const isDesktop = useMediaQuery("(min-width: 36em)");
-
-  console.log(
-    `GameShell: phase [${game.currentPhase}]: magicDice: [${game.magicDice ?? "null"}]`,
-  );
 
   return (
     <AppShell
@@ -106,17 +98,15 @@ function GameShell({ game }: { game: GameDataDto }) {
           <Box flex={1} miw={120} py={4}>
             <Stack gap={0} justify="center" h="100%">
               <GameMasterLog log={masterLog} />
-              {game.currentPhase !== Phase.MAGIC_DICE && (
-                <TurnProgressBar
-                  durationSeconds={
-                    game.currentPlayer.timeToPlay ??
-                    game.settings.turnDurationSeconds
-                  }
-                  resetKey={`${game.currentPhase}-${game.whosTurn}`}
-                  label="Time left before auto-play"
-                  isMyTurn={isMyTurn}
-                />
-              )}
+              <TurnProgressBar
+                durationSeconds={
+                  game.currentPlayer.timeToPlay ??
+                  game.settings.turnDurationSeconds
+                }
+                resetKey={`${game.currentPhase}-${game.whosTurn}`}
+                label="Time left before auto-play"
+                isMyTurn={isMyTurn}
+              />
             </Stack>
           </Box>
         </Group>
@@ -201,34 +191,6 @@ function GameShell({ game }: { game: GameDataDto }) {
                 <GameBoard {...GameBoardProps} />
               </PanContainer>
             </Center>
-
-            <Transition
-              mounted={game.currentPhase === Phase.MAGIC_DICE}
-              transition="fade"
-              duration={500}
-              exitDuration={400}
-              timingFunction="ease"
-            >
-              {(styles) => (
-                <Center
-                  style={{
-                    ...styles,
-                    position: "absolute",
-                    inset: 0,
-                    zIndex: 20,
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Box
-                    style={{
-                      position: "relative",
-                      borderRadius: 16,
-                      animation: "magicPulse 3s ease-in-out infinite",
-                    }}
-                  ></Box>
-                </Center>
-              )}
-            </Transition>
           </Box>
         </Center>
       </AppShell.Main>
