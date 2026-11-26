@@ -104,6 +104,8 @@ function GameShell({ game }: { game: GameDataDto }) {
                   game.settings.turnDurationSeconds
                 }
                 resetKey={`${game.currentPhase}-${game.whosTurn}`}
+                label="Time left before auto-play"
+                isMyTurn={isMyTurn}
               />
             </Stack>
           </Box>
@@ -137,17 +139,26 @@ function GameShell({ game }: { game: GameDataDto }) {
               settings={game.settings}
               masterLog={game.masterLog}
               isMyTurn={navEnabled}
-              phase={game.currentPhase}
+              disabled={
+                game.currentPhase !== Phase.PLACEMENT &&
+                game.currentPhase !== Phase.TRADE_BUILD
+              }
             />
-
-            <DiceRoller
-              currentRoll={game.currentPlayer.currentRoll}
+            <SkipTurnButton
               isMyTurn={navEnabled}
-              phase={game.currentPhase}
+              disabled={game.currentPhase !== Phase.TRADE_BUILD}
             />
-
-            <SkipTurnButton isMyTurn={navEnabled} phase={game.currentPhase} />
-
+            <DiceRoller
+              title="Dice Roller"
+              currentRoll={game.currentPlayer.currentRoll}
+              firstDice={game.currentPlayer.firstDice}
+              secondDice={game.currentPlayer.secondDice}
+              isMyTurn={navEnabled}
+              disabled={
+                game.currentPhase !== Phase.START &&
+                game.currentPhase !== Phase.RESOURCES
+              }
+            />
             <Accordion variant="separated" multiple defaultValue={["players"]}>
               <Accordion.Item value="players">
                 <Accordion.Control>Players</Accordion.Control>
@@ -173,10 +184,14 @@ function GameShell({ game }: { game: GameDataDto }) {
           players={game.players}
           settings={game.settings}
         />
-        <Center flex={1} w="100%" h="100%" mih={0} p={0}>
-          <PanContainer maxPan={400}>
-            <GameBoard {...GameBoardProps} />
-          </PanContainer>
+        <Center flex={1} w="100%" h="100%" mih={0} p={20}>
+          <Box style={{ position: "relative", width: "100%", height: "100%" }}>
+            <Center h="100%" w="100%">
+              <PanContainer maxPan={400}>
+                <GameBoard {...GameBoardProps} />
+              </PanContainer>
+            </Center>
+          </Box>
         </Center>
       </AppShell.Main>
 
