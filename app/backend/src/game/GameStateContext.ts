@@ -55,6 +55,7 @@ abstract class State {
   public setGameState(newGameState: GameStateContext) {
     this.state = newGameState;
   }
+  public abstract phaseCheck(): void;
   public abstract dice(username: string | void): void;
   public abstract skip(username: string | void): void;
   public abstract build(
@@ -65,7 +66,15 @@ abstract class State {
     username: string | void,
     payload: TradePayload | void,
   ): void;
-  public abstract phaseCheck(): void;
+  protected deny(action: Action, phase: Phase, username: string): void {
+    const p = this.state.getPlayerByUsername(username);
+    if (!p) return;
+    this.state.setPersonalLog(
+      p,
+      this.state.forbiddenActionLog(action, phase),
+      NotifColor.RED,
+    );
+  }
 }
 
 /**
@@ -814,43 +823,11 @@ class StartPhase extends State {
       this.phaseCheck();
     }
   }
-
-  public build(username: string) {
-    const p = this.state.getPlayerByUsername(username);
-    if (!p) return;
-    this.state.setPersonalLog(
-      p,
-      this.state.forbiddenActionLog(Action.BUILD, Phase.START),
-      NotifColor.RED,
-    );
-  }
-
-  public trade(username: string) {
-    const p = this.state.getPlayerByUsername(username);
-    if (!p) return;
-    this.state.setPersonalLog(
-      p,
-      this.state.forbiddenActionLog(Action.TRADE, Phase.START),
-      NotifColor.RED,
-    );
-  }
-
-  public skip(username: string) {
-    const p = this.state.getPlayerByUsername(username);
-    if (!p) return;
-    this.state.setPersonalLog(
-      p,
-      this.state.forbiddenActionLog(Action.SKIP, Phase.START),
-      NotifColor.RED,
-    );
-  }
-
   public computeTurnOrder() {
     const entries = Array.from(this.state.getStartingRolls().entries());
     entries.sort(([, a], [, b]) => b - a);
     this.state.setTurnOrder(entries.map(([username]) => username));
   }
-
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
     if (this.state.getStartingRolls().size !== this.state.getPlayers().size)
@@ -859,22 +836,43 @@ class StartPhase extends State {
     this.state.setupNextPhase(Phase.PLACEMENT);
     this.state.transitionTo(new PlacementPhase());
   }
+
+  public build(username: string) {
+    this.deny(Action.BUILD, Phase.START, username);
+    //const p = this.state.getPlayerByUsername(username);
+    //if (!p) return;
+    //this.state.setPersonalLog(
+    //  p,
+    //  this.state.forbiddenActionLog(Action.BUILD, Phase.START),
+    //  NotifColor.RED,
+    //);
+  }
+  public trade(username: string) {
+    this.deny(Action.TRADE, Phase.START, username);
+    //const p = this.state.getPlayerByUsername(username);
+    //if (!p) return;
+    //this.state.setPersonalLog(
+    //  p,
+    //  this.state.forbiddenActionLog(Action.TRADE, Phase.START),
+    //  NotifColor.RED,
+    //);
+  }
+  public skip(username: string) {
+    this.deny(Action.SKIP, Phase.START, username);
+    //const p = this.state.getPlayerByUsername(username);
+    //if (!p) return;
+    //this.state.setPersonalLog(
+    //  p,
+    //  this.state.forbiddenActionLog(Action.SKIP, Phase.START),
+    //  NotifColor.RED,
+    //);
+  }
 }
 
 /***********************************
  * Placement Phase
  **********************************/
 class PlacementPhase extends State {
-  public dice(username: string) {
-    const p = this.state.getPlayerByUsername(username);
-    if (!p) return;
-    this.state.setPersonalLog(
-      p,
-      this.state.forbiddenActionLog(Action.DICE, Phase.PLACEMENT),
-      NotifColor.RED,
-    );
-  }
-
   public build(username: string, payload: BuildPayload) {
     const p = this.state.isPlayersTurn(username);
     if (!p) return;
@@ -924,33 +922,45 @@ class PlacementPhase extends State {
     );
     this.phaseCheck();
   }
-
-  public trade(username: string) {
-    const p = this.state.getPlayerByUsername(username);
-    if (!p) return;
-    this.state.setPersonalLog(
-      p,
-      this.state.forbiddenActionLog(Action.TRADE, Phase.PLACEMENT),
-      NotifColor.RED,
-    );
-  }
-
-  public skip(username: string) {
-    const p = this.state.getPlayerByUsername(username);
-    if (!p) return;
-    this.state.setPersonalLog(
-      p,
-      this.state.forbiddenActionLog(Action.SKIP, Phase.PLACEMENT),
-      NotifColor.RED,
-    );
-  }
-
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
     if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
     this.state.resourcesProduction(true);
     this.state.setupNextPhase(Phase.RESOURCES);
     this.state.transitionTo(new ResourcesPhase());
+  }
+  public dice(username: string) {
+    this.deny(Action.DICE, Phase.PLACEMENT, username);
+
+    //const p = this.state.getPlayerByUsername(username);
+    //if (!p) return;
+    //this.state.setPersonalLog(
+    //  p,
+    //  this.state.forbiddenActionLog(Action.DICE, Phase.PLACEMENT),
+    //  NotifColor.RED,
+    //);
+  }
+  public trade(username: string) {
+    this.deny(Action.TRADE, Phase.PLACEMENT, username);
+
+    //const p = this.state.getPlayerByUsername(username);
+    //if (!p) return;
+    //this.state.setPersonalLog(
+    //  p,
+    //  this.state.forbiddenActionLog(Action.TRADE, Phase.PLACEMENT),
+    //  NotifColor.RED,
+    //);
+  }
+  public skip(username: string) {
+    this.deny(Action.SKIP, Phase.PLACEMENT, username);
+
+    //const p = this.state.getPlayerByUsername(username);
+    //if (!p) return;
+    //this.state.setPersonalLog(
+    //  p,
+    //  this.state.forbiddenActionLog(Action.SKIP, Phase.PLACEMENT),
+    //  NotifColor.RED,
+    //);
   }
 }
 
@@ -975,42 +985,42 @@ class ResourcesPhase extends State {
       this.phaseCheck();
     }
   }
-
-  public build(username: string) {
-    const p = this.state.getPlayerByUsername(username);
-    if (!p) return;
-    this.state.setPersonalLog(
-      p,
-      this.state.forbiddenActionLog(Action.BUILD, Phase.RESOURCES),
-      NotifColor.RED,
-    );
-  }
-
-  public trade(username: string) {
-    const p = this.state.getPlayerByUsername(username);
-    if (!p) return;
-    this.state.setPersonalLog(
-      p,
-      this.state.forbiddenActionLog(Action.TRADE, Phase.RESOURCES),
-      NotifColor.RED,
-    );
-  }
-
-  public skip(username: string) {
-    const p = this.state.getPlayerByUsername(username);
-    if (!p) return;
-    this.state.setPersonalLog(
-      p,
-      this.state.forbiddenActionLog(Action.SKIP, Phase.RESOURCES),
-      NotifColor.RED,
-    );
-  }
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
     const p = this.state.getCurrentPlayer();
     if (!p || !this.state.hasRolledBothDices(p)) return;
     this.state.setupNextPhase(Phase.TRADE_BUILD, 'keep');
     this.state.transitionTo(new TradeAndBuildPhase());
+  }
+  public build(username: string) {
+    this.deny(Action.BUILD, Phase.RESOURCES, username);
+    //const p = this.state.getPlayerByUsername(username);
+    //if (!p) return;
+    //this.state.setPersonalLog(
+    //  p,
+    //  this.state.forbiddenActionLog(Action.BUILD, Phase.RESOURCES),
+    //  NotifColor.RED,
+    //);
+  }
+  public trade(username: string) {
+    this.deny(Action.TRADE, Phase.RESOURCES, username);
+    //const p = this.state.getPlayerByUsername(username);
+    //if (!p) return;
+    //this.state.setPersonalLog(
+    //  p,
+    //  this.state.forbiddenActionLog(Action.TRADE, Phase.RESOURCES),
+    //  NotifColor.RED,
+    //);
+  }
+  public skip(username: string) {
+    this.deny(Action.SKIP, Phase.RESOURCES, username);
+    //const p = this.state.getPlayerByUsername(username);
+    //if (!p) return;
+    //this.state.setPersonalLog(
+    //  p,
+    //  this.state.forbiddenActionLog(Action.SKIP, Phase.RESOURCES),
+    //  NotifColor.RED,
+    //);
   }
 }
 
@@ -1116,29 +1126,27 @@ class TradeAndBuildPhase extends State {
     this.tradeCount++;
     if (this.isTradeBuildLimit(p)) this.phaseCheck();
   }
-
-  public dice(username: string) {
-    const p = this.state.getPlayerByUsername(username);
-    if (!p) return;
-    this.state.setPersonalLog(
-      p,
-      this.state.forbiddenActionLog(Action.DICE, Phase.TRADE_BUILD),
-      NotifColor.RED,
-    );
-  }
-
   public skip(username: string) {
     const p = this.state.isPlayersTurn(username);
     if (!p) return;
     this.state.setPersonalLog(p, `You ended your turn !`, NotifColor.GREEN);
     this.phaseCheck();
   }
-
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
     this.resetTradeBuildCount();
     this.state.setupNextPhase(Phase.RESOURCES, 'advance');
     this.state.transitionTo(new ResourcesPhase());
+  }
+  public dice(username: string) {
+    this.deny(Action.DICE, Phase.TRADE_BUILD, username);
+    //const p = this.state.getPlayerByUsername(username);
+    //if (!p) return;
+    //this.state.setPersonalLog(
+    //  p,
+    //  this.state.forbiddenActionLog(Action.DICE, Phase.TRADE_BUILD),
+    //  NotifColor.RED,
+    //);
   }
 }
 
