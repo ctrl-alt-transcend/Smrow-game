@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { IconX, IconCheck } from "@tabler/icons-react";
 import {
-  ScrollArea,
+  Box,
   ActionIcon,
   Group,
   Table,
@@ -100,14 +100,14 @@ export function PendingList() {
           {actionError}
         </Text>
       )}
-      <ScrollArea.Autosize mah={300} type="auto" offsetScrollbars="y">
+      <Box h={480} style={{ overflowY: "auto" }}>
         <Table
           verticalSpacing="md"
           style={{ tableLayout: "fixed", width: "100%" }}
         >
           <Table.Tbody>{rows}</Table.Tbody>
         </Table>
-      </ScrollArea.Autosize>
+      </Box>
     </Paper>
   );
 }

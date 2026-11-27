@@ -8,7 +8,6 @@ import {
   Table,
   Text,
   Paper,
-  ScrollArea,
   Anchor,
 } from "@mantine/core";
 import { socialSocket as socket } from "../../sockets/socialSocket.tsx";
@@ -108,14 +107,14 @@ export function FriendList() {
           {actionSuccess}
         </Text>
       )}
-      <ScrollArea.Autosize mah={400} type="auto" offsetScrollbars="y">
+      <Box h={480} style={{ overflowY: "auto" }}>
         <Table
           verticalSpacing="md"
           style={{ tableLayout: "fixed", width: "100%" }}
         >
           <Table.Tbody>{rows}</Table.Tbody>
         </Table>
-      </ScrollArea.Autosize>
+      </Box>
     </Paper>
   );
 }

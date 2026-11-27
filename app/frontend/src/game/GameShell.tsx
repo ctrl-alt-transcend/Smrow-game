@@ -6,7 +6,6 @@ import {
   Burger,
   Center,
   Group,
-  ScrollArea,
   Stack,
   Tooltip,
 } from "@mantine/core";
@@ -112,7 +111,7 @@ function GameShell({ game }: { game: GameDataDto }) {
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        <AppShell.Section grow component={ScrollArea}>
+        <AppShell.Section grow>
           <Stack
             gap="sm"
             style={

@@ -15,8 +15,8 @@ import {
   Group,
   Title,
   Menu,
-  ScrollArea,
   Button,
+  Box,
   UnstyledButton,
   useMantineTheme,
   Anchor,
@@ -169,7 +169,7 @@ export function HeaderTabs() {
         hiddenFrom="sm"
         zIndex={1000000}
       >
-        <ScrollArea h="calc(100vh - 80px)" mx="-md">
+        <Box h={480} style={{ overflowY: "auto" }}>
           {navLinks.map((link) => (
             <Link
               key={link.to}
@@ -201,7 +201,7 @@ export function HeaderTabs() {
           >
             Logout
           </UnstyledButton>
-        </ScrollArea>
+        </Box>
       </Drawer>
     </div>
   );
