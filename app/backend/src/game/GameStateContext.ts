@@ -104,6 +104,7 @@ class GameStateContext {
   private roundCount: number = 0;
   private turnCount: number = 0;
   private turnStart: number = 0;
+  private quittingPlayersCount: number = 0;
 
   constructor(
     gameId: string,
@@ -263,6 +264,9 @@ class GameStateContext {
   }
   public getCurrentTurnIndex(): number {
     return this.data.turnIndex;
+  }
+  public getQuittingPlayersCount(): number {
+    return this.quittingPlayersCount;
   }
   public getRoundCount(): number {
     return this.roundCount;
@@ -470,26 +474,20 @@ class GameStateContext {
     this.data.startingRolls.delete(username);
     const idx = this.data.turnOrder.indexOf(username);
     if (idx !== -1) {
+      this.quittingPlayersCount++;
       this.data.turnOrder.splice(idx, 1);
       if (this.data.turnOrder.length === 0) return;
+      this.turnCount++;
       if (this.data.whosTurn === username) {
-        this.data.whosTurn = '';
-        if (idx % this.data.turnOrder.length === 0) {
-          this.setNextPlayer(0);
-        } else {
-          this.setNextPlayer();
-        }
-      } else if (idx < this.data.turnIndex) {
+        this.setNextPlayer();
+      }
+      this.logger.debug(`idx: ${idx} | turnIndex: ${this.data.turnIndex}`);
+      if (idx < this.data.turnIndex) {
         this.data.turnIndex--;
       }
-      this.turnCount++;
-    } else if (this.data.whosTurn === username) {
-      const next = this.data.players.values().next().value as
-        Player | undefined;
-      this.data.whosTurn = next?.username ?? '';
     }
-    this.phaseCheckRequest();
     this.setAllPersonalLog(`${username} leaved the game!`, NotifColor.GREEN);
+    this.phaseCheckRequest();
     this.notifyAllPlayers();
   }
 
@@ -570,6 +568,7 @@ class GameStateContext {
     playerMode: 'reset' | 'advance' | 'keep' = 'reset',
   ): void {
     if (this.isVictory()) return;
+    this.quittingPlayersCount = 0;
     if (playerMode !== 'keep') {
       this.setNextPlayer(playerMode === 'reset' ? 0 : undefined);
       if (nextPhase === Phase.RESOURCES && this.data.turnIndex === 0) {
@@ -815,7 +814,11 @@ class StartPhase extends State {
   }
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
-    if (this.state.getStartingRolls().size !== this.state.getPlayers().size)
+    const count = this.state.getQuittingPlayersCount();
+    if (
+      this.state.getStartingRolls().size - count !==
+      this.state.getPlayers().size
+    )
       return;
     this.computeTurnOrder();
     this.state.setupNextPhase(Phase.PLACEMENT);
@@ -888,7 +891,9 @@ class PlacementPhase extends State {
   }
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
-    if (this.state.getTurnCount() < this.state.getPlayers().size) return;
+    const count = this.state.getQuittingPlayersCount();
+    if (this.state.getTurnCount() - count !== this.state.getPlayers().size)
+      return;
     this.state.resourcesProduction(true);
     this.state.setupNextPhase(Phase.RESOURCES);
     this.state.transitionTo(new ResourcesPhase());

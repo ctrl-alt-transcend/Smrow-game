@@ -62,7 +62,6 @@ export function DiceRoller({
   const diceSize = Math.round(Math.max(48, Math.min(96, (width - 64) / 2)));
   const locked = !isMyTurn || disabled;
   const total = firstDice && secondDice ? firstDice + secondDice : 0;
-  if (total !== 0) disabled = true;
 
   const clearServerTimeout = useCallback(() => {
     if (timeoutRef.current !== null) {
