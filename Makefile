@@ -26,7 +26,7 @@ pull:
 build:
 	docker compose -f $(DOCKER_COMPOSE_FILE) build
 
-up: ssl install secrets shared 
+up: ssl install secrets shared
 	docker compose -f $(DOCKER_COMPOSE_FILE) up -d
 
 watch:
