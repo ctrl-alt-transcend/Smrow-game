@@ -46,6 +46,8 @@ ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 RUN addgroup -g 1001 -S nestjs && adduser -S nestjs -u 1001 && \
 mkdir -p /app/backend/uploads/avatars && chown -R nestjs:nestjs /app/backend/uploads
 
+RUN echo "avatars created"
+
 #copy compiled production dependencies
 COPY --from=builder --chown=nestjs:nestjs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nestjs /app/backend/node_modules ./backend/node_modules
@@ -66,4 +68,3 @@ WORKDIR /app/backend
 USER nestjs
 EXPOSE 3000 3001
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
-
