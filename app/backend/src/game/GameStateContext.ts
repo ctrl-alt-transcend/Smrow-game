@@ -773,7 +773,6 @@ class GameStateContext {
     }
   }
 
-  /** Seconds remaining before the forced play, rounded up. */
   public getTimeLeft(username: string): number {
     if (this.getCurrentPhase() === Phase.START)
       return this.settings.turnDurationSeconds;
@@ -839,33 +838,12 @@ class StartPhase extends State {
 
   public build(username: string) {
     this.deny(Action.BUILD, Phase.START, username);
-    //const p = this.state.getPlayerByUsername(username);
-    //if (!p) return;
-    //this.state.setPersonalLog(
-    //  p,
-    //  this.state.forbiddenActionLog(Action.BUILD, Phase.START),
-    //  NotifColor.RED,
-    //);
   }
   public trade(username: string) {
     this.deny(Action.TRADE, Phase.START, username);
-    //const p = this.state.getPlayerByUsername(username);
-    //if (!p) return;
-    //this.state.setPersonalLog(
-    //  p,
-    //  this.state.forbiddenActionLog(Action.TRADE, Phase.START),
-    //  NotifColor.RED,
-    //);
   }
   public skip(username: string) {
     this.deny(Action.SKIP, Phase.START, username);
-    //const p = this.state.getPlayerByUsername(username);
-    //if (!p) return;
-    //this.state.setPersonalLog(
-    //  p,
-    //  this.state.forbiddenActionLog(Action.SKIP, Phase.START),
-    //  NotifColor.RED,
-    //);
   }
 }
 
@@ -931,36 +909,12 @@ class PlacementPhase extends State {
   }
   public dice(username: string) {
     this.deny(Action.DICE, Phase.PLACEMENT, username);
-
-    //const p = this.state.getPlayerByUsername(username);
-    //if (!p) return;
-    //this.state.setPersonalLog(
-    //  p,
-    //  this.state.forbiddenActionLog(Action.DICE, Phase.PLACEMENT),
-    //  NotifColor.RED,
-    //);
   }
   public trade(username: string) {
     this.deny(Action.TRADE, Phase.PLACEMENT, username);
-
-    //const p = this.state.getPlayerByUsername(username);
-    //if (!p) return;
-    //this.state.setPersonalLog(
-    //  p,
-    //  this.state.forbiddenActionLog(Action.TRADE, Phase.PLACEMENT),
-    //  NotifColor.RED,
-    //);
   }
   public skip(username: string) {
     this.deny(Action.SKIP, Phase.PLACEMENT, username);
-
-    //const p = this.state.getPlayerByUsername(username);
-    //if (!p) return;
-    //this.state.setPersonalLog(
-    //  p,
-    //  this.state.forbiddenActionLog(Action.SKIP, Phase.PLACEMENT),
-    //  NotifColor.RED,
-    //);
   }
 }
 
@@ -994,33 +948,12 @@ class ResourcesPhase extends State {
   }
   public build(username: string) {
     this.deny(Action.BUILD, Phase.RESOURCES, username);
-    //const p = this.state.getPlayerByUsername(username);
-    //if (!p) return;
-    //this.state.setPersonalLog(
-    //  p,
-    //  this.state.forbiddenActionLog(Action.BUILD, Phase.RESOURCES),
-    //  NotifColor.RED,
-    //);
   }
   public trade(username: string) {
     this.deny(Action.TRADE, Phase.RESOURCES, username);
-    //const p = this.state.getPlayerByUsername(username);
-    //if (!p) return;
-    //this.state.setPersonalLog(
-    //  p,
-    //  this.state.forbiddenActionLog(Action.TRADE, Phase.RESOURCES),
-    //  NotifColor.RED,
-    //);
   }
   public skip(username: string) {
     this.deny(Action.SKIP, Phase.RESOURCES, username);
-    //const p = this.state.getPlayerByUsername(username);
-    //if (!p) return;
-    //this.state.setPersonalLog(
-    //  p,
-    //  this.state.forbiddenActionLog(Action.SKIP, Phase.RESOURCES),
-    //  NotifColor.RED,
-    //);
   }
 }
 
@@ -1140,13 +1073,6 @@ class TradeAndBuildPhase extends State {
   }
   public dice(username: string) {
     this.deny(Action.DICE, Phase.TRADE_BUILD, username);
-    //const p = this.state.getPlayerByUsername(username);
-    //if (!p) return;
-    //this.state.setPersonalLog(
-    //  p,
-    //  this.state.forbiddenActionLog(Action.DICE, Phase.TRADE_BUILD),
-    //  NotifColor.RED,
-    //);
   }
 }
 
