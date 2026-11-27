@@ -79,7 +79,6 @@ abstract class State {
 
 /**
  * @brief define the fonction signature
- *
  * PlayerNotifier is a callback function that is called when the player turn expires
  */
 export type PlayerNotifier = (id: string, username: string) => void;
@@ -265,7 +264,6 @@ class GameStateContext {
   public getCurrentTurnIndex(): number {
     return this.data.turnIndex;
   }
-  /** Number of resources + trade and build rounds started */
   public getRoundCount(): number {
     return this.roundCount;
   }
@@ -391,14 +389,17 @@ class GameStateContext {
       p.personalLog.splice(0, p.personalLog.length - PERSONNAL_LOG_LIMIT);
     }
   }
-  public setAllPersonnalLog(
-    currentusername: string,
+  public setAllPersonalLog(
     message: string,
     type: NotifColor,
+    currentusername?: string,
   ) {
     this.data.players.forEach((player) => {
-      if (player.username !== currentusername)
+      if (currentusername && player.username !== currentusername) {
         this.setPersonalLog(player, message, type);
+      } else {
+        this.setPersonalLog(player, message, type);
+      }
     });
   }
   public resetAllDices() {
@@ -425,7 +426,6 @@ class GameStateContext {
       this.turnCount++;
     }
   }
-  /** Set next player turn, ignore the players that quit the game */
   public setNextPlayer(index?: number) {
     this.stopWatch();
     const p = this.getCurrentPlayer();
@@ -441,8 +441,6 @@ class GameStateContext {
     );
     this.startWatch();
   }
-
-  /** @argument winCondition: explain why the player won  */
   public setVictory(winner: string, winCondition: string) {
     this.data.winner = winner;
     this.data.winCondition = winCondition;
@@ -467,7 +465,6 @@ class GameStateContext {
       player.faction = this.pickFaction();
     });
   }
-
   public removePlayer(username: string) {
     this.data.players.delete(username);
     this.data.startingRolls.delete(username);
@@ -486,16 +483,13 @@ class GameStateContext {
         this.data.turnIndex--;
       }
       this.turnCount++;
-    }
-    /**
-     * @description If the player that left the game was the one that had to play, we set the next player as the current player
-     */
-    else if (this.data.whosTurn === username) {
+    } else if (this.data.whosTurn === username) {
       const next = this.data.players.values().next().value as
         Player | undefined;
       this.data.whosTurn = next?.username ?? '';
     }
     this.phaseCheckRequest();
+    this.setAllPersonalLog(`${username} leaved the game!`, NotifColor.GREEN);
     this.notifyAllPlayers();
   }
 
@@ -508,7 +502,6 @@ class GameStateContext {
     });
   }
 
-  /** To call when the game is ready to start */
   public launchGame() {
     if (this.isVictory()) return;
     if (this.getPlayers().size === 0) {
@@ -530,8 +523,6 @@ class GameStateContext {
     this.transitionTo(new StartPhase());
     this.startWatch();
   }
-
-  /** @description Generates: "You can't ${Action} during ${Phase}" */
   public forbiddenActionLog(action: Action, phase: Phase): string {
     return `You can't ${action} during ${phase}`;
   }
@@ -555,18 +546,18 @@ class GameStateContext {
     if (p.firstDice === 0) {
       p.firstDice = roll.val;
       this.setPersonalLog(p, `You ${ROLLED_A} ${roll.val}`, NotifColor.GREEN);
-      this.setAllPersonnalLog(
-        p.username,
+      this.setAllPersonalLog(
         `${p.username} ${ROLLED_A} ${roll.val}`,
         NotifColor.PURPLE,
+        p.username,
       );
     } else if (p.secondDice === 0) {
       p.secondDice = roll.val;
       this.setPersonalLog(p, `You ${ROLLED_A} ${roll.val}`, NotifColor.GREEN);
-      this.setAllPersonnalLog(
-        p.username,
+      this.setAllPersonalLog(
         `${p.username} ${ROLLED_A} ${roll.val}`,
         NotifColor.PURPLE,
+        p.username,
       );
     } else {
       roll.val = null;
@@ -574,7 +565,6 @@ class GameStateContext {
     }
     return roll;
   }
-
   public setupNextPhase(
     nextPhase: Phase,
     playerMode: 'reset' | 'advance' | 'keep' = 'reset',
@@ -594,7 +584,6 @@ class GameStateContext {
     this.setAllGuideLogs(`${GUIDE_LOG[nextPhase]}`);
     if (playerMode !== 'keep') this.resetAllDices();
   }
-
   public isVictory(): boolean {
     if (this.isGameTerminated()) return true;
     this.data.players.forEach((player) => {
@@ -618,7 +607,6 @@ class GameStateContext {
     }
     return this.isGameTerminated();
   }
-
   public resourcesProduction(placementPhase: boolean) {
     for (const [settlementId, player] of this.buildings) {
       const graphEntry = this.graph.get(settlementId);
@@ -663,7 +651,6 @@ class GameStateContext {
       });
     }
   }
-
   public robberRule(threshold: number): void {
     this.data.players.forEach((player) => {
       const totalCount = Object.values(player.resources).reduce(
@@ -782,7 +769,6 @@ class GameStateContext {
     return Math.max(0, Math.ceil(remaining / 1000));
   }
 }
-
 /***********************************
  * Pending Phase
  **********************************/
@@ -902,7 +888,7 @@ class PlacementPhase extends State {
   }
   public phaseCheck(): void {
     if (this.state.isVictory()) return;
-    if (this.state.getTurnCount() !== this.state.getPlayers().size) return;
+    if (this.state.getTurnCount() < this.state.getPlayers().size) return;
     this.state.resourcesProduction(true);
     this.state.setupNextPhase(Phase.RESOURCES);
     this.state.transitionTo(new ResourcesPhase());
