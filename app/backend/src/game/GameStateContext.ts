@@ -452,13 +452,13 @@ class GameStateContext {
   private pickFaction(): Faction {
     switch (this.factionSwitch++) {
       case 0:
-        return Faction.BOURSES_BLEUES;
+        return Faction.NILBOG;
       case 1:
-        return Faction.POURPRES_CHYBRES;
+        return Faction.GRODD;
       case 2:
-        return Faction.ROSES_FIACS;
+        return Faction.CORMYR;
       case 3:
-        return Faction.UREE_JAUNE;
+        return Faction.ACHERON;
       default:
         return Faction.DEFAULT;
     }
