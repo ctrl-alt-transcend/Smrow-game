@@ -111,7 +111,7 @@ function GameShell({ game }: { game: GameDataDto }) {
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        <AppShell.Section grow>
+        <Box h={480} style={{ overflowY: "auto" }}>
           <Stack
             gap="sm"
             style={
@@ -167,7 +167,7 @@ function GameShell({ game }: { game: GameDataDto }) {
               </Accordion.Item>
             </Accordion>
           </Stack>
-        </AppShell.Section>
+        </Box>
       </AppShell.Navbar>
       <AppShell.Main
         style={{
