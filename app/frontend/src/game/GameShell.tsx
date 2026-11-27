@@ -6,7 +6,6 @@ import {
   Burger,
   Center,
   Group,
-  ScrollArea,
   Stack,
   Tooltip,
 } from "@mantine/core";
@@ -51,8 +50,8 @@ function GameShell({ game }: { game: GameDataDto }) {
 
   let isMyTurn = game.currentPlayer.username === game.whosTurn;
   if (game.currentPhase === Phase.START) isMyTurn = true;
-  const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
 
+  const masterLog = isMyTurn ? game.currentPlayer.guideLog : game.masterLog;
   const navEnabled = isMyTurn && !waitingForPlayers;
   const isDesktop = useMediaQuery("(min-width: 36em)");
 
@@ -112,7 +111,7 @@ function GameShell({ game }: { game: GameDataDto }) {
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        <AppShell.Section grow component={ScrollArea}>
+        <Box style={{ overflowY: "auto" }}>
           <Stack
             gap="sm"
             style={
@@ -168,7 +167,7 @@ function GameShell({ game }: { game: GameDataDto }) {
               </Accordion.Item>
             </Accordion>
           </Stack>
-        </AppShell.Section>
+        </Box>
       </AppShell.Navbar>
       <AppShell.Main
         style={{
@@ -194,7 +193,6 @@ function GameShell({ game }: { game: GameDataDto }) {
           </Box>
         </Center>
       </AppShell.Main>
-
       <OptionsModal game={game} opened={optionsOpened} onClose={closeOptions} />
       <Notifications limit={2} />
     </AppShell>

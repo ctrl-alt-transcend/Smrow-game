@@ -61,10 +61,18 @@ export default function GameRow({ game }: GameRowProps) {
 
       <Modal
         opened={spectateOpened}
+        c="black"
         onClose={closeSpectate}
         title={`Spectating game #${game.gameId.substring(0, 5)}`}
         size="xl"
         fullScreen={isMobile}
+
+        styles={{
+          title: {
+            color: "var(--mantine-color-black-1)",
+            fontWeight: 700,
+          },
+        }}
       >
         <SpectateGameBoard gameId={game.gameId} />
       </Modal>

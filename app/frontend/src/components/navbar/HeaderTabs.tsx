@@ -15,10 +15,11 @@ import {
   Group,
   Title,
   Menu,
-  ScrollArea,
   Button,
+  Box,
   UnstyledButton,
   useMantineTheme,
+  Anchor,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import classes from "./HeaderTabs.module.css";
@@ -54,7 +55,9 @@ export function HeaderTabs() {
     <div className={classes.header}>
       <Container className={classes.mainSection} size="md">
         <Group justify="space-between">
-          <Title size="xl">Amazing Catan</Title>
+          <Anchor component={Link} to={"/home"} fz="lg" fw={500}>
+            <Title size="xl">Amazing Catan</Title>
+          </Anchor>
 
           <Group gap="xs" visibleFrom="sm" component="nav">
             {navLinks.map((link) => (
@@ -166,7 +169,7 @@ export function HeaderTabs() {
         hiddenFrom="sm"
         zIndex={1000000}
       >
-        <ScrollArea h="calc(100vh - 80px)" mx="-md">
+        <Box h={480} style={{ overflowY: "auto" }}>
           {navLinks.map((link) => (
             <Link
               key={link.to}
@@ -198,7 +201,7 @@ export function HeaderTabs() {
           >
             Logout
           </UnstyledButton>
-        </ScrollArea>
+        </Box>
       </Drawer>
     </div>
   );
