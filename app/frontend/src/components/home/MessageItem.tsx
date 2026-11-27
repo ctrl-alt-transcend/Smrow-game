@@ -1,4 +1,5 @@
-import { Paper, Text } from "@mantine/core";
+import { Paper, Text, Anchor } from "@mantine/core";
+import { Link } from "react-router";
 
 type MessageItemProps = {
   content: string;
@@ -22,14 +23,25 @@ export default function MessageItem({
         alignSelf: isOwn ? "flex-end" : "flex-start",
       }}
     >
-      {!isOwn && (
-        <Text size="xs" fw={700} c="dimmed" mb={2}>
-          {author}
+      {!isOwn ? (
+        <Anchor
+          component={Link}
+          to={`/profile/${encodeURIComponent(author)}`}
+          underline="hover"
+          c="black"
+          fz="lg"
+          fw={700}
+          display="block"
+        >
+          <Text right="esr" fw={700}>
+            @{author}
+          </Text>
+        </Anchor>
+      ) : (
+        <Text right="esr" fw={700}>
+          @{author}
         </Text>
       )}
-      <Text right="esr" fw={700}>
-        @{author}
-      </Text>
       <Text>{content}</Text>
     </Paper>
   );

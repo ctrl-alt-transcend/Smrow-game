@@ -111,7 +111,7 @@ function GameShell({ game }: { game: GameDataDto }) {
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        <Box h={480} style={{ overflowY: "auto" }}>
+        <Box style={{ overflowY: "auto" }}>
           <Stack
             gap="sm"
             style={
