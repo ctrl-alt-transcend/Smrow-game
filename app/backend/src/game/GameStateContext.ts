@@ -481,7 +481,6 @@ class GameStateContext {
       if (this.data.whosTurn === username) {
         this.setNextPlayer();
       }
-      this.logger.debug(`idx: ${idx} | turnIndex: ${this.data.turnIndex}`);
       if (idx < this.data.turnIndex) {
         this.data.turnIndex--;
       }
