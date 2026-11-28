@@ -56,7 +56,6 @@ export const Settlement: React.FC<SettlementProps> = ({
     <g
       transform={`translate(${data.vertex.x}, ${data.vertex.y}) scale(${scale})`}
     >
-      {/* Visual only: no mouse interaction */}
       <g pointerEvents="none">
         {data.isCity ? (
           <GoblinCityIcon flagColor={fillColor ?? "#b0b0b0"} />
@@ -65,7 +64,6 @@ export const Settlement: React.FC<SettlementProps> = ({
         )}
       </g>
 
-      {/* Controlled interactive area */}
       <circle
         cx={0}
         cy={0}
