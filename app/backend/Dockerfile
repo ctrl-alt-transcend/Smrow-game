@@ -67,4 +67,3 @@ WORKDIR /app/backend
 USER nestjs
 EXPOSE 3000 3001
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
-

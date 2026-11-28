@@ -305,21 +305,21 @@ export const LAND_COLORS: Record<LandType, string> = {
 };
 
 export const Faction = {
-  POURPRES_CHYBRES: "Pourpres Chybres",
-  BOURSES_BLEUES: "Bourses Bleues",
-  ROSES_FIACS: "Roses Fiacs",
-  UREE_JAUNE: "Uree Jaune",
-  DEFAULT: "Kikouneurs (default)",
+  GRODD: "Grodd",
+  NILBOG: "Nilbog",
+  CORMYR: "Cormyr",
+  ACHERON: "Acheron",
+  DEFAULT: "Kikoon",
   UNOCCUPIED: "unoccupied ...",
 } as const;
 export type Faction = (typeof Faction)[keyof typeof Faction];
 export const FactionSchema = z.enum(Faction);
 
 export const FACTION_COLORS: Record<Faction, string> = {
-  [Faction.POURPRES_CHYBRES]: '#cf69f8',
-  [Faction.BOURSES_BLEUES]: '#58b6d3',
-  [Faction.ROSES_FIACS]: '#f0a1a1',
-  [Faction.UREE_JAUNE]: '#f6e823',
+  [Faction.GRODD]: '#cf69f8',
+  [Faction.NILBOG]: '#58b6d3',
+  [Faction.CORMYR]: '#f0a1a1',
+  [Faction.ACHERON]: '#f6e823',
   [Faction.DEFAULT]: '#19af89',
   [Faction.UNOCCUPIED]: '#e4e4e4'
 };
