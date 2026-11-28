@@ -1,15 +1,15 @@
 import { Modal, Title, Stack } from "@mantine/core";
 import { PlayerPanel } from "./PlayerPanel.tsx";
-import type { PlayerPublicDto, SettingsData } from "shared";
+import type { GameDataDto, PlayerPublicDto } from "shared";
 import StartGameButton from "./StartGameButton.tsx";
-import { DisplaySetting } from "../../utils/game.utils.tsx";
+import { RulesSettingsAccordion } from "../../utils/game.utils.tsx";
 import QuitGameButton from "./QuitGameButton.tsx";
 
 type WaitingPlayersProps = {
   gameId: string;
   waitingForPlayers: boolean;
   players: PlayerPublicDto[];
-  settings: SettingsData;
+  game: GameDataDto;
 };
 
 export function WaitingPlayersModal(waitingPlayersProps: WaitingPlayersProps) {
@@ -31,10 +31,7 @@ export function WaitingPlayersModal(waitingPlayersProps: WaitingPlayersProps) {
         </Title>
         <PlayerPanel players={waitingPlayersProps.players} />
         <StartGameButton nPlayers={waitingPlayersProps.players.length} />
-        <DisplaySetting
-          gameId={waitingPlayersProps.gameId}
-          settings={waitingPlayersProps.settings}
-        />
+        <RulesSettingsAccordion game={waitingPlayersProps.game} />
         <QuitGameButton />
       </Stack>
     </Modal>

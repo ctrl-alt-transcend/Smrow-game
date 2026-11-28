@@ -3,6 +3,7 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { useJoinLobby } from "../../game/utils/game.utils.tsx";
 import GameLaunchMenu from "./GameLaunchMenu.tsx";
+import RulesModal from "./RulesModal.tsx";
 
 function JoinLobbyModal({
   opened,
@@ -52,6 +53,7 @@ export default function GameActions() {
       <Button onClick={open}>Join da game</Button>
       <JoinLobbyModal opened={opened} onClose={close} />
       <GameLaunchMenu />
+      <RulesModal />
     </Group>
   );
 }

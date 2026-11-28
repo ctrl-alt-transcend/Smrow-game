@@ -6,11 +6,32 @@ import {
   Phase,
   ResourceType,
   SettingsDataSchema,
+  type GameDataDto,
   type SettingsData,
 } from "shared";
 import { z } from "zod";
 import { http } from "../../services/http.tsx";
-import { Title, Text } from "@mantine/core";
+import { Title, Text, Accordion } from "@mantine/core";
+import DisplayRules from "../../components/utils/DisplayRules.tsx";
+
+export function RulesSettingsAccordion({ game }: { game: GameDataDto }) {
+  return (
+    <Accordion variant="separated" multiple>
+      <Accordion.Item value="rules">
+        <Accordion.Control>Rules</Accordion.Control>
+        <Accordion.Panel>
+          <DisplayRules />
+        </Accordion.Panel>
+      </Accordion.Item>
+      <Accordion.Item value="settings">
+        <Accordion.Control>Settings</Accordion.Control>
+        <Accordion.Panel>
+          <DisplaySetting gameId={game.gameId} settings={game.settings} />
+        </Accordion.Panel>
+      </Accordion.Item>
+    </Accordion>
+  );
+}
 
 export function DisplaySetting({
   gameId,
