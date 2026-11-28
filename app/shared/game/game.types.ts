@@ -243,13 +243,40 @@ export const END_GAME_INFO =
 export const SPECIAL_RULES = "Special Rules";
 export const SPECIAL_RULES_INFO =
 "• Robber Rule: when a 7 is rolled, every player loses half of their " +
-"total resources if that total is greater than 7. The robber then " +
+"total resources if that total is greater than the « robber threshold ». The robber then " +
 "moves randomly to another tile, blocking the resources the tiles " +
-"would normally produce\n" +
+"would normally produce when the corresponding tile value is rolled.\n" +
 "• Crossroad Rule: build the 3 roads surrounding one of your " +
 "settlements to earn a victory point.\n"
 
 export const CURRENT_GAME_SETTINGS = "Current Game Settings"
+
+export const ALL_RULES: { title: string; body: string }[] = [
+	{
+		title: `${Phase.START}`,
+		body: `${START_PHASE_INFO}`,
+	},
+	{
+		title: `${Phase.PLACEMENT}`,
+		body: `${PLACEMENT_PHASE_INFO}`,
+	},
+	{
+		title: `${Phase.RESOURCES}`,
+		body: `${RESOURCE_PHASE_INFO}`,
+	},
+	{
+		title: `${Phase.TRADE_BUILD}`,
+		body: `${TRADE_BUILD_INFO}`,
+	},
+	{
+		title: `${END_GAME_PHASE}`,
+		body: `${END_GAME_INFO}`,
+	},
+	{
+		title: `${SPECIAL_RULES}`,
+		body: `${SPECIAL_RULES_INFO}`,
+	},
+];
 
 /***********************************
  * Gameboard Elements
@@ -316,11 +343,11 @@ export type Faction = (typeof Faction)[keyof typeof Faction];
 export const FactionSchema = z.enum(Faction);
 
 export const FACTION_COLORS: Record<Faction, string> = {
-  [Faction.GRODD]: '#cf69f8',
-  [Faction.NILBOG]: '#58b6d3',
-  [Faction.CORMYR]: '#f0a1a1',
-  [Faction.ACHERON]: '#f6e823',
-  [Faction.DEFAULT]: '#19af89',
+  [Faction.GRODD]: '#117cff',
+  [Faction.NILBOG]: '#ff7f1d',
+  [Faction.CORMYR]: '#02ff24',
+  [Faction.ACHERON]: '#ce2eff',
+  [Faction.DEFAULT]: '#00fff2',
   [Faction.UNOCCUPIED]: '#e4e4e4'
 };
 

@@ -7,7 +7,7 @@ import {
   getTileStrokeColor,
   getTileStrokeWidth,
 } from "../../utils/tileRendering";
-import robberUrl from "../../assets/RobertTheRobber.svg";
+import robber from "../../assets/robber.svg";
 
 const TOKEN_RADIUS = HEX_SIZE * 0.34;
 const TOKEN_FONT_SIZE = HEX_SIZE * 0.46;
@@ -89,7 +89,7 @@ export const HexTile: React.FC<TileProps> = ({
       {data.hasRobber && (
         <g>
           <image
-            href={robberUrl}
+            href={robber}
             x={centerX - 2}
             y={centerY - 10}
             width={THIEF_WIDTH}

@@ -21,6 +21,7 @@ export const Settlement: React.FC<SettlementProps> = ({
     onMouseEnter,
     onMouseLeave,
   } = useHover(isHovered, onHoverChange);
+
   const fillColor = getFillColor(
     null,
     data.faction,
@@ -54,22 +55,29 @@ export const Settlement: React.FC<SettlementProps> = ({
   return (
     <g
       transform={`translate(${data.vertex.x}, ${data.vertex.y}) scale(${scale})`}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.(data);
-      }}
-      style={{ cursor: "pointer" }}
     >
-      {/* invisible click area */}
-      <circle r={16 / scale} fill="transparent" />
+      <g pointerEvents="none">
+        {data.isCity ? (
+          <GoblinCityIcon flagColor={fillColor ?? "#b0b0b0"} />
+        ) : (
+          <GoblinSettlementIcon flagColor={fillColor ?? "#b0b0b0"} />
+        )}
+      </g>
 
-      {data.isCity ? (
-        <GoblinCityIcon flagColor={fillColor ?? "#b0b0b0"} />
-      ) : (
-        <GoblinSettlementIcon flagColor={fillColor ?? "#b0b0b0"} />
-      )}
+      <circle
+        cx={0}
+        cy={0}
+        r={10 / scale}
+        fill="transparent"
+        pointerEvents="all"
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.(data);
+        }}
+        style={{ cursor: "pointer" }}
+      />
     </g>
   );
 };

@@ -181,7 +181,7 @@ function GameShell({ game }: { game: GameDataDto }) {
           gameId={game.gameId}
           waitingForPlayers={waitingForPlayers}
           players={game.players}
-          settings={game.settings}
+          game={game}
         />
         <Center flex={1} w="100%" h="100%" mih={0} p={20}>
           <Box style={{ position: "relative", width: "100%", height: "100%" }}>
