@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Anchor, Avatar, Group, Table, Text } from "@mantine/core";
 import type { LeaderboardEntry } from "shared";
 import ShowMoreButton, { VISIBLE_ROWS } from "./ShowMoreButton";
@@ -14,7 +14,18 @@ export default function Leaderboard({
   currentUserId,
 }: LeaderboardProps) {
   const [expanded, setExpanded] = useState(false);
-  const visible = expanded ? entries : entries.slice(0, VISIBLE_ROWS);
+
+  const sortedEntries = useMemo(() => {
+    return [...entries].sort((a, b) => {
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+      return a.username.localeCompare(b.username);
+    });
+  }, [entries]);
+
+  const visible = expanded
+    ? sortedEntries
+    : sortedEntries.slice(0, VISIBLE_ROWS);
 
   return (
     <>
@@ -29,14 +40,15 @@ export default function Leaderboard({
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {visible.map((entry) => {
+            {visible.map((entry, index) => {
               const isMe = entry.userId === currentUserId;
+              const position = index + 1;
               return (
                 <Table.Tr
                   key={entry.userId}
                   bg={isMe ? "var(--mantine-primary-color-light)" : undefined}
                 >
-                  <Table.Td fw={700}>{entry.rank}</Table.Td>
+                  <Table.Td fw={700}>{position}</Table.Td>
                   <Table.Td>
                     <Anchor
                       component={Link}
