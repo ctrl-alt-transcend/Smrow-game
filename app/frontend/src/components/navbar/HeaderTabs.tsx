@@ -105,9 +105,6 @@ export function HeaderTabs() {
                     />
                   }
 
-                  {/*<Text fw={500} size="sm" lh={1} mr={3}>
-                    {user?.name}
-                  </Text>*/}
                   <IconChevronDown size={12} stroke={1.5} />
                 </Group>
               </UnstyledButton>
