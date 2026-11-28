@@ -105,7 +105,12 @@ export default function Chat() {
 
       <Card.Section>
         <BackgroundImage src="/assets/bg-whatsapp.webp">
-          <Box h={480} p="sm" style={{ overflowY: "auto" }} ref={viewportRef}>
+          <Box
+            h={480}
+            p="sm"
+            style={{ overflowY: "auto", overflowX: "hidden" }}
+            ref={viewportRef}
+          >
             <Stack gap="xs">
               {messages.map((message) => (
                 <MessageItem
