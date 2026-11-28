@@ -70,7 +70,7 @@ services:
       - db_password
     volumes:
       - ./backend/prisma:/app/backend/prisma
-      - uploads_data:/app/backend/uploads
+      - uploads-data:/app/backend/uploads
 
   postgres:
     image: postgres:18
@@ -139,7 +139,7 @@ services:
 
 volumes:
   postgres-data:
-  uploads_data:
+  uploads-data:
 
 # --- Networks --- #
 

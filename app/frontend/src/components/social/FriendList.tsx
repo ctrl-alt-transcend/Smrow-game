@@ -41,8 +41,8 @@ export function FriendList() {
   };
 
   const rows = friends.map((item) => (
-    <Table.Tr key={item.id} w="100%" mah={0}>
-      <Table.Td>
+    <Table.Tr key={item.id}>
+      <Table.Td style={{ overflow: "hidden" }}>
         <Anchor
           component={Link}
           to={`/profile/${encodeURIComponent(item.username)}`}
@@ -67,8 +67,8 @@ export function FriendList() {
           </Group>
         </Anchor>
       </Table.Td>
-      <Table.Td w={1} style={{ whiteSpace: "nowrap" }}>
-        <Group gap="xs" justify="flex-end" wrap="nowrap">
+      <Table.Td style={{ whiteSpace: "nowrap" }}>
+        <Group gap="xs" justify="center" wrap="nowrap">
           <Box
             w={8}
             h={8}
