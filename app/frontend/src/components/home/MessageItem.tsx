@@ -16,11 +16,14 @@ export default function MessageItem({
     <Paper
       radius="md"
       p="xs"
+      miw={0}
       shadow="xs"
       maw="75%"
       bg={isOwn ? "Red.0" : "Red.1"}
       style={{
         alignSelf: isOwn ? "flex-end" : "flex-start",
+        overflowWrap: "anywhere",
+        wordBreak: "break-word",
       }}
     >
       {!isOwn ? (
@@ -33,12 +36,12 @@ export default function MessageItem({
           fw={700}
           display="block"
         >
-          <Text right="esr" fw={700}>
+          <Text right="esr" fw={700} truncate="end">
             @{author}
           </Text>
         </Anchor>
       ) : (
-        <Text right="esr" fw={700}>
+        <Text right="esr" fw={700} truncate="end">
           @{author}
         </Text>
       )}
