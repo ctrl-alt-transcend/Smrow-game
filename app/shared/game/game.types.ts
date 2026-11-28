@@ -343,11 +343,11 @@ export type Faction = (typeof Faction)[keyof typeof Faction];
 export const FactionSchema = z.enum(Faction);
 
 export const FACTION_COLORS: Record<Faction, string> = {
-  [Faction.GRODD]: '#cf69f8',
-  [Faction.NILBOG]: '#58b6d3',
-  [Faction.CORMYR]: '#f0a1a1',
-  [Faction.ACHERON]: '#f6e823',
-  [Faction.DEFAULT]: '#19af89',
+  [Faction.GRODD]: '#117cff',
+  [Faction.NILBOG]: '#ff7f1d',
+  [Faction.CORMYR]: '#02ff24',
+  [Faction.ACHERON]: '#ce2eff',
+  [Faction.DEFAULT]: '#00fff2',
   [Faction.UNOCCUPIED]: '#e4e4e4'
 };
 

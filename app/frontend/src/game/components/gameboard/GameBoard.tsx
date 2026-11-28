@@ -37,13 +37,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         height={svgBounds.svgHeight}
         viewBox={`${svgBounds.offsetX} ${svgBounds.offsetY} ${svgBounds.svgWidth} ${svgBounds.svgHeight}`}
       >
-        <ReserveIcon
-          data={board.reserve}
-          isSelected={selected.selectedReserve?.id === board.reserve.id}
-          isHovered={isReserveHovered(board.reserve)}
-          onHoverChange={(h) => handleReserveHover(h, board.reserve)}
-          onClick={handleReserveClick}
-        />
         <WaterLayer data={coasts} />
         {coasts.map((coast) => (
           <Coast
@@ -55,6 +48,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             onClick={handleCoastClick}
           />
         ))}
+        <ReserveIcon
+          data={board.reserve}
+          isSelected={selected.selectedReserve?.id === board.reserve.id}
+          isHovered={isReserveHovered(board.reserve)}
+          onHoverChange={(h) => handleReserveHover(h, board.reserve)}
+          onClick={handleReserveClick}
+        />
         {layout.map((tile) => (
           <HexTile
             key={`tile-${tile.q}-${tile.r}`}
