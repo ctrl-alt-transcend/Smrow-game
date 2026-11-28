@@ -113,14 +113,16 @@ studio:
 	DB_PASSWORD_FILE=../secrets/db_password.txt \
 	npx prisma studio
 
+
 ssl:
+ifneq ($(ENV), dev)
 	mkdir -p app/ssl  && \
 	openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   	-keyout app/ssl/transcendence.key \
   	-out app/ssl/transcendence.crt \
   	-subj "/C=CH/ST=Vaud/L=Lausanne/O=42Lausanne/CN=192.168.122.1" \
 	-addext "subjectAltName=IP:192.168.122.1,IP:127.0.0.1,DNS:localhost" && \
-	chmod 644 app/ssl/transcendence.crt && chmod 600 app/ssl/transcendence.key
-
+	chmod 644 app/ssl/transcendence.crt && chmod 600 app/ssl/transcendence.key ;
+endif
 
 .PHONY: all refresh build up down fclean re secrets migrate initdb install check ssl
